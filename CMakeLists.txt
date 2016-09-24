@@ -41,8 +41,8 @@ pybind11_add_module( riflib ${L1} ${L2} ${L3} ${L4} ${L5} )
 ########################### tests #########################################################
 # shitty "data" files to compile faster
 # TODO remove these
-list(APPEND LIB_CC src/scheme/rosetta/score/EtableParams_init.lib.cc
-        src/scheme/rosetta/atype_map.lib.cc src/scheme/chemical/ligand_factory.lib.cc)
+list(APPEND LIB_CC src/riflib/rosetta/score/EtableParams_init.lib.cc
+        src/riflib/rosetta/atype_map.lib.cc src/riflib/chemical/ligand_factory.lib.cc)
 SET_SOURCE_FILES_PROPERTIES(${LIB_CC} PROPERTIES COMPILE_FLAGS -O0)
 add_library(scheme ${LIB_CC})
 

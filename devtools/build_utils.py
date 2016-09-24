@@ -1,4 +1,4 @@
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import absolute_import, division, print_function
 from builtins import *
 
 import glob
@@ -20,10 +20,10 @@ def get_proj_root():
     return proj_root
 
 
-def get_build_dir(d):
+def get_build_dir(d, cfg='Release'):
     """get directory setup.py builds stuff in, d is lib or temp"""
     version = '{}.{}'.format(sys.version_info.major, sys.version_info.minor)
-    libdir = glob.glob(get_proj_root() + '/build_setup_py/' + d + '*' + version)
+    libdir = glob.glob(get_proj_root() + '/build_setup_py_'+cfg+'/' + d + '*' + version)
     assert len(libdir) < 2
     if libdir:
         return libdir[0]
@@ -62,26 +62,29 @@ def add_to_pypath(newpath):
         os.environ['PYTHONPATH'] += ':' + current
 
 
-def rebuild_safe():
+def rebuild_setup_py_riflib(cfg='Release'):
     proj_root = get_proj_root()
-    return os.system('cd ' + proj_root + '; python setup.py build --build-base=build_setup_py')  # incremental w/cmake
+    if os.system('cd ' + proj_root + '; python setup.py build --build-base=build_setup_py_'+cfg):
+        return -1
 
 
-def rebuild_fast(target='riflib'):
+
+def rebuild_fast(target='riflib', cfg='Release'):
     makeexe = 'ninja'
     if not which('ninja'):
         makeexe = 'make'
     proj_root = get_proj_root()
-    cmake_dir = get_build_dir('temp')  # just run setup.py every time
-    if cmake_dir:
-        return os.system('cd ' + cmake_dir + '; ' + makeexe + ' -j8 ' + target)
-    else:
-        return rebuild_safe()
+    cmake_dir = get_build_dir('temp', cfg=cfg)
+    if not cmake_dir:
+        if rebuild_setup_py_riflib(cfg=cfg):
+            return -1
+        cmake_dir = get_build_dir('temp', cfg=cfg)
+    return os.system('cd ' + cmake_dir + '; ' + makeexe + ' -j8 ' + target)
 
 
 def make_docs(kind='html'):
     proj_root = get_proj_root()
-    rebuild_safe()
+    rebuild_setup_py_riflib()
     add_to_pypath(get_build_dir('lib'))
     os.system('cd ' + proj_root + '/docs; make ' + kind)
 

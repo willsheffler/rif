@@ -1,4 +1,4 @@
-from __future__ import absolute_import, print_function
+from __future__ import absolute_import, division, print_function
 
 import os
 import re
@@ -32,6 +32,12 @@ def which(program):
     return None
 
 
+def infer_config(path):
+    path = path.split('/')[0]
+    if path.startswith('build_setup_py_'):
+        return path.replace('build_setup_py_','')
+
+
 class CMakeExtension(Extension):
     def __init__(self, name, sourcedir=''):
         Extension.__init__(self, name, sources=[])
@@ -62,7 +68,9 @@ class CMakeBuild(build_ext):
         if which('ninja'):
             cmake_args.append('-GNinja')
 
-        cfg = 'Debug' if self.debug else 'Release'
+        cfg = infer_config(self.build_temp)
+        if not cfg:
+            cfg = 'Debug' if self.debug else 'Release'
         build_args = ['--config', cfg]
 
         if platform.system() == "Windows":
@@ -72,8 +80,8 @@ class CMakeBuild(build_ext):
             build_args += ['--', '/m']
         else:
             cmake_args += ['-DCMAKE_BUILD_TYPE=' + cfg]
-            # build_args += ['--', '-j'+str(multiprocessing.cpu_count()), 'riflib']
-            build_args += ['--', '-j'+str(multiprocessing.cpu_count())]
+            build_args += ['--', '-j'+str(multiprocessing.cpu_count()), 'riflib']
+            # build_args += ['--', '-j'+str(multiprocessing.cpu_count())]
 
         env = os.environ.copy()
         env['CXXFLAGS'] = '{} -DVERSION_INFO=\\"{}\\"'.format(env.get('CXXFLAGS', ''),

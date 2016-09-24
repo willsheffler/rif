@@ -1,4 +1,4 @@
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import absolute_import, division, print_function
 from builtins import *
 
 import os
@@ -12,7 +12,7 @@ from build_utils import remove_installed_riflib
 if __name__ == '__main__':
     # remove_installed_rif()
     proj_root = get_proj_root()
-    if rebuild_fast(target='all'):
+    if rebuild_fast(target='riflib gtest_all'):
         sys.exit(-1)
     pypath = [
         os.path.abspath(get_build_dir('lib')),

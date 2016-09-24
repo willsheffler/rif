@@ -22,8 +22,18 @@
         {
             "name": "build_and_run_gtest_wip",
             "shell_cmd": "/Users/sheffler/anaconda2/envs/riflib_env/bin/python /Users/sheffler/riflib/devtools/build_and_run_gtest_wip.py",
-		    "file_regex": "^(..[^:]*):([0-9]+):?([0-9]+)?:? (.*)$",
+            "file_regex": "^(..[^:]*):([0-9]+):?([0-9]+)?:? (.*)$",
             "working_dir" : "/Users/sheffler/riflib/src/test",
-        }
+        },
+        // {
+        //     "name": "setup_py_build_Release",
+        //     "shell_cmd": "/Users/sheffler/anaconda2/envs/riflib_env/bin/python setup.py build --build-base=build_setup_py_Release",
+        //     "working_dir" : "/Users/sheffler/riflib",
+        // },
+        // {
+        //     "name": "setup_py_build_Debug",
+        //     "shell_cmd": "/Users/sheffler/anaconda2/envs/riflib_env/bin/python setup.py build --build-base=build_setup_py_Debug",
+        //     "working_dir" : "/Users/sheffler/riflib",
+        // },
     ]
 }

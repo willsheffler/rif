@@ -1,4 +1,4 @@
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import absolute_import, division, print_function
 from builtins import *
 
 import os
@@ -12,9 +12,9 @@ from build_utils import remove_installed_riflib
 if __name__ == '__main__':
     # remove_installed_rif()
     proj_root = get_proj_root()
-    if rebuild_fast(target='gtest_wip'):
+    if rebuild_fast(target='gtest_wip', cfg='Debug'):
         sys.exit(-1)
-    os.chdir(os.path.abspath(get_build_dir('temp')))
+    os.chdir(os.path.abspath(get_build_dir('temp', cfg='Debug')))
     os.system('./gtest_wip')
 
 

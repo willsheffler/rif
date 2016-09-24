@@ -9,7 +9,7 @@
 *.egg-info
 .eggs
 build/
-build_setup_py
+build_setup_py*
 .DS_Store
 _build/
 docs/_generate
