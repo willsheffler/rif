@@ -1,0 +1,29 @@
+{
+	"folders":
+	[
+		{
+			"path": "/Users/sheffler/riflib",
+            "folder_exclude_patterns": ["build*", ".git", ".cache", ".idea", "__pycache__"],
+            "file_exclude_patterns": ["*.pyc", "*.pyo","*.o", "*.a", "*.lib", "*.so",
+                        "*.dylib", ".DS_Store", "*.sublime-workspace", ".tags*",
+                        "test.sxhn", "test.sxm"],
+            "tab_size": 4,
+            "translate_tabs_to_spaces": true,
+		}
+	],
+	"build_systems":
+    [
+        {
+            "name": "build_and_run_pytest",
+            "shell_cmd": "/Users/sheffler/anaconda2/envs/riflib_env/bin/python /Users/sheffler/riflib/devtools/build_and_run_pytest.py",
+		    "file_regex": "^(..[^:]*):([0-9]+):?([0-9]+)?:? (.*)$",
+            "working_dir" : "/Users/sheffler/riflib/src/test",
+        },
+        {
+            "name": "build_and_run_gtest_wip",
+            "shell_cmd": "/Users/sheffler/anaconda2/envs/riflib_env/bin/python /Users/sheffler/riflib/devtools/build_and_run_gtest_wip.py",
+		    "file_regex": "^(..[^:]*):([0-9]+):?([0-9]+)?:? (.*)$",
+            "working_dir" : "/Users/sheffler/riflib/src/test",
+        }
+    ]
+}

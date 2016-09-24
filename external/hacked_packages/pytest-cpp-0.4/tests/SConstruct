@@ -1,0 +1,27 @@
+import os
+import sys
+
+if sys.platform.startswith('win'):
+    CCFLAGS = ['/EHsc', '/nologo']
+    LIBS = []
+else:
+    CCFLAGS = ''
+    LIBS = ['pthread']
+
+env = Environment(
+    CPPPATH=os.environ.get('INCLUDE'),
+    CCFLAGS=CCFLAGS,
+    LIBPATH=os.environ.get('LIBPATH'),
+    LIBS=LIBS,
+)
+genv = env.Clone(LIBS=['gtest'] + LIBS)
+
+Export('env genv')
+
+genv.Program('gtest.cpp')
+
+for filename in ('boost_success.cpp', 'boost_failure.cpp', 'boost_error.cpp'):
+    env.Program(filename)
+
+SConscript('acceptance/googletest-samples/SConscript')
+SConscript('acceptance/boosttest-samples/SConscript')
