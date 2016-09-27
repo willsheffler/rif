@@ -3,7 +3,7 @@
 	[
 		{
 			"path": "/Users/sheffler/riflib",
-            "folder_exclude_patterns": ["build*", ".git", ".cache", ".idea", "__pycache__"],
+            "folder_exclude_patterns": ["build*", ".git", ".cache", ".idea", "__pycache__", "external"],
             "file_exclude_patterns": ["*.pyc", "*.pyo","*.o", "*.a", "*.lib", "*.so",
                         "*.dylib", ".DS_Store", "*.sublime-workspace", ".tags*",
                         "test.sxhn", "test.sxm"],

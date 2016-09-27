@@ -26,13 +26,8 @@ add_subdirectory(external/pybind11)
 
 
 
-FILE(GLOB L1 "./[0-9a-zA-Z_]*.py.cpp")
-FILE(GLOB L2 "./*/[0-9a-zA-Z_]*.py.cpp")
-FILE(GLOB L3 "./*/*/[0-9a-zA-Z_]*.py.cpp")
-FILE(GLOB L4 "./*/*/*/[0-9a-zA-Z_]*.py.cpp")
-FILE(GLOB L5 "./*/*/*/*/[0-9a-zA-Z_]*.py.cpp")
-
-pybind11_add_module( riflib ${L1} ${L2} ${L3} ${L4} ${L5} )
+FILE(GLOB_RECURSE PYTHON_CPP "./src/[0-9a-zA-Z_]*.pybind.cpp")
+pybind11_add_module( riflib ${PYTHON_CPP} )
 # pybind11_add_module( riflib src/test.py.cpp )
 
 
@@ -41,24 +36,20 @@ pybind11_add_module( riflib ${L1} ${L2} ${L3} ${L4} ${L5} )
 ########################### tests #########################################################
 # shitty "data" files to compile faster
 # TODO remove these
-list(APPEND LIB_CC src/riflib/rosetta/score/EtableParams_init.lib.cc
-        src/riflib/rosetta/atype_map.lib.cc src/riflib/chemical/ligand_factory.lib.cc)
-SET_SOURCE_FILES_PROPERTIES(${LIB_CC} PROPERTIES COMPILE_FLAGS -O0)
-add_library(scheme ${LIB_CC})
+list(APPEND LIB_CPP src/riflib/rosetta/score/EtableParams_init.lib.cpp
+        src/riflib/rosetta/atype_map.lib.cpp src/riflib/chemical/ligand_factory.lib.cpp)
+SET_SOURCE_FILES_PROPERTIES(${LIB_CPP} PROPERTIES COMPILE_FLAGS -O0)
+add_library(scheme ${LIB_CPP})
 
 list(APPEND EXTRA_LIBS boost_system)
 
 include_directories(".")
 
-FILE(GLOB L1 "src/[0-9a-zA-Z_]*.gtest.cc")
-FILE(GLOB L2 "src/*/[0-9a-zA-Z_]*.gtest.cc")
-FILE(GLOB L3 "src/*/*/[0-9a-zA-Z_]*.gtest.cc")
-FILE(GLOB L4 "src/*/*/*/[0-9a-zA-Z_]*.gtest.cc")
-FILE(GLOB L5 "src/*/*/*/*/[0-9a-zA-Z_]*.gtest.cc")
+FILE(GLOB_RECURSE TEST_CPP "src/[0-9a-zA-Z_]*.gtest.cpp")
 
-add_executable(gtest_all src/test/gtest_all.cc ${L1} ${L2} ${L3} ${L4} ${L5})
+add_executable(gtest_all src/test/gtest_all.cpp ${TEST_CPP})
 target_link_libraries(gtest_all scheme ${EXTRA_LIBS})
 
-add_executable(gtest_wip src/test/gtest_wip.cc)
+add_executable(gtest_wip src/test/gtest_wip.cpp)
 target_link_libraries(gtest_wip scheme ${EXTRA_LIBS})
 
