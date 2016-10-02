@@ -134,25 +134,25 @@ struct TwoBodyTable {
 		return memuse;
 	}
 
-	bool check_equal( TwoBodyTable<Data> const & other ) const {
+	bool check_equal( TwoBodyTable<Data> const & that ) const {
 		bool iseq = true;
-  		iseq &= nres_ == other.nres_;
-  		iseq &= nrot_ == other.nrot_;
+  		iseq &= nres_ == that.nres_;
+  		iseq &= nrot_ == that.nrot_;
   		if( !iseq ) return false;
   		for( int i = 0; i < nres_*nrot_; ++i ){
-	  		iseq &= sel2all_.data()[i] == other.sel2all_.data()[i];
-	  		iseq &= all2sel_.data()[i] == other.all2sel_.data()[i];
-	  		iseq &= onebody_.data()[i] == other.onebody_.data()[i];
+	  		iseq &= sel2all_.data()[i] == that.sel2all_.data()[i];
+	  		iseq &= all2sel_.data()[i] == that.all2sel_.data()[i];
+	  		iseq &= onebody_.data()[i] == that.onebody_.data()[i];
   		}
   		for( int i = 0; i < nres_; ++i ){
-	  		iseq &= nsel_[i] == other.nsel_[i];
+	  		iseq &= nsel_[i] == that.nsel_[i];
   		}
   		for( int ir = 0; ir < nres_; ++ir ){
   		for( int jr = 0; jr < nres_; ++jr ){
-  			iseq &= twobody_[ir][jr].num_elements() == other.twobody_[ir][jr].num_elements();
+  			iseq &= twobody_[ir][jr].num_elements() == that.twobody_[ir][jr].num_elements();
 	  		if( !iseq ) return false;
 	  		for( int k = 0; k < twobody_[ir][jr].num_elements(); ++k ){
-		  		iseq &= twobody_[ir][jr].data()[k] == other.twobody_[ir][jr].data()[k];
+		  		iseq &= twobody_[ir][jr].data()[k] == that.twobody_[ir][jr].data()[k];
 	  		}
   		}}
   		return iseq;
@@ -307,32 +307,32 @@ struct TwoBodyTable {
 		return newt_p;
 	}
 
-	// void deepcopy( TwoBodyTable<Data> const & other ) {
+	// void deepcopy( TwoBodyTable<Data> const & that ) {
 	// 	// Array2D onebody_;
 	// 	// boost::multi_array< int, 2 > all2sel_, sel2all_;
 	// 	// std::vector<int> nsel_;
 	// 	// TwoBody twobody_;
-	// 	nres_ = other.nres_;
-	// 	nrot_ = other.nrot_;
-	// 	onebody_.resize( boost::extents[other.onebody_.shape()[0]][other.onebody_.shape()[1]] );// this seems crappy...
-	// 	all2sel_.resize( boost::extents[other.all2sel_.shape()[0]][other.all2sel_.shape()[1]] );
-	// 	sel2all_.resize( boost::extents[other.sel2all_.shape()[0]][other.sel2all_.shape()[1]] );
+	// 	nres_ = that.nres_;
+	// 	nrot_ = that.nrot_;
+	// 	onebody_.resize( boost::extents[that.onebody_.shape()[0]][that.onebody_.shape()[1]] );// this seems crappy...
+	// 	all2sel_.resize( boost::extents[that.all2sel_.shape()[0]][that.all2sel_.shape()[1]] );
+	// 	sel2all_.resize( boost::extents[that.sel2all_.shape()[0]][that.sel2all_.shape()[1]] );
 	// 	ALWAYS_ASSERT( all2sel_.num_elements() == onebody_.num_elements() );
 	// 	ALWAYS_ASSERT( sel2all_.num_elements() == onebody_.num_elements() );
-	// 	for( int i = 0; i < other.onebody_.num_elements(); ++i ){
-	// 		onebody_.data()[i] = other.onebody_.data()[i];
-	// 		all2sel_.data()[i] = other.all2sel_.data()[i];
-	// 		sel2all_.data()[i] = other.sel2all_.data()[i];
+	// 	for( int i = 0; i < that.onebody_.num_elements(); ++i ){
+	// 		onebody_.data()[i] = that.onebody_.data()[i];
+	// 		all2sel_.data()[i] = that.all2sel_.data()[i];
+	// 		sel2all_.data()[i] = that.sel2all_.data()[i];
 	// 	}
-	// 	nsel_.resize( other.nsel_.size() );
-	// 	for( int i = 0; i < nsel_.size(); ++i ) nsel_[i] = other.nsel_[i];
-	// 	twobody_.resize( boost::extents[other.twobody_.shape()[0]][other.twobody_.shape()[1]] );
+	// 	nsel_.resize( that.nsel_.size() );
+	// 	for( int i = 0; i < nsel_.size(); ++i ) nsel_[i] = that.nsel_[i];
+	// 	twobody_.resize( boost::extents[that.twobody_.shape()[0]][that.twobody_.shape()[1]] );
 	// 	for( int i = 0; i < nres_; ++i ){
 	// 	for( int j = 0; j < nres_; ++j ){
-	// 		twobody_[i][j].resize( boost::extents[other.twobody_[i][j].shape()[0]][other.twobody_[i][j].shape()[1]] );
+	// 		twobody_[i][j].resize( boost::extents[that.twobody_[i][j].shape()[0]][that.twobody_[i][j].shape()[1]] );
 	// 		ALWAYS_ASSERT( 0 == twobody_[i][j].num_elements() || nsel_[i]*nsel_[j] == twobody_[i][j].num_elements() );
 	// 		for( int k = 0; k < twobody_[i][j].num_elements(); ++k ){
-	// 			twobody_[i][j].data()[k] = other.twobody_[i][j].data()[k];
+	// 			twobody_[i][j].data()[k] = that.twobody_[i][j].data()[k];
 	// 		}
 	// 	}}
 

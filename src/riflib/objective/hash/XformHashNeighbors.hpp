@@ -242,8 +242,8 @@ struct XformHashNeighbors {
 		return ori_cache_[ori_key];
 	}
 
-	void merge( XformHashNeighbors<XformHash,UNIQUE> const & other ){
-		BOOST_FOREACH( typename OriCache::value_type const & v, other.ori_cache_ ){
+	void merge( XformHashNeighbors<XformHash,UNIQUE> const & that ){
+		BOOST_FOREACH( typename OriCache::value_type const & v, that.ori_cache_ ){
 			if( ori_cache_.find( v.first ) == ori_cache_.end() ){
 				ori_cache_.insert( v );
 			} else {

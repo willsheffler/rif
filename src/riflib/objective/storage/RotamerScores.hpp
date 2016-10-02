@@ -48,16 +48,16 @@ struct RotamerScore {
 	static float data2float( Data data ){ return float(data)/_Divisor; }
 	static Data  float2data( float f ){ return Data( f*_Divisor ); }
 
-	bool operator < ( THIS const & other ) const { return data_ > other.data_; } // reverse so low score is low
-	bool operator== ( THIS const & other ) const { return data_ == other.data_; }
-	bool operator!= ( THIS const & other ) const { return data_ != other.data_; }
-	bool operator== ( Data const & other ) const { return data_ == other; }
+	bool operator < ( THIS const & that ) const { return data_ > that.data_; } // reverse so low score is low
+	bool operator== ( THIS const & that ) const { return data_ == that.data_; }
+	bool operator!= ( THIS const & that ) const { return data_ != that.data_; }
+	bool operator== ( Data const & that ) const { return data_ == that; }
 
 	bool empty() const { return data_ == RotamerMask; }
 
- 	void set_or_merge( THIS const & other ){
- 		if( other < *this ){
- 			*this = other;
+ 	void set_or_merge( THIS const & that ){
+ 		if( that < *this ){
+ 			*this = that;
  		}
  	}
 
@@ -165,36 +165,36 @@ struct RotamerScoreSat : public RotamerScore<_Data,_RotamerBits,_Divisor> {
 		}
 		return true;
 	}
-	void set_or_merge( THIS const & other )
+	void set_or_merge( THIS const & that )
 	{
 		if( this->empty() ){
-			*this = other;
+			*this = that;
 		} else {
 			// merge sat data iff same rotamer, mostly for bounding grids
-			if( other.rotamer() == this->rotamer() ){
+			if( that.rotamer() == this->rotamer() ){
 				int osat = 0;
 				for( int isat = 0; isat < NSat; ++isat ){
 					if( sat_data_[isat].empty() ){
-						while( osat < NSat && ! is_new_sat(other.sat_data_[osat]) ) ++osat;
+						while( osat < NSat && ! is_new_sat(that.sat_data_[osat]) ) ++osat;
 						if( osat >= NSat ) break;
-						sat_data_[isat] = other.sat_data_[osat];
+						sat_data_[isat] = that.sat_data_[osat];
 						++osat;
 					}
 				}
 			}
-			BASE::set_or_merge( other );
+			BASE::set_or_merge( that );
 		}
 	}
 
 	bool operator==(THIS const & o) const { return this->data_==o.data_ && this->sat_data_==o.sat_data_; }
 	bool operator!=(THIS const & o) const { return this->data_!=o.data_ || this->sat_data_!=o.sat_data_; }
-	bool operator < ( THIS const & other ) const {
+	bool operator < ( THIS const & that ) const {
 		int nsat=0,onsat=0;
 		for( int i = 0; i < NSat; ++i ){
 			 nsat += this->sat_data_[i].not_empty();
-			onsat += other.sat_data_[i].not_empty();
+			onsat += that.sat_data_[i].not_empty();
 		}
-		if( nsat == onsat ) return this->data_ > other.data_;
+		if( nsat == onsat ) return this->data_ > that.data_;
 		return nsat > onsat;
 	} // reverse so low score is low
 
@@ -280,11 +280,11 @@ struct RotamerScores {
 		rotscores_[insert_pos].set_or_merge( to_insert );
 	}
 	template<int N2>
-	void merge( RotamerScores<N2,RotScore> const & other )
+	void merge( RotamerScores<N2,RotScore> const & that )
 	{
 		for( int i = 0; i < N2; ++i ){
-			if( other.empty(i) ) break;
-			add_rotamer( other.rotscores_[i] );
+			if( that.empty(i) ) break;
+			add_rotamer( that.rotscores_[i] );
 		}
 	}
 	float score_of_rotamer( int irot ) const

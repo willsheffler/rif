@@ -62,12 +62,12 @@ namespace impl {
 		BodyTplt() : conformation_() {}
 		BodyTplt(shared_ptr<ConformationConst> c) : conformation_(c) {}
 
-		BodyTplt( This const & other ){
-			conformation_ = other.conformation_;
+		BodyTplt( This const & that ){
+			conformation_ = that.conformation_;
 		}
 
-		void deepcopy( This const & other ){
-			conformation_ = make_shared<Conformation>( *other.conformation_ );
+		void deepcopy( This const & that ){
+			conformation_ = make_shared<Conformation>( *that.conformation_ );
 		}
 
 		// BodyTplt( BodyTplt const & proto ){

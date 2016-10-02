@@ -142,8 +142,8 @@ struct InstanceMap : impl::fusion_map<_Keys,Arg2>::type
     typename f::result_of::value_at_key<Base,Key>::type const &
     get() const { return f::at_key<Key>((Base&)*this); }
 
-    bool operator==(THIS const & other) const {
-        impl::EqualsVisitor<THIS> eqv(*this,other);
+    bool operator==(THIS const & that) const {
+        impl::EqualsVisitor<THIS> eqv(*this,that);
         m::for_each<Keys,type2type<m::_1> >(eqv);
         return eqv.is_equal;
     }

@@ -64,7 +64,7 @@ def add_to_pypath(newpath):
 
 def rebuild_setup_py_riflib(cfg='Release'):
     proj_root = get_proj_root()
-    if os.system('cd ' + proj_root + '; python setup.py build --build-base=build_setup_py_'+cfg):
+    if os.system('cd ' + proj_root + '; '+sys.executable+' setup.py build --build-base=build_setup_py_'+cfg):
         return -1
 
 

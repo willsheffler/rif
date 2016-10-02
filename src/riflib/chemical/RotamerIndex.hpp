@@ -21,9 +21,9 @@ namespace scheme { namespace chemical {
 struct HBondRay {
 	::Eigen::Vector3f horb_cen, direction;
 	int32_t id=1, group=-1;
-	bool operator==(HBondRay const & other) const {
-		float d1 = (horb_cen-other.horb_cen).norm();
-		float d2 = (direction-other.direction).norm();
+	bool operator==(HBondRay const & that) const {
+		float d1 = (horb_cen-that.horb_cen).norm();
+		float d2 = (direction-that.direction).norm();
 		return d1 < 0.0001 && d2 < 0.0001;
 	}
 };
@@ -76,12 +76,12 @@ struct ChemicalIndex {
 		atomdata_.clear();
 	}
 
-	bool operator==(ChemicalIndex<AtomData> const & other) const {
+	bool operator==(ChemicalIndex<AtomData> const & that) const {
 		return (
-				resnames_      == other.resnames_    &&
-				resname2num_   == other.resname2num_ &&
-				atomdata_      == other.atomdata_    &&
-				null_atomdata_ == other.null_atomdata_
+				resnames_      == that.resnames_    &&
+				resname2num_   == that.resname2num_ &&
+				atomdata_      == that.atomdata_    &&
+				null_atomdata_ == that.null_atomdata_
 			);
 	}
 
@@ -111,25 +111,25 @@ struct Rotamer {
 		}
 		return h;
 	}
-	bool operator==(Rotamer<Atom> const & other) const {
-		bool atoms_close = atoms_.size() == other.atoms_.size();
+	bool operator==(Rotamer<Atom> const & that) const {
+		bool atoms_close = atoms_.size() == that.atoms_.size();
 		if( atoms_close ){
 			for( int i = 0; i < atoms_.size(); ++i ){
-				float dist = (atoms_.at(i).position() - other.atoms_.at(i).position()).norm();
+				float dist = (atoms_.at(i).position() - that.atoms_.at(i).position()).norm();
 				atoms_close &= dist < 0.00001;
-				atoms_close &= atoms_.at(i).type() == other.atoms_.at(i).type();
+				atoms_close &= atoms_.at(i).type() == that.atoms_.at(i).type();
 			}
 		}
 		return (
-				resname_ == other.resname_ &&
-				n_proton_chi_ == other.n_proton_chi_ &&
-				chi_ == other.chi_ &&
+				resname_ == that.resname_ &&
+				n_proton_chi_ == that.n_proton_chi_ &&
+				chi_ == that.chi_ &&
 				atoms_close &&
-				// atoms_ == other.atoms_ &&
-				// hbonders_ == other.hbonders_ &&
-				donors_ == other.donors_ &&
-				acceptors_ == other.acceptors_ &&
-				nheavyatoms == other.nheavyatoms
+				// atoms_ == that.atoms_ &&
+				// hbonders_ == that.hbonders_ &&
+				donors_ == that.donors_ &&
+				acceptors_ == that.acceptors_ &&
+				nheavyatoms == that.nheavyatoms
 			);
 	}
 };
@@ -747,20 +747,20 @@ struct RotamerIndex {
 	}
 
 
-	bool operator==(THIS const & other) const {
+	bool operator==(THIS const & that) const {
 		return (
-				n_primary_rotamers_         == other.n_primary_rotamers_   &&
-				seen_child_rotamer_         == other.seen_child_rotamer_   &&
-				ala_rot_                    == other.ala_rot_              &&
-				chem_index_                 == other.chem_index_           &&
-				rotamers_                   == other.rotamers_             &&
-				parent_rotamer_             == other.parent_rotamer_       &&
-				bounds_map_                 == other.bounds_map_           &&
-				child_map_                  == other.child_map_            &&
-				protonchi_parent_of_        == other.protonchi_parent_of_  &&
-				structural_parents_         == other.structural_parents_   &&
-				structural_parent_of_       == other.structural_parent_of_ // &&
-				// to_structural_parent_frame_ == other.to_structural_parent_frame_
+				n_primary_rotamers_         == that.n_primary_rotamers_   &&
+				seen_child_rotamer_         == that.seen_child_rotamer_   &&
+				ala_rot_                    == that.ala_rot_              &&
+				chem_index_                 == that.chem_index_           &&
+				rotamers_                   == that.rotamers_             &&
+				parent_rotamer_             == that.parent_rotamer_       &&
+				bounds_map_                 == that.bounds_map_           &&
+				child_map_                  == that.child_map_            &&
+				protonchi_parent_of_        == that.protonchi_parent_of_  &&
+				structural_parents_         == that.structural_parents_   &&
+				structural_parent_of_       == that.structural_parent_of_ // &&
+				// to_structural_parent_frame_ == that.to_structural_parent_frame_
 			);
 	}
 };
