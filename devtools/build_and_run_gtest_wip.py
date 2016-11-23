@@ -12,9 +12,9 @@ from build_utils import remove_installed_riflib
 if __name__ == '__main__':
     # remove_installed_rif()
     proj_root = get_proj_root()
-    if rebuild_fast(target='gtest_wip', cfg='Debug'):
+    if rebuild_fast(target='gtest_wip', cfg='Release'):
         sys.exit(-1)
-    os.chdir(os.path.abspath(get_build_dir('temp', cfg='Debug')))
+    os.chdir(os.path.abspath(get_build_dir('temp', cfg='Release')))
     os.system('./gtest_wip')
 
 

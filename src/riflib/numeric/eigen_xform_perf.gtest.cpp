@@ -24,7 +24,7 @@ template< class Xform >
 void test_xform_perf(){
     int NSAMP = 10*1000;
     #ifdef SCHEME_BENCHMARK
-    NSAMP = 1*1000*1000;
+        NSAMP = 1*1000*1000;
     #endif
     std::mt19937 rng;
     Xform x,sum = Xform::Identity();

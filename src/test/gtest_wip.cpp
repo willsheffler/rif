@@ -1,6 +1,11 @@
 #include "gtest_util.hpp"
 
+#define SCHEME_BENCHMARK
+
 // include desired tests here:
+
+// #include "riflib/numeric/eigen_xform_perf.gtest.cpp"
+
 
 #include "test/hana/hana.gtest.cpp"
 
@@ -13,7 +18,6 @@
 
 // #include "riflib/numeric/euler_angles.gtest.cpp"
 // #include "riflib/numeric/FixedPoint.gtest.cpp"
-// #include "riflib/numeric/xform_perf.gtest.cpp"
 // #include "riflib/numeric/rand_xform.gtest.cpp"
 // #include "riflib/dock/fftdock.gtest.cpp"
 

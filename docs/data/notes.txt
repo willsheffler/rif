@@ -1,0 +1,4 @@
+my MBP 2.8, running cool
+ninja clean; time ninja -j1
+
+riflib/tests release build time with MPL/fusion: 128s
