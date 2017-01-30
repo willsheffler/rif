@@ -12,7 +12,8 @@ endif()
 
 include_directories("external/include")
 include_directories("src")
-
+include_directories("/opt/local/include")
+link_directories("/opt/local/lib")
 
 function(PRINT_CONFIG)
     message("CMAKE_BUILD_TYPE: " ${CMAKE_BUILD_TYPE})
