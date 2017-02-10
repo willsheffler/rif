@@ -69,7 +69,7 @@ def rebuild_setup_py_riflib(cfg='Release'):
 
 
 
-def rebuild_fast(target='riflib', cfg='Release'):
+def rebuild_fast(target='riflib pigen', cfg='Release'):
     makeexe = 'ninja'
     if not which('ninja'):
         makeexe = 'make'

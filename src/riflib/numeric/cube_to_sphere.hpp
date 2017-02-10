@@ -10,6 +10,7 @@ namespace numeric {
 // assumes we are on the +Z face!!!!!  order Z,Xform,-Y,-Xform,Y,-Z
 template<class Vec>
 void cube_to_sphere(Vec & v){
+    typedef typename Vec::Scalar Float;
 	double const xx = v.x()*v.x();
 	double const yy = v.y()*v.y();
 	double const zz = v.z()*v.z();
@@ -21,17 +22,18 @@ void cube_to_sphere(Vec & v){
 
 template<class Vec>
 void sphere_to_cube_facenum0(Vec & v){
-	double const x = v.x();
-	double const y = v.y();
-	// double const z = v.z();
-	double & Xform(v.x());
-	double & Y(v.y());
-	double & Z(v.z());
-	double const INV_SQRT_2 = 0.70710676908493042;
-	double const a2 = x * x * 2.0;
-	double const b2 = y * y * 2.0;
-	double const inner = -a2 + b2 -3.0;
-	double const innersqrt = -sqrt((inner * inner) - 12.0 * a2);
+    typedef typename Vec::Scalar Float;
+	Float const x = v.x();
+	Float const y = v.y();
+	// Float const z = v.z();
+	Float & Xform(v.x());
+	Float & Y(v.y());
+	Float & Z(v.z());
+	Float const INV_SQRT_2 = 0.70710676908493042;
+	Float const a2 = x * x * 2.0;
+	Float const b2 = y * y * 2.0;
+	Float const inner = -a2 + b2 -3.0;
+	Float const innersqrt = -sqrt((inner * inner) - 12.0 * a2);
 	Xform = (fabs(x)<0.000001) ? 0.0 : sqrt(innersqrt+a2-b2+3.0) * INV_SQRT_2;
 	Y = (fabs(y)<0.000001) ? 0.0 : sqrt(innersqrt-a2+b2+3.0) * INV_SQRT_2;
 	Z = 1.0; // not really necessary for lookups...
@@ -40,8 +42,10 @@ void sphere_to_cube_facenum0(Vec & v){
 	// if(Xform > 1.0) Xform = 1.0; // shouldn't be necessary
 	// if(Y > 1.0) Y = 1.0; // shouldn't be necessary
  }
-void permute_cube_face_xyz(int face, double & x, double & y, double & z){
-	double X=x,Y=y,Z=z;
+
+template<class Float>
+void permute_cube_face_xyz(int face, Float & x, Float & y, Float & z){
+	Float X=x,Y=y,Z=z;
 	switch(face){
 		case 0:	x= X; y= Y; z= Z; break;
 		case 1:	x=-Y; y= Z; z=-X; break;
@@ -52,8 +56,10 @@ void permute_cube_face_xyz(int face, double & x, double & y, double & z){
 		default: break;
 	}
  }
-void inverse_permute_cube_face_xyz(int face, double & x, double & y, double & z){
-	double X=x,Y=y,Z=z;
+
+template<class Float>
+void inverse_permute_cube_face_xyz(int face, Float & x, Float & y, Float & z){
+	Float X=x,Y=y,Z=z;
 	switch(face){
 		case 0:	x= X; y= Y; z= Z; break;
 		case 1:	x=-Z; y=-X; z= Y; break;
@@ -66,7 +72,8 @@ void inverse_permute_cube_face_xyz(int face, double & x, double & y, double & z)
  }
 template<class Vec>
 uint64_t get_cube_facenum(Vec const & p){
-		double const ax = fabs(p.x()), ay = fabs(p.y()), az = fabs(p.z());
+    typedef typename Vec::Scalar Float;
+    Float const ax = fabs(p.x()), ay = fabs(p.y()), az = fabs(p.z());
 	uint64_t facenum = 0;
 	     if( ax >= ay && ax >= az ) facenum = (p.x() > 0) ? 4 : 2;
 	else if( ay >= az && ay >= ax ) facenum = (p.y() > 0) ? 1 : 3;

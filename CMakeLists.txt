@@ -12,8 +12,10 @@ endif()
 
 include_directories("external/include")
 include_directories("src")
+include_directories("/usr/local/include")
 include_directories("/opt/local/include")
-link_directories("/opt/local/lib")
+link_directories("/usr/local/lib")
+#link_directories("/opt/local/lib")
 
 function(PRINT_CONFIG)
     message("CMAKE_BUILD_TYPE: " ${CMAKE_BUILD_TYPE})
@@ -24,8 +26,11 @@ endfunction()
 
 function(BUILD_PYTHON_BINDINGS)
     add_subdirectory(external/pybind11)
-    FILE(GLOB_RECURSE PYTHON_CPP "./src/[0-9a-zA-Z_]*.pybind.cpp")
-    pybind11_add_module( riflib ${PYTHON_CPP} )
+    FILE(GLOB_RECURSE RIFLIB_PY_CPP "./src/riflib/[0-9a-zA-Z_]*.pybind.cpp")
+    pybind11_add_module( riflib ${RIFLIB_PY_CPP} )
+    FILE(GLOB_RECURSE PIGEN_CPP "./src/pigen/[0-9a-zA-Z_]*.pybind.cpp")
+    # message(${PIGEN_CPP})
+    pybind11_add_module( pigen ${PIGEN_CPP} )
 endfunction()
 
 

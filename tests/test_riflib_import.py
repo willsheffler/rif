@@ -13,6 +13,6 @@ def test_math():
         print('"{}"'.format(p))
     print('------------------------')
     print(riflib.__file__)
-    assert riflib.add(1, 2) == 4
+    assert riflib.add(1, 2) == 3
     assert riflib.subtract(1, 2) == -1
     assert riflib.mult(3, 3) == 9

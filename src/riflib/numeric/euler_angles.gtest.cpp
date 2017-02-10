@@ -33,7 +33,8 @@ TEST(euler_angles,test){
 		Matrix3d m2;
 		from_euler_angles(euler,m2);
 		double thresh = 0.0000001;
-		if( euler[2] < 0.000001 || euler[2] > M_PI-0.000001 ) thresh = 0.0002;
+        if( euler[2] < 0.000001  || euler[2] > M_PI-0.000001  ) thresh = 0.0002;
+		if( euler[2] < 0.0000001 || euler[2] > M_PI-0.0000001 ) thresh = 0.002;
 		if( !m2.isApprox(m,thresh) ){
 			cout << euler << endl;
 			cout << m << endl;
@@ -77,7 +78,8 @@ TEST( euler_angles, performance ){
 		Matrix3d m2;
 		from_euler_angles(euler[i],m2);
 		double thresh = 0.0000001;
-		if( euler[i][2] < 0.000001 || euler[i][2] > M_PI-0.000001 ) thresh = 0.0002;
+		if( euler[i][2] < 0.000001  || euler[i][2] > M_PI-0.000001  ) thresh = 0.0002;
+        if( euler[i][2] < 0.0000001 || euler[i][2] > M_PI-0.0000001 ) thresh = 0.002;
 		if( !m2.isApprox(samp[i],thresh) ){
 			cout << euler[i] << endl;
 			cout << samp[i] << endl;

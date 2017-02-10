@@ -7,7 +7,7 @@
 // #include "riflib/numeric/eigen_xform_perf.gtest.cpp"
 
 
-#include "test/hana/hana.gtest.cpp"
+// #include "test/hana/hana.gtest.cpp"
 
 // #include "riflib/util/hash.gtest.cpp"
 // #include "riflib/util/hash_thread.gtest.cpp" // TODO ARRAY!!
@@ -86,7 +86,7 @@
 
 // #include "riflib/chemical/stub.gtest.cpp"
 
-// #include "riflib/numeric/cube_to_sphere.gtest.cpp"
+#include "riflib/numeric/cube_to_sphere.gtest.cpp"
 
 // #include "riflib/numeric/rand_xform.gtest.cpp"
 
