@@ -111,3 +111,25 @@ def remove_installed_riflib():
         os.system('echo y | ' + sys.executable + ' -m pip uninstall riflib')
         assert is_devel_install() or not rif_is_installed()
         print('uninstalled riflib from ' + sys.executable)
+
+
+def build_and_run_pytest(redo_cmake=False):
+    # remove_installed_rif()
+    proj_root = get_proj_root()
+    print('calling rebuild_fast')
+    if rebuild_fast(target='riflib gtest_all', cfg='Release', redo_cmake=redo_cmake):
+        sys.exit(-1)
+    pypath = [
+        os.path.abspath(get_build_dir('lib')),
+        proj_root + '/external',
+    ]
+    # need to use sys.path for this process
+    sys.path = pypath + sys.path
+    # need to use PYTHONPATH env for xdist subprocesses
+    add_to_pypath(pypath)
+    # TODO both here and in docs, this gets messed up when riflib is actually installed
+    import pytest
+    if sys.version_info.major is 2:
+        proj_root = bytes(proj_root, 'ascii')
+    pytest.main(proj_root)
+

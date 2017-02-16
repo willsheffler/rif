@@ -17,3 +17,6 @@ docs/_generate
 *.sxhn
 *.sublime-workspace
 .clang_complete
+build_manual
+log/gtest_wip.log
+log/pytest.log

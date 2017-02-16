@@ -4,6 +4,7 @@ namespace py = pybind11;
 
 void init_riflib_numeric_pigen(py::module & riflib);
 void init_test_example(py::module & riflib);
+void init_test_numpy(py::module & riflib_test);
 
 
 PYBIND11_PLUGIN(riflib) {
@@ -21,6 +22,11 @@ PYBIND11_PLUGIN(riflib) {
 
     init_riflib_numeric_pigen(riflib);
     init_test_example(riflib);
+
+    {
+        py::module riflib_test = riflib.def_submodule("test");
+        init_test_numpy(riflib_test);
+    }
 
 
 #ifdef VERSION_INFO

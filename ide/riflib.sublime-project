@@ -14,15 +14,18 @@
 	"build_systems":
     [
         {
+            "name": "cmake_build_and_run_pytest",
+            "shell_cmd": "/Users/sheffler/anaconda2/envs/riflib_env/bin/python /Users/sheffler/riflib/devtools/cmake_build_and_run_pytest.py 2>&1 | tee ../../log/pytest.log",
+            "working_dir" : "/Users/sheffler/riflib/src/test"
+        },
+        {
             "name": "build_and_run_pytest",
             "shell_cmd": "/Users/sheffler/anaconda2/envs/riflib_env/bin/python /Users/sheffler/riflib/devtools/build_and_run_pytest.py 2>&1 | tee ../../log/pytest.log",
-		    "file_regex": "^(..[^:]*):([0-9]+):?([0-9]+)?:? (.*)$",
             "working_dir" : "/Users/sheffler/riflib/src/test"
         },
         {
             "name": "build_and_run_gtest_wip",
             "shell_cmd": "/Users/sheffler/anaconda2/envs/riflib_env/bin/python /Users/sheffler/riflib/devtools/build_and_run_gtest_wip.py 2>&1 | tee ../../log/gtest_wip.log",
-            "file_regex": "^(..[^:]*):([0-9]+):?([0-9]+)?:? (.*)$",
             "working_dir" : "/Users/sheffler/riflib/src/test"
         }
     ]
