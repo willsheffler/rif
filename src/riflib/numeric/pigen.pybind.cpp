@@ -10,20 +10,12 @@ std::string str(C const & c){
     return boost::lexical_cast<std::string>(c);
 }
 
-PYBIND11_PLUGIN(pigen) {
+
+void init_riflib_numeric_pigen(py::module &riflib) {
+
+    py::module pigen = riflib.def_submodule("pigen");
 
     using namespace Eigen;
-
-    py::module m("pigen", R"pbdoc(
-        pigen docs
-        -----------------------
-
-        .. currentmodule:: pigen
-
-        .. autosummary::
-           :toctree: _generate
-
-    )pbdoc");
 
     typedef Vector3f v3f;
     typedef Matrix<float,3,3> m33f;
@@ -31,7 +23,7 @@ PYBIND11_PLUGIN(pigen) {
 
     float const fprec = NumTraits<float>::dummy_precision();
 
-    py::class_<Vector3f>( m, "Vector3f" )
+    py::class_<Vector3f>( pigen, "Vector3f" )
         .def( py::init<float,float,float>() )
         .def( py::self == py::self )
         .def( "__add__", [](v3f u, v3f v)->v3f{ return u+v; } )
@@ -52,7 +44,7 @@ PYBIND11_PLUGIN(pigen) {
             return "Vector3f("+str(v[0])+", "+str(v[1])+", "+str(v[2])+")"; } );
     ;
 
-    py::class_<m33f>( m, "Matrix33f" )
+    py::class_<m33f>( pigen, "Matrix33f" )
         .def( "__init__",
             [](m33f &instance ) { instance = m33f::Identity(); } )
         .def( "__add__", [](m33f u, m33f v)->m33f{ return u+v; } )
@@ -69,7 +61,7 @@ PYBIND11_PLUGIN(pigen) {
             return m.isApprox(n,prec); }, py::arg("value"), py::arg("prec")=fprec )
     ;
 
-    py::class_<x3f>( m, "Transform3f" )
+    py::class_<x3f>( pigen, "Transform3f" )
         .def( "__init__",
             [](x3f &instance ) { instance = x3f::Identity(); } )
         // .def( py::self == py::self )
@@ -81,7 +73,5 @@ PYBIND11_PLUGIN(pigen) {
             return str(x.rotation()) + '\n' + str(x.translation().transpose());
         } )
     ;
-
-    return m.ptr();
 
 }

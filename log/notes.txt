@@ -1,0 +1,3 @@
+PYTHON BINDING STUFF:
+
+to add pybind submodules, see riflib.pytest.cpp and example.pytest.cpp

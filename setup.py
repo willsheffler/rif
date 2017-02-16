@@ -80,8 +80,8 @@ class CMakeBuild(build_ext):
             build_args += ['--', '/m']
         else:
             cmake_args += ['-DCMAKE_BUILD_TYPE=' + cfg]
-            build_args += ['--', '-j'+str(multiprocessing.cpu_count()), 'riflib', 'pigen']
-            # build_args += ['--', '-j'+str(multiprocessing.cpu_count())]
+            # build_args += ['--', '-j'+str(multiprocessing.cpu_count()), 'riflib']
+            build_args += ['--', '-j'+str(multiprocessing.cpu_count())]
 
         env = os.environ.copy()
         env['CXXFLAGS'] = '{} -DVERSION_INFO=\\"{}\\"'.format(env.get('CXXFLAGS', ''),

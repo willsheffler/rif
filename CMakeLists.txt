@@ -25,12 +25,8 @@ endfunction()
 
 
 function(BUILD_PYTHON_BINDINGS)
-    add_subdirectory(external/pybind11)
-    FILE(GLOB_RECURSE RIFLIB_PY_CPP "./src/riflib/[0-9a-zA-Z_]*.pybind.cpp")
-    pybind11_add_module( riflib ${RIFLIB_PY_CPP} )
-    FILE(GLOB_RECURSE PIGEN_CPP "./src/pigen/[0-9a-zA-Z_]*.pybind.cpp")
-    # message(${PIGEN_CPP})
-    pybind11_add_module( pigen ${PIGEN_CPP} )
+    FILE(GLOB_RECURSE PY_CPP "./src/[0-9a-zA-Z_]*.pybind.cpp")
+    pybind11_add_module( riflib ${PY_CPP} )
 endfunction()
 
 
@@ -45,21 +41,22 @@ function(BUILD_GTESTS)
                         src/riflib/rosetta/atype_map.lib.cpp
                         src/riflib/chemical/ligand_factory.lib.cpp)
     set_source_files_properties(${LIB_CPP} PROPERTIES COMPILE_FLAGS -O0)
-    add_library(scheme ${LIB_CPP})
+    add_library(riflib_data ${LIB_CPP})
 
 
     file(GLOB_RECURSE TEST_CPP "src/[0-9a-zA-Z_]*.gtest.cpp")
     add_executable(gtest_all src/test/gtest_all.cpp ${TEST_CPP})
-    target_link_libraries(gtest_all scheme ${EXTRA_LIBS})
+    target_link_libraries(gtest_all riflib_data ${EXTRA_LIBS})
 
     add_executable(gtest_wip src/test/gtest_wip.cpp)
-    target_link_libraries(gtest_wip scheme ${EXTRA_LIBS})
+    target_link_libraries(gtest_wip riflib_data ${EXTRA_LIBS})
 endfunction()
 
 
 PRINT_CONFIG()
 
-BUILD_PYTHON_BINDINGS()
+add_subdirectory(external/pybind11)
+BUILD_PYTHON_BINDINGS("")
 
 BUILD_GTESTS()
 

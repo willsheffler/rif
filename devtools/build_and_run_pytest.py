@@ -12,7 +12,7 @@ if __name__ == '__main__':
     # remove_installed_rif()
     proj_root = get_proj_root()
     print('calling rebuild_fast')
-    if rebuild_fast(target='riflib gtest_all pigen', cfg='Release'):
+    if rebuild_fast(target='riflib gtest_all', cfg='Release', redo_cmake=0):
         sys.exit(-1)
     pypath = [
         os.path.abspath(get_build_dir('lib')),

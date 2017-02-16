@@ -69,16 +69,17 @@ def rebuild_setup_py_riflib(cfg='Release'):
 
 
 
-def rebuild_fast(target='riflib pigen', cfg='Release'):
+def rebuild_fast(target='riflib', cfg='Release', redo_cmake=False):
     makeexe = 'ninja'
     if not which('ninja'):
         makeexe = 'make'
     proj_root = get_proj_root()
     cmake_dir = get_build_dir('temp', cfg=cfg)
-    if not cmake_dir:
+    if not cmake_dir or redo_cmake:
         if rebuild_setup_py_riflib(cfg=cfg):
             return -1
         cmake_dir = get_build_dir('temp', cfg=cfg)
+
     return os.system('cd ' + cmake_dir + '; ' + makeexe + ' -j8 ' + target)
 
 
