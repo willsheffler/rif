@@ -28,7 +28,7 @@ endfunction()
 function(build_python_bindings)
     execute_process(COMMAND python src/sourcegen.py WORKING_DIRECTORY ../..)
     FILE(GLOB_RECURSE PY_CPP "./src/[0-9a-zA-Z_]*.pybind.cpp")
-    pybind11_add_module( riflib ${PY_CPP} )
+    pybind11_add_module( riflib src/riflib.gen.cpp ${PY_CPP} )
 endfunction()
 
 

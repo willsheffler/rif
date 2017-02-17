@@ -1,54 +1,72 @@
-import shutil, os, glob, subprocess, re
+"""generate main rifgen.gen.cpp pybind file with modules organized based on file paths
+of *.pybind.cpp components"""
+
+import subprocess
+import os
+import re
 from jinja2 import Template
-from collections import namedtuple
 
-# assume run from top project directory
-pyfiles = subprocess.check_output('find src -regex [^.].+pybind.cpp'.split()).split()
-pymodules = dict()
-for f in pyfiles:
-    if f == "src/riflib.pybind.cpp": continue
-    print "sourcegen.py: found pybind file", f
-    for line in subprocess.check_output(['grep','--with-filename','RIFLIB_PYBIND_', f]).splitlines():
-        match = re.match("src/(.+).pybind.cpp:.* RIFLIB_PYBIND_(\w+)",line)
-        path = match.group(1).replace('riflib/','')
-        func = match.group(2)
-        assert len(match.groups()) is 2
-        pymodules[func] = path
+def get_pybind_modules(srcpath):
+    "find RIFLIB_PYBIND_ functions in *.pybind.cpp files"
+    pbfiles = subprocess.check_output('find {} -regex [^.].+pybind.cpp'.format(srcpath).split())
+    pymodules = dict()
+    for pybindfile in pbfiles.splitlines():
+        print "sourcegen.py: found pybind file", pybindfile
+        grepped = subprocess.check_output(['grep', '-H', 'RIFLIB_PYBIND_', pybindfile])
+        for line in grepped.splitlines():
+            match = re.match(r"src/(.+).pybind.cpp:.* RIFLIB_PYBIND_(\w+)", line)
+            assert len(match.groups()) is 2
+            # todo move src/riflib/* to src/* OR src/* to src/riflib/*
+            path = match.group(1).replace('riflib/', '')
+            func = match.group(2)
+            pymodules[func] = path
+    return pymodules
 
-# print pymodules
-
-# todo: move the formatting into the jinja template, pass it the data not code!
-forward = ''
-code = ''
-
-for v in set(pymodules.values()):
-    code += '    py::module ' + v.replace('/','__') + ' = riflib.def_submodule("' + '").def_submodule("'.join(v.split('/')) + '");\n'
-code += '\n'
-for k,v in pymodules.items():
-    forward += 'void RIFLIB_PYBIND_'+k+'(py::module & m);\n'
-    code += '    RIFLIB_PYBIND_'+k+'('+v.replace('/','__')+');\n'
-
-# print forward
-# print code
-
-if os.path.exists('src/riflib.pybind.cpp.TMP'):
-    os.remove('src/riflib.pybind.cpp.TMP')
-
-with open('src/riflib.pybind.cpp.jinja','r') as f:
-    t = Template(f.read())
-    with open('src/riflib.pybind.cpp.TMP','w') as o:
-        newcontent = t.render(forward=forward, code=code)
-        o.write(newcontent)
-
-    diff = True
-    if os.path.exists('src/riflib.pybind.cpp'):
-        assert os.path.exists('src/riflib.pybind.cpp.TMP')
-        diff = subprocess.call("diff src/riflib.pybind.cpp src/riflib.pybind.cpp.TMP".split())
+def update_file_if_needed(destfile, newcontent):
+    "update destfile with newcontent if needed, otherwise don't modifiy file"
+    testfile = destfile + ".TMP"
+    if os.path.exists(testfile):
+        os.remove(testfile)
+    with open(testfile, 'w') as out:
+        out.write(newcontent)
+    diff = 1
+    if os.path.exists(destfile):
+        assert os.path.exists(testfile)
+        diff = subprocess.call(['diff', testfile, destfile])
     if diff:
-        print 'sourcegen.py: updating riflib.pybind.cpp'
-        if os.path.exists('src/riflib.pybind.cpp'):
-            os.remove('src/riflib.pybind.cpp')
-        os.rename('src/riflib.pybind.cpp.TMP','src/riflib.pybind.cpp')
+        print 'sourcegen.py: updating', destfile
+        if os.path.exists(destfile):
+            os.remove(destfile)
+        os.rename(testfile, destfile)
     else:
         print "sourcegen.py: riflib.pybind.cpp is up to date"
-        os.remove('src/riflib.pybind.cpp.TMP')
+        os.remove(testfile)
+
+def shitty_make_code(pymodules):
+    "todo: move the formatting into the jinja template, pass it the data not code!"
+    code1 = ''
+    code2 = ''
+    for path in set(pymodules.values()):
+        code2 += ('    py::module ' + path.replace('/', '__') +
+                  ' = riflib.def_submodule("' +
+                  '").def_submodule("'.join(path.split('/')) +
+                  '");\n')
+    code2 += '\n'
+    for func, path in pymodules.items():
+        code1 += 'void RIFLIB_PYBIND_' + func + '(py::module & m);\n'
+        code2 += '    RIFLIB_PYBIND_' + func + '('+path.replace('/', '__') + ');\n'
+    return code1, code2
+
+def main(template_fname):
+    "generate pybind sources"
+    destfile = template_fname.replace('.jinja', '')
+    pymodules = get_pybind_modules('src') # assume in top level project dir
+    forward, code = shitty_make_code(pymodules)
+
+    with open(template_fname, 'r') as template_file:
+        template = Template(template_file.read())
+    newcontent = template.render(forward=forward, code=code)
+    update_file_if_needed(destfile, newcontent)
+
+if __name__ == '__main__':
+    main('src/riflib.gen.cpp.jinja')
