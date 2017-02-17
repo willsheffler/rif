@@ -131,5 +131,5 @@ def build_and_run_pytest(redo_cmake=False):
     import pytest
     if sys.version_info.major is 2:
         proj_root = bytes(proj_root, 'ascii')
-    pytest.main([".."]) # assuming we execute from ide dir
+    pytest.main(["."]) # assuming we execute from ide dir
 

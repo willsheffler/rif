@@ -18,15 +18,15 @@
     [
         {
 "name": "cmake_build_and_run_pytest",
-"shell_cmd": "python $folder/devtools/cmake_build_and_run_pytest.py 2>&1 | tee $folder/log/pytest.log",
+"shell_cmd": "cd $folder && python devtools/cmake_build_and_run_pytest.py 2>&1 | tee log/pytest.log",
         },
         {
 "name": "build_and_run_pytest",
-"shell_cmd": "python $folder/devtools/build_and_run_pytest.py 2>&1 | tee $folder/log/pytest.log",
+"shell_cmd": "cd $folder && python devtools/build_and_run_pytest.py 2>&1 | tee log/pytest.log",
         },
         {
 "name": "build_and_run_gtest_wip",
-"shell_cmd": "python $folder/devtools/build_and_run_gtest_wip.py 2>&1 | tee $folder/log/gtest_wip.log",
+"shell_cmd": "cd folder && python devtools/build_and_run_gtest_wip.py 2>&1 | tee log/gtest_wip.log",
         }
     ]
 }
