@@ -24,8 +24,8 @@ PYBIND11_PLUGIN(riflib) {
     init_test_example(riflib);
 
     {
-        py::module riflib_test = riflib.def_submodule("test");
-        init_test_numpy(riflib_test);
+        auto m = riflib.def_submodule("test");
+        init_test_numpy(m);
     }
 
 

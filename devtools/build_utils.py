@@ -125,11 +125,11 @@ def build_and_run_pytest(redo_cmake=False):
     ]
     # need to use sys.path for this process
     sys.path = pypath + sys.path
-    # need to use PYTHONPATH env for xdist subprocesses
+    # need to use PYTHONPATH env for xdist subprocessess
     add_to_pypath(pypath)
     # TODO both here and in docs, this gets messed up when riflib is actually installed
     import pytest
     if sys.version_info.major is 2:
         proj_root = bytes(proj_root, 'ascii')
-    pytest.main(proj_root)
+    pytest.main([".."]) # assuming we execute from ide dir
 
