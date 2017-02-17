@@ -4,12 +4,14 @@ of *.pybind.cpp components"""
 import subprocess
 import os
 import re
-from jinja2 import Template
+from collections import OrderedDict
+
+import jinja2
 
 def get_pybind_modules(srcpath):
     "find RIFLIB_PYBIND_ functions in *.pybind.cpp files"
     pbfiles = subprocess.check_output('find {} -regex [^.].+pybind.cpp'.format(srcpath).split())
-    pymodules = dict()
+    pymodules = OrderedDict()
     for pybindfile in pbfiles.splitlines():
         print "sourcegen.py: found pybind file", pybindfile
         grepped = subprocess.check_output(['grep', '-H', 'RIFLIB_PYBIND_', pybindfile])
@@ -62,9 +64,8 @@ def main(template_fname):
     destfile = template_fname.replace('.jinja', '')
     pymodules = get_pybind_modules('src') # assume in top level project dir
     forward, code = shitty_make_code(pymodules)
-
     with open(template_fname, 'r') as template_file:
-        template = Template(template_file.read())
+        template = jinja2.Template(template_file.read())
     newcontent = template.render(forward=forward, code=code)
     update_file_if_needed(destfile, newcontent)
 
