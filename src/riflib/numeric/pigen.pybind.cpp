@@ -11,9 +11,7 @@ std::string str(C const & c){
 }
 
 
-void init_riflib_numeric_pigen(py::module &riflib) {
-
-    py::module pigen = riflib.def_submodule("pigen");
+void RIFLIB_PYBIND_numeric_pigen(py::module & pigen) {
 
     using namespace Eigen;
 

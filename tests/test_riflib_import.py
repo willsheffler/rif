@@ -13,4 +13,4 @@ def test_math():
         print('"{}"'.format(p))
     print('------------------------')
     print(riflib.__file__)
-    assert riflib.example.add(1, 2) == 3
+    assert riflib.test.example.add(1, 2) == 3

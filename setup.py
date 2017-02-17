@@ -103,5 +103,5 @@ setup(
     cmdclass=dict(build_ext=CMakeBuild),
     zip_safe=False,
     test_suite='pytest',
-    tests_require=['pytest', 'hypothesis', 'colorama', 'pytest_cpp'],
+    tests_require=['pytest', 'hypothesis', 'colorama', 'pytest_cpp', 'jinja2'],
 )

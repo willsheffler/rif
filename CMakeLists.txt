@@ -4,7 +4,8 @@ project(riflib)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14 -DCXX11 -DCXX14")
 if(${CMAKE_BUILD_TYPE} MATCHES "Release")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O0")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-deprecated-declarations")
+    # set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O0")    
     # set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -ffast-math") # eigen xform perf worse!!
     # set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -funroll-loops")
     # set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native")
@@ -24,7 +25,8 @@ function(PRINT_CONFIG)
 endfunction()
 
 
-function(BUILD_PYTHON_BINDINGS)
+function(build_python_bindings)
+    execute_process(COMMAND python src/sourcegen.py WORKING_DIRECTORY ../..)
     FILE(GLOB_RECURSE PY_CPP "./src/[0-9a-zA-Z_]*.pybind.cpp")
     pybind11_add_module( riflib ${PY_CPP} )
 endfunction()
@@ -56,7 +58,7 @@ endfunction()
 PRINT_CONFIG()
 
 add_subdirectory(external/pybind11)
-BUILD_PYTHON_BINDINGS("")
+build_python_bindings("")
 
 BUILD_GTESTS()
 

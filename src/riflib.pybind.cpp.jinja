@@ -2,10 +2,7 @@
 
 namespace py = pybind11;
 
-void init_riflib_numeric_pigen(py::module & riflib);
-void init_test_example(py::module & riflib);
-void init_test_numpy(py::module & riflib_test);
-
+{{forward}}
 
 PYBIND11_PLUGIN(riflib) {
     py::module riflib("riflib", R"pbdoc(
@@ -19,15 +16,7 @@ PYBIND11_PLUGIN(riflib) {
 
     )pbdoc");
 
-
-    init_riflib_numeric_pigen(riflib);
-    init_test_example(riflib);
-
-    {
-        auto m = riflib.def_submodule("test");
-        init_test_numpy(m);
-    }
-
+{{code}}
 
 #ifdef VERSION_INFO
     riflib.attr("__version__") = py::str(VERSION_INFO);

@@ -7,9 +7,6 @@ void np_array_info(){
 
 namespace py = pybind11;
 
-void init_test_numpy(py::module & riflib){
-    py::module m = riflib.def_submodule("numpy", "");
-
+void RIFLIB_PYBIND_test_numpy(py::module & m){
     m.def("np_array_info", &np_array_info);
-
 }

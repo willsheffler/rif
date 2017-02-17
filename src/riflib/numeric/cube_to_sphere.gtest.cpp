@@ -7,7 +7,7 @@
 namespace scheme{ namespace numeric { namespace cube_to_sphere_test {
 
 
-TEST( cube_to_sphere, test_permute ){
+TEST( cube_to_sphere, test_permute_and_inv ){
     std::mt19937 rng;
     std::normal_distribution<> rnorm;
     std::uniform_int_distribution<> randint(0,5);

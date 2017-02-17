@@ -60,6 +60,9 @@
 #include <string>
 #include <limits>
 
+
+// todo: wrap and adapt this code to make numpy array of quats
+
 // Windows doesn't define M_PI in the standard header?
 #if !defined(M_PI)
 #define M_PI 3.1415926535897932384626433832795028841971694

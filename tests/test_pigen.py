@@ -3,15 +3,15 @@
 
 def test_import_pigen():
     try:
-        import riflib.pigen
+        import riflib.numeric.pigen
         success = True
     except:
         success = False
     assert success
 
-from riflib.pigen import Vector3f as V
-from riflib.pigen import Matrix33f as M
-from riflib.pigen import Transform3f as X
+from riflib.numeric.pigen import Vector3f as V
+from riflib.numeric.pigen import Matrix33f as M
+from riflib.numeric.pigen import Transform3f as X
 
 
 def test_Vector3f():
