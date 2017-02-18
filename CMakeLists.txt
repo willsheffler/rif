@@ -13,7 +13,6 @@ endif()
 
 include_directories("external/include")
 include_directories("src")
-include_directories("src/riflib")
 include_directories("/usr/local/include")
 include_directories("/opt/local/include")
 link_directories("/usr/local/lib")
@@ -31,8 +30,9 @@ endfunction()
 function(build_python_bindings)
     execute_process(COMMAND python src/sourcegen.py WORKING_DIRECTORY ../..)
     FILE(GLOB_RECURSE PY_CPP "./src/[0-9a-zA-Z_]*.pybind.cpp")
-    pybind11_add_module( riflib src/riflib.gen.cpp ${PY_CPP} )
-    target_link_libraries( riflib PRIVATE ${EXTRA_LIBS} )
+    pybind11_add_module( riflib_cpp src/riflib.gen.cpp ${PY_CPP} )
+    target_link_libraries( riflib_cpp PRIVATE ${EXTRA_LIBS} )
+    # install(DIRECTORY src/riflib DESTINATION /home/sheffler/riflib/ build_setup_py_Release/lib.linux-x86_64-2.7 FILES_MATCHING PATTERN "*.py")
 endfunction()
 
 
@@ -42,9 +42,9 @@ function(BUILD_GTESTS)
     list(APPEND EXTRA_LIBS gtest )
 
     # shitty "data" files to compile faster TODO: remove these
-    list(APPEND LIB_CPP src/riflib/rosetta/score/EtableParams_init.lib.cpp
-                        src/riflib/rosetta/atype_map.lib.cpp
-                        src/riflib/chemical/ligand_factory.lib.cpp)
+    list(APPEND LIB_CPP src/rosetta/score/EtableParams_init.lib.cpp
+                        src/rosetta/atype_map.lib.cpp
+                        src/chemical/ligand_factory.lib.cpp)
     set_source_files_properties(${LIB_CPP} PROPERTIES COMPILE_FLAGS -O0)
     add_library(riflib_data ${LIB_CPP})
 

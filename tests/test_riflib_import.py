@@ -1,6 +1,5 @@
 import riflib
 
-
 def test_import_riflib():
     print(riflib.__file__)
     assert riflib.__version__ == '0.0.1'

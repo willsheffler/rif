@@ -69,7 +69,7 @@ def rebuild_setup_py_riflib(cfg='Release'):
 
 
 
-def rebuild_fast(target='riflib', cfg='Release', redo_cmake=False):
+def rebuild_fast(target='riflib_cpp', cfg='Release', redo_cmake=False):
     makeexe = 'ninja'
     if not which('ninja'):
         makeexe = 'make'
@@ -117,7 +117,7 @@ def build_and_run_pytest(redo_cmake=False):
     # remove_installed_rif()
     proj_root = get_proj_root()
     print('calling rebuild_fast')
-    if rebuild_fast(target='riflib gtest_all', cfg='Release', redo_cmake=redo_cmake):
+    if rebuild_fast(target='riflib_cpp gtest_all', cfg='Release', redo_cmake=redo_cmake):
         sys.exit(-1)
     pypath = [
         os.path.abspath(get_build_dir('lib')),

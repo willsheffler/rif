@@ -21,8 +21,7 @@ def get_pybind_modules(srcpath):
         for line in grepped.splitlines():
             match = re.match(r"src/(.+).pybind.cpp:.* RIFLIB_PYBIND_(\w+)", line)
             assert len(match.groups()) is 2
-            # todo move src/riflib/* to src/* OR src/* to src/riflib/*
-            path = match.group(1).replace('riflib/', '')
+            path = match.group(1)
             func = match.group(2)
             pymodules[func] = path
     return pymodules
@@ -62,10 +61,39 @@ def shitty_make_code(pymodules):
         code2 += '    RIFLIB_PYBIND_' + func + '('+path.replace('/', '__') + ');\n'
     return code1, code2
 
+def mkdir_if_necessary(path):
+    os.system('mkdir -p '+path)
+
+def mkfile_if_necessary(path, content):
+    if not os.path.exists(path):
+        print 'sourcegen.py MAKING:', path
+        with open(path,'w') as out:
+            out.write(content)
+
+def make_py_stencils(pymodules):
+    # todo: create these files in src, have cmake copy them to lib.whatever
+    loc = 'build_setup_py_Release/lib.linux-x86_64-2.7/riflib/'
+    mkfile_if_necessary(loc+"/__init__.py",'from riflib_cpp import *\n'+
+                        'import riflib_cpp\n'+
+                        '__version__ = riflib_cpp.__version__\n')
+    directories = set()
+    for path in set(pymodules.values()):
+        for nprefix in range(1,len(path.split('/'))):
+            d = '/'.join(path.split('/')[:nprefix])
+            directories.add(d)
+            mkdir_if_necessary(loc + d)
+    for path in directories:
+        pyfile = loc + path + '__init__.py'
+        mkfile_if_necessary(pyfile, 'from riflib_cpp.'+path.replace('/','.')+' import *\n')
+    for path in set(pymodules.values()):
+        pyfile = loc+path+".py"
+        mkfile_if_necessary(pyfile,'from riflib_cpp.'+path.replace('/','.')+' import *\n')
+
 def main(template_fname):
     "generate pybind sources"
     destfile = template_fname.replace('.jinja', '')
     pymodules = get_pybind_modules('src') # assume in top level project dir
+    make_py_stencils(pymodules)
     forward, code = shitty_make_code(pymodules)
     with open(template_fname, 'r') as template_file:
         template = jinja2.Template(template_file.read())

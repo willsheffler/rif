@@ -11,8 +11,8 @@ void RIFLIB_PYBIND_test_example_mul(py::module & m);
 void RIFLIB_PYBIND_test_example_dummy(py::module & m);
 
 
-PYBIND11_PLUGIN(riflib) {
-    py::module riflib("riflib", R"pbdoc(
+PYBIND11_PLUGIN(riflib_cpp) {
+    py::module riflib("riflib_cpp", R"pbdoc(
         riflib docs
         -----------------------
 
