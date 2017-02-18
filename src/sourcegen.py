@@ -14,7 +14,10 @@ def get_pybind_modules(srcpath):
     pymodules = OrderedDict()
     for pybindfile in pbfiles.splitlines():
         print "sourcegen.py: found pybind file", pybindfile
-        grepped = subprocess.check_output(['grep', '-H', 'RIFLIB_PYBIND_', pybindfile])
+        try:
+            grepped = subprocess.check_output(['grep', '-H', 'RIFLIB_PYBIND_', pybindfile])
+        except:
+            continue
         for line in grepped.splitlines():
             match = re.match(r"src/(.+).pybind.cpp:.* RIFLIB_PYBIND_(\w+)", line)
             assert len(match.groups()) is 2

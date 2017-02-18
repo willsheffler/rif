@@ -53,14 +53,19 @@
 // The weights are normalized such that sum weight = ntot.
 
 #include <cassert>
-#include <vector>
-#include <iostream>
-#include <iomanip>
 #include <cmath>
-#include <string>
+#include <iomanip>
+#include <iostream>
 #include <limits>
+#include <string>
+#include <vector>
+
+#include <boost/iostreams/filtering_streambuf.hpp>
+#include <boost/iostreams/filter/gzip.hpp>
+#include <fstream>
 
 
+#include <Eigen/Dense>
 // todo: wrap and adapt this code to make numpy array of quats
 
 // Windows doesn't define M_PI in the standard header?
@@ -72,17 +77,14 @@ using namespace std;
 
 // Minimal quaternion class
 class Quaternion {
-public:
+ public:
   double w, x, y, z;
   Quaternion(double ww = 1, double xx = 0, double yy = 0, double zz = 0)
-    : w(ww)
-    , x(xx)
-    , y(yy)
-    , z(zz) {}
+      : w(ww), x(xx), y(yy), z(zz) {}
   void Normalize() {
-    double t = w*w + x*x + y*y + z*z;
+    double t = w * w + x * x + y * y + z * z;
     assert(t > 0);
-    t = 1/sqrt(t);
+    t = 1 / sqrt(t);
     w *= t;
     x *= t;
     y *= t;
@@ -93,12 +95,9 @@ public:
     Normalize();
     // Make first biggest element positive
     double mag = w;
-    if (abs(x) > abs(mag))
-      mag = x;
-    if (abs(y) > abs(mag))
-      mag = y;
-    if (abs(z) > abs(mag))
-      mag = z;
+    if (abs(x) > abs(mag)) mag = x;
+    if (abs(y) > abs(mag)) mag = y;
+    if (abs(z) > abs(mag)) mag = z;
     if (mag < 0) {
       w *= -1;
       x *= -1;
@@ -109,11 +108,10 @@ public:
   }
   // a.Times(b) returns a * b
   Quaternion Times(const Quaternion& q) const {
-    double
-      mw = w*q.w - x*q.x - y*q.y - z*q.z,
-      mx = w*q.x + x*q.w + y*q.z - z*q.y,
-      my = w*q.y + y*q.w + z*q.x - x*q.z,
-      mz = w*q.z + z*q.w + x*q.y - y*q.x;
+    double mw = w * q.w - x * q.x - y * q.y - z * q.z,
+           mx = w * q.x + x * q.w + y * q.z - z * q.y,
+           my = w * q.y + y * q.w + z * q.x - x * q.z,
+           mz = w * q.z + z * q.w + x * q.y - y * q.x;
     return Quaternion(mw, mx, my, mz);
   }
   void Print(ostream& s) const;
@@ -122,16 +120,10 @@ public:
 
 // Class to hold a set of orientations and weights
 class PackSet {
-public:
-  Quaternion Orientation(size_t i) const {
-    return m_v[i];
-  }
-  double Weight(size_t i) const {
-    return m_w[i];
-  }
-  size_t Number() const {
-    return m_v.size();
-  }
+ public:
+  Quaternion Orientation(size_t i) const { return m_v[i]; }
+  double Weight(size_t i) const { return m_w[i]; }
+  size_t Number() const { return m_v.size(); }
   void Add(const Quaternion& q, double w = 1) {
     Quaternion v(q);
     v.Canonicalize();
@@ -145,30 +137,29 @@ public:
   void Print(ostream& s, bool euler = false, size_t prec = 6) const {
     for (size_t i = 0; i < Number(); ++i) {
       if (euler)
-    m_v[i].PrintEuler(s);
+        m_v[i].PrintEuler(s);
       else
-    m_v[i].Print(s);
-      s << " " << fixed << setprecision(prec) << setw(prec + 2) << m_w[i] << endl;
+        m_v[i].Print(s);
+      s << " " << fixed << setprecision(prec) << setw(prec + 2) << m_w[i]
+        << endl;
     }
   }
-private:
+
+ private:
   vector<Quaternion> m_v;
   vector<double> m_w;
 };
 
 // The triple of grid indices
 class Triple {
-public:
+ public:
   int a, b, c;
-  Triple(int aa, int bb, int cc)
-    : a(aa)
-    , b(bb)
-    , c(cc) {}
+  Triple(int aa, int bb, int cc) : a(aa), b(bb), c(cc) {}
 };
 
 // Generate the permutations and sign changes for a Triple.
 class Permute {
-public:
+ public:
   Permute(Triple x) {
     assert(x.a >= x.b && x.b >= x.c && x.c >= 0);
     m_arr.push_back(x);
@@ -176,21 +167,20 @@ public:
     // Do the sign changes
     if (x.a != 0) {
       for (size_t i = 0; i < n; ++i)
-    m_arr.push_back(Triple(-m_arr[i].a, m_arr[i].b, m_arr[i].c));
+        m_arr.push_back(Triple(-m_arr[i].a, m_arr[i].b, m_arr[i].c));
       n *= 2;
     }
     if (x.b != 0) {
       for (size_t i = 0; i < n; ++i)
-    m_arr.push_back(Triple(m_arr[i].a, -m_arr[i].b, m_arr[i].c));
+        m_arr.push_back(Triple(m_arr[i].a, -m_arr[i].b, m_arr[i].c));
       n *= 2;
     }
     if (x.c != 0) {
       for (size_t i = 0; i < n; ++i)
-    m_arr.push_back(Triple(m_arr[i].a, m_arr[i].b, -m_arr[i].c));
+        m_arr.push_back(Triple(m_arr[i].a, m_arr[i].b, -m_arr[i].c));
       n *= 2;
     }
-    if (x.a == x.b && x.b == x.c)
-      return;
+    if (x.a == x.b && x.b == x.c) return;
     // With at least two distinct indices we can rotate the set thru 3
     // permuations.
     for (size_t i = 0; i < n; ++i) {
@@ -198,8 +188,7 @@ public:
       m_arr.push_back(Triple(m_arr[i].c, m_arr[i].a, m_arr[i].b));
     }
     n *= 3;
-    if (x.a == x.b || x.b == x.c)
-      return;
+    if (x.a == x.b || x.b == x.c) return;
     // With three distinct indices we can in addition interchange the
     // first two indices (to yield all 6 permutations of 3 indices).
     for (size_t i = 0; i < n; ++i) {
@@ -207,13 +196,10 @@ public:
     }
     n *= 2;
   }
-  size_t Number() const {
-    return m_arr.size();
-  }
-  Triple Member(size_t i) const {
-    return m_arr[i];
-  }
-private:
+  size_t Number() const { return m_arr.size(); }
+  Triple Member(size_t i) const { return m_arr[i]; }
+
+ private:
   vector<Triple> m_arr;
 };
 
@@ -257,27 +243,44 @@ double pind(double ind, double delta, double sigma) {
   return (sigma == 0) ? ind * delta : sinh(sigma * ind * delta) / sigma;
 }
 
-void dump_karney_orientation_file(std::istream & in) {
+auto read_karney_orientation_file(
+  std::string fname
+){
+
+  Eigen::MatrixXd quats;
+  Eigen::VectorXd cover;
+
+  std::ifstream file( fname.c_str(), std::ios_base::in|std::ios_base::binary );
+  if(!file.good()){
+    std::cerr << "no file: " << fname << std::endl;
+    return std::make_tuple(quats, cover);
+  }
+  boost::iostreams::filtering_streambuf<boost::iostreams::input> fin;
+  fin.push(boost::iostreams::gzip_decompressor());
+  fin.push(file);
+  std::istream in(&fin);
+
+
+
   bool euler = false;
   assert(in.good());
   string line;
   while (in.peek() == '#') {
     getline(in, line);
-    cout << line << endl;
+    // cout << line << endl;
   }
   assert(in.good());
   getline(in, line);
   assert(line == "format grid");
-  cout << "format " << (euler ? "euler" : "quaternion") << endl;
   double delta, sigma, maxrad, coverage;
   size_t ncell, ntot, nent;
   in >> delta >> sigma >> ntot >> ncell >> nent >> maxrad >> coverage;
   // Use extra digit of precision with weights and radii.  This also
   // triggers a memory minimizing expansion.
   const bool fine = delta < 0.05;
-  cout << ntot << " " << fixed
-       << setprecision(fine ? 3 : 2) << maxrad << " "
-       << setprecision(5) << coverage << endl;
+  quats.resize(ntot,4);
+  cover.resize(ntot);
+  int quats_i = 0;
   PackSet s;
   size_t ncell1 = 0;
   for (size_t n = 0; n < nent; ++n) {
@@ -290,22 +293,28 @@ void dump_karney_orientation_file(std::istream & in) {
     assert(mult == p.Number());
     for (size_t i = 0; i < mult; ++i) {
       Triple t = p.Member(i);
-      s.Add(Quaternion(1.0,
-               pind(0.5 * t.a, delta, sigma),
-               pind(0.5 * t.b, delta, sigma),
-               pind(0.5 * t.c, delta, sigma)),
-        w);
+      s.Add(Quaternion(1.0, pind(0.5 * t.a, delta, sigma),
+                       pind(0.5 * t.b, delta, sigma),
+                       pind(0.5 * t.c, delta, sigma)),
+            w);
     }
     ncell1 += mult;
     if (fine) {
       // Skip n = 0; that's already included.
       for (size_t n = 1; n < 24; ++n) {
-    Quaternion q(CubeSyms[n][0], CubeSyms[n][1],
-             CubeSyms[n][2], CubeSyms[n][3]);
-    for (size_t i = 0; i < mult; ++i)
-      s.Add(q.Times(s.Orientation(i)), s.Weight(i));
+        Quaternion q(CubeSyms[n][0], CubeSyms[n][1], CubeSyms[n][2],
+                     CubeSyms[n][3]);
+        for (size_t i = 0; i < mult; ++i)
+          s.Add(q.Times(s.Orientation(i)), s.Weight(i));
       }
-      s.Print(cout, euler, fine ? 7 : 6);
+      // s.Print(cout, euler, fine ? 7 : 6);
+      for(int i = 0; i < s.Number(); ++i){
+        quats(quats_i  ,0) = s.Orientation(i).w;
+        quats(quats_i  ,1) = s.Orientation(i).x;
+        quats(quats_i  ,2) = s.Orientation(i).y;
+        quats(quats_i  ,3) = s.Orientation(i).z;
+        cover[quats_i++] = s.Weight(i);
+      }
       s.Clear();
     }
   }
@@ -315,16 +324,23 @@ void dump_karney_orientation_file(std::istream & in) {
     size_t nc = s.Number();
     assert(nc == ncell);
     for (size_t n = 1; n < 24; ++n) {
-      Quaternion q(CubeSyms[n][0], CubeSyms[n][1],
-           CubeSyms[n][2], CubeSyms[n][3]);
+      Quaternion q(CubeSyms[n][0], CubeSyms[n][1], CubeSyms[n][2],
+                   CubeSyms[n][3]);
       for (size_t i = 0; i < nc; ++i)
-    s.Add(q.Times(s.Orientation(i)), s.Weight(i));
+        s.Add(q.Times(s.Orientation(i)), s.Weight(i));
     }
     assert(s.Number() == ntot);
-    s.Print(cout, euler, fine ? 7 : 6);
+    // s.Print(cout, euler, fine ? 7 : 6);
+    for(int i = 0; i < s.Number(); ++i){
+      quats(quats_i  ,0) = s.Orientation(i).w;
+      quats(quats_i  ,1) = s.Orientation(i).x;
+      quats(quats_i  ,2) = s.Orientation(i).y;
+      quats(quats_i  ,3) = s.Orientation(i).z;
+      cover[quats_i++] = s.Weight(i);
+    }
     s.Clear();
   }
-  std::cout << "DONE" << endl;
+  return std::make_tuple(quats, cover);
 }
 
 void Quaternion::Print(ostream& s) const {
@@ -347,22 +363,20 @@ void Quaternion::PrintEuler(ostream& s) const {
   // Convert to rotation matrix (assume quaternion is already
   // normalized)
   double
-    // m00 = 1 - 2*y*y - 2*z*z,
-    m01 =     2*x*y - 2*z*w,
-    m02 =     2*x*z + 2*y*w,
-    // m10 =     2*x*y + 2*z*w,
-    m11 = 1 - 2*x*x - 2*z*z,
-    m12 =     2*y*z - 2*x*w,
-    m20 =     2*x*z - 2*y*w,
-    m21 =     2*y*z + 2*x*w,
-    m22 = 1 - 2*x*x - 2*y*y;
+      // m00 = 1 - 2*y*y - 2*z*z,
+      m01 = 2 * x * y - 2 * z * w,
+      m02 = 2 * x * z + 2 * y * w,
+      // m10 =     2*x*y + 2*z*w,
+      m11 = 1 - 2 * x * x - 2 * z * z, m12 = 2 * y * z - 2 * x * w,
+      m20 = 2 * x * z - 2 * y * w, m21 = 2 * y * z + 2 * x * w,
+      m22 = 1 - 2 * x * x - 2 * y * y;
   // Taken from Ken Shoemake, "Euler Angle Conversion", Graphics Gems
   // IV, Academic 1994.
   //
   //    http://vered.rose.utoronto.ca/people/david_dir/GEMS/GEMS.html
-  double sy = sqrt(m02*m02 + m12*m12);
+  double sy = sqrt(m02 * m02 + m12 * m12);
   //  double sy = sqrt(m10*m10 + m20*m20);
-  double a,  b, c;
+  double a, b, c;
   b = atan2(sy, m22);
   if (sy > 16 * numeric_limits<double>::epsilon()) {
     a = atan2(m12, m02);
@@ -371,14 +385,17 @@ void Quaternion::PrintEuler(ostream& s) const {
     a = atan2(-m01, m11);
     c = 0;
   }
-  s << fixed << setprecision(9) << setw(12) << a << " "
-    << setw(12) << b << " " << setw(12) << c;
+  s << fixed << setprecision(9) << setw(12) << a << " " << setw(12) << b << " "
+    << setw(12) << c;
 
 #if !defined(NDEBUG)
   // Sanity check.  Convert from Euler angles back to a quaternion, q
-  Quaternion q = Quaternion(cos(a/2), 0, 0, sin(a/2)). // a about z
-    Times(Quaternion(cos(b/2), 0, sin(b/2), 0). // b about y
-      Times(Quaternion(cos(c/2), 0, 0, sin(c/2)))); // c about z
+  Quaternion q =
+      Quaternion(cos(a / 2), 0, 0, sin(a / 2))
+          .  // a about z
+      Times(Quaternion(cos(b / 2), 0, sin(b / 2), 0)
+                .                                              // b about y
+            Times(Quaternion(cos(c / 2), 0, 0, sin(c / 2))));  // c about z
   // and check that q is parallel to *this.
   double t = abs(q.w * w + q.x * x + q.y * y + q.z * z);
   assert(t > 1 - 16 * numeric_limits<double>::epsilon());

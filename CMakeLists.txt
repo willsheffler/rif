@@ -18,6 +18,8 @@ include_directories("/usr/local/include")
 include_directories("/opt/local/include")
 link_directories("/usr/local/lib")
 #link_directories("/opt/local/lib")
+list(APPEND EXTRA_LIBS boost_system)
+list(APPEND EXTRA_LIBS boost_iostreams)
 
 function(PRINT_CONFIG)
     message("CMAKE_BUILD_TYPE: " ${CMAKE_BUILD_TYPE})
@@ -30,6 +32,7 @@ function(build_python_bindings)
     execute_process(COMMAND python src/sourcegen.py WORKING_DIRECTORY ../..)
     FILE(GLOB_RECURSE PY_CPP "./src/[0-9a-zA-Z_]*.pybind.cpp")
     pybind11_add_module( riflib src/riflib.gen.cpp ${PY_CPP} )
+    target_link_libraries( riflib PRIVATE ${EXTRA_LIBS} )
 endfunction()
 
 
@@ -37,8 +40,6 @@ function(BUILD_GTESTS)
     add_subdirectory(external/googletest)
     include_directories("external/googletest/include")
     list(APPEND EXTRA_LIBS gtest )
-    list(APPEND EXTRA_LIBS boost_system)
-    list(APPEND EXTRA_LIBS boost_iostreams)
 
     # shitty "data" files to compile faster TODO: remove these
     list(APPEND LIB_CPP src/riflib/rosetta/score/EtableParams_init.lib.cpp

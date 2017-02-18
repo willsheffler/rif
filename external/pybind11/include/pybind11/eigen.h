@@ -17,64 +17,35 @@
 #  pragma GCC diagnostic push
 #  pragma GCC diagnostic ignored "-Wconversion"
 #  pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+#  if __GNUC__ >= 7
+#    pragma GCC diagnostic ignored "-Wint-in-bool-context"
+#  endif
 #endif
 
 #include <Eigen/Core>
 #include <Eigen/SparseCore>
 
-#if defined(__GNUG__) || defined(__clang__)
-#  pragma GCC diagnostic pop
-#endif
-
 #if defined(_MSC_VER)
-#pragma warning(push)
-#pragma warning(disable: 4127) // warning C4127: Conditional expression is constant
+#  pragma warning(push)
+#  pragma warning(disable: 4127) // warning C4127: Conditional expression is constant
 #endif
 
 NAMESPACE_BEGIN(pybind11)
 NAMESPACE_BEGIN(detail)
 
-template <typename T> class is_eigen_dense {
-private:
-    template<typename Derived> static std::true_type test(const Eigen::DenseBase<Derived> &);
-    static std::false_type test(...);
-public:
-    static constexpr bool value = decltype(test(std::declval<T>()))::value;
-};
-
-// Eigen::Ref<Derived> satisfies is_eigen_dense, but isn't constructible, so it needs a special
-// type_caster to handle argument copying/forwarding.
-template <typename T> class is_eigen_ref {
-private:
-    template<typename Derived> static enable_if_t<
-        std::is_same<typename std::remove_const<T>::type, Eigen::Ref<Derived>>::value,
-        Derived> test(const Eigen::Ref<Derived> &);
-    static void test(...);
-public:
-    typedef decltype(test(std::declval<T>())) Derived;
-    static constexpr bool value = !std::is_void<Derived>::value;
-};
-
-template <typename T> class is_eigen_sparse {
-private:
-    template<typename Derived> static std::true_type test(const Eigen::SparseMatrixBase<Derived> &);
-    static std::false_type test(...);
-public:
-    static constexpr bool value = decltype(test(std::declval<T>()))::value;
-};
+template <typename T> using is_eigen_dense = is_template_base_of<Eigen::DenseBase, T>;
+template <typename T> using is_eigen_sparse = is_template_base_of<Eigen::SparseMatrixBase, T>;
+template <typename T> using is_eigen_ref = is_template_base_of<Eigen::RefBase, T>;
 
 // Test for objects inheriting from EigenBase<Derived> that aren't captured by the above.  This
 // basically covers anything that can be assigned to a dense matrix but that don't have a typical
 // matrix data layout that can be copied from their .data().  For example, DiagonalMatrix and
 // SelfAdjointView fall into this category.
-template <typename T> class is_eigen_base {
-private:
-    template<typename Derived> static std::true_type test(const Eigen::EigenBase<Derived> &);
-    static std::false_type test(...);
-public:
-    static constexpr bool value = !is_eigen_dense<T>::value && !is_eigen_sparse<T>::value &&
-        decltype(test(std::declval<T>()))::value;
-};
+template <typename T> using is_eigen_base = all_of<
+    is_template_base_of<Eigen::EigenBase, T>,
+    negation<is_eigen_dense<T>>,
+    negation<is_eigen_sparse<T>>
+>;
 
 template<typename Type>
 struct type_caster<Type, enable_if_t<is_eigen_dense<Type>::value && !is_eigen_ref<Type>::value>> {
@@ -83,8 +54,8 @@ struct type_caster<Type, enable_if_t<is_eigen_dense<Type>::value && !is_eigen_re
     static constexpr bool isVector = Type::IsVectorAtCompileTime;
 
     bool load(handle src, bool) {
-        array_t<Scalar> buf(src, true);
-        if (!buf.check())
+        auto buf = array_t<Scalar>::ensure(src);
+        if (!buf)
             return false;
 
         if (buf.ndim() == 1) {
@@ -159,11 +130,14 @@ protected:
     static PYBIND11_DESCR cols() { return _<T::ColsAtCompileTime>(); }
 };
 
-template<typename Type>
-struct type_caster<Type, enable_if_t<is_eigen_dense<Type>::value && is_eigen_ref<Type>::value>> {
+// Eigen::Ref<Derived> satisfies is_eigen_dense, but isn't constructable, so it needs a special
+// type_caster to handle argument copying/forwarding.
+template <typename CVDerived, int Options, typename StrideType>
+struct type_caster<Eigen::Ref<CVDerived, Options, StrideType>> {
 protected:
-    using Derived = typename std::remove_const<typename is_eigen_ref<Type>::Derived>::type;
-    using DerivedCaster = type_caster<Derived>;
+    using Type = Eigen::Ref<CVDerived, Options, StrideType>;
+    using Derived = typename std::remove_const<CVDerived>::type;
+    using DerivedCaster = make_caster<Derived>;
     DerivedCaster derived_caster;
     std::unique_ptr<Type> value;
 public:
@@ -184,7 +158,7 @@ template <typename Type>
 struct type_caster<Type, enable_if_t<is_eigen_base<Type>::value && !is_eigen_ref<Type>::value>> {
 protected:
     using Matrix = Eigen::Matrix<typename Type::Scalar, Eigen::Dynamic, Eigen::Dynamic>;
-    using MatrixCaster = type_caster<Matrix>;
+    using MatrixCaster = make_caster<Matrix>;
 public:
     [[noreturn]] bool load(handle, bool) { pybind11_fail("Unable to load() into specialized EigenBase object"); }
     static handle cast(const Type &src, return_value_policy policy, handle parent) { return MatrixCaster::cast(Matrix(src), policy, parent); }
@@ -208,7 +182,7 @@ struct type_caster<Type, enable_if_t<is_eigen_sparse<Type>::value>> {
         if (!src)
             return false;
 
-        object obj(src, true);
+        auto obj = reinterpret_borrow<object>(src);
         object sparse_module = module::import("scipy.sparse");
         object matrix_type = sparse_module.attr(
             rowMajor ? "csr_matrix" : "csc_matrix");
@@ -227,7 +201,7 @@ struct type_caster<Type, enable_if_t<is_eigen_sparse<Type>::value>> {
         auto shape = pybind11::tuple((pybind11::object) obj.attr("shape"));
         auto nnz = obj.attr("nnz").cast<Index>();
 
-        if (!values.check() || !innerIndices.check() || !outerIndices.check())
+        if (!values || !innerIndices || !outerIndices)
             return false;
 
         value = Eigen::MappedSparseMatrix<Scalar, Type::Flags, StorageIndex>(
@@ -260,6 +234,8 @@ struct type_caster<Type, enable_if_t<is_eigen_sparse<Type>::value>> {
 NAMESPACE_END(detail)
 NAMESPACE_END(pybind11)
 
-#if defined(_MSC_VER)
-#pragma warning(pop)
+#if defined(__GNUG__) || defined(__clang__)
+#  pragma GCC diagnostic pop
+#elif defined(_MSC_VER)
+#  pragma warning(pop)
 #endif

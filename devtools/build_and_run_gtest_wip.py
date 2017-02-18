@@ -1,3 +1,5 @@
+"""build and run gtest_wip c++ exe"""
+
 from __future__ import absolute_import, division, print_function
 from builtins import *
 
@@ -11,10 +13,6 @@ from build_utils import remove_installed_riflib
 
 if __name__ == '__main__':
     # remove_installed_rif()
-    proj_root = get_proj_root()
     if rebuild_fast(target='gtest_wip', cfg='Release'):
         sys.exit(-1)
-    os.chdir(os.path.abspath(get_build_dir('temp', cfg='Release')))
-    os.system('./gtest_wip')
-
-
+    os.system(get_build_dir('temp', cfg='Release') + '/gtest_wip')

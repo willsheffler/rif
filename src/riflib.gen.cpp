@@ -2,6 +2,7 @@
 
 namespace py = pybind11;
 
+void RIFLIB_PYBIND_sampling_orientations(py::module & m);
 void RIFLIB_PYBIND_numeric_pigen(py::module & m);
 void RIFLIB_PYBIND_test_numpy(py::module & m);
 void RIFLIB_PYBIND_test_example_add(py::module & m);
@@ -25,7 +26,9 @@ PYBIND11_PLUGIN(riflib) {
     py::module test__test_numpy = riflib.def_submodule("test").def_submodule("test_numpy");
     py::module test__example = riflib.def_submodule("test").def_submodule("example");
     py::module numeric__pigen = riflib.def_submodule("numeric").def_submodule("pigen");
+    py::module sampling__orientations = riflib.def_submodule("sampling").def_submodule("orientations");
 
+    RIFLIB_PYBIND_sampling_orientations(sampling__orientations);
     RIFLIB_PYBIND_numeric_pigen(numeric__pigen);
     RIFLIB_PYBIND_test_numpy(test__test_numpy);
     RIFLIB_PYBIND_test_example_add(test__example);
