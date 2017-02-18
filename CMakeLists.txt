@@ -13,6 +13,7 @@ endif()
 
 include_directories("external/include")
 include_directories("src")
+include_directories("src/riflib")
 include_directories("/usr/local/include")
 include_directories("/opt/local/include")
 link_directories("/usr/local/lib")
@@ -37,6 +38,7 @@ function(BUILD_GTESTS)
     include_directories("external/googletest/include")
     list(APPEND EXTRA_LIBS gtest )
     list(APPEND EXTRA_LIBS boost_system)
+    list(APPEND EXTRA_LIBS boost_iostreams)
 
     # shitty "data" files to compile faster TODO: remove these
     list(APPEND LIB_CPP src/riflib/rosetta/score/EtableParams_init.lib.cpp

@@ -87,6 +87,7 @@
 // #include "riflib/chemical/stub.gtest.cpp"
 
 #include "riflib/numeric/cube_to_sphere.gtest.cpp"
+#include "sampling/Orientations.gtest.cpp"
 
 // #include "riflib/numeric/rand_xform.gtest.cpp"
 
