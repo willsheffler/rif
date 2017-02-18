@@ -70,10 +70,9 @@ def mkfile_if_necessary(path, content):
         with open(path,'w') as out:
             out.write(content)
 
-def make_py_stencils(pymodules):
-    # todo: create these files in src, have cmake copy them to lib.whatever
-    loc = 'build_setup_py_Release/lib.linux-x86_64-2.7/riflib/'
-    mkfile_if_necessary(loc+"/__init__.py",'from riflib_cpp import *\n'+
+def make_py_stencils(pymodules, lib_location):
+    mkdir_if_necessary(lib_location)
+    mkfile_if_necessary(lib_location+"/__init__.py",'from riflib_cpp import *\n'+
                         'import riflib_cpp\n'+
                         '__version__ = riflib_cpp.__version__\n')
     directories = set()
@@ -81,19 +80,19 @@ def make_py_stencils(pymodules):
         for nprefix in range(1,len(path.split('/'))):
             d = '/'.join(path.split('/')[:nprefix])
             directories.add(d)
-            mkdir_if_necessary(loc + d)
+            mkdir_if_necessary(lib_location + d)
     for path in directories:
-        pyfile = loc + path + '__init__.py'
+        pyfile = lib_location + path + '/__init__.py'
         mkfile_if_necessary(pyfile, 'from riflib_cpp.'+path.replace('/','.')+' import *\n')
     for path in set(pymodules.values()):
-        pyfile = loc+path+".py"
+        pyfile = lib_location+path+".py"
         mkfile_if_necessary(pyfile,'from riflib_cpp.'+path.replace('/','.')+' import *\n')
 
-def main(template_fname):
+def main(template_fname, lib_location):
     "generate pybind sources"
     destfile = template_fname.replace('.jinja', '')
     pymodules = get_pybind_modules('src') # assume in top level project dir
-    make_py_stencils(pymodules)
+    make_py_stencils(pymodules, lib_location)
     forward, code = shitty_make_code(pymodules)
     with open(template_fname, 'r') as template_file:
         template = jinja2.Template(template_file.read())
@@ -101,4 +100,6 @@ def main(template_fname):
     update_file_if_needed(destfile, newcontent)
 
 if __name__ == '__main__':
-    main('src/riflib.gen.cpp.jinja')
+    import sys
+    assert len(sys.argv) == 2
+    main('src/riflib.gen.cpp.jinja', sys.argv[1]+'/riflib/')

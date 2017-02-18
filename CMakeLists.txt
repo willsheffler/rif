@@ -28,11 +28,12 @@ endfunction()
 
 
 function(build_python_bindings)
-    execute_process(COMMAND python src/sourcegen.py WORKING_DIRECTORY ../..)
+    execute_process(COMMAND python ${CMAKE_SOURCE_DIR}/src/sourcegen.py
+                               ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}
+                    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
     FILE(GLOB_RECURSE PY_CPP "./src/[0-9a-zA-Z_]*.pybind.cpp")
     pybind11_add_module( riflib_cpp src/riflib.gen.cpp ${PY_CPP} )
     target_link_libraries( riflib_cpp PRIVATE ${EXTRA_LIBS} )
-    # install(DIRECTORY src/riflib DESTINATION /home/sheffler/riflib/ build_setup_py_Release/lib.linux-x86_64-2.7 FILES_MATCHING PATTERN "*.py")
 endfunction()
 
 
