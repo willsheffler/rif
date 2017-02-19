@@ -1,5 +1,5 @@
 from riflib.test.test_numpy import np_array_info
-from riflib.sampling.orientations import read_karney_orientation_file
+from riflib.sampling.orientations import ori_set, read_karney_orientation_file
 import numpy as np
 
 def test_numpy_binding():

@@ -19,8 +19,10 @@ def get_pybind_modules(srcpath):
         except:
             continue
         for line in grepped.splitlines():
-            match = re.match(r"src/(.+).pybind.cpp:.* RIFLIB_PYBIND_(\w+)", line)
-            assert len(match.groups()) is 2
+            match = re.match(r".*src/(.+).pybind.cpp\:.* RIFLIB_PYBIND_(\w+)", line)
+            # print 'line:', line
+            # print match
+            # assert len(match.groups()) is 2
             path = match.group(1)
             func = match.group(2)
             pymodules[func] = path
@@ -70,9 +72,9 @@ def mkfile_if_necessary(path, content):
         with open(path,'w') as out:
             out.write(content)
 
-def make_py_stencils(pymodules, lib_location):
-    mkdir_if_necessary(lib_location)
-    mkfile_if_necessary(lib_location+"/__init__.py",'from riflib_cpp import *\n'+
+def make_py_stencils(pymodules, srcdir):
+    mkdir_if_necessary(srcdir)
+    mkfile_if_necessary(srcdir+"/__init__.py",'from riflib_cpp import *\n'+
                         'import riflib_cpp\n'+
                         '__version__ = riflib_cpp.__version__\n')
     directories = set()
@@ -80,19 +82,19 @@ def make_py_stencils(pymodules, lib_location):
         for nprefix in range(1,len(path.split('/'))):
             d = '/'.join(path.split('/')[:nprefix])
             directories.add(d)
-            mkdir_if_necessary(lib_location + d)
+            mkdir_if_necessary(srcdir + d)
     for path in directories:
-        pyfile = lib_location + path + '/__init__.py'
+        pyfile = srcdir + path + '/__init__.py'
         mkfile_if_necessary(pyfile, 'from riflib_cpp.'+path.replace('/','.')+' import *\n')
     for path in set(pymodules.values()):
-        pyfile = lib_location+path+".py"
+        pyfile = srcdir+path+".py"
         mkfile_if_necessary(pyfile,'from riflib_cpp.'+path.replace('/','.')+' import *\n')
 
-def main(template_fname, lib_location):
+def main(template_fname, srcdir):
     "generate pybind sources"
     destfile = template_fname.replace('.jinja', '')
-    pymodules = get_pybind_modules('src') # assume in top level project dir
-    make_py_stencils(pymodules, lib_location)
+    pymodules = get_pybind_modules(srcdir) # assume in top level project dir
+    make_py_stencils(pymodules, srcdir)
     forward, code = shitty_make_code(pymodules)
     with open(template_fname, 'r') as template_file:
         template = jinja2.Template(template_file.read())
@@ -102,4 +104,6 @@ def main(template_fname, lib_location):
 if __name__ == '__main__':
     import sys
     assert len(sys.argv) == 2
-    main('src/riflib.gen.cpp.jinja', sys.argv[1]+'/riflib/')
+    srcdir = sys.argv[1]
+    srcdir += '/' if not srcdir.endswith('/') else ''
+    main(srcdir+'riflib.gen.cpp.jinja', srcdir)

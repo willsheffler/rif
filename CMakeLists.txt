@@ -28,12 +28,12 @@ endfunction()
 
 
 function(build_python_bindings)
-    execute_process(COMMAND python ${CMAKE_SOURCE_DIR}/src/sourcegen.py
-                               ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}
-                    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
+    execute_process(COMMAND python ${CMAKE_SOURCE_DIR}/devtools/sourcegen.py ${CMAKE_SOURCE_DIR}/src)
     FILE(GLOB_RECURSE PY_CPP "./src/[0-9a-zA-Z_]*.pybind.cpp")
     pybind11_add_module( riflib_cpp src/riflib.gen.cpp ${PY_CPP} )
     target_link_libraries( riflib_cpp PRIVATE ${EXTRA_LIBS} )
+    execute_process(COMMAND python ${CMAKE_SOURCE_DIR}/devtools/cp_filtered.py .py
+        ${CMAKE_SOURCE_DIR}/src ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/riflib)
 endfunction()
 
 
