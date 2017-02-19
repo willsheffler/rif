@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 """generate main rifgen.gen.cpp pybind file with modules organized based on file paths
 of *.pybind.cpp components"""
 
@@ -13,7 +15,7 @@ def get_pybind_modules(srcpath):
     pbfiles = subprocess.check_output('find {} -regex [^.].+pybind.cpp'.format(srcpath).split())
     pymodules = OrderedDict()
     for pybindfile in pbfiles.splitlines():
-        print "sourcegen.py: found pybind file", pybindfile
+        print "found pybind file", pybindfile
         try:
             grepped = subprocess.check_output(['grep', '-H', 'RIFLIB_PYBIND_', pybindfile])
         except:
@@ -40,12 +42,12 @@ def update_file_if_needed(destfile, newcontent):
         assert os.path.exists(testfile)
         diff = subprocess.call(['diff', testfile, destfile])
     if diff:
-        print 'sourcegen.py: updating', destfile
+        print 'pybind_source_gen.py: updating', destfile
         if os.path.exists(destfile):
             os.remove(destfile)
         os.rename(testfile, destfile)
     else:
-        print "sourcegen.py: riflib.pybind.cpp is up to date"
+        print "pybind_source_gen.py: riflib.pybind.cpp is up to date"
         os.remove(testfile)
 
 def shitty_make_code(pymodules):
@@ -68,7 +70,7 @@ def mkdir_if_necessary(path):
 
 def mkfile_if_necessary(path, content):
     if not os.path.exists(path):
-        print 'sourcegen.py MAKING:', path
+        print 'pybind_source_gen.py MAKING:', path
         with open(path,'w') as out:
             out.write(content)
 
