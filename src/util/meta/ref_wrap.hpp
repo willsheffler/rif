@@ -28,44 +28,56 @@ namespace meta {
 namespace m = boost::mpl;
 // namespace f = boost::fusion;
 
-
-template<class T> struct remove_refwrap { typedef typename boost::remove_const<T>::type type; };
-template<class T> struct remove_refwrap<boost::reference_wrapper<T> > { typedef typename boost::remove_const<T>::type type; };
+template <class T>
+struct remove_refwrap {
+  typedef typename boost::remove_const<T>::type type;
+};
+template <class T>
+struct remove_refwrap<boost::reference_wrapper<T> > {
+  typedef typename boost::remove_const<T>::type type;
+};
 
 ///@brief works with pair and tuple
-template<class T> struct recursive_remove_refwrap { typedef typename remove_refwrap<T>::type type; };
-template<class A,class B>
-	struct recursive_remove_refwrap<std::pair<A,B> > { typedef 
-		std::pair< typename remove_refwrap<A>::type ,
-		           typename remove_refwrap<B>::type > type; };
-template<class A> 
-	struct recursive_remove_refwrap<boost::tuple<A> > { typedef 
-		boost::tuple< typename remove_refwrap<A>::type > type; };
-template<class A,class B>
-	struct recursive_remove_refwrap<boost::tuple<A,B> > { typedef 
-		boost::tuple< typename remove_refwrap<A>::type ,
-		              typename remove_refwrap<B>::type > type; };
-template<class A,class B,class C>
-	struct recursive_remove_refwrap<boost::tuple<A,B,C> > { typedef
-		boost::tuple< typename remove_refwrap<A>::type ,
-		              typename remove_refwrap<B>::type ,
-		              typename remove_refwrap<C>::type > type; };
-template<class A,class B,class C,class D>
-	struct recursive_remove_refwrap<boost::tuple<A,B,C,D> > { typedef
-		boost::tuple< typename remove_refwrap<A>::type ,
-		              typename remove_refwrap<B>::type ,
-		              typename remove_refwrap<C>::type ,
-		              typename remove_refwrap<D>::type > type; };
+template <class T>
+struct recursive_remove_refwrap {
+  typedef typename remove_refwrap<T>::type type;
+};
+template <class A, class B>
+struct recursive_remove_refwrap<std::pair<A, B> > {
+  typedef std::pair<typename remove_refwrap<A>::type,
+                    typename remove_refwrap<B>::type>
+      type;
+};
+template <class A>
+struct recursive_remove_refwrap<boost::tuple<A> > {
+  typedef boost::tuple<typename remove_refwrap<A>::type> type;
+};
+template <class A, class B>
+struct recursive_remove_refwrap<boost::tuple<A, B> > {
+  typedef boost::tuple<typename remove_refwrap<A>::type,
+                       typename remove_refwrap<B>::type>
+      type;
+};
+template <class A, class B, class C>
+struct recursive_remove_refwrap<boost::tuple<A, B, C> > {
+  typedef boost::tuple<typename remove_refwrap<A>::type,
+                       typename remove_refwrap<B>::type,
+                       typename remove_refwrap<C>::type>
+      type;
+};
+template <class A, class B, class C, class D>
+struct recursive_remove_refwrap<boost::tuple<A, B, C, D> > {
+  typedef boost::tuple<
+      typename remove_refwrap<A>::type, typename remove_refwrap<B>::type,
+      typename remove_refwrap<C>::type, typename remove_refwrap<D>::type>
+      type;
+};
 
 // struct recursive_remove_refwrap_MFC {
-// 	template<class T> struct apply { typedef typename recursive_remove_refwrap<T>::type type; }; };
-
-
-
-
+// 	template<class T> struct apply { typedef typename
+// recursive_remove_refwrap<T>::type type; }; };
 }
 }
 }
-
 
 #endif

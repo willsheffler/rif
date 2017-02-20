@@ -2,22 +2,21 @@
 
 #include "search/HackPack.hpp"
 
-
-namespace scheme { namespace search { namespace hptest {
+namespace scheme {
+namespace search {
+namespace hptest {
 
 using std::cout;
 using std::endl;
 
 typedef float Float;
 
-TEST( HackPack, create_empty_packer ){
+TEST(HackPack, create_empty_packer) {
+  ::scheme::objective::storage::TwoBodyTable<float> twob(1, 1);
+  HackPackOpts opts;
 
-		::scheme::objective::storage::TwoBodyTable<float> twob(1,1);
-		HackPackOpts opts;
-
-		HackPack packer( twob, opts, 0 );
-
-
+  HackPack packer(twob, opts, 0);
 }
-
-}}}
+}
+}
+}

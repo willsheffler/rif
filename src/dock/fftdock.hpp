@@ -4,10 +4,7 @@
 #include <fftw3.h>
 
 namespace scheme {
-namespace dock {
-
-
-}
+namespace dock {}
 }
 
 #endif

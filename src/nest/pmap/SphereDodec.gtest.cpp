@@ -12,8 +12,6 @@ namespace pmap {
 // 	MapType::ValueType val;
 // 	sd.params_to_value( MapType::Params(0.5,0.5), 0, 0, val );
 // }
-
-
 }
 }
 }

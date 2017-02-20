@@ -2,10 +2,6 @@
 
 namespace scheme {
 namespace kinematics {
-namespace integration {
-
-
+namespace integration {}
 }
 }
-}
-

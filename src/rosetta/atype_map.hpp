@@ -3,10 +3,11 @@
 
 #include <string>
 
-namespace scheme { namespace rosetta {
+namespace scheme {
+namespace rosetta {
 
-int rosetta_atom_type( std::string const & resname, std::string const & atomname );
-
-}}
+int rosetta_atom_type(std::string const& resname, std::string const& atomname);
+}
+}
 
 #endif

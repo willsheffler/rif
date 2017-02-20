@@ -6,7 +6,6 @@
 
 // #include "numeric/eigen_xform_perf.gtest.cpp"
 
-
 // #include "test/hana/hana.gtest.cpp"
 
 // #include "util/hash.gtest.cpp"
@@ -26,7 +25,8 @@
 // #include "nest/MultiNest.gtest.cpp"
 
 // #include "nest/pmap/parameter_maps.gtest.cpp" // 7.546 // 4.0 wo Eigen
-// #include "nest/pmap/parameter_maps_test_nbrcell.gtest.cpp" // 4.472 // 3.1 wo eigen
+// #include "nest/pmap/parameter_maps_test_nbrcell.gtest.cpp" // 4.472 // 3.1 wo
+// eigen
 // #include "nest/pmap/SphereDodec.gtest.cpp"
 // #include "nest/pmap/SphereQuad.gtest.cpp"
 // #include "nest/pmap/HecatonicosachoronMap.gtest.cpp"
@@ -54,7 +54,6 @@
 // #include "kinematics/Scene_test_eigen.gtest.cpp"
 // #include "kinematics/SceneIterator.gtest.cpp"
 // #include "kinematics/Director.gtest.cpp"
-
 
 // #include "io/dump_pdb_atom.gtest.cpp"
 
@@ -91,14 +90,12 @@
 
 // #include "numeric/rand_xform.gtest.cpp"
 
-int main(int argc, char **argv)
-{
+int main(int argc, char **argv) {
+  std::cout << int(1.6 * 1) << std::endl;
 
-	std::cout << int( 1.6 * 1 ) << std::endl;
-
-	std::vector<std::string> args;
-	for(int i = 0; i < argc; ++i) args.push_back(std::string(argv[i]));
-	std::cout << "int main(int argc, char **argv) FROM " << __FILE__ << std::endl;
-	init_gtest_tests(args);
-	return run_gtest_tests();
+  std::vector<std::string> args;
+  for (int i = 0; i < argc; ++i) args.push_back(std::string(argv[i]));
+  std::cout << "int main(int argc, char **argv) FROM " << __FILE__ << std::endl;
+  init_gtest_tests(args);
+  return run_gtest_tests();
 }

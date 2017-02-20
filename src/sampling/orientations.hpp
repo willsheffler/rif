@@ -60,10 +60,9 @@
 #include <string>
 #include <vector>
 
-#include <boost/iostreams/filtering_streambuf.hpp>
 #include <boost/iostreams/filter/gzip.hpp>
+#include <boost/iostreams/filtering_streambuf.hpp>
 #include <fstream>
-
 
 #include <Eigen/Dense>
 // todo: wrap and adapt this code to make numpy array of quats
@@ -206,34 +205,34 @@ class Permute {
 // The rotational symmetries of the cube.  (Not normalized, since
 // PackSet.Add does this.)
 static double CubeSyms[24][4] = {
-  {1, 0, 0, 0},
-  // 180 deg rotations about 3 axes
-  {0, 1, 0, 0},
-  {0, 0, 1, 0},
-  {0, 0, 0, 1},
-  // +/- 120 degree rotations about 4 leading diagonals
-  {1, 1, 1, 1},
-  {1, 1, 1,-1},
-  {1, 1,-1, 1},
-  {1, 1,-1,-1},
-  {1,-1, 1, 1},
-  {1,-1, 1,-1},
-  {1,-1,-1, 1},
-  {1,-1,-1,-1},
-  // +/- 90 degree rotations about 3 axes
-  {1, 1, 0, 0},
-  {1,-1, 0, 0},
-  {1, 0, 1, 0},
-  {1, 0,-1, 0},
-  {1, 0, 0, 1},
-  {1, 0, 0,-1},
-  // 180 degree rotations about 6 face diagonals
-  {0, 1, 1, 0},
-  {0, 1,-1, 0},
-  {0, 1, 0, 1},
-  {0, 1, 0,-1},
-  {0, 0, 1, 1},
-  {0, 0, 1,-1},
+    {1, 0, 0, 0},
+    // 180 deg rotations about 3 axes
+    {0, 1, 0, 0},
+    {0, 0, 1, 0},
+    {0, 0, 0, 1},
+    // +/- 120 degree rotations about 4 leading diagonals
+    {1, 1, 1, 1},
+    {1, 1, 1, -1},
+    {1, 1, -1, 1},
+    {1, 1, -1, -1},
+    {1, -1, 1, 1},
+    {1, -1, 1, -1},
+    {1, -1, -1, 1},
+    {1, -1, -1, -1},
+    // +/- 90 degree rotations about 3 axes
+    {1, 1, 0, 0},
+    {1, -1, 0, 0},
+    {1, 0, 1, 0},
+    {1, 0, -1, 0},
+    {1, 0, 0, 1},
+    {1, 0, 0, -1},
+    // 180 degree rotations about 6 face diagonals
+    {0, 1, 1, 0},
+    {0, 1, -1, 0},
+    {0, 1, 0, 1},
+    {0, 1, 0, -1},
+    {0, 0, 1, 1},
+    {0, 0, 1, -1},
 };
 
 // Convert from index to position.  The sinh scaling tries to compensate
@@ -243,15 +242,12 @@ double pind(double ind, double delta, double sigma) {
   return (sigma == 0) ? ind * delta : sinh(sigma * ind * delta) / sigma;
 }
 
-auto read_karney_orientation_file(
-  std::string fname
-){
-
+auto read_karney_orientation_file(std::string fname) {
   Eigen::MatrixXd quats;
   Eigen::VectorXd cover;
 
-  std::ifstream file( fname.c_str(), std::ios_base::in|std::ios_base::binary );
-  if(!file.good()){
+  std::ifstream file(fname.c_str(), std::ios_base::in | std::ios_base::binary);
+  if (!file.good()) {
     std::cerr << "no file: " << fname << std::endl;
     return std::make_tuple(quats, cover);
   }
@@ -259,8 +255,6 @@ auto read_karney_orientation_file(
   fin.push(boost::iostreams::gzip_decompressor());
   fin.push(file);
   std::istream in(&fin);
-
-
 
   bool euler = false;
   assert(in.good());
@@ -278,7 +272,7 @@ auto read_karney_orientation_file(
   // Use extra digit of precision with weights and radii.  This also
   // triggers a memory minimizing expansion.
   const bool fine = delta < 0.05;
-  quats.resize(ntot,4);
+  quats.resize(ntot, 4);
   cover.resize(ntot);
   int quats_i = 0;
   PackSet s;
@@ -308,11 +302,11 @@ auto read_karney_orientation_file(
           s.Add(q.Times(s.Orientation(i)), s.Weight(i));
       }
       // s.Print(cout, euler, fine ? 7 : 6);
-      for(int i = 0; i < s.Number(); ++i){
-        quats(quats_i  ,0) = s.Orientation(i).w;
-        quats(quats_i  ,1) = s.Orientation(i).x;
-        quats(quats_i  ,2) = s.Orientation(i).y;
-        quats(quats_i  ,3) = s.Orientation(i).z;
+      for (int i = 0; i < s.Number(); ++i) {
+        quats(quats_i, 0) = s.Orientation(i).w;
+        quats(quats_i, 1) = s.Orientation(i).x;
+        quats(quats_i, 2) = s.Orientation(i).y;
+        quats(quats_i, 3) = s.Orientation(i).z;
         cover[quats_i++] = s.Weight(i);
       }
       s.Clear();
@@ -331,11 +325,11 @@ auto read_karney_orientation_file(
     }
     assert(s.Number() == ntot);
     // s.Print(cout, euler, fine ? 7 : 6);
-    for(int i = 0; i < s.Number(); ++i){
-      quats(quats_i  ,0) = s.Orientation(i).w;
-      quats(quats_i  ,1) = s.Orientation(i).x;
-      quats(quats_i  ,2) = s.Orientation(i).y;
-      quats(quats_i  ,3) = s.Orientation(i).z;
+    for (int i = 0; i < s.Number(); ++i) {
+      quats(quats_i, 0) = s.Orientation(i).w;
+      quats(quats_i, 1) = s.Orientation(i).x;
+      quats(quats_i, 2) = s.Orientation(i).y;
+      quats(quats_i, 3) = s.Orientation(i).z;
       cover[quats_i++] = s.Weight(i);
     }
     s.Clear();
