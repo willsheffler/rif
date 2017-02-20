@@ -14,7 +14,7 @@ using std::cout;
 using std::endl;
 
 TEST(SphereQuad, cell_centers) {
-  typedef SphereQuad<2, util::SimpleArray<3, double> > MapType;
+  typedef SphereQuad<2, util::SimpleArray<3, double>> MapType;
   typedef MapType::Params PRM;
   typedef MapType::ValueType VAL;
   MapType sd;

@@ -35,8 +35,8 @@ struct UnitMap {
   UnitMap(Index num_cells = 1) : num_cells_(num_cells) {}
   ///@brief sets value to parameters without change
   ///@return false iff invalid parameters
-  bool params_to_value(Params const& params, Index cell_index, Index /*resl*/,
-                       Value& value) const {
+  bool params_to_value(Params const &params, Index cell_index, Index /*resl*/,
+                       Value &value) const {
     for (int i = 0; i < DIM; ++i) assert(0.0 <= params[i]);
     assert(params[0] <= (Float)num_cells_);
     for (int i = 1; i < DIM; ++i) assert(params[i] <= 1.0);
@@ -46,8 +46,8 @@ struct UnitMap {
   }
   ///@brief sets params/cell_index from value
   ///@note necessary for value lookup and neighbor lookup
-  bool value_to_params(Value const& value, Index resl, Params& params,
-                       Index& cell_index) const {
+  bool value_to_params(Value const &value, Index resl, Params &params,
+                       Index &cell_index) const {
     ///@note neighbor lookups require out of bounds mappings to be valid
     value_to_params_for_cell(value, resl, params, 0);
     cell_index = (Index)value[0];
@@ -59,15 +59,15 @@ struct UnitMap {
   }
   ///@brief get params repr of Value wrt cell cell_index
   ///@note necessary only for neighbor lookup
-  void value_to_params_for_cell(Value const& value, Index /*resl*/,
-                                Params& params, Index cell_index) const {
+  void value_to_params_for_cell(Value const &value, Index /*resl*/,
+                                Params &params, Index cell_index) const {
     for (int i = 0; i < DIM; ++i) params[i] = value[i];
     params[0] -= (Float)cell_index;
   }
   ///@brief return the cell_index of neighboring cells within delta of value
   ///@note delta parameter is in "Parameter Space"
   template <class OutIter>
-  void get_neighboring_cells(Value const& value, Index /*resl*/,
+  void get_neighboring_cells(Value const &value, Index /*resl*/,
                              Float param_delta, OutIter out) const {
     // Float param_delta = 1.0 / (Float)(1<<resl);
     // this BIG thing is to ensure rounding goes down
@@ -80,7 +80,7 @@ struct UnitMap {
     for (int i = lb; i <= ub; ++i) *(out++) = i;
   }
   ///@brief aka covering radius max distance from bin center to any value within
-  ///bin
+  /// bin
   Float bin_circumradius(Index resl) const {
     return 0.5 / (Float)(1 << resl) * sqrt(DIM);
   }

@@ -162,8 +162,8 @@ TEST(RotamerScores, test_sort) {
 }
 
 TEST(RotamerScores, test_sat_data) {
-  ASSERT_EQ(sizeof(RotamerScores<3, RotamerScoreSat<> >), 12);
-  RotamerScores<3, RotamerScoreSat<> > rs;
+  ASSERT_EQ(sizeof(RotamerScores<3, RotamerScoreSat<>>), 12);
+  RotamerScores<3, RotamerScoreSat<>> rs;
 
   rs.add_rotamer(0, -1.0);
   ASSERT_FLOAT_EQ(rs.score(0), int(-1.0 * -13.0) / -13.0);
@@ -205,7 +205,7 @@ TEST(RotamerScores, test_sat_data) {
 }
 
 TEST(RotamerScores, test_sort_sat) {
-  typedef RotamerScores<14, RotamerScoreSat<> > RS;
+  typedef RotamerScores<14, RotamerScoreSat<>> RS;
   ASSERT_EQ(sizeof(RS), 56);
   RS rs;
   rs.add_rotamer(0, -0.1, 3, 7);

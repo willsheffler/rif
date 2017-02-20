@@ -29,11 +29,11 @@ struct SetVisitor {
   typedef _Interaction Interaction;
   std::set<Interaction> set_;
 
-  void operator()(Interaction const& i, double = 1.0) { set_.insert(i); }
+  void operator()(Interaction const &i, double = 1.0) { set_.insert(i); }
 
   template <class I>
   typename boost::enable_if<util::meta::is_pair<I>, void>::type operator()(
-      typename I::first_type const& i, typename I::second_type const& j,
+      typename I::first_type const &i, typename I::second_type const &j,
       double = 1.0) {
     set_.insert(std::make_pair(i, j));
   }
@@ -49,19 +49,19 @@ typedef actor::ActorConcept<X1dim, char> ADC;
 struct FixedActor {
   double data_;
   FixedActor(double d = 0) : data_(d) {}
-  bool operator==(FixedActor const& o) const { return o.data_ == data_; }
-  bool operator<(FixedActor const& o) const { return data_ < o.data_; }
+  bool operator==(FixedActor const &o) const { return o.data_ == data_; }
+  bool operator<(FixedActor const &o) const { return data_ < o.data_; }
   template <class Archive>
-  void serialize(Archive& ar, const unsigned int) {
-    ar& data_;
+  void serialize(Archive &ar, const unsigned int) {
+    ar &data_;
   }
 };
-std::ostream& operator<<(std::ostream& out, FixedActor const& f) {
+std::ostream &operator<<(std::ostream &out, FixedActor const &f) {
   return out << "FixedActor(" << f.data_ << ")";
 }
 
 template <class Interaction, class Scene>
-void test_iterator_visitor_agree_for_interaction(Scene const& scene) {
+void test_iterator_visitor_agree_for_interaction(Scene const &scene) {
   typedef typename impl::get_placeholder_type<Interaction,
                                               typename Scene::Index>::type PH;
   std::set<Interaction> iterset;
@@ -136,17 +136,17 @@ void test_iterator_visitor_agree(std::vector<int> nbod, int nsym) {
   test_iterator_visitor_agree_for_interaction<ADI>(scene);
   test_iterator_visitor_agree_for_interaction<ADC>(scene);
   test_iterator_visitor_agree_for_interaction<FixedActor>(scene);
-  test_iterator_visitor_agree_for_interaction<std::pair<ADI, ADI> >(scene);
-  test_iterator_visitor_agree_for_interaction<std::pair<ADI, ADC> >(scene);
-  test_iterator_visitor_agree_for_interaction<std::pair<ADC, ADC> >(scene);
-  test_iterator_visitor_agree_for_interaction<std::pair<ADC, ADI> >(scene);
-  test_iterator_visitor_agree_for_interaction<std::pair<FixedActor, ADI> >(
+  test_iterator_visitor_agree_for_interaction<std::pair<ADI, ADI>>(scene);
+  test_iterator_visitor_agree_for_interaction<std::pair<ADI, ADC>>(scene);
+  test_iterator_visitor_agree_for_interaction<std::pair<ADC, ADC>>(scene);
+  test_iterator_visitor_agree_for_interaction<std::pair<ADC, ADI>>(scene);
+  test_iterator_visitor_agree_for_interaction<std::pair<FixedActor, ADI>>(
       scene);
-  test_iterator_visitor_agree_for_interaction<std::pair<ADI, FixedActor> >(
+  test_iterator_visitor_agree_for_interaction<std::pair<ADI, FixedActor>>(
       scene);
-  test_iterator_visitor_agree_for_interaction<std::pair<FixedActor, ADC> >(
+  test_iterator_visitor_agree_for_interaction<std::pair<FixedActor, ADC>>(
       scene);
-  test_iterator_visitor_agree_for_interaction<std::pair<ADC, FixedActor> >(
+  test_iterator_visitor_agree_for_interaction<std::pair<ADC, FixedActor>>(
       scene);
 }
 
@@ -163,31 +163,31 @@ struct Config {};
 struct ObjADIFixed {
   typedef std::pair<ADI, FixedActor> Interaction;
   template <class Config>
-  double operator()(Interaction const& i, Config const& c) const {
+  double operator()(Interaction const &i, Config const &c) const {
     return this->operator()(i.first, i.second, c);
   }
-  double operator()(ADI const& i, FixedActor const& j, Config const&) const {
+  double operator()(ADI const &i, FixedActor const &j, Config const &) const {
     return i.position().val_ * j.data_;
   }
 };
 struct ObjFixedADI {
   typedef std::pair<FixedActor, ADI> Interaction;
   template <class Config>
-  double operator()(Interaction const& i, Config const&) const {
+  double operator()(Interaction const &i, Config const &) const {
     return i.second.position().val_ * i.first.data_;
   }
-  double operator()(FixedActor const& i, ADI const& j, Config const&) const {
+  double operator()(FixedActor const &i, ADI const &j, Config const &) const {
     return j.position().val_ * i.data_;
   }
 };
 struct ObjFixedFixed {
   typedef std::pair<FixedActor, FixedActor> Interaction;
   template <class Config>
-  double operator()(Interaction const&, Config const&) const {
+  double operator()(Interaction const &, Config const &) const {
     std::exit(-1);
   }
-  double operator()(FixedActor const& i, FixedActor const& j,
-                    Config const&) const {
+  double operator()(FixedActor const &i, FixedActor const &j,
+                    Config const &) const {
     std::exit(-1);
   }
 };
@@ -287,7 +287,7 @@ TEST(Scene, base_class_basic_operations) {
 
   Scene scene(2);
 
-  SceneBase<X1dim, uint32_t>& test = scene;
+  SceneBase<X1dim, uint32_t> &test = scene;
 
   ASSERT_EQ(test.template num_actors<FixedActor>(0), 0);
   ASSERT_TRUE(test.add_actor(0, FixedActor(1.0)));

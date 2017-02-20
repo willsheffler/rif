@@ -34,7 +34,7 @@ struct TestScoreBBactor {
   TestScoreBBactor(Xform target, Float rad, Float lever)
       : target_inv_(target.inverse()), radius_(rad), lever_(lever) {}
   template <class Config>
-  Result operator()(BBActor const& a, Config const& c) const {
+  Result operator()(BBActor const &a, Config const &c) const {
     // for( int i = 0; i < 12; ++i ){
     // cout << i << " " << target_inv_.data()[i] << endl;
     // cout << i << " " << a.position().data()[i] << endl;

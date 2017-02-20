@@ -23,7 +23,7 @@ std::vector<std::string> get_pdb_lines(std::string resn, bool hydrogen) {
   using std::string;
 
   vector<std::string> lines;
-  std::back_insert_iterator<vector<string> > outiter(lines);
+  std::back_insert_iterator<vector<string>> outiter(lines);
 
   AtomIncludeCheck check(hydrogen);
 

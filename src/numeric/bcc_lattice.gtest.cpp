@@ -38,7 +38,8 @@ using std::endl;
 // 					rep[i] =
 // ((int)(samp[i]*nbins)+u(r))/nbins;
 // 				}
-// 				// cout << idata << " " << irep << " " << samp <<
+// 				// cout << idata << " " << irep << " " << samp
+// <<
 // endl;
 // 				// cout << idata << " " << irep << " " << rep <<
 // endl;

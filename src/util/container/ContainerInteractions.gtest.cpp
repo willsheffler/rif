@@ -16,7 +16,7 @@ TEST(util_container_ContainerInteractions, default_on_vector) {
 
   BOOST_STATIC_ASSERT(
       (boost::is_same<std::pair<ContainerInteractionsIter<Index>,
-                                ContainerInteractionsIter<Index> >,
+                                ContainerInteractionsIter<Index>>,
                       CI::Range>::value));
 
   std::vector<int> a;
@@ -81,7 +81,7 @@ struct myvector : std::vector<T> {
 };
 template <class Xform, class A, class Container2, class Index>
 struct ContainerInteractions<Xform, myvector<A>, Container2, Index> {
-  typedef std::vector<std::pair<Index, Index> > Range;
+  typedef std::vector<std::pair<Index, Index>> Range;
   static void get_interaction_range(Xform const &, myvector<A> const &c1,
                                     Container2 const &c2, Range &r) {
     // std::cout << "ContainerInteractions specialization myvector10" <<

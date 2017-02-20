@@ -27,7 +27,7 @@ struct RosettaField {
 
   RosettaField() { EtableInit::init_EtableParams(params); }
 
-  RosettaField(std::vector<Atom> const& atm) : atoms_(atm) {
+  RosettaField(std::vector<Atom> const &atm) : atoms_(atm) {
     EtableInit::init_EtableParams(params);
     init_atom_bins();
   }
@@ -35,7 +35,7 @@ struct RosettaField {
   void init_atom_bins() {
     atom_bins_lb_.fill(std::numeric_limits<float>::max());
     atom_bins_ub_.fill(std::numeric_limits<float>::min());
-    for (auto const& a : atoms_) {
+    for (auto const &a : atoms_) {
       atom_bins_lb_ = atom_bins_lb_.min(a.position());
       atom_bins_ub_ = atom_bins_ub_.max(a.position());
     }
@@ -48,7 +48,7 @@ struct RosettaField {
     atom_bins_dim_[2] = std::max(
         1, (int)std::ceil((atom_bins_ub_[2] - atom_bins_lb_[2]) / bin_witdh_));
     atom_bins_.resize(atom_bins_dim_);
-    for (auto const& a : atoms_) {
+    for (auto const &a : atoms_) {
       I3 i = position_to_atombin(a.position());
       // std::cout << "add atom " << i << std::endl;
       atom_bins_(i).push_back(a);
@@ -67,7 +67,7 @@ struct RosettaField {
     return i;
   }
 
-  float compute_rosetta_energy_one(Atom const& a, float x, float y, float z,
+  float compute_rosetta_energy_one(Atom const &a, float x, float y, float z,
                                    int atype) const {
     float const dx = x - a.position()[0];
     float const dy = y - a.position()[1];
@@ -82,7 +82,7 @@ struct RosettaField {
     if (very_repulsive) at = 5;
     bool neg_only = at < 0;
     at = abs(at);
-    EtableParamsOnePair<float> const& p = params.params_for_pair(at, atype);
+    EtableParamsOnePair<float> const &p = params.params_for_pair(at, atype);
     lj_evaluation(p, dis, dis2, inv_dis2, atr0, rep0);
     lk_evaluation(p, dis, inv_dis2, sol0);
     atr0 = neg_only ? 0.0 : atr0;
@@ -99,7 +99,7 @@ struct RosettaField {
   float compute_rosetta_energy_safe(float x, float y, float z,
                                     int atype) const {
     float E = 0;
-    for (auto const& a : atoms_) {
+    for (auto const &a : atoms_) {
       E += compute_rosetta_energy_one(a, x, y, z, atype);
     }
     return E;
@@ -119,7 +119,7 @@ struct RosettaField {
       for (ii[1] = lb[1]; ii[1] < ub[1]; ++ii[1]) {
         for (ii[2] = lb[2]; ii[2] < ub[2]; ++ii[2]) {
           // std::cout << i << " " << ii << " " << std::endl;
-          for (auto const& a : atom_bins_(ii)) {
+          for (auto const &a : atom_bins_(ii)) {
             E += compute_rosetta_energy_one(a, x, y, z, atype);
           }
         }
@@ -129,20 +129,20 @@ struct RosettaField {
   }
 
   template <class F>
-  float compute_rosetta_energy(F const& f, int atype) const {
+  float compute_rosetta_energy(F const &f, int atype) const {
     return compute_rosetta_energy(f[0], f[1], f[2], atype);
   }
   template <class F>
-  float compute_rosetta_energy_safe(F const& f, int atype) const {
+  float compute_rosetta_energy_safe(F const &f, int atype) const {
     return compute_rosetta_energy_safe(f[0], f[1], f[2], atype);
   }
 };
 
 template <class Atom, class EtableInit>
 struct RosettaFieldAtype : objective::voxel::Field3D<float> {
-  RosettaField<Atom, EtableInit> const& rf_;
+  RosettaField<Atom, EtableInit> const &rf_;
   int atype_;
-  RosettaFieldAtype(RosettaField<Atom, EtableInit> const& rf, int atype)
+  RosettaFieldAtype(RosettaField<Atom, EtableInit> const &rf, int atype)
       : rf_(rf), atype_(atype) {}
   float operator()(float x, float y, float z) const {
     return rf_.compute_rosetta_energy(x, y, z, atype_);

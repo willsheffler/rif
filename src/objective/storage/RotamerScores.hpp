@@ -52,16 +52,16 @@ struct RotamerScore {
   static float data2float(Data data) { return float(data) / _Divisor; }
   static Data float2data(float f) { return Data(f * _Divisor); }
 
-  bool operator<(THIS const& that) const {
+  bool operator<(THIS const &that) const {
     return data_ > that.data_;
   }  // reverse so low score is low
-  bool operator==(THIS const& that) const { return data_ == that.data_; }
-  bool operator!=(THIS const& that) const { return data_ != that.data_; }
-  bool operator==(Data const& that) const { return data_ == that; }
+  bool operator==(THIS const &that) const { return data_ == that.data_; }
+  bool operator!=(THIS const &that) const { return data_ != that.data_; }
+  bool operator==(Data const &that) const { return data_ == that; }
 
   bool empty() const { return data_ == RotamerMask; }
 
-  void set_or_merge(THIS const& that) {
+  void set_or_merge(THIS const &that) {
     if (that < *this) {
       *this = that;
     }
@@ -86,8 +86,8 @@ int const RotamerScore<Data, RBits, Div>::ScoreBits;
 template <class Data, int RBits, int Div>
 bool const RotamerScore<Data, RBits, Div>::UseSat;
 template <class Data, int RBits, int Div>
-std::ostream& operator<<(std::ostream& out,
-                         RotamerScore<Data, RBits, Div> const& val) {
+std::ostream &operator<<(std::ostream &out,
+                         RotamerScore<Data, RBits, Div> const &val) {
   out << val.rotamer() << "<" << val.score() << ">";
   return out;
 }
@@ -101,11 +101,11 @@ struct SatisfactionDatum {
   bool not_empty() const { return data_ != 255; }
   int target_sat_num() const { return (int)data_; }
   int rotamer_sat_num() const { return 0; }
-  bool operator==(SatisfactionDatum const& o) const { return data_ == o.data_; }
+  bool operator==(SatisfactionDatum const &o) const { return data_ == o.data_; }
 } __attribute__((packed));
 template <int RotBits>
-std::ostream& operator<<(std::ostream& out,
-                         SatisfactionDatum<RotBits> const& val) {
+std::ostream &operator<<(std::ostream &out,
+                         SatisfactionDatum<RotBits> const &val) {
   out << (int)val.data_;
   return out;
 }
@@ -147,33 +147,33 @@ struct RotamerScoreSat : public RotamerScore<_Data, _RotamerBits, _Divisor> {
     return name;
   }
   template <class Array>
-  void get_sat_groups_raw(Array& sat_groups_out) const {
+  void get_sat_groups_raw(Array &sat_groups_out) const {
     for (int isat = 0; isat < NSat; ++isat) {
       sat_groups_out[isat] = sat_data_[isat].target_sat_num();
     }
   }
-  void get_sat_groups(std::vector<int>& sat_groups_out) const {
+  void get_sat_groups(std::vector<int> &sat_groups_out) const {
     for (int isat = 0; isat < NSat; ++isat) {
       if (sat_data_[isat].not_empty()) {
         sat_groups_out.push_back(sat_data_[isat].target_sat_num());
       }
     }
   }
-  void mark_sat_groups(std::vector<bool>& sat_groups_mask) const {
+  void mark_sat_groups(std::vector<bool> &sat_groups_mask) const {
     for (int isat = 0; isat < NSat; ++isat) {
       if (sat_data_[isat].not_empty()) {
         sat_groups_mask[sat_data_[isat].target_sat_num()] = true;
       }
     }
   }
-  bool is_new_sat(SatDatum const& sd) const {
+  bool is_new_sat(SatDatum const &sd) const {
     if (sd.empty()) return false;
     for (int i = 0; i < NSat; ++i) {
       if (sat_data_[i] == sd) return false;
     }
     return true;
   }
-  void set_or_merge(THIS const& that) {
+  void set_or_merge(THIS const &that) {
     if (this->empty()) {
       *this = that;
     } else {
@@ -193,13 +193,13 @@ struct RotamerScoreSat : public RotamerScore<_Data, _RotamerBits, _Divisor> {
     }
   }
 
-  bool operator==(THIS const& o) const {
+  bool operator==(THIS const &o) const {
     return this->data_ == o.data_ && this->sat_data_ == o.sat_data_;
   }
-  bool operator!=(THIS const& o) const {
+  bool operator!=(THIS const &o) const {
     return this->data_ != o.data_ || this->sat_data_ != o.sat_data_;
   }
-  bool operator<(THIS const& that) const {
+  bool operator<(THIS const &that) const {
     int nsat = 0, onsat = 0;
     for (int i = 0; i < NSat; ++i) {
       nsat += this->sat_data_[i].not_empty();
@@ -219,8 +219,8 @@ bool const RotamerScoreSat<Data, RBits, Div, Sat, N>::UseSat;
 template <class Data, int RBits, int Div, class Sat, int N>
 int const RotamerScoreSat<Data, RBits, Div, Sat, N>::NSat;
 template <class Data, int RBits, int Div, class Sat, int N>
-std::ostream& operator<<(std::ostream& out,
-                         RotamerScoreSat<Data, RBits, Div, Sat, N> const& val) {
+std::ostream &operator<<(std::ostream &out,
+                         RotamerScoreSat<Data, RBits, Div, Sat, N> const &val) {
   out << val.rotamer() << "<" << val.score() << ">";
   std::vector<int> sat;
   val.get_sat_groups(sat);
@@ -232,7 +232,7 @@ std::ostream& operator<<(std::ostream& out,
   return out;
 }
 
-template <int _N, class _RotamerScore = RotamerScore<> >
+template <int _N, class _RotamerScore = RotamerScore<>>
 struct RotamerScores {
   BOOST_STATIC_ASSERT((_N > 0));
   BOOST_STATIC_ASSERT((_N < 256));  // arbitrary
@@ -252,14 +252,14 @@ struct RotamerScores {
   void add_rotamer(Data rot, float score, int sat1 = -1, int sat2 = -1) {
     add_rotamer_impl<RotScore::UseSat>(rot, score, sat1, sat2);
   }
-  void rotamer_sat_groups(int irot, std::vector<int>& sat_groups_out) const {
+  void rotamer_sat_groups(int irot, std::vector<int> &sat_groups_out) const {
     rotamer_sat_groups_impl<RotScore::UseSat>(irot, sat_groups_out);
   }
-  void mark_sat_groups(int irot, std::vector<bool>& sat_groups_mask) const {
+  void mark_sat_groups(int irot, std::vector<bool> &sat_groups_mask) const {
     mark_sat_groups_impl<RotScore::UseSat>(irot, sat_groups_mask);
   }
   template <class Array>
-  void get_sat_groups_raw(int irot, Array& a) const {
+  void get_sat_groups_raw(int irot, Array &a) const {
     get_sat_groups_raw_impl<RotScore::UseSat, Array>(irot, a);
   }
   void add_rotamer(RotScore to_insert) {
@@ -289,7 +289,7 @@ struct RotamerScores {
     rotscores_[insert_pos].set_or_merge(to_insert);
   }
   template <int N2>
-  void merge(RotamerScores<N2, RotScore> const& that) {
+  void merge(RotamerScores<N2, RotScore> const &that) {
     for (int i = 0; i < N2; ++i) {
       if (that.empty(i)) break;
       add_rotamer(that.rotscores_[i]);
@@ -339,8 +339,8 @@ struct RotamerScores {
     return name;
   }
 
-  bool operator==(THIS const& o) const { return rotscores_ == o.rotscores_; }
-  bool operator!=(THIS const& o) const { return rotscores_ != o.rotscores_; }
+  bool operator==(THIS const &o) const { return rotscores_ == o.rotscores_; }
+  bool operator!=(THIS const &o) const { return rotscores_ != o.rotscores_; }
 
   template <bool UseSat>
   typename boost::enable_if_c<UseSat, void>::type add_rotamer_impl(Data rot,
@@ -358,38 +358,38 @@ struct RotamerScores {
   }
   template <bool UseSat>
   typename boost::enable_if_c<UseSat, void>::type rotamer_sat_groups_impl(
-      int irot, std::vector<int>& sat_groups_out) const {
+      int irot, std::vector<int> &sat_groups_out) const {
     rotscores_[irot].get_sat_groups(sat_groups_out);
   }
   template <bool UseSat>
   typename boost::disable_if_c<UseSat, void>::type rotamer_sat_groups_impl(
-      int irot, std::vector<int>& sat_groups_out) const {
+      int irot, std::vector<int> &sat_groups_out) const {
     return;
   }
   template <bool UseSat>
   typename boost::enable_if_c<UseSat, void>::type mark_sat_groups_impl(
-      int irot, std::vector<bool>& sat_groups_mask) const {
+      int irot, std::vector<bool> &sat_groups_mask) const {
     rotscores_[irot].mark_sat_groups(sat_groups_mask);
   }
   template <bool UseSat>
   typename boost::disable_if_c<UseSat, void>::type mark_sat_groups_impl(
-      int irot, std::vector<bool>& sat_groups_mask) const {
+      int irot, std::vector<bool> &sat_groups_mask) const {
     return;
   }
   template <bool UseSat, class Array>
   typename boost::enable_if_c<UseSat, void>::type get_sat_groups_raw_impl(
-      int irot, Array& a) const {
+      int irot, Array &a) const {
     rotscores_[irot].get_sat_groups_raw(a);
   }
   template <bool UseSat, class Array>
   typename boost::disable_if_c<UseSat, void>::type get_sat_groups_raw_impl(
-      int irot, Array&) const {
+      int irot, Array &) const {
     return;
   }
 };
 
 template <int N, class R>
-std::ostream& operator<<(std::ostream& out, RotamerScores<N, R> const& val) {
+std::ostream &operator<<(std::ostream &out, RotamerScores<N, R> const &val) {
   out << val.name() << "( ";
   for (int i = 0; i < val.size(); ++i) {
     out << val.rotscores_[i] << " ";

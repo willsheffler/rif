@@ -1386,9 +1386,11 @@ TEST(SceneIterator, interactions_twobody_hetero_sym) {
 // 	// 		Interaction::first_type a1;
 // 	// 		Interaction::second_type a2;
 // 	// 		boost::tie(a1,a2) = s.get_interaction<Interaction>(ip);
-// 	// 		cout << ip.first.first << " " << ip.second.first << " " <<
+// 	// 		cout << ip.first.first << " " << ip.second.first << " "
+// <<
 // a1 << "    ";
-// 	// 		cout << ip.first.second << " " << ip.second.second << " "
+// 	// 		cout << ip.first.second << " " << ip.second.second << "
+// "
 // << a2 << endl;
 // 	// 	}
 // 	// }

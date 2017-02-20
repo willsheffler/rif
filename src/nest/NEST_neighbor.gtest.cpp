@@ -21,7 +21,7 @@ TEST(NEST_NEIGHBOR, dim2_test_case) {
   std::vector<size_t> neighbors;
   NEST<2>::ValueType val(0.85, 0.15);
   size_t r = 1;
-  std::back_insert_iterator<std::vector<size_t> > back_it(neighbors);
+  std::back_insert_iterator<std::vector<size_t>> back_it(neighbors);
   nest.get_neighbors(val, r, back_it);
   ASSERT_EQ(neighbors.size(), 4);
   ASSERT_EQ(neighbors[0], 0);
@@ -37,7 +37,7 @@ TEST(NEST_NEIGHBOR, dim3_test_case) {
   // val[0] = 0.85; val[1] = 0.15; val[2] = 0.5;
   size_t r = 3;
   std::vector<size_t> neighbors;
-  std::back_insert_iterator<std::vector<size_t> > back_it(neighbors);
+  std::back_insert_iterator<std::vector<size_t>> back_it(neighbors);
   nest.get_neighbors(val, r, back_it);
   ASSERT_EQ(neighbors.size(), 27);
   EXPECT_EQ(nest.set_and_get(neighbors[0], r), VAL(0.6875, 0.0625, 0.4375));
@@ -72,7 +72,7 @@ TEST(NEST_NEIGHBOR, dim3_test_case) {
 TEST(NEST_NEIGHBOR, unit_1d_boundary_1cell) {
   NEST<1> nest;
   std::vector<size_t> neighbors;
-  std::back_insert_iterator<std::vector<size_t> > back_it(neighbors);
+  std::back_insert_iterator<std::vector<size_t>> back_it(neighbors);
   size_t r = 2;
   NEST<1>::ValueType val;
 
@@ -105,7 +105,7 @@ TEST(NEST_NEIGHBOR, unit_2d_boundary_1cell) {
 
   NestType nest;
   std::vector<size_t> neighbors;
-  std::back_insert_iterator<std::vector<size_t> > back_it(neighbors);
+  std::back_insert_iterator<std::vector<size_t>> back_it(neighbors);
   size_t r = 2;
 
   neighbors.clear();
@@ -166,7 +166,7 @@ TEST(NEST_NEIGHBOR, unitmap_neighbors_2d_boundary_2cell) {
   typedef NestType::ValueType VAL;
   NestType nest(2);
   std::vector<size_t> neighbors;
-  std::back_insert_iterator<std::vector<size_t> > back_it(neighbors);
+  std::back_insert_iterator<std::vector<size_t>> back_it(neighbors);
   size_t r = 2;
   int i;
 
@@ -217,7 +217,7 @@ TEST(NEST_NEIGHBOR, unitmap_neighbors_3d_boundary_2cell) {
   typedef NestType::ValueType VAL;
   NestType nest(2);
   std::vector<size_t> neighbors;
-  std::back_insert_iterator<std::vector<size_t> > back_it(neighbors);
+  std::back_insert_iterator<std::vector<size_t>> back_it(neighbors);
   size_t r = 4;
   int i;
 
@@ -296,7 +296,7 @@ TEST(NEST_NEIGHBOR, unitmap_neighbors_2d_boundary_20cell) {
   typedef NestType::ValueType VAL;
   NestType nest(20);
   std::vector<size_t> neighbors;
-  std::back_insert_iterator<std::vector<size_t> > back_it(neighbors);
+  std::back_insert_iterator<std::vector<size_t>> back_it(neighbors);
   size_t r = 2;
   int i;
 
@@ -336,7 +336,7 @@ TEST(NEST_NEIGHBOR, scalemap_neighbors_2d_boundary) {
                 NestType::Indices(4, 4));
 
   std::vector<size_t> neighbors;
-  std::back_insert_iterator<std::vector<size_t> > back_it(neighbors);
+  std::back_insert_iterator<std::vector<size_t>> back_it(neighbors);
   size_t r = 3;
   int i;
 

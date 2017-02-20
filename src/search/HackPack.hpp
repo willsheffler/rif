@@ -1,14 +1,14 @@
 #include "objective/storage/TwoBodyTable.hpp"
 
-#include <random>
 #include <boost/foreach.hpp>
+#include <random>
 
 namespace scheme {
 namespace search {
 
 template <typename Float>
-inline bool pass_metropolis(Float const& temperature, Float const& deltaE,
-                            Float const& random_uniform) {
+inline bool pass_metropolis(Float const &temperature, Float const &deltaE,
+                            Float const &random_uniform) {
   if (deltaE < 0) {
     return true;
   } else {  // evaluate prob of substitution
@@ -35,7 +35,7 @@ struct HackPackOpts {
   float rotamer_onebody_inclusion_threshold = 5.0;
   bool init_with_best_1be_rots = true;
 };
-std::ostream& operator<<(std::ostream& out, HackPackOpts const& hpo) {
+std::ostream &operator<<(std::ostream &out, HackPackOpts const &hpo) {
   out << "HackPackOpts:"
       << "\n  pack_iter_mult " << hpo.pack_iter_mult << "\n  hbond_weight "
       << hpo.hbond_weight << "\n  upweight_iface " << hpo.upweight_iface
@@ -56,21 +56,21 @@ std::ostream& operator<<(std::ostream& out, HackPackOpts const& hpo) {
 
 struct HackPack {
   typedef std::pair<int32_t, float> RotInfo;
-  typedef std::pair<int32_t, std::vector<RotInfo> > RotInfos;
+  typedef std::pair<int32_t, std::vector<RotInfo>> RotInfos;
   int nres_;                        // total res currently stored
   std::vector<RotInfos> res_rots_;  // iresapp + list of irottwob/onebody pairs
-  std::vector<std::pair<int32_t, int32_t> >
+  std::vector<std::pair<int32_t, int32_t>>
       rot_list_;  // list of ireslocal / irotlocal pairs
   std::vector<int32_t> current_rots_, trial_best_rots_,
       global_best_rots_;  // current rotamer in local numbering
   std::mt19937 rng;
-  ::scheme::objective::storage::TwoBodyTable<float> const&
-      twob_;  // dangerous, but faster than ptr / shared_ptr
+  ::scheme::objective::storage::TwoBodyTable<float> const
+      &twob_;  // dangerous, but faster than ptr / shared_ptr
   float score_, trial_best_score_, global_best_score_;
   HackPackOpts opts_;
   int32_t default_rot_num_;
-  HackPack(::scheme::objective::storage::TwoBodyTable<float> const& twob,
-           HackPackOpts const& opts, int32_t default_rot_num,
+  HackPack(::scheme::objective::storage::TwoBodyTable<float> const &twob,
+           HackPackOpts const &opts, int32_t default_rot_num,
            int seed_offset = 0  // mainly for threads
            )
       : nres_(0),
@@ -88,21 +88,21 @@ struct HackPack {
     // todo: always add native rotamer and ALA/GLY as appropriate
     // should hopefully not deallocate memory
     rot_list_.clear();
-    BOOST_FOREACH (RotInfos& rotinfos, res_rots_) {
+    BOOST_FOREACH (RotInfos &rotinfos, res_rots_) {
       rotinfos.first = -1;
       rotinfos.second.clear();
     }
     nres_ = 0;
   }
   template <class Int>
-  bool using_rotamer(Int const& ires, Int const& irotglobal) {
+  bool using_rotamer(Int const &ires, Int const &irotglobal) {
     ALWAYS_ASSERT(0 <= ires && ires < twob_.all2sel_.shape()[0]);
     ALWAYS_ASSERT(0 <= irotglobal && irotglobal < twob_.all2sel_.shape()[1]);
     return twob_.all2sel_[ires][irotglobal] >= 0;
   }
   template <class Int>
-  void add_tmp_rot(int const& ires, Int const& irotglobal,
-                   float const& onebody_e) {
+  void add_tmp_rot(int const &ires, Int const &irotglobal,
+                   float const &onebody_e) {
     // #pragma omp critical
     // {
     // 	std::cout << "================= add_tmp_rot " << ires << " " <<
@@ -149,7 +149,7 @@ struct HackPack {
     }
   }
 
-  float compute_energy_full(std::vector<int32_t> const& rots) const {
+  float compute_energy_full(std::vector<int32_t> const &rots) const {
     // using namespace ObjexxFCL::format;
     // for( int i = 1; i < nres_; ++i ){
     // 		int   const iresglobal = res_rots_[i].first;
@@ -195,9 +195,9 @@ struct HackPack {
     }
     return score;
   }
-  float compute_energy_delta(std::vector<int32_t> const& rots,
-                             int32_t const& ilres,
-                             int32_t const& ilrotnew) const {
+  float compute_energy_delta(std::vector<int32_t> const &rots,
+                             int32_t const &ilres,
+                             int32_t const &ilrotnew) const {
     // using namespace ObjexxFCL::format;
     float delta = 0;
     int32_t const ilrotold = rots.at(ilres);
@@ -252,14 +252,14 @@ struct HackPack {
     std::uniform_int_distribution<> rand_idx(0, nres_ - 1);
     return rand_idx(rng);
   }
-  int32_t randrot(int32_t const& ires) {
+  int32_t randrot(int32_t const &ires) {
     assert(res_rots_.at(ires).second.size() > 0);
     // if( res_rots_[ires].second.size() == 1 ) return 0;
     std::uniform_int_distribution<> rand_idx(
         0, res_rots_.at(ires).second.size() - 1);
     return rand_idx(rng);
   }
-  void randrot_not_current_uniform_res(int32_t& ires, int32_t& irot) {
+  void randrot_not_current_uniform_res(int32_t &ires, int32_t &irot) {
     for (int k = 0; k < 1000; ++k) {
       ires = randres();
       if (res_rots_.at(ires).second.size() > 1) break;
@@ -273,7 +273,7 @@ struct HackPack {
     }
     ALWAYS_ASSERT(0 <= irot && irot < res_rots_.at(ires).second.size());
   }
-  void randrot_not_current_uniform_rot(int32_t& ires, int32_t& irot) {
+  void randrot_not_current_uniform_rot(int32_t &ires, int32_t &irot) {
     std::uniform_int_distribution<> rand_idx(0, rot_list_.size() - 1);
     for (int i = 0; i < 1000; ++i) {
       int const irand = rand_idx(rng);
@@ -314,7 +314,10 @@ struct HackPack {
     // newfull << std::endl;
     // 	if( fabs(delta-test_delta) > 0.01 ){
     // 		#pragma omp critical
-    // 		std::cout << "fabs(delta-test_delta) " << fabs(delta-test_delta) << " "
+    // 		std::cout << "fabs(delta-test_delta) " << fabs(delta-test_delta)
+    // <<
+    // "
+    // "
     // << delta << " " << test_delta << std::endl;
     // 	}
     // }
@@ -362,8 +365,7 @@ struct HackPack {
       assign_random_rots();
     }
   }
-  void fill_result_rots(
-      std::vector<std::pair<int32_t, int32_t> >& result_rots) {
+  void fill_result_rots(std::vector<std::pair<int32_t, int32_t>> &result_rots) {
     result_rots.clear();
     for (int i = 0; i < nres_; ++i) {
       int32_t iresglobal = res_rots_.at(i).first;
@@ -386,7 +388,7 @@ struct HackPack {
       result_rots.push_back(std::make_pair(iresglobal, irotglobal));
     }
   }
-  float pack(std::vector<std::pair<int32_t, int32_t> >& result_rots) {
+  float pack(std::vector<std::pair<int32_t, int32_t>> &result_rots) {
     assert(res_rots_.size() >= nres_);
     for (int i = 0; i < nres_; ++i) {
       // std::cout << i << " " << res_rots_[i].second.size() << std::endl;
@@ -451,7 +453,7 @@ struct HackPack {
       int ires = this->res_rots_[ilres].first;
       // std::cout << I(3,ilres) << " res " << I(3,ires);
       std::cout << ilres << " res " << ires;
-      BOOST_FOREACH (typename HackPack::RotInfo const& rinfo,
+      BOOST_FOREACH (typename HackPack::RotInfo const &rinfo,
                      this->res_rots_[ilres].second) {
         std::cout << " " << rinfo.first << "/" << rinfo.second;
       }

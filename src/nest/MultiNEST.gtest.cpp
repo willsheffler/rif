@@ -39,9 +39,9 @@ TEST(MultiNest, boost_any) {
 
   any adsp = dsp;
   *dsp = 2.34;
-  ASSERT_EQ(2.34, *any_cast<shared_ptr<double> >(adsp));
+  ASSERT_EQ(2.34, *any_cast<shared_ptr<double>>(adsp));
   *dsp = 3.34;
-  ASSERT_EQ(3.34, **any_cast<shared_ptr<double> >(&adsp));
+  ASSERT_EQ(3.34, **any_cast<shared_ptr<double>>(&adsp));
   *dsp = 2.34;
   ASSERT_EQ(nullptr, any_cast<double *>(&adsp));
 }
@@ -57,7 +57,7 @@ TEST(MultiNest, expand_index) {
   multi.expand_index(0, indices);
   ASSERT_EQ(indices.size(), 0);
 
-  multi.add_nest(make_shared<NEST<1> >());
+  multi.add_nest(make_shared<NEST<1>>());
   ASSERT_EQ(multi.virtual_dim(), 1);
 
   for (int i = 0; i < 10; ++i) {
@@ -67,7 +67,7 @@ TEST(MultiNest, expand_index) {
     ASSERT_EQ(indices[0], i);
   }
 
-  multi.add_nest(make_shared<NEST<2> >());
+  multi.add_nest(make_shared<NEST<2>>());
   ASSERT_EQ(multi.virtual_dim(), 3);
 
   std::cout << endl;
@@ -94,9 +94,9 @@ TEST(MultiNest, get_state_single_cell) {
   MultiNest<uint64_t, uint64_t>::Indices indices;
 
   MultiNest<uint64_t, uint64_t> multi;
-  multi.add_nest(make_shared<NEST<1> >());
-  multi.add_nest(make_shared<NEST<2> >());
-  multi.add_nest(make_shared<NEST<3> >());
+  multi.add_nest(make_shared<NEST<1>>());
+  multi.add_nest(make_shared<NEST<2>>());
+  multi.add_nest(make_shared<NEST<3>>());
   ASSERT_EQ(multi.size(0), 1);
 
   typedef util::SimpleArray<1, double> A1;
@@ -172,9 +172,9 @@ TEST(MultiNest, get_index_single_cell) {
   MultiNest<uint64_t, uint64_t>::Indices indices;
 
   MultiNest<uint64_t, uint64_t> multi;
-  multi.add_nest(make_shared<NEST<1> >());
-  multi.add_nest(make_shared<NEST<2> >());
-  multi.add_nest(make_shared<NEST<3> >());
+  multi.add_nest(make_shared<NEST<1>>());
+  multi.add_nest(make_shared<NEST<2>>());
+  multi.add_nest(make_shared<NEST<3>>());
   ASSERT_EQ(multi.size(0), 1);
 
   typedef util::SimpleArray<1, double> A1;
@@ -204,9 +204,9 @@ TEST(MultiNest, get_state_two_cells) {
   MultiNest<uint64_t, uint64_t>::Indices indices;
 
   MultiNest<uint64_t, uint64_t> multi;
-  multi.add_nest(make_shared<NEST<1> >(2));
-  multi.add_nest(make_shared<NEST<2> >());
-  multi.add_nest(make_shared<NEST<3> >());
+  multi.add_nest(make_shared<NEST<1>>(2));
+  multi.add_nest(make_shared<NEST<2>>());
+  multi.add_nest(make_shared<NEST<3>>());
   ASSERT_EQ(multi.size(0), 2);
 
   typedef util::SimpleArray<1, double> A1;
@@ -309,9 +309,9 @@ TEST(MultiNest, get_index_two_cells) {
   MultiNest<uint64_t, uint64_t>::Indices indices;
 
   MultiNest<uint64_t, uint64_t> multi;
-  multi.add_nest(make_shared<NEST<1> >(2));
-  multi.add_nest(make_shared<NEST<2> >());
-  multi.add_nest(make_shared<NEST<3> >());
+  multi.add_nest(make_shared<NEST<1>>(2));
+  multi.add_nest(make_shared<NEST<2>>());
+  multi.add_nest(make_shared<NEST<3>>());
   ASSERT_EQ(multi.size(0), 2);
 
   typedef util::SimpleArray<1, double> A1;
@@ -341,9 +341,9 @@ TEST(MultiNest, get_state_ncell_handling) {
   MultiNest<uint64_t, uint64_t>::Indices indices;
 
   MultiNest<uint64_t, uint64_t> multi;
-  multi.add_nest(make_shared<NEST<1> >(4));
-  multi.add_nest(make_shared<NEST<2> >(3));
-  multi.add_nest(make_shared<NEST<3> >(2));
+  multi.add_nest(make_shared<NEST<1>>(4));
+  multi.add_nest(make_shared<NEST<2>>(3));
+  multi.add_nest(make_shared<NEST<3>>(2));
   ASSERT_EQ(multi.size(0), 24);
 
   typedef util::SimpleArray<1, double> A1;
@@ -563,9 +563,9 @@ TEST(MultiNest, get_index_ncell_handling) {
   MultiNest<uint64_t, uint64_t>::Indices indices;
 
   MultiNest<uint64_t, uint64_t> multi;
-  multi.add_nest(make_shared<NEST<1> >(4));
-  multi.add_nest(make_shared<NEST<2> >(3));
-  multi.add_nest(make_shared<NEST<3> >(2));
+  multi.add_nest(make_shared<NEST<1>>(4));
+  multi.add_nest(make_shared<NEST<2>>(3));
+  multi.add_nest(make_shared<NEST<3>>(2));
   ASSERT_EQ(multi.size(0), 24);
 
   typedef util::SimpleArray<1, double> A1;

@@ -106,15 +106,15 @@ class Quaternion {
     return;
   }
   // a.Times(b) returns a * b
-  Quaternion Times(const Quaternion& q) const {
+  Quaternion Times(const Quaternion &q) const {
     double mw = w * q.w - x * q.x - y * q.y - z * q.z,
            mx = w * q.x + x * q.w + y * q.z - z * q.y,
            my = w * q.y + y * q.w + z * q.x - x * q.z,
            mz = w * q.z + z * q.w + x * q.y - y * q.x;
     return Quaternion(mw, mx, my, mz);
   }
-  void Print(ostream& s) const;
-  void PrintEuler(ostream& s) const;
+  void Print(ostream &s) const;
+  void PrintEuler(ostream &s) const;
 };
 
 // Class to hold a set of orientations and weights
@@ -123,7 +123,7 @@ class PackSet {
   Quaternion Orientation(size_t i) const { return m_v[i]; }
   double Weight(size_t i) const { return m_w[i]; }
   size_t Number() const { return m_v.size(); }
-  void Add(const Quaternion& q, double w = 1) {
+  void Add(const Quaternion &q, double w = 1) {
     Quaternion v(q);
     v.Canonicalize();
     m_v.push_back(v);
@@ -133,7 +133,7 @@ class PackSet {
     m_v.clear();
     m_w.clear();
   }
-  void Print(ostream& s, bool euler = false, size_t prec = 6) const {
+  void Print(ostream &s, bool euler = false, size_t prec = 6) const {
     for (size_t i = 0; i < Number(); ++i) {
       if (euler)
         m_v[i].PrintEuler(s);
@@ -337,14 +337,14 @@ auto read_karney_orientation_file(std::string fname) {
   return std::make_tuple(quats, cover);
 }
 
-void Quaternion::Print(ostream& s) const {
+void Quaternion::Print(ostream &s) const {
   s << fixed << setprecision(9) << setw(12) << w << " ";
   s << setw(12) << x << " ";
   s << setw(12) << y << " ";
   s << setw(12) << z;
 }
 
-void Quaternion::PrintEuler(ostream& s) const {
+void Quaternion::PrintEuler(ostream &s) const {
   // Print out orientation as a set of Euler angles, following the
   // convention given in
   //

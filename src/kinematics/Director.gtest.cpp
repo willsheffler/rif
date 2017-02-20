@@ -19,17 +19,17 @@ struct TestScene : public SceneBase<X1dim> {
   TestScene() : SceneBase<X1dim>() {}
   virtual ~TestScene() {}
 
-  void add_position(X1dim const& x) {
+  void add_position(X1dim const &x) {
     this->positions_.push_back(x);
     update_symmetry(positions_.size());
   }
 
-  virtual shared_ptr<SceneBase<X1dim> > clone_deep() const {
+  virtual shared_ptr<SceneBase<X1dim>> clone_deep() const {
     return make_shared<TestScene>(*this);
   }
 };
 
-std::ostream& operator<<(std::ostream& out, TestScene const& s) {
+std::ostream &operator<<(std::ostream &out, TestScene const &s) {
   out << "TestScene";
   BOOST_FOREACH (X1dim x, s.positions_)
     out << "\t" << x;
@@ -69,16 +69,16 @@ TEST(Director, test_TreeDirector) {
   scene.add_position(0);
   // cout << scene << endl;
 
-  shared_ptr<scheme::nest::NestBase<> > x1nest =
-      make_shared<scheme::nest::NEST<1, X1dim> >(1);
-  shared_ptr<scheme::nest::NestBase<> > x1nest2 =
-      make_shared<scheme::nest::NEST<1, X1dim> >(2);
+  shared_ptr<scheme::nest::NestBase<>> x1nest =
+      make_shared<scheme::nest::NEST<1, X1dim>>(1);
+  shared_ptr<scheme::nest::NestBase<>> x1nest2 =
+      make_shared<scheme::nest::NEST<1, X1dim>>(2);
 
-  shared_ptr<SceneTree<X1dim> > child = make_shared<SceneTree<X1dim> >(10);
+  shared_ptr<SceneTree<X1dim>> child = make_shared<SceneTree<X1dim>>(10);
   child->add_body(1);
   child->add_position_nest(x1nest2);
 
-  shared_ptr<SceneTree<X1dim> > root = make_shared<SceneTree<X1dim> >(20);
+  shared_ptr<SceneTree<X1dim>> root = make_shared<SceneTree<X1dim>>(20);
   root->add_body(0);
   root->add_position_nest(x1nest);
   root->add_child(child);
@@ -108,7 +108,7 @@ TEST(Director, test_TreeDirector) {
   cout << "set_scene rate: " << (double)count / t.elapsed() << " / sec "
        << endl;
 
-  shared_ptr<SceneBase<X1dim> > test = scene.clone_deep();
+  shared_ptr<SceneBase<X1dim>> test = scene.clone_deep();
   // cout << test->position(0) << " " << scene.position(0) << endl;
   ASSERT_EQ(test->position(0)[0], scene.position(0)[0]);
   test->set_position(0, 0);

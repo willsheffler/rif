@@ -21,7 +21,7 @@ struct NESTED_FOR {
 template <>
 struct NESTED_FOR<1> {
   template <class Functor, class Indices>
-  NESTED_FOR(Indices const& lb, Indices const& ub, Functor& f) {
+  NESTED_FOR(Indices const &lb, Indices const &ub, Functor &f) {
     Indices i;
     for (i[0] = lb[0]; i[0] <= ub[0]; ++i[0]) {
       f(i);
@@ -32,7 +32,7 @@ struct NESTED_FOR<1> {
 template <>
 struct NESTED_FOR<2> {
   template <class Functor, class Indices>
-  NESTED_FOR(Indices const& lb, Indices const& ub, Functor& f) {
+  NESTED_FOR(Indices const &lb, Indices const &ub, Functor &f) {
     Indices i;
     for (i[1] = lb[1]; i[1] <= ub[1]; ++i[1]) {
       for (i[0] = lb[0]; i[0] <= ub[0]; ++i[0]) {
@@ -45,7 +45,7 @@ struct NESTED_FOR<2> {
 template <>
 struct NESTED_FOR<3> {
   template <class Functor, class Indices>
-  NESTED_FOR(Indices const& lb, Indices const& ub, Functor& f) {
+  NESTED_FOR(Indices const &lb, Indices const &ub, Functor &f) {
     Indices i;
     for (i[2] = lb[2]; i[2] <= ub[2]; ++i[2]) {
       for (i[1] = lb[1]; i[1] <= ub[1]; ++i[1]) {
@@ -60,7 +60,7 @@ struct NESTED_FOR<3> {
 template <>
 struct NESTED_FOR<4> {
   template <class Functor, class Indices>
-  NESTED_FOR(Indices const& lb, Indices const& ub, Functor& f) {
+  NESTED_FOR(Indices const &lb, Indices const &ub, Functor &f) {
     Indices i;
     for (i[3] = lb[3]; i[3] <= ub[3]; ++i[3]) {
       for (i[2] = lb[2]; i[2] <= ub[2]; ++i[2]) {
@@ -77,7 +77,7 @@ struct NESTED_FOR<4> {
 template <>
 struct NESTED_FOR<5> {
   template <class Functor, class Indices>
-  NESTED_FOR(Indices const& lb, Indices const& ub, Functor& f) {
+  NESTED_FOR(Indices const &lb, Indices const &ub, Functor &f) {
     Indices i;
     for (i[4] = lb[4]; i[4] <= ub[4]; ++i[4]) {
       for (i[3] = lb[3]; i[3] <= ub[3]; ++i[3]) {
@@ -96,7 +96,7 @@ struct NESTED_FOR<5> {
 template <>
 struct NESTED_FOR<6> {
   template <class Functor, class Indices>
-  NESTED_FOR(Indices const& lb, Indices const& ub, Functor& f) {
+  NESTED_FOR(Indices const &lb, Indices const &ub, Functor &f) {
     Indices i;
     for (i[5] = lb[5]; i[5] <= ub[5]; ++i[5]) {
       for (i[4] = lb[4]; i[4] <= ub[4]; ++i[4]) {
@@ -117,7 +117,7 @@ struct NESTED_FOR<6> {
 template <>
 struct NESTED_FOR<7> {
   template <class Functor, class Indices>
-  NESTED_FOR(Indices const& lb, Indices const& ub, Functor& f) {
+  NESTED_FOR(Indices const &lb, Indices const &ub, Functor &f) {
     Indices i;
     for (i[6] = lb[6]; i[6] <= ub[6]; ++i[6]) {
       for (i[5] = lb[5]; i[5] <= ub[5]; ++i[5]) {
@@ -140,7 +140,7 @@ struct NESTED_FOR<7> {
 template <>
 struct NESTED_FOR<8> {
   template <class Functor, class Indices>
-  NESTED_FOR(Indices const& lb, Indices const& ub, Functor& f) {
+  NESTED_FOR(Indices const &lb, Indices const &ub, Functor &f) {
     Indices i;
     for (i[7] = lb[7]; i[7] <= ub[7]; ++i[7]) {
       for (i[6] = lb[6]; i[6] <= ub[6]; ++i[6]) {
@@ -165,7 +165,7 @@ struct NESTED_FOR<8> {
 template <>
 struct NESTED_FOR<9> {
   template <class Functor, class Indices>
-  NESTED_FOR(Indices const& lb, Indices const& ub, Functor& f) {
+  NESTED_FOR(Indices const &lb, Indices const &ub, Functor &f) {
     Indices i;
     for (i[8] = lb[8]; i[8] <= ub[8]; ++i[8]) {
       for (i[7] = lb[7]; i[7] <= ub[7]; ++i[7]) {
@@ -192,7 +192,7 @@ struct NESTED_FOR<9> {
 template <>
 struct NESTED_FOR<10> {
   template <class Functor, class Indices>
-  NESTED_FOR(Indices const& lb, Indices const& ub, Functor& f) {
+  NESTED_FOR(Indices const &lb, Indices const &ub, Functor &f) {
     Indices i;
     for (i[9] = lb[9]; i[9] <= ub[9]; ++i[9]) {
       for (i[8] = lb[8]; i[8] <= ub[8]; ++i[8]) {

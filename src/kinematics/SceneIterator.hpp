@@ -145,7 +145,7 @@ struct SceneIter1B
 
 template <class I>
 struct make_pairpair {
-  typedef std::pair<std::pair<I, I>, std::pair<I, I> > type;
+  typedef std::pair<std::pair<I, I>, std::pair<I, I>> type;
 };
 
 struct CountPairNoDuplicates {

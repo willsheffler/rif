@@ -8,7 +8,7 @@ namespace rosetta {
 
 std::map<std::pair<std::string, std::string>, int> rosetta_atype_map;
 
-int rosetta_atom_type(std::string const& resname, std::string const& atomname) {
+int rosetta_atom_type(std::string const &resname, std::string const &atomname) {
   // std::cout << "rosetta_atom_type " <<  << std::endl;
   std::map<std::pair<std::string, std::string>, int>::const_iterator i =
       rosetta_atype_map.find(std::make_pair(resname, atomname));

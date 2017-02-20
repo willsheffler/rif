@@ -9,7 +9,7 @@ namespace scheme {
 namespace numeric {
 
 template <class T>
-void rand_xform(std::mt19937& rng, Eigen::Transform<T, 3, Eigen::Affine>& x,
+void rand_xform(std::mt19937 &rng, Eigen::Transform<T, 3, Eigen::Affine> &x,
                 T cart_bound = 512.0) {
   std::uniform_real_distribution<> runif;
   std::normal_distribution<> rnorm;
@@ -30,8 +30,8 @@ void rand_xform(std::mt19937& rng, Eigen::Transform<T, 3, Eigen::Affine>& x,
 }
 
 template <class T>
-void rand_xform(std::mt19937& rng,
-                Eigen::Transform<T, 3, Eigen::AffineCompact>& x,
+void rand_xform(std::mt19937 &rng,
+                Eigen::Transform<T, 3, Eigen::AffineCompact> &x,
                 T cart_bound = 512.0) {
   std::uniform_real_distribution<> runif;
   std::normal_distribution<> rnorm;
@@ -46,16 +46,16 @@ void rand_xform(std::mt19937& rng,
 }
 
 template <class X>
-X rand_xform(std::mt19937& rng, scalar<X> cart_bound = 512.0) {
+X rand_xform(std::mt19937 &rng, scalar<X> cart_bound = 512.0) {
   X x;
   rand_xform(rng, x, cart_bound);
   return x;
 }
 
 template <class T>
-void rand_xform_cartnormal(std::mt19937& rng,
-                           Eigen::Transform<T, 3, Eigen::AffineCompact>& x,
-                           T const& cart_sd) {
+void rand_xform_cartnormal(std::mt19937 &rng,
+                           Eigen::Transform<T, 3, Eigen::AffineCompact> &x,
+                           T const &cart_sd) {
   std::uniform_real_distribution<> runif;
   std::normal_distribution<> rnorm;
   Eigen::Quaterniond qrand(rnorm(rng), rnorm(rng), rnorm(rng), rnorm(rng));
@@ -68,8 +68,8 @@ void rand_xform_cartnormal(std::mt19937& rng,
 }
 
 template <class T>
-void rand_xform_quat(std::mt19937& rng,
-                     Eigen::Transform<T, 3, Eigen::AffineCompact>& x,
+void rand_xform_quat(std::mt19937 &rng,
+                     Eigen::Transform<T, 3, Eigen::AffineCompact> &x,
                      double cart_bound, double quat_bound) {
   std::uniform_real_distribution<> runif;
   std::normal_distribution<> rnorm;
@@ -104,8 +104,8 @@ void rand_xform_quat(std::mt19937& rng,
 }
 
 template <class T>
-void rand_xform_sphere(std::mt19937& rng,
-                       Eigen::Transform<T, 3, Eigen::AffineCompact>& x,
+void rand_xform_sphere(std::mt19937 &rng,
+                       Eigen::Transform<T, 3, Eigen::AffineCompact> &x,
                        T const cart_radius, T const ang_radius) {
   std::normal_distribution<> rnorm;
   std::uniform_real_distribution<> runif;

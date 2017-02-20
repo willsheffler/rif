@@ -12,14 +12,14 @@ struct X1dim {
   double val_;
   X1dim() : val_(0) {}
   X1dim(double d) : val_(d) {}
-  bool operator==(X1dim const& o) const { return o.val_ == val_; }
-  bool operator<(X1dim const& o) const { return val_ < o.val_; }
+  bool operator==(X1dim const &o) const { return o.val_ == val_; }
+  bool operator<(X1dim const &o) const { return val_ < o.val_; }
   template <class Archive>
-  void serialize(Archive& ar, const unsigned int) {
-    ar& val_;
+  void serialize(Archive &ar, const unsigned int) {
+    ar &val_;
   }
   static X1dim Identity() { return X1dim(0.0); }
-  double& operator[](int i) {
+  double &operator[](int i) {
     assert(i == 0);
     return val_;
   }
@@ -29,7 +29,7 @@ struct X1dim {
   }
 };
 inline X1dim operator*(X1dim a, X1dim b) { return X1dim(a.val_ + b.val_); }
-inline std::ostream& operator<<(std::ostream& out, X1dim const& x) {
+inline std::ostream &operator<<(std::ostream &out, X1dim const &x) {
   return out << x.val_;
 }
 inline X1dim inverse(X1dim x) { return X1dim(-x.val_); }

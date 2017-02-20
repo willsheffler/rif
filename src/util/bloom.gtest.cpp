@@ -68,7 +68,8 @@ using std::endl;
 // 			avg_tot_rot += tot_rot;
 // 		}
 // 		avg_tot_rot /= NSAMP;
-// 		cout << "avg num configurations: " << NRES << " " << avg_tot_rot <<
+// 		cout << "avg num configurations: " << NRES << " " << avg_tot_rot
+// <<
 // endl;
 // 	}
 // }

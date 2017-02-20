@@ -30,18 +30,18 @@ TEST(hana, demo_test) {
 
   // Computations on types can be performed with the same syntax as that of
   // normal C++. Believe it or not, everything is done at compile-time.
-  auto animal_types = hana::make_tuple(hana::type_c<Fish*>, hana::type_c<Cat&>,
-                                       hana::type_c<Dog*>);
+  auto animal_types = hana::make_tuple(
+      hana::type_c<Fish *>, hana::type_c<Cat &>, hana::type_c<Dog *>);
   auto animal_ptrs = hana::filter(
       animal_types, [](auto a) { return hana::traits::is_pointer(a); });
-  static_assert(
-      animal_ptrs == hana::make_tuple(hana::type_c<Fish*>, hana::type_c<Dog*>),
-      "");
+  static_assert(animal_ptrs ==
+                    hana::make_tuple(hana::type_c<Fish *>, hana::type_c<Dog *>),
+                "");
 
   // And many other goodies to make your life easier, including:
   // 1. Access to elements in a tuple with a sane syntax.
-  static_assert(animal_ptrs[0_c] == hana::type_c<Fish*>, "");
-  static_assert(animal_ptrs[1_c] == hana::type_c<Dog*>, "");
+  static_assert(animal_ptrs[0_c] == hana::type_c<Fish *>, "");
+  static_assert(animal_ptrs[1_c] == hana::type_c<Dog *>, "");
 
   // 2. Unroll loops at compile-time without hassle.
   std::string s;
@@ -51,7 +51,7 @@ TEST(hana, demo_test) {
 
   // 3. Easily check whether an expression is valid.
   //    This is usually achieved with complex SFINAE-based tricks.
-  auto has_name = hana::is_valid([](auto&& x) -> decltype((void)x.name) {});
+  auto has_name = hana::is_valid([](auto &&x) -> decltype((void)x.name) {});
   static_assert(has_name(animals[0_c]), "");
   static_assert(!has_name(1), "");
 }

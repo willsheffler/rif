@@ -48,8 +48,8 @@ struct Rotation1DMap {
 
   ///@brief sets value to parameters without change
   ///@return false iff invalid parameters
-  bool params_to_value(Params const& params, Index cell_index, Index resl,
-                       Value& value) const {
+  bool params_to_value(Params const &params, Index cell_index, Index resl,
+                       Value &value) const {
     BOOST_ASSERT(fabs(axis.norm() - 1.0) < 0.00001);
     BOOST_ASSERT(lb < ub);
     bool doflip = cell_index >= nside;
@@ -67,8 +67,8 @@ struct Rotation1DMap {
     return true;
   }
 
-  void get_axis_angle_and_flip(Value value, Eigen::Vector3d& ax, Float& ang,
-                               bool& doflip) const {
+  void get_axis_angle_and_flip(Value value, Eigen::Vector3d &ax, Float &ang,
+                               bool &doflip) const {
     Eigen::AngleAxis<Float> aa(value);
     ang = aa.angle();
     ax = aa.axis();
@@ -95,8 +95,8 @@ struct Rotation1DMap {
 
   ///@brief sets params/cell_index from value
   ///@note necessary for value lookup and neighbor lookup
-  bool value_to_params(Value const& value0, Index /*resl*/, Params& params,
-                       Index& cell_index) const {
+  bool value_to_params(Value const &value0, Index /*resl*/, Params &params,
+                       Index &cell_index) const {
     M value = value0;
     BOOST_ASSERT(fabs(axis.norm() - 1.0) < 0.00001);
     BOOST_ASSERT(lb < ub);
@@ -123,7 +123,7 @@ struct Rotation1DMap {
 
   ///@brief get parameter space repr of Value for particular cell
   ///@note necessary only for neighbor lookup
-  void value_to_params_for_cell(Value const& value, Params& params) const {
+  void value_to_params_for_cell(Value const &value, Params &params) const {
     std::cerr << "Not Implemented" << std::endl;
     std::exit(-1);
   }
@@ -131,14 +131,14 @@ struct Rotation1DMap {
   ///@brief return the cell_index of neighboring cells within radius of value
   ///@note delta parameter is in "Parameter Space"
   template <class OutIter>
-  void get_neighboring_cells(Value const& value, Float radius,
+  void get_neighboring_cells(Value const &value, Float radius,
                              OutIter out) const {
     std::cerr << "Not Implemented" << std::endl;
     std::exit(-1);
   }
 
   ///@brief aka covering radius max distance from bin center to any value within
-  ///bin
+  /// bin
   Float bin_circumradius(Index resl) const {
     return (ub - lb) / nside / (Float)(1 << resl);
   }

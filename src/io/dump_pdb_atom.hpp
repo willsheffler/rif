@@ -13,8 +13,8 @@ namespace io {
 
 using chemical::AtomData;
 
-inline void dump_pdb_atom(std::ostream& out, double x, double y, double z,
-                          AtomData const& a = AtomData()) {
+inline void dump_pdb_atom(std::ostream &out, double x, double y, double z,
+                          AtomData const &a = AtomData()) {
   // std::string atomname,resname,elem;
   // int atomnum,resnum;
   // char chain;
@@ -40,10 +40,10 @@ inline void dump_pdb_atom(std::ostream& out, double x, double y, double z,
 }
 
 template <class XYZ>
-inline void dump_pdb_atom_resname_atomname(std::ostream& out,
-                                           std::string const& resname,
-                                           std::string const& atomname,
-                                           XYZ const& xyz) {
+inline void dump_pdb_atom_resname_atomname(std::ostream &out,
+                                           std::string const &resname,
+                                           std::string const &atomname,
+                                           XYZ const &xyz) {
   AtomData a;
   a.resname = resname;
   a.atomname = atomname;
@@ -51,16 +51,16 @@ inline void dump_pdb_atom_resname_atomname(std::ostream& out,
 }
 
 template <class XYZ>
-inline void dump_pdb_atom(std::ostream& out, std::string const& elem,
-                          XYZ const& xyz) {
+inline void dump_pdb_atom(std::ostream &out, std::string const &elem,
+                          XYZ const &xyz) {
   AtomData a;
   a.elem = elem;
   dump_pdb_atom(out, xyz[0], xyz[1], xyz[2], a);
 }
 
 template <class XYZ>
-inline void dump_pdb_atom(std::ostream& out, std::string elem, int resi,
-                          XYZ const& xyz) {
+inline void dump_pdb_atom(std::ostream &out, std::string elem, int resi,
+                          XYZ const &xyz) {
   AtomData a;
   a.elem = elem;
   a.resnum = resi;
@@ -68,20 +68,20 @@ inline void dump_pdb_atom(std::ostream& out, std::string elem, int resi,
 }
 
 template <class XYZ>
-inline void dump_pdb_atom(std::ostream& out, int index, XYZ const& xyz) {
+inline void dump_pdb_atom(std::ostream &out, int index, XYZ const &xyz) {
   AtomData a;
   a.atomnum = index;
   dump_pdb_atom(out, xyz[0], xyz[1], xyz[2], a);
 }
 
 template <class XYZ>
-inline void dump_pdb_atom(std::ostream& out, XYZ const& xyz,
-                          AtomData const& a) {
+inline void dump_pdb_atom(std::ostream &out, XYZ const &xyz,
+                          AtomData const &a) {
   dump_pdb_atom(out, xyz[0], xyz[1], xyz[2], a);
 }
 
 template <class XYZ>
-inline void dump_pdb_atom(std::ostream& out, XYZ const& xyz, AtomData const& a,
+inline void dump_pdb_atom(std::ostream &out, XYZ const &xyz, AtomData const &a,
                           int resi) {
   AtomData d(a);
   d.resnum = resi;
@@ -89,7 +89,7 @@ inline void dump_pdb_atom(std::ostream& out, XYZ const& xyz, AtomData const& a,
 }
 
 template <class Atom>
-inline void dump_pdb_atom(std::ostream& out, Atom const& atom, int iatom = -1,
+inline void dump_pdb_atom(std::ostream &out, Atom const &atom, int iatom = -1,
                           int ires = -1, char chain = 0) {
   AtomData d = atom.data();
   if (iatom > 0) d.atomnum = iatom;
@@ -100,7 +100,7 @@ inline void dump_pdb_atom(std::ostream& out, Atom const& atom, int iatom = -1,
 }
 
 template <class Atom>
-inline std::string dump_pdb_atom(Atom const& atom) {
+inline std::string dump_pdb_atom(Atom const &atom) {
   std::ostringstream o;
   dump_pdb_atom(o, atom.position()[0], atom.position()[1], atom.position()[2],
                 atom.data());

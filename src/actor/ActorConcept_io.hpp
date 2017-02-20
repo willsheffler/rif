@@ -8,7 +8,7 @@ namespace scheme {
 namespace actor {
 
 template <class P, class D>
-std::ostream& operator<<(std::ostream& out, ActorConcept<P, D> const& a) {
+std::ostream &operator<<(std::ostream &out, ActorConcept<P, D> const &a) {
   return out << "Actor( " << a.position_ << ", " << a.data_ << " )";
 }
 

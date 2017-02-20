@@ -71,12 +71,12 @@ struct EtableParamsOnePair {
 
   CubicPolynomial fasol_cubic_poly1_close;  // desolvation of atom 1 by atom 2
   Real fasol_cubic_poly1_close_flat;  // the fixed value used for distances
-                                      // beneath fasol_cubic_poly_close_start
+  // beneath fasol_cubic_poly_close_start
   CubicPolynomial fasol_cubic_poly1_far;  // desolvation of atom 1 by atom 2
 
   CubicPolynomial fasol_cubic_poly2_close;  // desolvation of atom 2 by atom 1
   Real fasol_cubic_poly2_close_flat;  // the fixed value used for distances
-                                      // beneath fasol_cubic_poly_close_start
+  // beneath fasol_cubic_poly_close_start
   CubicPolynomial fasol_cubic_poly2_far;  // desolvation of atom 2 by atom 1
   Real ljatr_final_weight;
   Real fasol_final_weight;
@@ -131,10 +131,10 @@ struct EtableParamsOnePair {
 };
 
 template <typename Real>
-struct EtableParams : std::vector<EtableParamsOnePair<Real> > {
+struct EtableParams : std::vector<EtableParamsOnePair<Real>> {
   static std::size_t const N_ATOMTYPES = 25;
   template <class Size>
-  EtableParamsOnePair<Real> const& params_for_pair(Size atype1,
+  EtableParamsOnePair<Real> const &params_for_pair(Size atype1,
                                                    Size atype2) const {
     Size i1 = atype1 < atype2 ? atype1 : atype2;
     Size i2 = atype1 < atype2 ? atype2 : atype1;

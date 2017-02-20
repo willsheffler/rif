@@ -25,7 +25,7 @@ struct MultiNest : public NestBase<Index> {
   Index max_valid_resl_;
 
   MultiNest() { init(); }
-  MultiNest(Nests const& nests) { init(nests); }
+  MultiNest(Nests const &nests) { init(nests); }
 
   Index max_valid_resl() const { return max_valid_resl_; }
 
@@ -34,7 +34,7 @@ struct MultiNest : public NestBase<Index> {
     init();
   }
 
-  void init(Nests const& nests) {
+  void init(Nests const &nests) {
     nests_ = nests;
     init();
   }
@@ -68,7 +68,7 @@ struct MultiNest : public NestBase<Index> {
   }
 
   template <class Anys>
-  bool get_states(BigIndex const& index, Index resl, Anys& anys) const {
+  bool get_states(BigIndex const &index, Index resl, Anys &anys) const {
     BOOST_VERIFY(resl <= max_valid_resl_);
     BOOST_VERIFY(anys.size() == nests_.size());
     BOOST_VERIFY(index < size(resl));
@@ -91,7 +91,7 @@ struct MultiNest : public NestBase<Index> {
     return true;
   }
 
-  void expand_index(BigIndex const& index, Indices& out) const {
+  void expand_index(BigIndex const &index, Indices &out) const {
     out.resize(dim_);
     for (Index i = 0; i < dim_; ++i) {
       out[i] = util::undilate(dim_, index >> i);
@@ -103,7 +103,7 @@ struct MultiNest : public NestBase<Index> {
 
   ///@brief virtual virtual function to set the state of this nest
   ///@returns false if invalid index
-  virtual bool virtual_get_state(Index index, Index resl, boost::any& result) {
+  virtual bool virtual_get_state(Index index, Index resl, boost::any &result) {
     BOOST_VERIFY(resl <= max_valid_resl_);
     std::cout << "sheffler: not implemented yet" << std::endl;
     std::exit(-1);
@@ -111,12 +111,12 @@ struct MultiNest : public NestBase<Index> {
 
   ///@brief virtual virtual function to set the state of this nest
   ///@detail will consume DIM indices from hindices vector, starting at iindex,
-  ///then will increment iindex
+  /// then will increment iindex
   ///        for use in composite data structures containing NestBases
   ///@returns false if invalid index
-  virtual bool virtual_get_state(std::vector<Index> const& indices,
-                                 Index cell_index, size_t& iindex, Index resl,
-                                 boost::any& result) {
+  virtual bool virtual_get_state(std::vector<Index> const &indices,
+                                 Index cell_index, size_t &iindex, Index resl,
+                                 boost::any &result) {
     BOOST_VERIFY(resl <= max_valid_resl_);
     std::cout << "sheffler: not implemented yet" << std::endl;
     std::exit(-1);
@@ -145,11 +145,11 @@ struct MultiNest : public NestBase<Index> {
   }
 
   ///@brief virtual function returning index of value (sent as boost::any)
-  virtual Index virtual_get_index(boost::any const& val, Index resl) const {
+  virtual Index virtual_get_index(boost::any const &val, Index resl) const {
     BOOST_VERIFY(resl <= max_valid_resl_);
     // std::cout << "attempt to cast to vector<any> cosnt *" << std::endl;
-    std::vector<boost::any> const& anys =
-        *boost::any_cast<std::vector<boost::any>*>(val);
+    std::vector<boost::any> const &anys =
+        *boost::any_cast<std::vector<boost::any> *>(val);
     // std::cout << "   cast success" << std::endl;
     BOOST_VERIFY(nests_.size() == anys.size());
     std::vector<Index> indices, cell_indices;
@@ -183,9 +183,9 @@ struct MultiNest : public NestBase<Index> {
     return index | cell_index << (dim_ * resl);
   }
 
-  virtual bool virtual_get_indices(boost::any const& val, Index resl,
-                                   Index& cell_index_out,
-                                   std::vector<Index>& indices_out) const {
+  virtual bool virtual_get_indices(boost::any const &val, Index resl,
+                                   Index &cell_index_out,
+                                   std::vector<Index> &indices_out) const {
     BOOST_VERIFY(resl <= max_valid_resl_);
     BOOST_VERIFY(false);
     return true;

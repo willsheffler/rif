@@ -79,8 +79,8 @@ namespace score {
 /// desolvation
 /// of atom 2 by atom 1.
 template <typename Real, typename LKParams>
-void lk_evaluation(LKParams const& p, Real const dis, Real const inv_dis2,
-                   Real& fa_solE) {
+void lk_evaluation(LKParams const &p, Real const dis, Real const inv_dis2,
+                   Real &fa_solE) {
   /// a) At distances below p.fasol_cubic_poly_close_start, the value of fasol
   /// is held constant.
   /// b) Then there's a cubic_poly to smooth between this constant region and
@@ -114,8 +114,8 @@ void lk_evaluation(LKParams const& p, Real const dis, Real const inv_dis2,
 
 /// @brief Evaluate the lk solvation energy derivative of given atom pair.
 template <typename Real, typename LKParams>
-void lk_derivative(LKParams const& p, Real const dis, Real const inv_dis,
-                   Real const inv_dis2, Real& dfasolE_ddis) {
+void lk_derivative(LKParams const &p, Real const dis, Real const inv_dis,
+                   Real const inv_dis2, Real &dfasolE_ddis) {
   /// a) At distances below p.fasol_cubic_poly_close_start, the value of fasol
   /// is held constant.
   /// b) Then there's a cubic_poly to smooth between this constant region and
@@ -203,7 +203,7 @@ void lk_derivative(LKParams const& p, Real const dis, Real const inv_dis,
 /// Only call this function if the square distance is in the range
 /// sqrt( p.ljrep_linear_ramp_d2_cutoff ) < dis < p.ljatr_cubic_poly_xhi
 template <typename Real, typename LJParams>
-Real lj_generic_form(Real const dis2, Real const inv_dis2, LJParams const& p) {
+Real lj_generic_form(Real const dis2, Real const inv_dis2, LJParams const &p) {
   assert(dis2 >= p.ljrep_linear_ramp_d2_cutoff);
   assert(dis2 <= p.ljatr_cubic_poly_xhi * p.ljatr_cubic_poly_xhi);
   Real const inv_dis6 = inv_dis2 * inv_dis2 * inv_dis2;
@@ -217,15 +217,15 @@ Real lj_generic_form(Real const dis2, Real const inv_dis2, LJParams const& p) {
 /// Only call this function if the square distance is in the range
 /// p.ljatr_cubic_poly_xlo < dis < p.ljatr_cubic_poly_xhi
 template <typename Real, typename LJParams>
-Real ljatr_cubic_poly_ramp_to_zero(Real const dis, LJParams const& p) {
+Real ljatr_cubic_poly_ramp_to_zero(Real const dis, LJParams const &p) {
   assert(dis >= p.ljatr_cubic_poly_xlo);
   assert(dis <= p.ljatr_cubic_poly_xhi);
   return eval_cubic_polynomial(dis, p.ljatr_cubic_poly_parameters);
 }
 
 template <typename Real, typename LJParams>
-void lj_evaluation(LJParams const& p, Real const dis, Real const dis2,
-                   Real const inv_dis2, Real& lj_atrE, Real& lj_repE) {
+void lj_evaluation(LJParams const &p, Real const dis, Real const dis2,
+                   Real const inv_dis2, Real &lj_atrE, Real &lj_repE) {
   // locals
   Real ljE;
 
@@ -301,16 +301,16 @@ void lj_evaluation(LJParams const& p, Real const dis, Real const dis2,
 /// Only call this function if the square distance is in the range
 /// p.ljatr_cubic_poly_xlo < dis < p.ljatr_cubic_poly_xhi
 template <typename Real, typename LJParams>
-Real ljatr_cubic_poly_ramp_to_zero_deriv(Real const dis, LJParams const& p) {
+Real ljatr_cubic_poly_ramp_to_zero_deriv(Real const dis, LJParams const &p) {
   assert(dis >= p.ljatr_cubic_poly_xlo);
   assert(dis <= p.ljatr_cubic_poly_xhi);
   return cubic_polynomial_deriv(dis, p.ljatr_cubic_poly_parameters);
 }
 
 template <typename Real, typename LJParams>
-void lj_derivatives(LJParams const& p, Real const dis, Real const inv_dis,
-                    Real const dis2, Real const inv_dis2, Real& dljatrE_ddis,
-                    Real& dljrepE_ddis) {
+void lj_derivatives(LJParams const &p, Real const dis, Real const inv_dis,
+                    Real const dis2, Real const inv_dis2, Real &dljatrE_ddis,
+                    Real &dljrepE_ddis) {
   // locals
   Real dljE(1), inv_dis6(1);
 

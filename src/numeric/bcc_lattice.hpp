@@ -18,22 +18,22 @@ struct BCC {
   Indices nside_, nside_prefsum_;
   Floats lower_, width_, lower_cen_, half_width_;
 
-  bool operator!=(BCC<DIM, Float, Index> const& o) const {
+  bool operator!=(BCC<DIM, Float, Index> const &o) const {
     return !(*this == o);
   }
-  bool operator==(BCC<DIM, Float, Index> const& o) const {
+  bool operator==(BCC<DIM, Float, Index> const &o) const {
     return nside_ == o.nside_ && lower_ == o.lower_ && width_ == o.width_;
   }
 
   BCC() {}
 
   template <class Sizes>
-  BCC(Sizes const& sizes, Floats lower = Floats(0), Floats upper = Floats(1)) {
+  BCC(Sizes const &sizes, Floats lower = Floats(0), Floats upper = Floats(1)) {
     init(sizes, lower, upper);
   }
 
   template <class Sizes>
-  void init(Sizes const& sizes, Floats lower, Floats upper) {
+  void init(Sizes const &sizes, Floats lower, Floats upper) {
     nside_ = sizes;
     lower_ = lower;
     for (size_t i = 0; i < DIM; ++i) nside_prefsum_[i] = nside_.prod(i);
@@ -50,12 +50,12 @@ struct BCC {
     return this->get_center(indices, odd);
   }
 
-  Floats get_center(Indices const& indices, bool const& odd) const {
+  Floats get_center(Indices const &indices, bool const &odd) const {
     return lower_cen_ + width_ * indices.template cast<Float>() +
            (odd ? half_width_ : 0);
   }
 
-  Indices get_indices(Floats value, bool& odd) const {
+  Indices get_indices(Floats value, bool &odd) const {
     value = (value - lower_) / width_;
     Indices const indices = value.template cast<Index>();
     value = value - indices.template cast<Float>() - 0.5;
@@ -64,7 +64,7 @@ struct BCC {
     return odd ? corner_indices : indices;
   }
 
-  Index operator[](Floats const& value) const {
+  Index operator[](Floats const &value) const {
     bool odd;
     Indices indices = get_indices(value, odd);
     Index index = (nside_prefsum_ * indices).sum();
@@ -129,7 +129,7 @@ struct BCC {
 };
 
 template <int DIM, class Float, class Index>
-std::ostream& operator<<(std::ostream& out, BCC<DIM, Float, Index> const& bcc) {
+std::ostream &operator<<(std::ostream &out, BCC<DIM, Float, Index> const &bcc) {
   return out << "lb " << bcc.lower_ << " w " << bcc.width_;
 }
 
@@ -145,13 +145,13 @@ struct Cubic {
   Cubic() {}
 
   template <class Sizes>
-  Cubic(Sizes const& sizes, Floats lower = Floats(0),
+  Cubic(Sizes const &sizes, Floats lower = Floats(0),
         Floats upper = Floats(1)) {
     init(sizes, lower, upper);
   }
 
   template <class Sizes>
-  void init(Sizes const& sizes, Floats lower = Floats(0),
+  void init(Sizes const &sizes, Floats lower = Floats(0),
             Floats upper = Floats(1)) {
     nside_ = sizes;
     lower_ = lower;
@@ -168,7 +168,7 @@ struct Cubic {
     return get_center(indices);
   }
 
-  Floats get_center(Indices const& indices) const {
+  Floats get_center(Indices const &indices) const {
     return lower_cen_ + width_ * indices.template cast<Float>();
   }
 
@@ -177,7 +177,7 @@ struct Cubic {
     return value.template cast<Index>();
   }
 
-  Index operator[](Floats const& value) const {
+  Index operator[](Floats const &value) const {
     Indices indices = get_indices(value);
     return (nside_prefsum_ * indices).sum();
   }

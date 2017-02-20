@@ -17,8 +17,8 @@ namespace m = boost::mpl;
 template <typename SeqA, typename SeqB>
 struct intersect {
   typedef typename m::copy<
-      SeqB, m::inserter<m::set<>, m::insert<m::_1, m::_2> > >::type set_seq2;
-  typedef typename m::copy_if<SeqA, m::has_key<set_seq2, m::_1> >::type type;
+      SeqB, m::inserter<m::set<>, m::insert<m::_1, m::_2>>>::type set_seq2;
+  typedef typename m::copy_if<SeqA, m::has_key<set_seq2, m::_1>>::type type;
 };
 }
 }

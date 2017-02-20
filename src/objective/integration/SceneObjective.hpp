@@ -7,7 +7,7 @@ namespace scheme {
 namespace objective {
 namespace integration {
 
-typedef std::vector<std::pair<int32_t, int32_t> > Rotamers;
+typedef std::vector<std::pair<int32_t, int32_t>> Rotamers;
 
 // todo: move this into the proper libraries
 template <class _Position, class _Index = uint64_t>
@@ -74,14 +74,14 @@ struct SceneObjectiveParametric
   template <class RotMeth>
   typename boost::disable_if<boost::is_same<void, RotMeth>, void>::type
   fill_rotamers(typename Objective::Results const &results,
-                std::vector<std::pair<int32_t, int32_t> > &rotamers) const {
+                std::vector<std::pair<int32_t, int32_t>> &rotamers) const {
     rotamers = results.template get<_RotamerMethod>().rotamers_;
   }
 
   template <class RotMeth>
   typename boost::enable_if<boost::is_same<void, RotMeth>, void>::type
   fill_rotamers(typename Objective::Results const &results,
-                std::vector<std::pair<int32_t, int32_t> > &rotamers) const {
+                std::vector<std::pair<int32_t, int32_t>> &rotamers) const {
     std::cerr
         << "rotamer output not supported if _RotamerMethod is void/unspecified"
         << std::endl;

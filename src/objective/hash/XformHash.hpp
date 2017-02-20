@@ -15,8 +15,8 @@ namespace hash {
 
 template <class Float>
 void get_transform_rotation(
-    Eigen::Transform<Float, 3, Eigen::AffineCompact> const& x,
-    Eigen::Matrix<Float, 3, 3>& rotation) {
+    Eigen::Transform<Float, 3, Eigen::AffineCompact> const &x,
+    Eigen::Matrix<Float, 3, 3> &rotation) {
   for (int i = 0; i < 9; ++i) rotation.data()[i] = x.data()[i];
 }
 
@@ -39,10 +39,10 @@ struct XformHash_Quat_BCC7_Zorder {
 
   Grid grid_;
 
-  bool operator==(XformHash_Quat_BCC7_Zorder<Xform> const& o) const {
+  bool operator==(XformHash_Quat_BCC7_Zorder<Xform> const &o) const {
     return grid_ == o.grid_;
   }
-  bool operator!=(XformHash_Quat_BCC7_Zorder<Xform> const& o) const {
+  bool operator!=(XformHash_Quat_BCC7_Zorder<Xform> const &o) const {
     return grid_ != o.grid_;
   }
 
@@ -105,7 +105,7 @@ struct XformHash_Quat_BCC7_Zorder {
     // std::cout << "NSIDE " << nside << std::endl;
   }
 
-  Key get_key(Xform const& x) const {
+  Key get_key(Xform const &x) const {
     Eigen::Matrix<Float, 3, 3> rotation;
     get_transform_rotation(x, rotation);
     Eigen::Quaternion<Float> q(rotation);
@@ -139,7 +139,7 @@ struct XformHash_Quat_BCC7_Zorder {
     return key;
   }
 
-  I7 get_indices(Key key, bool& odd) const {
+  I7 get_indices(Key key, bool &odd) const {
     odd = key & (Key)1;
     I7 i7;
     i7[0] = (util::undilate<7>(key >> 1) & 63) | ((key >> 57) & 127) << 6;
@@ -203,7 +203,7 @@ struct XformHash_Quat_BCC7_Zorder {
   Float cart_width() const { return grid_.width_[0]; }
   Float ang_width() const { return grid_.width_[3]; }
 
-  Key asym_key(Key key, Key& isym) const {
+  Key asym_key(Key key, Key &isym) const {
     // get o,w,x,y,z for orig key
     Key o = key & (Key)1;
     Key w = util::undilate<7>(key >> 4) & 63;
@@ -273,7 +273,7 @@ struct XformHash_Quat_BCC7_Zorder {
     std::cout << i7 << " " << odd << std::endl;
   }
 
-  F7 lever_coord(Key key, Float lever_dist, F7 const& ref) const {
+  F7 lever_coord(Key key, Float lever_dist, F7 const &ref) const {
     bool odd;
     I7 i7 = get_indices(key, odd);
     F7 f7 = grid_.get_center(i7, odd);
@@ -352,7 +352,7 @@ struct XformHash_Quat_BCC7 {
     grid_.init(nside, -ub, ub);
   }
 
-  Key get_key(Xform const& x) const {
+  Key get_key(Xform const &x) const {
     Eigen::Matrix<Float, 3, 3> rotation;
     get_transform_rotation(x, rotation);
     Eigen::Quaternion<Float> q(rotation);
@@ -464,7 +464,7 @@ struct XformHash_bt24_BCC3_Zorder {
   // 7 bits high order cart Z bits
   // 36 bits 6*6 zorder cart/ori
   // 2 bits cart/ori even/odd
-  Key get_key(Xform const& x) const {
+  Key get_key(Xform const &x) const {
     Eigen::Matrix3d rotation;
     get_transform_rotation(x, rotation);
 
@@ -604,7 +604,7 @@ struct XformHash_bt24_BCC3 {
     // std::endl;
   }
 
-  Key get_key(Xform const& x) const {
+  Key get_key(Xform const &x) const {
     Eigen::Matrix3d rotation;
     get_transform_rotation(x, rotation);
 
@@ -738,7 +738,7 @@ struct XformHash_bt24_BCC6 {
     grid_.init(nside, lb, ub);
   }
 
-  Key get_key(Xform const& x) const {
+  Key get_key(Xform const &x) const {
     Eigen::Matrix<Float, 3, 3> rotation;
     get_transform_rotation(x, rotation);
 
@@ -791,7 +791,7 @@ struct XformHash_bt24_BCC6 {
     Eigen::Matrix<Float, 3, 3> m;
     // ori_map_.params_to_value( params, cell_index, 0, m );
     {
-      Float const& w(nest::pmap::cell_width<Float>());
+      Float const &w(nest::pmap::cell_width<Float>());
 
       // assert( params[0] >= -0.0001 && params[0] <= 1.0001 );
       // assert( params[1] >= -0.0001 && params[1] <= 1.0001 );
@@ -885,7 +885,7 @@ struct XformHash_bt24_Cubic_Zorder {
     // std::endl;
   }
 
-  Key get_key(Xform const& x) const {
+  Key get_key(Xform const &x) const {
     Eigen::Matrix3d rotation;
     get_transform_rotation(x, rotation);
 
@@ -1014,7 +1014,7 @@ struct XformHash_Quatgrid_Cubic {
     // std::endl;
   }
 
-  Key get_key(Xform const& x) const {
+  Key get_key(Xform const &x) const {
     Eigen::Matrix3d rotation;
     get_transform_rotation(x, rotation);
 

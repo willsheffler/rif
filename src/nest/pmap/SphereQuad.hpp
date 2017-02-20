@@ -16,7 +16,7 @@ using std::cout;
 using std::endl;
 
 namespace quadsphere_data {
-double* get_quadsphere_cells() {
+double *get_quadsphere_cells() {
   static double quadsphere_cells[9 * 6] = {
       1, 0, 0,  0, 1,  0,  0,  0,  1,
 
@@ -48,9 +48,9 @@ struct SphereQuad {
 
   ///@brief sets value to parameters without change
   ///@return false iff invalid parameters
-  bool params_to_value(Params const& params, Index cell_index, Index resl,
-                       Value& value) const {
-    Map<Matrix<double, 3, 3> > const rot_to_cell(const_cast<double*>(
+  bool params_to_value(Params const &params, Index cell_index, Index resl,
+                       Value &value) const {
+    Map<Matrix<double, 3, 3>> const rot_to_cell(const_cast<double *>(
         quadsphere_data::get_quadsphere_cells() + 9 * cell_index));
     Vector3d vec(params[0] * 2.0 - 1.0, params[1] * 2.0 - 1.0, 1.0);
     vec = rot_to_cell * vec;
@@ -63,13 +63,13 @@ struct SphereQuad {
 
   ///@brief sets params/cell_index from value
   ///@note necessary for value lookup and neighbor lookup
-  bool value_to_params(Value const& value, Index resl, Params& params,
-                       Index& cell_index) const {
+  bool value_to_params(Value const &value, Index resl, Params &params,
+                       Index &cell_index) const {
     Matrix<double, 3, 1> tmpval(value[0], value[1], value[2]);
     tmpval = tmpval / tmpval.norm();
     // cout << tmpval.transpose() << endl;
 
-    Map<Matrix<double, 3, 6>, 0, OuterStride<9> > const centers(
+    Map<Matrix<double, 3, 6>, 0, OuterStride<9>> const centers(
         quadsphere_data::get_quadsphere_cells() + 6);
     // cout << centers << endl;
     Matrix<double, 1, 6> dotprods = centers.transpose() * tmpval;
@@ -83,7 +83,7 @@ struct SphereQuad {
     }
     // cout << "DOTS " << dotprods << " " << cell_index << " val: " <<
     // tmpval.transpose() << endl;
-    Map<Matrix<double, 3, 3> > const rot_to_cell(
+    Map<Matrix<double, 3, 3>> const rot_to_cell(
         quadsphere_data::get_quadsphere_cells() + 9 * cell_index);
     tmpval = rot_to_cell.transpose() * tmpval;
     // cout << "unit cell val: " << tmpval.transpose() << endl;
@@ -99,16 +99,16 @@ struct SphereQuad {
 
   ///@brief get parameter space repr of Value for particular cell
   ///@note necessary only for neighbor lookup
-  void value_to_params_for_cell(Value const& value, Params& params) const;
+  void value_to_params_for_cell(Value const &value, Params &params) const;
 
   ///@brief return the cell_index of neighboring cells within radius of value
   ///@note delta parameter is in "Parameter Space"
   template <class OutIter>
-  void get_neighboring_cells(Value const& value, Float radius,
+  void get_neighboring_cells(Value const &value, Float radius,
                              OutIter out) const;
 
   ///@brief aka covering radius max distance from bin center to any value within
-  ///bin
+  /// bin
   Float bin_circumradius(Index resl) const {
     double const delta = 1.0 / (double)(1ul << resl);
     /// these are correct with a mapping spreading out the corners

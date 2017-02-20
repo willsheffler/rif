@@ -28,14 +28,14 @@ struct Ellipse3D : Field3D<double> {
                            sqr((h - c3) / sd3));
   }
   template <class F3>
-  double operator()(F3 const& f3) const {
+  double operator()(F3 const &f3) const {
     return this->operator()(f3[0], f3[1], f3[2]);
   }
 };
 size_t Ellipse3D::ncalls = 0;
 
 template <class Cache, class Field>
-double test_cache_vs_field(Cache const& cache, Field field, int nsamp = 10000) {
+double test_cache_vs_field(Cache const &cache, Field field, int nsamp = 10000) {
   // cout << cache.num_elements()/1000000.0 <<"M" << endl;
   BOOST_STATIC_ASSERT((Cache::DIM == 3));
   typedef util::SimpleArray<3, double> F3;

@@ -48,12 +48,12 @@ Real eval_cubic_polynomial(Real const x, Real const c0, Real const c1,
 }
 
 template <typename Real, typename CubicPolynomialParams>
-Real eval_cubic_polynomial(Real const x, CubicPolynomialParams const& cp) {
+Real eval_cubic_polynomial(Real const x, CubicPolynomialParams const &cp) {
   return ((cp.c3 * x + cp.c2) * x + cp.c1) * x + cp.c0;
 }
 
 template <typename Real, typename CubicPolynomialParams>
-Real cubic_polynomial_deriv(Real const x, CubicPolynomialParams const& cp) {
+Real cubic_polynomial_deriv(Real const x, CubicPolynomialParams const &cp) {
   return (3 * cp.c3 * x + 2 * cp.c2) * x + cp.c1;
 }
 

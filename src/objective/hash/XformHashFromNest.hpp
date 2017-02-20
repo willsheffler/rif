@@ -39,7 +39,7 @@ struct XformHashFromNest {
       nest_.init(ang_resl_deg, lb, ub, bs);
     }
 
-    Index get_key(Xform const& x, int resl = 0) const {
+    Index get_key(Xform const &x, int resl = 0) const {
       return nest_.get_index(x, resl);
     }
 

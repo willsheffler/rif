@@ -194,7 +194,8 @@ TEST(TetracontoctachoronMap, nside_covering) {
 // out(("tcoc_"+boost::lexical_cast<std::string>(r)+".pdb").c_str());
 // 		io::dump_pdb_atom(out,  "Z" ,0,Vector3d(0,0,0));
 // 		int count1 = 0, count2 = 0;
-// 		// cout << r << " " << nest.size(r) << " " << (beg>>(4*(10-r))) <<
+// 		// cout << r << " " << nest.size(r) << " " << (beg>>(4*(10-r)))
+// <<
 // endl;
 // 		// continue;
 // 		// for(size_t i = beg>>(4*(10-r)); i < nest.size(r); ++i){
@@ -204,7 +205,8 @@ TEST(TetracontoctachoronMap, nside_covering) {
 // 				++count2;
 // 				if( count1 > N) break;
 // 				Matrix3d m = nest.value();
-// 				// cout << r << " " << i << " " << q.coeffs().transpose()
+// 				// cout << r << " " << i << " " <<
+// q.coeffs().transpose()
 // << endl;
 // 				Vector3d ximg = m * X;
 // 				Vector3d yimg = m * Y;

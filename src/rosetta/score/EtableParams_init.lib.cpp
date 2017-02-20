@@ -7,14 +7,14 @@ namespace score {
 // #pragma GCC optimization_level 0
 
 ///@brief horrible function to fill horrible rosetta datastructure of LJ/LK
-///params
+/// params
 void EtableParamsInit::init_EtableParams(
-    std::vector<EtableParamsOnePair<float> >& analytic_parameters) {
+    std::vector<EtableParamsOnePair<float>> &analytic_parameters) {
   typedef CubicPolynomialParamsBase<float> CubicPolynomial;
   typedef ExtraQuadraticRepulsion<float> ExtraQuadraticRepulsion;
   analytic_parameters.resize(325);
   {  // 1 1
-    EtableParamsOnePair<float>& params = analytic_parameters[0];
+    EtableParamsOnePair<float> &params = analytic_parameters[0];
     params.ljrep_linear_ramp_d2_cutoff = 5.76;
     params.lj_r6_coeff = -983.04;
     params.lj_r12_coeff = 2.01327e+06;
@@ -31,7 +31,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(1.376, -1.08156, 0.245851, -0.0173024);
   }
   {  // 1 2
-    EtableParamsOnePair<float>& params = analytic_parameters[1];
+    EtableParamsOnePair<float> &params = analytic_parameters[1];
     params.ljrep_linear_ramp_d2_cutoff = 5.76;
     params.lj_r6_coeff = -983.04;
     params.lj_r12_coeff = 2.01327e+06;
@@ -50,7 +50,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(1.376, -1.08156, 0.245851, -0.0173024);
   }
   {  // 1 3
-    EtableParamsOnePair<float>& params = analytic_parameters[2];
+    EtableParamsOnePair<float> &params = analytic_parameters[2];
     params.ljrep_linear_ramp_d2_cutoff = 5.76;
     params.lj_r6_coeff = -625.603;
     params.lj_r12_coeff = 1.28123e+06;
@@ -67,7 +67,7 @@ void EtableParamsInit::init_EtableParams(
     params.lj_radius_2 = 2;
   }
   {  // 1 4
-    EtableParamsOnePair<float>& params = analytic_parameters[3];
+    EtableParamsOnePair<float> &params = analytic_parameters[3];
     params.ljrep_linear_ramp_d2_cutoff = 5.76;
     params.lj_r6_coeff = -958.989;
     params.lj_r12_coeff = 1.96401e+06;
@@ -86,7 +86,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(1.34234, -1.05509, 0.239837, -0.0168791);
   }
   {  // 1 5
-    EtableParamsOnePair<float>& params = analytic_parameters[4];
+    EtableParamsOnePair<float> &params = analytic_parameters[4];
     params.ljrep_linear_ramp_d2_cutoff = 5.76;
     params.lj_r6_coeff = -1207.65;
     params.lj_r12_coeff = 2.47326e+06;
@@ -109,7 +109,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(-1.05336, 0.978338, -0.312321, 0.0330986);
   }
   {  // 1 6
-    EtableParamsOnePair<float>& params = analytic_parameters[5];
+    EtableParamsOnePair<float> &params = analytic_parameters[5];
     params.ljrep_linear_ramp_d2_cutoff = 5.76;
     params.lj_r6_coeff = -983.04;
     params.lj_r12_coeff = 2.01327e+06;
@@ -128,7 +128,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(1.376, -1.08156, 0.245851, -0.0173024);
   }
   {  // 1 7
-    EtableParamsOnePair<float>& params = analytic_parameters[6];
+    EtableParamsOnePair<float> &params = analytic_parameters[6];
     params.ljrep_linear_ramp_d2_cutoff = 5.0625;
     params.lj_r6_coeff = -940.722;
     params.lj_r12_coeff = 1.30803e+06;
@@ -154,7 +154,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(-1.40125, 1.09634, -0.248678, 0.0174795);
   }
   {  // 1 8
-    EtableParamsOnePair<float>& params = analytic_parameters[7];
+    EtableParamsOnePair<float> &params = analytic_parameters[7];
     params.ljrep_linear_ramp_d2_cutoff = 5.0625;
     params.lj_r6_coeff = -940.722;
     params.lj_r12_coeff = 1.30803e+06;
@@ -176,7 +176,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(2.46311, -2.44309, 0.84146, -0.0961935);
   }
   {  // 1 9
-    EtableParamsOnePair<float>& params = analytic_parameters[8];
+    EtableParamsOnePair<float> &params = analytic_parameters[8];
     params.ljrep_linear_ramp_d2_cutoff = 5.0625;
     params.lj_r6_coeff = -940.722;
     params.lj_r12_coeff = 1.30803e+06;
@@ -202,7 +202,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(-1.22806, 0.960842, -0.217942, 0.0153191);
   }
   {  // 1 10
-    EtableParamsOnePair<float>& params = analytic_parameters[9];
+    EtableParamsOnePair<float> &params = analytic_parameters[9];
     params.ljrep_linear_ramp_d2_cutoff = 5.0625;
     params.lj_r6_coeff = -940.722;
     params.lj_r12_coeff = 1.30803e+06;
@@ -228,7 +228,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(-6.51607, 4.24621, -0.872397, 0.0576163);
   }
   {  // 1 11
-    EtableParamsOnePair<float>& params = analytic_parameters[10];
+    EtableParamsOnePair<float> &params = analytic_parameters[10];
     params.ljrep_linear_ramp_d2_cutoff = 5.0625;
     params.lj_r6_coeff = -940.722;
     params.lj_r12_coeff = 1.30803e+06;
@@ -254,7 +254,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(-3.25804, 2.12311, -0.436199, 0.0288081);
   }
   {  // 1 12
-    EtableParamsOnePair<float>& params = analytic_parameters[11];
+    EtableParamsOnePair<float> &params = analytic_parameters[11];
     params.ljrep_linear_ramp_d2_cutoff = 5.0625;
     params.lj_r6_coeff = -940.722;
     params.lj_r12_coeff = 1.30803e+06;
@@ -271,7 +271,7 @@ void EtableParamsInit::init_EtableParams(
     params.lj_radius_2 = 1.75;
   }
   {  // 1 13
-    EtableParamsOnePair<float>& params = analytic_parameters[12];
+    EtableParamsOnePair<float> &params = analytic_parameters[12];
     params.ljrep_linear_ramp_d2_cutoff = 4.5369;
     params.lj_r6_coeff = -553.128;
     params.lj_r12_coeff = 553562;
@@ -293,7 +293,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(3.15759, -3.34315, 1.25125, -0.155012);
   }
   {  // 1 14
-    EtableParamsOnePair<float>& params = analytic_parameters[13];
+    EtableParamsOnePair<float> &params = analytic_parameters[13];
     params.ljrep_linear_ramp_d2_cutoff = 4.5369;
     params.lj_r6_coeff = -553.128;
     params.lj_r12_coeff = 553562;
@@ -315,7 +315,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(2.757, -2.91901, 1.09251, -0.135346);
   }
   {  // 1 15
-    EtableParamsOnePair<float>& params = analytic_parameters[14];
+    EtableParamsOnePair<float> &params = analytic_parameters[14];
     params.ljrep_linear_ramp_d2_cutoff = 4.5369;
     params.lj_r6_coeff = -635.478;
     params.lj_r12_coeff = 635976;
@@ -341,7 +341,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(-3.08823, 2.01901, -0.415651, 0.0274889);
   }
   {  // 1 16
-    EtableParamsOnePair<float>& params = analytic_parameters[15];
+    EtableParamsOnePair<float> &params = analytic_parameters[15];
     params.ljrep_linear_ramp_d2_cutoff = 4.5369;
     params.lj_r6_coeff = -553.128;
     params.lj_r12_coeff = 553562;
@@ -363,7 +363,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(1.88513, -1.99591, 0.747012, -0.0925445);
   }
   {  // 1 17
-    EtableParamsOnePair<float>& params = analytic_parameters[16];
+    EtableParamsOnePair<float> &params = analytic_parameters[16];
     params.ljrep_linear_ramp_d2_cutoff = 5.4756;
     params.lj_r6_coeff = -975.143;
     params.lj_r12_coeff = 1.71564e+06;
@@ -385,7 +385,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(3.1108, -2.93943, 0.9552, -0.103182);
   }
   {  // 1 18
-    EtableParamsOnePair<float>& params = analytic_parameters[17];
+    EtableParamsOnePair<float> &params = analytic_parameters[17];
     params.ljrep_linear_ramp_d2_cutoff = 5.0625;
     params.lj_r6_coeff = -940.722;
     params.lj_r12_coeff = 1.30803e+06;
@@ -407,7 +407,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(3.07889, -3.05387, 1.05182, -0.120242);
   }
   {  // 1 19
-    EtableParamsOnePair<float>& params = analytic_parameters[18];
+    EtableParamsOnePair<float> &params = analytic_parameters[18];
     params.ljrep_linear_ramp_d2_cutoff = 5.76;
     params.lj_r6_coeff = -625.603;
     params.lj_r12_coeff = 1.28123e+06;
@@ -424,7 +424,7 @@ void EtableParamsInit::init_EtableParams(
     params.lj_radius_2 = 2;
   }
   {  // 1 20
-    EtableParamsOnePair<float>& params = analytic_parameters[19];
+    EtableParamsOnePair<float> &params = analytic_parameters[19];
     params.ljrep_linear_ramp_d2_cutoff = 5.76;
     params.lj_r6_coeff = -1061.8;
     params.lj_r12_coeff = 2.17458e+06;
@@ -443,7 +443,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(1.48625, -1.16821, 0.26555, -0.0186888);
   }
   {  // 1 21
-    EtableParamsOnePair<float>& params = analytic_parameters[20];
+    EtableParamsOnePair<float> &params = analytic_parameters[20];
     params.ljrep_linear_ramp_d2_cutoff = 4.5369;
     params.lj_r6_coeff = -553.128;
     params.lj_r12_coeff = 553562;
@@ -465,7 +465,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(2.35641, -2.49488, 0.933765, -0.115681);
   }
   {  // 1 22
-    EtableParamsOnePair<float>& params = analytic_parameters[21];
+    EtableParamsOnePair<float> &params = analytic_parameters[21];
     params.ljrep_linear_ramp_d2_cutoff = 6.2001;
     params.lj_r6_coeff = -2706.99;
     params.lj_r12_coeff = 6.91426e+06;
@@ -493,7 +493,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(-5.80233, 4.23603, -0.928482, 0.0639422);
   }
   {  // 1 23
-    EtableParamsOnePair<float>& params = analytic_parameters[22];
+    EtableParamsOnePair<float> &params = analytic_parameters[22];
     params.ljrep_linear_ramp_d2_cutoff = 6.2001;
     params.lj_r6_coeff = -2706.99;
     params.lj_r12_coeff = 6.91426e+06;
@@ -521,7 +521,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(-5.80233, 4.23603, -0.928482, 0.0639422);
   }
   {  // 1 24
-    EtableParamsOnePair<float>& params = analytic_parameters[23];
+    EtableParamsOnePair<float> &params = analytic_parameters[23];
     params.hydrogen_interaction = 1;
     params.maxd2 = 9;
     params.ljrep_linear_ramp_d2_cutoff = 3.24;
@@ -538,7 +538,7 @@ void EtableParamsInit::init_EtableParams(
     params.lj_radius_2 = 1;
   }
   {  // 1 25
-    EtableParamsOnePair<float>& params = analytic_parameters[24];
+    EtableParamsOnePair<float> &params = analytic_parameters[24];
     params.hydrogen_interaction = 1;
     params.maxd2 = 10.25;
     params.ljrep_linear_ramp_d2_cutoff = 3.6864;
@@ -555,7 +555,7 @@ void EtableParamsInit::init_EtableParams(
     params.lj_radius_2 = 1.2;
   }
   {  // 2 2
-    EtableParamsOnePair<float>& params = analytic_parameters[25];
+    EtableParamsOnePair<float> &params = analytic_parameters[25];
     params.ljrep_linear_ramp_d2_cutoff = 5.76;
     params.lj_r6_coeff = -983.04;
     params.lj_r12_coeff = 2.01327e+06;
@@ -576,7 +576,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(1.08535, -1.00957, 0.322944, -0.0342853);
   }
   {  // 2 3
-    EtableParamsOnePair<float>& params = analytic_parameters[26];
+    EtableParamsOnePair<float> &params = analytic_parameters[26];
     params.ljrep_linear_ramp_d2_cutoff = 5.76;
     params.lj_r6_coeff = -625.603;
     params.lj_r12_coeff = 1.28123e+06;
@@ -597,7 +597,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(1.58506, -1.47217, 0.469969, -0.0498055);
   }
   {  // 2 4
-    EtableParamsOnePair<float>& params = analytic_parameters[27];
+    EtableParamsOnePair<float> &params = analytic_parameters[27];
     params.ljrep_linear_ramp_d2_cutoff = 5.76;
     params.lj_r6_coeff = -958.989;
     params.lj_r12_coeff = 1.96401e+06;
@@ -620,7 +620,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(1.49811, -1.39141, 0.44419, -0.0470736);
   }
   {  // 2 5
-    EtableParamsOnePair<float>& params = analytic_parameters[28];
+    EtableParamsOnePair<float> &params = analytic_parameters[28];
     params.ljrep_linear_ramp_d2_cutoff = 5.76;
     params.lj_r6_coeff = -1207.65;
     params.lj_r12_coeff = 2.47326e+06;
@@ -644,7 +644,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(2.0064, -1.8635, 0.594897, -0.0630449);
   }
   {  // 2 6
-    EtableParamsOnePair<float>& params = analytic_parameters[29];
+    EtableParamsOnePair<float> &params = analytic_parameters[29];
     params.ljrep_linear_ramp_d2_cutoff = 5.76;
     params.lj_r6_coeff = -983.04;
     params.lj_r12_coeff = 2.01327e+06;
@@ -667,7 +667,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(1.23059, -1.14295, 0.36487, -0.0386676);
   }
   {  // 2 7
-    EtableParamsOnePair<float>& params = analytic_parameters[30];
+    EtableParamsOnePair<float> &params = analytic_parameters[30];
     params.ljrep_linear_ramp_d2_cutoff = 5.0625;
     params.lj_r6_coeff = -940.722;
     params.lj_r12_coeff = 1.30803e+06;
@@ -689,7 +689,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(3.09439, -3.06924, 1.05712, -0.120847);
   }
   {  // 2 8
-    EtableParamsOnePair<float>& params = analytic_parameters[31];
+    EtableParamsOnePair<float> &params = analytic_parameters[31];
     params.ljrep_linear_ramp_d2_cutoff = 5.0625;
     params.lj_r6_coeff = -940.722;
     params.lj_r12_coeff = 1.30803e+06;
@@ -710,7 +710,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(1.39074, -1.37943, 0.47511, -0.0543133);
   }
   {  // 2 9
-    EtableParamsOnePair<float>& params = analytic_parameters[32];
+    EtableParamsOnePair<float> &params = analytic_parameters[32];
     params.ljrep_linear_ramp_d2_cutoff = 5.0625;
     params.lj_r6_coeff = -940.722;
     params.lj_r12_coeff = 1.30803e+06;
@@ -732,7 +732,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(2.71193, -2.6899, 0.926464, -0.105911);
   }
   {  // 2 10
-    EtableParamsOnePair<float>& params = analytic_parameters[33];
+    EtableParamsOnePair<float> &params = analytic_parameters[33];
     params.ljrep_linear_ramp_d2_cutoff = 5.0625;
     params.lj_r6_coeff = -940.722;
     params.lj_r12_coeff = 1.30803e+06;
@@ -758,7 +758,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(-3.67914, 2.39752, -0.492578, 0.0325316);
   }
   {  // 2 11
-    EtableParamsOnePair<float>& params = analytic_parameters[34];
+    EtableParamsOnePair<float> &params = analytic_parameters[34];
     params.ljrep_linear_ramp_d2_cutoff = 5.0625;
     params.lj_r6_coeff = -940.722;
     params.lj_r12_coeff = 1.30803e+06;
@@ -784,7 +784,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(-1.83957, 1.19876, -0.246289, 0.0162658);
   }
   {  // 2 12
-    EtableParamsOnePair<float>& params = analytic_parameters[35];
+    EtableParamsOnePair<float> &params = analytic_parameters[35];
     params.ljrep_linear_ramp_d2_cutoff = 5.0625;
     params.lj_r6_coeff = -940.722;
     params.lj_r12_coeff = 1.30803e+06;
@@ -801,7 +801,7 @@ void EtableParamsInit::init_EtableParams(
     params.lj_radius_2 = 1.75;
   }
   {  // 2 13
-    EtableParamsOnePair<float>& params = analytic_parameters[36];
+    EtableParamsOnePair<float> &params = analytic_parameters[36];
     params.ljrep_linear_ramp_d2_cutoff = 4.5369;
     params.lj_r6_coeff = -553.128;
     params.lj_r12_coeff = 553562;
@@ -823,7 +823,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(1.78286, -1.88763, 0.706485, -0.0875238);
   }
   {  // 2 14
-    EtableParamsOnePair<float>& params = analytic_parameters[37];
+    EtableParamsOnePair<float> &params = analytic_parameters[37];
     params.ljrep_linear_ramp_d2_cutoff = 4.5369;
     params.lj_r6_coeff = -553.128;
     params.lj_r12_coeff = 553562;
@@ -845,7 +845,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(1.55667, -1.64815, 0.616857, -0.07642);
   }
   {  // 2 15
-    EtableParamsOnePair<float>& params = analytic_parameters[38];
+    EtableParamsOnePair<float> &params = analytic_parameters[38];
     params.ljrep_linear_ramp_d2_cutoff = 4.5369;
     params.lj_r6_coeff = -635.478;
     params.lj_r12_coeff = 635976;
@@ -871,7 +871,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(-1.7437, 1.13999, -0.234687, 0.0155209);
   }
   {  // 2 16
-    EtableParamsOnePair<float>& params = analytic_parameters[39];
+    EtableParamsOnePair<float> &params = analytic_parameters[39];
     params.ljrep_linear_ramp_d2_cutoff = 4.5369;
     params.lj_r6_coeff = -553.128;
     params.lj_r12_coeff = 553562;
@@ -892,7 +892,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(1.06439, -1.12694, 0.421782, -0.052253);
   }
   {  // 2 17
-    EtableParamsOnePair<float>& params = analytic_parameters[40];
+    EtableParamsOnePair<float> &params = analytic_parameters[40];
     params.ljrep_linear_ramp_d2_cutoff = 5.4756;
     params.lj_r6_coeff = -975.143;
     params.lj_r12_coeff = 1.71564e+06;
@@ -915,7 +915,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(1.75644, -1.65968, 0.539331, -0.0582589);
   }
   {  // 2 18
-    EtableParamsOnePair<float>& params = analytic_parameters[41];
+    EtableParamsOnePair<float> &params = analytic_parameters[41];
     params.ljrep_linear_ramp_d2_cutoff = 5.0625;
     params.lj_r6_coeff = -940.722;
     params.lj_r12_coeff = 1.30803e+06;
@@ -937,7 +937,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(1.73842, -1.72429, 0.593887, -0.0678917);
   }
   {  // 2 19
-    EtableParamsOnePair<float>& params = analytic_parameters[42];
+    EtableParamsOnePair<float> &params = analytic_parameters[42];
     params.ljrep_linear_ramp_d2_cutoff = 5.76;
     params.lj_r6_coeff = -625.603;
     params.lj_r12_coeff = 1.28123e+06;
@@ -958,7 +958,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(1.58506, -1.47217, 0.469969, -0.0498055);
   }
   {  // 2 20
-    EtableParamsOnePair<float>& params = analytic_parameters[43];
+    EtableParamsOnePair<float> &params = analytic_parameters[43];
     params.ljrep_linear_ramp_d2_cutoff = 5.76;
     params.lj_r6_coeff = -1061.8;
     params.lj_r12_coeff = 2.17458e+06;
@@ -977,7 +977,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(1.48625, -1.16821, 0.26555, -0.0186888);
   }
   {  // 2 21
-    EtableParamsOnePair<float>& params = analytic_parameters[44];
+    EtableParamsOnePair<float> &params = analytic_parameters[44];
     params.ljrep_linear_ramp_d2_cutoff = 4.5369;
     params.lj_r6_coeff = -553.128;
     params.lj_r12_coeff = 553562;
@@ -999,7 +999,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(1.33049, -1.40868, 0.527228, -0.0653162);
   }
   {  // 2 22
-    EtableParamsOnePair<float>& params = analytic_parameters[45];
+    EtableParamsOnePair<float> &params = analytic_parameters[45];
     params.ljrep_linear_ramp_d2_cutoff = 6.2001;
     params.lj_r6_coeff = -2706.99;
     params.lj_r12_coeff = 6.91426e+06;
@@ -1030,7 +1030,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(-3.27614, 2.39177, -0.524245, 0.0361034);
   }
   {  // 2 23
-    EtableParamsOnePair<float>& params = analytic_parameters[46];
+    EtableParamsOnePair<float> &params = analytic_parameters[46];
     params.ljrep_linear_ramp_d2_cutoff = 6.2001;
     params.lj_r6_coeff = -2706.99;
     params.lj_r12_coeff = 6.91426e+06;
@@ -1061,7 +1061,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(-3.27614, 2.39177, -0.524245, 0.0361034);
   }
   {  // 2 24
-    EtableParamsOnePair<float>& params = analytic_parameters[47];
+    EtableParamsOnePair<float> &params = analytic_parameters[47];
     params.hydrogen_interaction = 1;
     params.maxd2 = 9;
     params.ljrep_linear_ramp_d2_cutoff = 3.24;
@@ -1078,7 +1078,7 @@ void EtableParamsInit::init_EtableParams(
     params.lj_radius_2 = 1;
   }
   {  // 2 25
-    EtableParamsOnePair<float>& params = analytic_parameters[48];
+    EtableParamsOnePair<float> &params = analytic_parameters[48];
     params.hydrogen_interaction = 1;
     params.maxd2 = 10.25;
     params.ljrep_linear_ramp_d2_cutoff = 3.6864;
@@ -1095,7 +1095,7 @@ void EtableParamsInit::init_EtableParams(
     params.lj_radius_2 = 1.2;
   }
   {  // 3 3
-    EtableParamsOnePair<float>& params = analytic_parameters[49];
+    EtableParamsOnePair<float> &params = analytic_parameters[49];
     params.ljrep_linear_ramp_d2_cutoff = 5.76;
     params.lj_r6_coeff = -398.131;
     params.lj_r12_coeff = 815373;
@@ -1112,7 +1112,7 @@ void EtableParamsInit::init_EtableParams(
     params.lj_radius_2 = 2;
   }
   {  // 3 4
-    EtableParamsOnePair<float>& params = analytic_parameters[50];
+    EtableParamsOnePair<float> &params = analytic_parameters[50];
     params.ljrep_linear_ramp_d2_cutoff = 5.76;
     params.lj_r6_coeff = -610.297;
     params.lj_r12_coeff = 1.24989e+06;
@@ -1129,7 +1129,7 @@ void EtableParamsInit::init_EtableParams(
     params.lj_radius_2 = 2;
   }
   {  // 3 5
-    EtableParamsOnePair<float>& params = analytic_parameters[51];
+    EtableParamsOnePair<float> &params = analytic_parameters[51];
     params.ljrep_linear_ramp_d2_cutoff = 5.76;
     params.lj_r6_coeff = -768.541;
     params.lj_r12_coeff = 1.57397e+06;
@@ -1152,7 +1152,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(-2.23449, 1.74681, -0.46076, 0.0403819);
   }
   {  // 3 6
-    EtableParamsOnePair<float>& params = analytic_parameters[52];
+    EtableParamsOnePair<float> &params = analytic_parameters[52];
     params.ljrep_linear_ramp_d2_cutoff = 5.76;
     params.lj_r6_coeff = -625.603;
     params.lj_r12_coeff = 1.28123e+06;
@@ -1169,7 +1169,7 @@ void EtableParamsInit::init_EtableParams(
     params.lj_radius_2 = 2;
   }
   {  // 3 7
-    EtableParamsOnePair<float>& params = analytic_parameters[53];
+    EtableParamsOnePair<float> &params = analytic_parameters[53];
     params.ljrep_linear_ramp_d2_cutoff = 5.0625;
     params.lj_r6_coeff = -598.672;
     params.lj_r12_coeff = 832428;
@@ -1195,7 +1195,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(-2.25915, 1.76758, -0.40093, 0.0281813);
   }
   {  // 3 8
-    EtableParamsOnePair<float>& params = analytic_parameters[54];
+    EtableParamsOnePair<float> &params = analytic_parameters[54];
     params.ljrep_linear_ramp_d2_cutoff = 5.0625;
     params.lj_r6_coeff = -598.672;
     params.lj_r12_coeff = 832428;
@@ -1221,7 +1221,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(-1.01535, 0.794416, -0.180193, 0.0126657);
   }
   {  // 3 9
-    EtableParamsOnePair<float>& params = analytic_parameters[55];
+    EtableParamsOnePair<float> &params = analytic_parameters[55];
     params.ljrep_linear_ramp_d2_cutoff = 5.0625;
     params.lj_r6_coeff = -598.672;
     params.lj_r12_coeff = 832428;
@@ -1247,7 +1247,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(-1.97993, 1.54911, -0.351376, 0.0246982);
   }
   {  // 3 10
-    EtableParamsOnePair<float>& params = analytic_parameters[56];
+    EtableParamsOnePair<float> &params = analytic_parameters[56];
     params.ljrep_linear_ramp_d2_cutoff = 5.0625;
     params.lj_r6_coeff = -598.672;
     params.lj_r12_coeff = 832428;
@@ -1273,7 +1273,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(-10.5055, 6.84593, -1.40652, 0.0928915);
   }
   {  // 3 11
-    EtableParamsOnePair<float>& params = analytic_parameters[57];
+    EtableParamsOnePair<float> &params = analytic_parameters[57];
     params.ljrep_linear_ramp_d2_cutoff = 5.0625;
     params.lj_r6_coeff = -598.672;
     params.lj_r12_coeff = 832428;
@@ -1299,7 +1299,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(-5.25275, 3.42297, -0.703259, 0.0464458);
   }
   {  // 3 12
-    EtableParamsOnePair<float>& params = analytic_parameters[58];
+    EtableParamsOnePair<float> &params = analytic_parameters[58];
     params.ljrep_linear_ramp_d2_cutoff = 5.0625;
     params.lj_r6_coeff = -598.672;
     params.lj_r12_coeff = 832428;
@@ -1320,7 +1320,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(1.53882, -1.52631, 0.525698, -0.0600964);
   }
   {  // 3 13
-    EtableParamsOnePair<float>& params = analytic_parameters[59];
+    EtableParamsOnePair<float> &params = analytic_parameters[59];
     params.ljrep_linear_ramp_d2_cutoff = 4.5369;
     params.lj_r6_coeff = -352.009;
     params.lj_r12_coeff = 352284;
@@ -1346,7 +1346,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(-1.31714, 1.08327, -0.251329, 0.0178951);
   }
   {  // 3 14
-    EtableParamsOnePair<float>& params = analytic_parameters[60];
+    EtableParamsOnePair<float> &params = analytic_parameters[60];
     params.ljrep_linear_ramp_d2_cutoff = 4.5369;
     params.lj_r6_coeff = -352.009;
     params.lj_r12_coeff = 352284;
@@ -1372,7 +1372,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(-1.15004, 0.945841, -0.219444, 0.0156248);
   }
   {  // 3 15
-    EtableParamsOnePair<float>& params = analytic_parameters[61];
+    EtableParamsOnePair<float> &params = analytic_parameters[61];
     params.ljrep_linear_ramp_d2_cutoff = 4.5369;
     params.lj_r6_coeff = -404.416;
     params.lj_r12_coeff = 404732;
@@ -1398,7 +1398,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(-4.97899, 3.25514, -0.670131, 0.0443188);
   }
   {  // 3 16
-    EtableParamsOnePair<float>& params = analytic_parameters[62];
+    EtableParamsOnePair<float> &params = analytic_parameters[62];
     params.ljrep_linear_ramp_d2_cutoff = 4.5369;
     params.lj_r6_coeff = -352.009;
     params.lj_r12_coeff = 352284;
@@ -1420,7 +1420,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(3.03929, -3.21789, 1.20437, -0.149204);
   }
   {  // 3 17
-    EtableParamsOnePair<float>& params = analytic_parameters[63];
+    EtableParamsOnePair<float> &params = analytic_parameters[63];
     params.ljrep_linear_ramp_d2_cutoff = 5.4756;
     params.lj_r6_coeff = -620.577;
     params.lj_r12_coeff = 1.09183e+06;
@@ -1446,7 +1446,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(-1.2362, 0.938856, -0.209935, 0.014633);
   }
   {  // 3 18
-    EtableParamsOnePair<float>& params = analytic_parameters[64];
+    EtableParamsOnePair<float> &params = analytic_parameters[64];
     params.ljrep_linear_ramp_d2_cutoff = 5.0625;
     params.lj_r6_coeff = -598.672;
     params.lj_r12_coeff = 832428;
@@ -1472,7 +1472,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(-1.26919, 0.99302, -0.225241, 0.0158322);
   }
   {  // 3 19
-    EtableParamsOnePair<float>& params = analytic_parameters[65];
+    EtableParamsOnePair<float> &params = analytic_parameters[65];
     params.ljrep_linear_ramp_d2_cutoff = 5.76;
     params.lj_r6_coeff = -398.131;
     params.lj_r12_coeff = 815373;
@@ -1491,7 +1491,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(-1.13218, 1.05155, -0.335692, 0.0355754);
   }
   {  // 3 20
-    EtableParamsOnePair<float>& params = analytic_parameters[66];
+    EtableParamsOnePair<float> &params = analytic_parameters[66];
     params.ljrep_linear_ramp_d2_cutoff = 5.76;
     params.lj_r6_coeff = -675.728;
     params.lj_r12_coeff = 1.38389e+06;
@@ -1510,7 +1510,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(-1.13218, 1.05155, -0.335692, 0.0355754);
   }
   {  // 3 21
-    EtableParamsOnePair<float>& params = analytic_parameters[67];
+    EtableParamsOnePair<float> &params = analytic_parameters[67];
     params.ljrep_linear_ramp_d2_cutoff = 4.5369;
     params.lj_r6_coeff = -352.009;
     params.lj_r12_coeff = 352284;
@@ -1534,7 +1534,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(3.79911, -4.02236, 1.50546, -0.186505);
   }
   {  // 3 22
-    EtableParamsOnePair<float>& params = analytic_parameters[68];
+    EtableParamsOnePair<float> &params = analytic_parameters[68];
     params.ljrep_linear_ramp_d2_cutoff = 6.2001;
     params.lj_r6_coeff = -1722.72;
     params.lj_r12_coeff = 4.40021e+06;
@@ -1562,7 +1562,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(-9.35477, 6.82952, -1.49694, 0.103091);
   }
   {  // 3 23
-    EtableParamsOnePair<float>& params = analytic_parameters[69];
+    EtableParamsOnePair<float> &params = analytic_parameters[69];
     params.ljrep_linear_ramp_d2_cutoff = 6.2001;
     params.lj_r6_coeff = -1722.72;
     params.lj_r12_coeff = 4.40021e+06;
@@ -1590,7 +1590,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(-9.35477, 6.82952, -1.49694, 0.103091);
   }
   {  // 3 24
-    EtableParamsOnePair<float>& params = analytic_parameters[70];
+    EtableParamsOnePair<float> &params = analytic_parameters[70];
     params.hydrogen_interaction = 1;
     params.maxd2 = 9;
     params.ljrep_linear_ramp_d2_cutoff = 3.24;
@@ -1607,7 +1607,7 @@ void EtableParamsInit::init_EtableParams(
     params.lj_radius_2 = 1;
   }
   {  // 3 25
-    EtableParamsOnePair<float>& params = analytic_parameters[71];
+    EtableParamsOnePair<float> &params = analytic_parameters[71];
     params.hydrogen_interaction = 1;
     params.maxd2 = 10.25;
     params.ljrep_linear_ramp_d2_cutoff = 3.6864;
@@ -1624,7 +1624,7 @@ void EtableParamsInit::init_EtableParams(
     params.lj_radius_2 = 1.2;
   }
   {  // 4 4
-    EtableParamsOnePair<float>& params = analytic_parameters[72];
+    EtableParamsOnePair<float> &params = analytic_parameters[72];
     params.ljrep_linear_ramp_d2_cutoff = 5.76;
     params.lj_r6_coeff = -935.526;
     params.lj_r12_coeff = 1.91596e+06;
@@ -1645,7 +1645,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(-1.43407, 1.12267, -0.296587, 0.0260294);
   }
   {  // 4 5
-    EtableParamsOnePair<float>& params = analytic_parameters[73];
+    EtableParamsOnePair<float> &params = analytic_parameters[73];
     params.ljrep_linear_ramp_d2_cutoff = 5.76;
     params.lj_r6_coeff = -1178.1;
     params.lj_r12_coeff = 2.41275e+06;
@@ -1668,7 +1668,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(-2.11192, 1.65099, -0.435486, 0.0381669);
   }
   {  // 4 6
-    EtableParamsOnePair<float>& params = analytic_parameters[74];
+    EtableParamsOnePair<float> &params = analytic_parameters[74];
     params.ljrep_linear_ramp_d2_cutoff = 5.76;
     params.lj_r6_coeff = -958.989;
     params.lj_r12_coeff = 1.96401e+06;
@@ -1687,7 +1687,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(1.34234, -1.05509, 0.239837, -0.0168791);
   }
   {  // 4 7
-    EtableParamsOnePair<float>& params = analytic_parameters[75];
+    EtableParamsOnePair<float> &params = analytic_parameters[75];
     params.ljrep_linear_ramp_d2_cutoff = 5.0625;
     params.lj_r6_coeff = -917.706;
     params.lj_r12_coeff = 1.27603e+06;
@@ -1713,7 +1713,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(-2.13523, 1.67062, -0.378938, 0.0266355);
   }
   {  // 4 8
-    EtableParamsOnePair<float>& params = analytic_parameters[76];
+    EtableParamsOnePair<float> &params = analytic_parameters[76];
     params.ljrep_linear_ramp_d2_cutoff = 5.0625;
     params.lj_r6_coeff = -917.706;
     params.lj_r12_coeff = 1.27603e+06;
@@ -1735,7 +1735,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(3.75331, -3.72281, 1.28222, -0.146581);
   }
   {  // 4 9
-    EtableParamsOnePair<float>& params = analytic_parameters[77];
+    EtableParamsOnePair<float> &params = analytic_parameters[77];
     params.ljrep_linear_ramp_d2_cutoff = 5.0625;
     params.lj_r6_coeff = -917.706;
     params.lj_r12_coeff = 1.27603e+06;
@@ -1761,7 +1761,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(-1.87133, 1.46414, -0.332103, 0.0233434);
   }
   {  // 4 10
-    EtableParamsOnePair<float>& params = analytic_parameters[78];
+    EtableParamsOnePair<float> &params = analytic_parameters[78];
     params.ljrep_linear_ramp_d2_cutoff = 5.0625;
     params.lj_r6_coeff = -917.706;
     params.lj_r12_coeff = 1.27603e+06;
@@ -1787,7 +1787,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(-9.92925, 6.47042, -1.32937, 0.0877962);
   }
   {  // 4 11
-    EtableParamsOnePair<float>& params = analytic_parameters[79];
+    EtableParamsOnePair<float> &params = analytic_parameters[79];
     params.ljrep_linear_ramp_d2_cutoff = 5.0625;
     params.lj_r6_coeff = -917.706;
     params.lj_r12_coeff = 1.27603e+06;
@@ -1813,7 +1813,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(-4.96463, 3.23521, -0.664684, 0.0438981);
   }
   {  // 4 12
-    EtableParamsOnePair<float>& params = analytic_parameters[80];
+    EtableParamsOnePair<float> &params = analytic_parameters[80];
     params.ljrep_linear_ramp_d2_cutoff = 5.0625;
     params.lj_r6_coeff = -917.706;
     params.lj_r12_coeff = 1.27603e+06;
@@ -1834,7 +1834,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(1.45441, -1.44259, 0.496862, -0.0568);
   }
   {  // 4 13
-    EtableParamsOnePair<float>& params = analytic_parameters[81];
+    EtableParamsOnePair<float> &params = analytic_parameters[81];
     params.ljrep_linear_ramp_d2_cutoff = 4.5369;
     params.lj_r6_coeff = -539.595;
     params.lj_r12_coeff = 540018;
@@ -1860,7 +1860,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(-1.24489, 1.02385, -0.237543, 0.0169135);
   }
   {  // 4 14
-    EtableParamsOnePair<float>& params = analytic_parameters[82];
+    EtableParamsOnePair<float> &params = analytic_parameters[82];
     params.ljrep_linear_ramp_d2_cutoff = 4.5369;
     params.lj_r6_coeff = -539.595;
     params.lj_r12_coeff = 540018;
@@ -1884,7 +1884,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(-1.08696, 0.89396, -0.207407, 0.0147678);
   }
   {  // 4 15
-    EtableParamsOnePair<float>& params = analytic_parameters[83];
+    EtableParamsOnePair<float> &params = analytic_parameters[83];
     params.ljrep_linear_ramp_d2_cutoff = 4.5369;
     params.lj_r6_coeff = -619.93;
     params.lj_r12_coeff = 620416;
@@ -1910,7 +1910,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(-4.70588, 3.07659, -0.633373, 0.0418878);
   }
   {  // 4 16
-    EtableParamsOnePair<float>& params = analytic_parameters[84];
+    EtableParamsOnePair<float> &params = analytic_parameters[84];
     params.ljrep_linear_ramp_d2_cutoff = 4.5369;
     params.lj_r6_coeff = -539.595;
     params.lj_r12_coeff = 540018;
@@ -1932,7 +1932,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(2.87258, -3.04138, 1.1383, -0.14102);
   }
   {  // 4 17
-    EtableParamsOnePair<float>& params = analytic_parameters[85];
+    EtableParamsOnePair<float> &params = analytic_parameters[85];
     params.ljrep_linear_ramp_d2_cutoff = 5.4756;
     params.lj_r6_coeff = -951.285;
     params.lj_r12_coeff = 1.67366e+06;
@@ -1958,7 +1958,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(-1.16839, 0.887357, -0.19842, 0.0138304);
   }
   {  // 4 18
-    EtableParamsOnePair<float>& params = analytic_parameters[86];
+    EtableParamsOnePair<float> &params = analytic_parameters[86];
     params.ljrep_linear_ramp_d2_cutoff = 5.0625;
     params.lj_r6_coeff = -917.706;
     params.lj_r12_coeff = 1.27603e+06;
@@ -1984,7 +1984,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(-1.19957, 0.938551, -0.212886, 0.0149637);
   }
   {  // 4 19
-    EtableParamsOnePair<float>& params = analytic_parameters[87];
+    EtableParamsOnePair<float> &params = analytic_parameters[87];
     params.ljrep_linear_ramp_d2_cutoff = 5.76;
     params.lj_r6_coeff = -610.297;
     params.lj_r12_coeff = 1.24989e+06;
@@ -2005,7 +2005,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(-1.07008, 0.993867, -0.317278, 0.033624);
   }
   {  // 4 20
-    EtableParamsOnePair<float>& params = analytic_parameters[88];
+    EtableParamsOnePair<float> &params = analytic_parameters[88];
     params.ljrep_linear_ramp_d2_cutoff = 5.76;
     params.lj_r6_coeff = -1035.83;
     params.lj_r12_coeff = 2.12137e+06;
@@ -2028,7 +2028,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(-1.07008, 0.993867, -0.317278, 0.033624);
   }
   {  // 4 21
-    EtableParamsOnePair<float>& params = analytic_parameters[89];
+    EtableParamsOnePair<float> &params = analytic_parameters[89];
     params.ljrep_linear_ramp_d2_cutoff = 4.5369;
     params.lj_r6_coeff = -539.595;
     params.lj_r12_coeff = 540018;
@@ -2050,7 +2050,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(3.59072, -3.80173, 1.42288, -0.176275);
   }
   {  // 4 22
-    EtableParamsOnePair<float>& params = analytic_parameters[90];
+    EtableParamsOnePair<float> &params = analytic_parameters[90];
     params.ljrep_linear_ramp_d2_cutoff = 6.2001;
     params.lj_r6_coeff = -2640.76;
     params.lj_r12_coeff = 6.7451e+06;
@@ -2080,7 +2080,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(-8.84164, 6.4549, -1.41483, 0.0974358);
   }
   {  // 4 23
-    EtableParamsOnePair<float>& params = analytic_parameters[91];
+    EtableParamsOnePair<float> &params = analytic_parameters[91];
     params.ljrep_linear_ramp_d2_cutoff = 6.2001;
     params.lj_r6_coeff = -2640.76;
     params.lj_r12_coeff = 6.7451e+06;
@@ -2110,7 +2110,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(-8.84164, 6.4549, -1.41483, 0.0974358);
   }
   {  // 4 24
-    EtableParamsOnePair<float>& params = analytic_parameters[92];
+    EtableParamsOnePair<float> &params = analytic_parameters[92];
     params.hydrogen_interaction = 1;
     params.maxd2 = 9;
     params.ljrep_linear_ramp_d2_cutoff = 3.24;
@@ -2127,7 +2127,7 @@ void EtableParamsInit::init_EtableParams(
     params.lj_radius_2 = 1;
   }
   {  // 4 25
-    EtableParamsOnePair<float>& params = analytic_parameters[93];
+    EtableParamsOnePair<float> &params = analytic_parameters[93];
     params.hydrogen_interaction = 1;
     params.maxd2 = 10.25;
     params.ljrep_linear_ramp_d2_cutoff = 3.6864;
@@ -2144,7 +2144,7 @@ void EtableParamsInit::init_EtableParams(
     params.lj_radius_2 = 1.2;
   }
   {  // 5 5
-    EtableParamsOnePair<float>& params = analytic_parameters[94];
+    EtableParamsOnePair<float> &params = analytic_parameters[94];
     params.ljrep_linear_ramp_d2_cutoff = 5.76;
     params.lj_r6_coeff = -1483.57;
     params.lj_r12_coeff = 3.03835e+06;
@@ -2173,7 +2173,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(-2.82847, 2.21115, -0.58324, 0.0511164);
   }
   {  // 5 6
-    EtableParamsOnePair<float>& params = analytic_parameters[95];
+    EtableParamsOnePair<float> &params = analytic_parameters[95];
     params.ljrep_linear_ramp_d2_cutoff = 5.76;
     params.lj_r6_coeff = -1207.65;
     params.lj_r12_coeff = 2.47326e+06;
@@ -2196,7 +2196,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(-1.73479, 1.35617, -0.357721, 0.0313514);
   }
   {  // 5 7
-    EtableParamsOnePair<float>& params = analytic_parameters[96];
+    EtableParamsOnePair<float> &params = analytic_parameters[96];
     params.ljrep_linear_ramp_d2_cutoff = 5.0625;
     params.lj_r6_coeff = -1155.66;
     params.lj_r12_coeff = 1.6069e+06;
@@ -2222,7 +2222,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(-2.85968, 2.23744, -0.507506, 0.0356725);
   }
   {  // 5 8
-    EtableParamsOnePair<float>& params = analytic_parameters[97];
+    EtableParamsOnePair<float> &params = analytic_parameters[97];
     params.ljrep_linear_ramp_d2_cutoff = 5.0625;
     params.lj_r6_coeff = -1155.66;
     params.lj_r12_coeff = 1.6069e+06;
@@ -2248,7 +2248,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(-1.28525, 1.00559, -0.228092, 0.0160326);
   }
   {  // 5 9
-    EtableParamsOnePair<float>& params = analytic_parameters[98];
+    EtableParamsOnePair<float> &params = analytic_parameters[98];
     params.ljrep_linear_ramp_d2_cutoff = 5.0625;
     params.lj_r6_coeff = -1155.66;
     params.lj_r12_coeff = 1.6069e+06;
@@ -2274,7 +2274,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(-2.50624, 1.9609, -0.44478, 0.0312635);
   }
   {  // 5 10
-    EtableParamsOnePair<float>& params = analytic_parameters[99];
+    EtableParamsOnePair<float> &params = analytic_parameters[99];
     params.ljrep_linear_ramp_d2_cutoff = 5.0625;
     params.lj_r6_coeff = -1155.66;
     params.lj_r12_coeff = 1.6069e+06;
@@ -2300,7 +2300,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(-13.2981, 8.66573, -1.7804, 0.117584);
   }
   {  // 5 11
-    EtableParamsOnePair<float>& params = analytic_parameters[100];
+    EtableParamsOnePair<float> &params = analytic_parameters[100];
     params.ljrep_linear_ramp_d2_cutoff = 5.0625;
     params.lj_r6_coeff = -1155.66;
     params.lj_r12_coeff = 1.6069e+06;
@@ -2326,7 +2326,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(-6.64905, 4.33287, -0.890201, 0.0587921);
   }
   {  // 5 12
-    EtableParamsOnePair<float>& params = analytic_parameters[101];
+    EtableParamsOnePair<float> &params = analytic_parameters[101];
     params.ljrep_linear_ramp_d2_cutoff = 5.0625;
     params.lj_r6_coeff = -1155.66;
     params.lj_r12_coeff = 1.6069e+06;
@@ -2348,7 +2348,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(1.94787, -1.93204, 0.66544, -0.0760714);
   }
   {  // 5 13
-    EtableParamsOnePair<float>& params = analytic_parameters[102];
+    EtableParamsOnePair<float> &params = analytic_parameters[102];
     params.ljrep_linear_ramp_d2_cutoff = 4.5369;
     params.lj_r6_coeff = -679.508;
     params.lj_r12_coeff = 680040;
@@ -2374,7 +2374,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(-1.66727, 1.37123, -0.318137, 0.022652);
   }
   {  // 5 14
-    EtableParamsOnePair<float>& params = analytic_parameters[103];
+    EtableParamsOnePair<float> &params = analytic_parameters[103];
     params.ljrep_linear_ramp_d2_cutoff = 4.5369;
     params.lj_r6_coeff = -679.508;
     params.lj_r12_coeff = 680040;
@@ -2400,7 +2400,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(-1.45575, 1.19727, -0.277777, 0.0197783);
   }
   {  // 5 15
-    EtableParamsOnePair<float>& params = analytic_parameters[104];
+    EtableParamsOnePair<float> &params = analytic_parameters[104];
     params.ljrep_linear_ramp_d2_cutoff = 4.5369;
     params.lj_r6_coeff = -780.673;
     params.lj_r12_coeff = 781284;
@@ -2426,7 +2426,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(-6.30252, 4.12043, -0.848267, 0.0560998);
   }
   {  // 5 16
-    EtableParamsOnePair<float>& params = analytic_parameters[105];
+    EtableParamsOnePair<float> &params = analytic_parameters[105];
     params.ljrep_linear_ramp_d2_cutoff = 4.5369;
     params.lj_r6_coeff = -679.508;
     params.lj_r12_coeff = 680040;
@@ -2448,7 +2448,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(3.8472, -4.07328, 1.52451, -0.188866);
   }
   {  // 5 17
-    EtableParamsOnePair<float>& params = analytic_parameters[106];
+    EtableParamsOnePair<float> &params = analytic_parameters[106];
     params.ljrep_linear_ramp_d2_cutoff = 5.4756;
     params.lj_r6_coeff = -1197.94;
     params.lj_r12_coeff = 2.10763e+06;
@@ -2478,7 +2478,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(-1.56481, 1.18843, -0.265741, 0.0185228);
   }
   {  // 5 18
-    EtableParamsOnePair<float>& params = analytic_parameters[107];
+    EtableParamsOnePair<float> &params = analytic_parameters[107];
     params.ljrep_linear_ramp_d2_cutoff = 5.0625;
     params.lj_r6_coeff = -1155.66;
     params.lj_r12_coeff = 1.6069e+06;
@@ -2504,7 +2504,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(-1.60656, 1.25699, -0.285116, 0.0200407);
   }
   {  // 5 19
-    EtableParamsOnePair<float>& params = analytic_parameters[108];
+    EtableParamsOnePair<float> &params = analytic_parameters[108];
     params.ljrep_linear_ramp_d2_cutoff = 5.76;
     params.lj_r6_coeff = -768.541;
     params.lj_r12_coeff = 1.57397e+06;
@@ -2529,7 +2529,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(-1.43314, 1.33107, -0.424926, 0.0450321);
   }
   {  // 5 20
-    EtableParamsOnePair<float>& params = analytic_parameters[109];
+    EtableParamsOnePair<float> &params = analytic_parameters[109];
     params.ljrep_linear_ramp_d2_cutoff = 5.76;
     params.lj_r6_coeff = -1304.41;
     params.lj_r12_coeff = 2.67143e+06;
@@ -2554,7 +2554,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(-1.43314, 1.33107, -0.424926, 0.0450321);
   }
   {  // 5 21
-    EtableParamsOnePair<float>& params = analytic_parameters[110];
+    EtableParamsOnePair<float> &params = analytic_parameters[110];
     params.ljrep_linear_ramp_d2_cutoff = 4.5369;
     params.lj_r6_coeff = -679.508;
     params.lj_r12_coeff = 680040;
@@ -2580,7 +2580,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(-1.24423, 1.02331, -0.237416, 0.0169045);
   }
   {  // 5 22
-    EtableParamsOnePair<float>& params = analytic_parameters[111];
+    EtableParamsOnePair<float> &params = analytic_parameters[111];
     params.ljrep_linear_ramp_d2_cutoff = 6.2001;
     params.lj_r6_coeff = -3325.49;
     params.lj_r12_coeff = 8.49404e+06;
@@ -2614,7 +2614,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(-11.8415, 8.64496, -1.89486, 0.130494);
   }
   {  // 5 23
-    EtableParamsOnePair<float>& params = analytic_parameters[112];
+    EtableParamsOnePair<float> &params = analytic_parameters[112];
     params.ljrep_linear_ramp_d2_cutoff = 6.2001;
     params.lj_r6_coeff = -3325.49;
     params.lj_r12_coeff = 8.49404e+06;
@@ -2648,7 +2648,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(-11.8415, 8.64496, -1.89486, 0.130494);
   }
   {  // 5 24
-    EtableParamsOnePair<float>& params = analytic_parameters[113];
+    EtableParamsOnePair<float> &params = analytic_parameters[113];
     params.hydrogen_interaction = 1;
     params.maxd2 = 9;
     params.ljrep_linear_ramp_d2_cutoff = 3.24;
@@ -2665,7 +2665,7 @@ void EtableParamsInit::init_EtableParams(
     params.lj_radius_2 = 1;
   }
   {  // 5 25
-    EtableParamsOnePair<float>& params = analytic_parameters[114];
+    EtableParamsOnePair<float> &params = analytic_parameters[114];
     params.hydrogen_interaction = 1;
     params.maxd2 = 10.25;
     params.ljrep_linear_ramp_d2_cutoff = 3.6864;
@@ -2682,7 +2682,7 @@ void EtableParamsInit::init_EtableParams(
     params.lj_radius_2 = 1.2;
   }
   {  // 6 6
-    EtableParamsOnePair<float>& params = analytic_parameters[115];
+    EtableParamsOnePair<float> &params = analytic_parameters[115];
     params.ljrep_linear_ramp_d2_cutoff = 5.76;
     params.lj_r6_coeff = -983.04;
     params.lj_r12_coeff = 2.01327e+06;
@@ -2701,7 +2701,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(1.376, -1.08156, 0.245851, -0.0173024);
   }
   {  // 6 7
-    EtableParamsOnePair<float>& params = analytic_parameters[116];
+    EtableParamsOnePair<float> &params = analytic_parameters[116];
     params.ljrep_linear_ramp_d2_cutoff = 5.0625;
     params.lj_r6_coeff = -940.722;
     params.lj_r12_coeff = 1.30803e+06;
@@ -2727,7 +2727,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(-1.75394, 1.3723, -0.31127, 0.0218791);
   }
   {  // 6 8
-    EtableParamsOnePair<float>& params = analytic_parameters[117];
+    EtableParamsOnePair<float> &params = analytic_parameters[117];
     params.ljrep_linear_ramp_d2_cutoff = 5.0625;
     params.lj_r6_coeff = -940.722;
     params.lj_r12_coeff = 1.30803e+06;
@@ -2749,7 +2749,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(3.08308, -3.05802, 1.05326, -0.120405);
   }
   {  // 6 9
-    EtableParamsOnePair<float>& params = analytic_parameters[118];
+    EtableParamsOnePair<float> &params = analytic_parameters[118];
     params.ljrep_linear_ramp_d2_cutoff = 5.0625;
     params.lj_r6_coeff = -940.722;
     params.lj_r12_coeff = 1.30803e+06;
@@ -2775,7 +2775,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(-1.53716, 1.20269, -0.272799, 0.019175);
   }
   {  // 6 10
-    EtableParamsOnePair<float>& params = analytic_parameters[119];
+    EtableParamsOnePair<float> &params = analytic_parameters[119];
     params.ljrep_linear_ramp_d2_cutoff = 5.0625;
     params.lj_r6_coeff = -940.722;
     params.lj_r12_coeff = 1.30803e+06;
@@ -2801,7 +2801,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(-8.15617, 5.31498, -1.09198, 0.0721183);
   }
   {  // 6 11
-    EtableParamsOnePair<float>& params = analytic_parameters[120];
+    EtableParamsOnePair<float> &params = analytic_parameters[120];
     params.ljrep_linear_ramp_d2_cutoff = 5.0625;
     params.lj_r6_coeff = -940.722;
     params.lj_r12_coeff = 1.30803e+06;
@@ -2827,7 +2827,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(-4.07809, 2.65749, -0.54599, 0.0360592);
   }
   {  // 6 12
-    EtableParamsOnePair<float>& params = analytic_parameters[121];
+    EtableParamsOnePair<float> &params = analytic_parameters[121];
     params.ljrep_linear_ramp_d2_cutoff = 5.0625;
     params.lj_r6_coeff = -940.722;
     params.lj_r12_coeff = 1.30803e+06;
@@ -2848,7 +2848,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(1.19469, -1.18498, 0.408137, -0.0466571);
   }
   {  // 6 13
-    EtableParamsOnePair<float>& params = analytic_parameters[122];
+    EtableParamsOnePair<float> &params = analytic_parameters[122];
     params.ljrep_linear_ramp_d2_cutoff = 4.5369;
     params.lj_r6_coeff = -553.128;
     params.lj_r12_coeff = 553562;
@@ -2872,7 +2872,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(-1.02259, 0.841021, -0.195124, 0.0138932);
   }
   {  // 6 14
-    EtableParamsOnePair<float>& params = analytic_parameters[123];
+    EtableParamsOnePair<float> &params = analytic_parameters[123];
     params.ljrep_linear_ramp_d2_cutoff = 4.5369;
     params.lj_r6_coeff = -553.128;
     params.lj_r12_coeff = 553562;
@@ -2894,7 +2894,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(3.45094, -3.65373, 1.36749, -0.169413);
   }
   {  // 6 15
-    EtableParamsOnePair<float>& params = analytic_parameters[124];
+    EtableParamsOnePair<float> &params = analytic_parameters[124];
     params.ljrep_linear_ramp_d2_cutoff = 4.5369;
     params.lj_r6_coeff = -635.478;
     params.lj_r12_coeff = 635976;
@@ -2920,7 +2920,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(-3.86554, 2.5272, -0.52027, 0.0344079);
   }
   {  // 6 16
-    EtableParamsOnePair<float>& params = analytic_parameters[125];
+    EtableParamsOnePair<float> &params = analytic_parameters[125];
     params.ljrep_linear_ramp_d2_cutoff = 4.5369;
     params.lj_r6_coeff = -553.128;
     params.lj_r12_coeff = 553562;
@@ -2942,7 +2942,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(2.35962, -2.49828, 0.935035, -0.115838);
   }
   {  // 6 17
-    EtableParamsOnePair<float>& params = analytic_parameters[126];
+    EtableParamsOnePair<float> &params = analytic_parameters[126];
     params.ljrep_linear_ramp_d2_cutoff = 5.4756;
     params.lj_r6_coeff = -975.143;
     params.lj_r12_coeff = 1.71564e+06;
@@ -2964,7 +2964,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(3.89379, -3.67929, 1.19562, -0.129152);
   }
   {  // 6 18
-    EtableParamsOnePair<float>& params = analytic_parameters[127];
+    EtableParamsOnePair<float> &params = analytic_parameters[127];
     params.ljrep_linear_ramp_d2_cutoff = 5.0625;
     params.lj_r6_coeff = -940.722;
     params.lj_r12_coeff = 1.30803e+06;
@@ -2986,7 +2986,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(3.85385, -3.82253, 1.31657, -0.150507);
   }
   {  // 6 19
-    EtableParamsOnePair<float>& params = analytic_parameters[128];
+    EtableParamsOnePair<float> &params = analytic_parameters[128];
     params.ljrep_linear_ramp_d2_cutoff = 5.76;
     params.lj_r6_coeff = -625.603;
     params.lj_r12_coeff = 1.28123e+06;
@@ -3003,7 +3003,7 @@ void EtableParamsInit::init_EtableParams(
     params.lj_radius_2 = 2;
   }
   {  // 6 20
-    EtableParamsOnePair<float>& params = analytic_parameters[129];
+    EtableParamsOnePair<float> &params = analytic_parameters[129];
     params.ljrep_linear_ramp_d2_cutoff = 5.76;
     params.lj_r6_coeff = -1061.8;
     params.lj_r12_coeff = 2.17458e+06;
@@ -3022,7 +3022,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(1.48625, -1.16821, 0.26555, -0.0186888);
   }
   {  // 6 21
-    EtableParamsOnePair<float>& params = analytic_parameters[130];
+    EtableParamsOnePair<float> &params = analytic_parameters[130];
     params.ljrep_linear_ramp_d2_cutoff = 4.5369;
     params.lj_r6_coeff = -553.128;
     params.lj_r12_coeff = 553562;
@@ -3044,7 +3044,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(2.94952, -3.12285, 1.16879, -0.144797);
   }
   {  // 6 22
-    EtableParamsOnePair<float>& params = analytic_parameters[131];
+    EtableParamsOnePair<float> &params = analytic_parameters[131];
     params.ljrep_linear_ramp_d2_cutoff = 6.2001;
     params.lj_r6_coeff = -2706.99;
     params.lj_r12_coeff = 6.91426e+06;
@@ -3072,7 +3072,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(-7.26278, 5.30224, -1.16218, 0.0800365);
   }
   {  // 6 23
-    EtableParamsOnePair<float>& params = analytic_parameters[132];
+    EtableParamsOnePair<float> &params = analytic_parameters[132];
     params.ljrep_linear_ramp_d2_cutoff = 6.2001;
     params.lj_r6_coeff = -2706.99;
     params.lj_r12_coeff = 6.91426e+06;
@@ -3100,7 +3100,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(-7.26278, 5.30224, -1.16218, 0.0800365);
   }
   {  // 6 24
-    EtableParamsOnePair<float>& params = analytic_parameters[133];
+    EtableParamsOnePair<float> &params = analytic_parameters[133];
     params.hydrogen_interaction = 1;
     params.maxd2 = 9;
     params.ljrep_linear_ramp_d2_cutoff = 3.24;
@@ -3117,7 +3117,7 @@ void EtableParamsInit::init_EtableParams(
     params.lj_radius_2 = 1;
   }
   {  // 6 25
-    EtableParamsOnePair<float>& params = analytic_parameters[134];
+    EtableParamsOnePair<float> &params = analytic_parameters[134];
     params.hydrogen_interaction = 1;
     params.maxd2 = 10.25;
     params.ljrep_linear_ramp_d2_cutoff = 3.6864;
@@ -3134,7 +3134,7 @@ void EtableParamsInit::init_EtableParams(
     params.lj_radius_2 = 1.2;
   }
   {  // 7 7
-    EtableParamsOnePair<float>& params = analytic_parameters[135];
+    EtableParamsOnePair<float> &params = analytic_parameters[135];
     params.ljrep_linear_ramp_d2_cutoff = 4.41;
     params.lj_r6_coeff = -876.485;
     params.lj_r12_coeff = 805606;
@@ -3159,7 +3159,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(0.942932, -1.03341, 0.409025, -0.0531824);
   }
   {  // 7 8
-    EtableParamsOnePair<float>& params = analytic_parameters[136];
+    EtableParamsOnePair<float> &params = analytic_parameters[136];
     params.ljrep_linear_ramp_d2_cutoff = 3.24;
     params.lj_r6_coeff = -347.587;
     params.lj_r12_coeff = 126696;
@@ -3179,7 +3179,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(0.952494, -1.1584, 0.570156, -0.0915688);
   }
   {  // 7 9
-    EtableParamsOnePair<float>& params = analytic_parameters[137];
+    EtableParamsOnePair<float> &params = analytic_parameters[137];
     params.ljrep_linear_ramp_d2_cutoff = 4.41;
     params.lj_r6_coeff = -876.485;
     params.lj_r12_coeff = 805606;
@@ -3205,7 +3205,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(-1.06762, 0.83531, -0.189469, 0.0133177);
   }
   {  // 7 10
-    EtableParamsOnePair<float>& params = analytic_parameters[138];
+    EtableParamsOnePair<float> &params = analytic_parameters[138];
     params.ljrep_linear_ramp_d2_cutoff = 4.41;
     params.lj_r6_coeff = -876.485;
     params.lj_r12_coeff = 805606;
@@ -3236,7 +3236,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(-1.95039, 1.27097, -0.261126, 0.0172457);
   }
   {  // 7 11
-    EtableParamsOnePair<float>& params = analytic_parameters[139];
+    EtableParamsOnePair<float> &params = analytic_parameters[139];
     params.ljrep_linear_ramp_d2_cutoff = 4.41;
     params.lj_r6_coeff = -876.485;
     params.lj_r12_coeff = 805606;
@@ -3262,7 +3262,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(-1.06762, 0.83531, -0.189469, 0.0133177);
   }
   {  // 7 12
-    EtableParamsOnePair<float>& params = analytic_parameters[140];
+    EtableParamsOnePair<float> &params = analytic_parameters[140];
     params.ljrep_linear_ramp_d2_cutoff = 4.41;
     params.lj_r6_coeff = -876.485;
     params.lj_r12_coeff = 805606;
@@ -3279,7 +3279,7 @@ void EtableParamsInit::init_EtableParams(
     params.lj_radius_2 = 1.75;
   }
   {  // 7 13
-    EtableParamsOnePair<float>& params = analytic_parameters[141];
+    EtableParamsOnePair<float> &params = analytic_parameters[141];
     params.ljrep_linear_ramp_d2_cutoff = 2.4336;
     params.lj_r6_coeff = -120.326;
     params.lj_r12_coeff = 18585.2;
@@ -3301,7 +3301,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(-1.02949, 0.805478, -0.182702, 0.0128421);
   }
   {  // 7 14
-    EtableParamsOnePair<float>& params = analytic_parameters[142];
+    EtableParamsOnePair<float> &params = analytic_parameters[142];
     params.ljrep_linear_ramp_d2_cutoff = 3.24;
     params.lj_r6_coeff = -283.953;
     params.lj_r12_coeff = 103501;
@@ -3327,7 +3327,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(-1.02949, 0.805478, -0.182702, 0.0128421);
   }
   {  // 7 15
-    EtableParamsOnePair<float>& params = analytic_parameters[143];
+    EtableParamsOnePair<float> &params = analytic_parameters[143];
     params.ljrep_linear_ramp_d2_cutoff = 3.24;
     params.lj_r6_coeff = -326.227;
     params.lj_r12_coeff = 118910;
@@ -3353,7 +3353,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(-1.02949, 0.805478, -0.182702, 0.0128421);
   }
   {  // 7 16
-    EtableParamsOnePair<float>& params = analytic_parameters[144];
+    EtableParamsOnePair<float> &params = analytic_parameters[144];
     params.ljrep_linear_ramp_d2_cutoff = 3.24;
     params.lj_r6_coeff = -283.953;
     params.lj_r12_coeff = 103501;
@@ -3379,7 +3379,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(-1.02949, 0.805478, -0.182702, 0.0128421);
   }
   {  // 7 17
-    EtableParamsOnePair<float>& params = analytic_parameters[145];
+    EtableParamsOnePair<float> &params = analytic_parameters[145];
     params.ljrep_linear_ramp_d2_cutoff = 4.7961;
     params.lj_r6_coeff = -923.635;
     params.lj_r12_coeff = 1.09201e+06;
@@ -3405,7 +3405,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(-1.40125, 1.09634, -0.248678, 0.0174795);
   }
   {  // 7 18
-    EtableParamsOnePair<float>& params = analytic_parameters[146];
+    EtableParamsOnePair<float> &params = analytic_parameters[146];
     params.ljrep_linear_ramp_d2_cutoff = 4.41;
     params.lj_r6_coeff = -876.485;
     params.lj_r12_coeff = 805606;
@@ -3427,7 +3427,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(0.942932, -1.03341, 0.409025, -0.0531824);
   }
   {  // 7 19
-    EtableParamsOnePair<float>& params = analytic_parameters[147];
+    EtableParamsOnePair<float> &params = analytic_parameters[147];
     params.ljrep_linear_ramp_d2_cutoff = 5.0625;
     params.lj_r6_coeff = -598.672;
     params.lj_r12_coeff = 832428;
@@ -3453,7 +3453,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(-2.25915, 1.76758, -0.40093, 0.0281813);
   }
   {  // 7 20
-    EtableParamsOnePair<float>& params = analytic_parameters[148];
+    EtableParamsOnePair<float> &params = analytic_parameters[148];
     params.ljrep_linear_ramp_d2_cutoff = 5.0625;
     params.lj_r6_coeff = -1016.1;
     params.lj_r12_coeff = 1.41284e+06;
@@ -3479,7 +3479,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(-1.40125, 1.09634, -0.248678, 0.0174795);
   }
   {  // 7 21
-    EtableParamsOnePair<float>& params = analytic_parameters[149];
+    EtableParamsOnePair<float> &params = analytic_parameters[149];
     params.ljrep_linear_ramp_d2_cutoff = 3.24;
     params.lj_r6_coeff = -283.953;
     params.lj_r12_coeff = 103501;
@@ -3505,7 +3505,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(-1.02949, 0.805478, -0.182702, 0.0128421);
   }
   {  // 7 22
-    EtableParamsOnePair<float>& params = analytic_parameters[150];
+    EtableParamsOnePair<float> &params = analytic_parameters[150];
     params.ljrep_linear_ramp_d2_cutoff = 5.4756;
     params.lj_r6_coeff = -2628.14;
     params.lj_r12_coeff = 4.62388e+06;
@@ -3538,7 +3538,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(-1.73675, 1.26793, -0.277913, 0.0191392);
   }
   {  // 7 23
-    EtableParamsOnePair<float>& params = analytic_parameters[151];
+    EtableParamsOnePair<float> &params = analytic_parameters[151];
     params.ljrep_linear_ramp_d2_cutoff = 5.4756;
     params.lj_r6_coeff = -2628.14;
     params.lj_r12_coeff = 4.62388e+06;
@@ -3571,7 +3571,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(-1.73675, 1.26793, -0.277913, 0.0191392);
   }
   {  // 7 24
-    EtableParamsOnePair<float>& params = analytic_parameters[152];
+    EtableParamsOnePair<float> &params = analytic_parameters[152];
     params.hydrogen_interaction = 1;
     params.maxd2 = 7.55;
     params.ljrep_linear_ramp_d2_cutoff = 2.7225;
@@ -3588,7 +3588,7 @@ void EtableParamsInit::init_EtableParams(
     params.lj_radius_2 = 1;
   }
   {  // 7 25
-    EtableParamsOnePair<float>& params = analytic_parameters[153];
+    EtableParamsOnePair<float> &params = analytic_parameters[153];
     params.hydrogen_interaction = 1;
     params.maxd2 = 8.7;
     params.ljrep_linear_ramp_d2_cutoff = 3.1329;
@@ -3605,7 +3605,7 @@ void EtableParamsInit::init_EtableParams(
     params.lj_radius_2 = 1.2;
   }
   {  // 8 8
-    EtableParamsOnePair<float>& params = analytic_parameters[154];
+    EtableParamsOnePair<float> &params = analytic_parameters[154];
     params.ljrep_linear_ramp_d2_cutoff = 4.41;
     params.lj_r6_coeff = -876.485;
     params.lj_r12_coeff = 805606;
@@ -3622,7 +3622,7 @@ void EtableParamsInit::init_EtableParams(
     params.lj_radius_2 = 1.75;
   }
   {  // 8 9
-    EtableParamsOnePair<float>& params = analytic_parameters[155];
+    EtableParamsOnePair<float> &params = analytic_parameters[155];
     params.ljrep_linear_ramp_d2_cutoff = 3.24;
     params.lj_r6_coeff = -347.587;
     params.lj_r12_coeff = 126696;
@@ -3642,7 +3642,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(1.32772, -1.61474, 0.794763, -0.127641);
   }
   {  // 8 10
-    EtableParamsOnePair<float>& params = analytic_parameters[156];
+    EtableParamsOnePair<float> &params = analytic_parameters[156];
     params.ljrep_linear_ramp_d2_cutoff = 3.24;
     params.lj_r6_coeff = -347.587;
     params.lj_r12_coeff = 126696;
@@ -3667,7 +3667,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(-1.95039, 1.27097, -0.261126, 0.0172457);
   }
   {  // 8 11
-    EtableParamsOnePair<float>& params = analytic_parameters[157];
+    EtableParamsOnePair<float> &params = analytic_parameters[157];
     params.ljrep_linear_ramp_d2_cutoff = 3.24;
     params.lj_r6_coeff = -347.587;
     params.lj_r12_coeff = 126696;
@@ -3689,7 +3689,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(-1.44841, 1.00723, -0.215044, 0.0145675);
   }
   {  // 8 12
-    EtableParamsOnePair<float>& params = analytic_parameters[158];
+    EtableParamsOnePair<float> &params = analytic_parameters[158];
     params.ljrep_linear_ramp_d2_cutoff = 3.24;
     params.lj_r6_coeff = -347.587;
     params.lj_r12_coeff = 126696;
@@ -3706,7 +3706,7 @@ void EtableParamsInit::init_EtableParams(
     params.lj_radius_2 = 1.75;
   }
   {  // 8 13
-    EtableParamsOnePair<float>& params = analytic_parameters[159];
+    EtableParamsOnePair<float> &params = analytic_parameters[159];
     params.ljrep_linear_ramp_d2_cutoff = 2.4336;
     params.lj_r6_coeff = -120.326;
     params.lj_r12_coeff = 18585.2;
@@ -3724,7 +3724,7 @@ void EtableParamsInit::init_EtableParams(
     params.lj_radius_2 = 1.55;
   }
   {  // 8 14
-    EtableParamsOnePair<float>& params = analytic_parameters[160];
+    EtableParamsOnePair<float> &params = analytic_parameters[160];
     params.ljrep_linear_ramp_d2_cutoff = 3.9204;
     params.lj_r6_coeff = -503.039;
     params.lj_r12_coeff = 324830;
@@ -3746,7 +3746,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(1.05283, -1.19695, 0.501576, -0.0692504);
   }
   {  // 8 15
-    EtableParamsOnePair<float>& params = analytic_parameters[161];
+    EtableParamsOnePair<float> &params = analytic_parameters[161];
     params.ljrep_linear_ramp_d2_cutoff = 3.9204;
     params.lj_r6_coeff = -577.932;
     params.lj_r12_coeff = 373190;
@@ -3770,7 +3770,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(1.05283, -1.19695, 0.501576, -0.0692504);
   }
   {  // 8 16
-    EtableParamsOnePair<float>& params = analytic_parameters[162];
+    EtableParamsOnePair<float> &params = analytic_parameters[162];
     params.ljrep_linear_ramp_d2_cutoff = 3.9204;
     params.lj_r6_coeff = -503.039;
     params.lj_r12_coeff = 324830;
@@ -3792,7 +3792,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(1.05283, -1.19695, 0.501576, -0.0692504);
   }
   {  // 8 17
-    EtableParamsOnePair<float>& params = analytic_parameters[163];
+    EtableParamsOnePair<float> &params = analytic_parameters[163];
     params.ljrep_linear_ramp_d2_cutoff = 4.7961;
     params.lj_r6_coeff = -923.635;
     params.lj_r12_coeff = 1.09201e+06;
@@ -3814,7 +3814,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(1.64189, -1.72207, 0.639671, -0.0782866);
   }
   {  // 8 18
-    EtableParamsOnePair<float>& params = analytic_parameters[164];
+    EtableParamsOnePair<float> &params = analytic_parameters[164];
     params.ljrep_linear_ramp_d2_cutoff = 3.24;
     params.lj_r6_coeff = -347.587;
     params.lj_r12_coeff = 126696;
@@ -3831,7 +3831,7 @@ void EtableParamsInit::init_EtableParams(
     params.lj_radius_2 = 1.75;
   }
   {  // 8 19
-    EtableParamsOnePair<float>& params = analytic_parameters[165];
+    EtableParamsOnePair<float> &params = analytic_parameters[165];
     params.ljrep_linear_ramp_d2_cutoff = 5.0625;
     params.lj_r6_coeff = -598.672;
     params.lj_r12_coeff = 832428;
@@ -3855,7 +3855,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(-1.01535, 0.794416, -0.180193, 0.0126657);
   }
   {  // 8 20
-    EtableParamsOnePair<float>& params = analytic_parameters[166];
+    EtableParamsOnePair<float> &params = analytic_parameters[166];
     params.ljrep_linear_ramp_d2_cutoff = 5.0625;
     params.lj_r6_coeff = -1016.1;
     params.lj_r12_coeff = 1.41284e+06;
@@ -3877,7 +3877,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(2.46311, -2.44309, 0.84146, -0.0961935);
   }
   {  // 8 21
-    EtableParamsOnePair<float>& params = analytic_parameters[167];
+    EtableParamsOnePair<float> &params = analytic_parameters[167];
     params.ljrep_linear_ramp_d2_cutoff = 3.9204;
     params.lj_r6_coeff = -503.039;
     params.lj_r12_coeff = 324830;
@@ -3899,7 +3899,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(1.05283, -1.19695, 0.501576, -0.0692504);
   }
   {  // 8 22
-    EtableParamsOnePair<float>& params = analytic_parameters[168];
+    EtableParamsOnePair<float> &params = analytic_parameters[168];
     params.ljrep_linear_ramp_d2_cutoff = 5.4756;
     params.lj_r6_coeff = -2628.14;
     params.lj_r12_coeff = 4.62388e+06;
@@ -3932,7 +3932,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(-1.73675, 1.26793, -0.277913, 0.0191392);
   }
   {  // 8 23
-    EtableParamsOnePair<float>& params = analytic_parameters[169];
+    EtableParamsOnePair<float> &params = analytic_parameters[169];
     params.ljrep_linear_ramp_d2_cutoff = 5.4756;
     params.lj_r6_coeff = -2628.14;
     params.lj_r12_coeff = 4.62388e+06;
@@ -3965,7 +3965,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(-1.73675, 1.26793, -0.277913, 0.0191392);
   }
   {  // 8 24
-    EtableParamsOnePair<float>& params = analytic_parameters[170];
+    EtableParamsOnePair<float> &params = analytic_parameters[170];
     params.hydrogen_interaction = 1;
     params.maxd2 = 3.05;
     params.ljrep_linear_ramp_d2_cutoff = 1.1025;
@@ -3982,7 +3982,7 @@ void EtableParamsInit::init_EtableParams(
     params.lj_radius_2 = 1;
   }
   {  // 8 25
-    EtableParamsOnePair<float>& params = analytic_parameters[171];
+    EtableParamsOnePair<float> &params = analytic_parameters[171];
     params.hydrogen_interaction = 1;
     params.maxd2 = 8.7;
     params.ljrep_linear_ramp_d2_cutoff = 3.1329;
@@ -3999,7 +3999,7 @@ void EtableParamsInit::init_EtableParams(
     params.lj_radius_2 = 1.2;
   }
   {  // 9 9
-    EtableParamsOnePair<float>& params = analytic_parameters[172];
+    EtableParamsOnePair<float> &params = analytic_parameters[172];
     params.ljrep_linear_ramp_d2_cutoff = 4.41;
     params.lj_r6_coeff = -876.485;
     params.lj_r12_coeff = 805606;
@@ -4026,7 +4026,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(2.10354, -2.30537, 0.912472, -0.118642);
   }
   {  // 9 10
-    EtableParamsOnePair<float>& params = analytic_parameters[173];
+    EtableParamsOnePair<float> &params = analytic_parameters[173];
     params.ljrep_linear_ramp_d2_cutoff = 4.41;
     params.lj_r6_coeff = -876.485;
     params.lj_r12_coeff = 805606;
@@ -4055,7 +4055,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(-4.96463, 3.23521, -0.664684, 0.0438981);
   }
   {  // 9 11
-    EtableParamsOnePair<float>& params = analytic_parameters[174];
+    EtableParamsOnePair<float> &params = analytic_parameters[174];
     params.ljrep_linear_ramp_d2_cutoff = 4.41;
     params.lj_r6_coeff = -876.485;
     params.lj_r12_coeff = 805606;
@@ -4084,7 +4084,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(-2.48231, 1.6176, -0.332342, 0.0219491);
   }
   {  // 9 12
-    EtableParamsOnePair<float>& params = analytic_parameters[175];
+    EtableParamsOnePair<float> &params = analytic_parameters[175];
     params.ljrep_linear_ramp_d2_cutoff = 4.41;
     params.lj_r6_coeff = -876.485;
     params.lj_r12_coeff = 805606;
@@ -4101,7 +4101,7 @@ void EtableParamsInit::init_EtableParams(
     params.lj_radius_2 = 1.75;
   }
   {  // 9 13
-    EtableParamsOnePair<float>& params = analytic_parameters[176];
+    EtableParamsOnePair<float> &params = analytic_parameters[176];
     params.ljrep_linear_ramp_d2_cutoff = 2.4336;
     params.lj_r6_coeff = -120.326;
     params.lj_r12_coeff = 18585.2;
@@ -4124,7 +4124,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(-1.5088, 1.20902, -0.277274, 0.0196135);
   }
   {  // 9 14
-    EtableParamsOnePair<float>& params = analytic_parameters[177];
+    EtableParamsOnePair<float> &params = analytic_parameters[177];
     params.ljrep_linear_ramp_d2_cutoff = 3.24;
     params.lj_r6_coeff = -283.953;
     params.lj_r12_coeff = 103501;
@@ -4151,7 +4151,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(1.10945, -1.35758, 0.666201, -0.106755);
   }
   {  // 9 15
-    EtableParamsOnePair<float>& params = analytic_parameters[178];
+    EtableParamsOnePair<float> &params = analytic_parameters[178];
     params.ljrep_linear_ramp_d2_cutoff = 3.24;
     params.lj_r6_coeff = -326.227;
     params.lj_r12_coeff = 118910;
@@ -4180,7 +4180,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(-2.35294, 1.53829, -0.316686, 0.0209439);
   }
   {  // 9 16
-    EtableParamsOnePair<float>& params = analytic_parameters[179];
+    EtableParamsOnePair<float> &params = analytic_parameters[179];
     params.ljrep_linear_ramp_d2_cutoff = 3.24;
     params.lj_r6_coeff = -283.953;
     params.lj_r12_coeff = 103501;
@@ -4205,7 +4205,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(1.47702, -1.79477, 0.876094, -0.139831);
   }
   {  // 9 17
-    EtableParamsOnePair<float>& params = analytic_parameters[180];
+    EtableParamsOnePair<float> &params = analytic_parameters[180];
     params.ljrep_linear_ramp_d2_cutoff = 4.7961;
     params.lj_r6_coeff = -923.635;
     params.lj_r12_coeff = 1.09201e+06;
@@ -4234,7 +4234,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(1.32259, -1.38193, 0.511917, -0.0625125);
   }
   {  // 9 18
-    EtableParamsOnePair<float>& params = analytic_parameters[181];
+    EtableParamsOnePair<float> &params = analytic_parameters[181];
     params.ljrep_linear_ramp_d2_cutoff = 4.41;
     params.lj_r6_coeff = -876.485;
     params.lj_r12_coeff = 805606;
@@ -4256,7 +4256,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(1.34842, -1.4778, 0.584918, -0.0760524);
   }
   {  // 9 19
-    EtableParamsOnePair<float>& params = analytic_parameters[182];
+    EtableParamsOnePair<float> &params = analytic_parameters[182];
     params.ljrep_linear_ramp_d2_cutoff = 5.0625;
     params.lj_r6_coeff = -598.672;
     params.lj_r12_coeff = 832428;
@@ -4282,7 +4282,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(-1.97993, 1.54911, -0.351376, 0.0246982);
   }
   {  // 9 20
-    EtableParamsOnePair<float>& params = analytic_parameters[183];
+    EtableParamsOnePair<float> &params = analytic_parameters[183];
     params.ljrep_linear_ramp_d2_cutoff = 5.0625;
     params.lj_r6_coeff = -1016.1;
     params.lj_r12_coeff = 1.41284e+06;
@@ -4308,7 +4308,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(-1.22806, 0.960842, -0.217942, 0.0153191);
   }
   {  // 9 21
-    EtableParamsOnePair<float>& params = analytic_parameters[184];
+    EtableParamsOnePair<float> &params = analytic_parameters[184];
     params.ljrep_linear_ramp_d2_cutoff = 3.24;
     params.lj_r6_coeff = -283.953;
     params.lj_r12_coeff = 103501;
@@ -4335,7 +4335,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(0.948249, -1.16032, 0.569402, -0.0912438);
   }
   {  // 9 22
-    EtableParamsOnePair<float>& params = analytic_parameters[185];
+    EtableParamsOnePair<float> &params = analytic_parameters[185];
     params.ljrep_linear_ramp_d2_cutoff = 5.4756;
     params.lj_r6_coeff = -2628.14;
     params.lj_r12_coeff = 4.62388e+06;
@@ -4368,7 +4368,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(-4.42082, 3.22745, -0.707415, 0.0487179);
   }
   {  // 9 23
-    EtableParamsOnePair<float>& params = analytic_parameters[186];
+    EtableParamsOnePair<float> &params = analytic_parameters[186];
     params.ljrep_linear_ramp_d2_cutoff = 5.4756;
     params.lj_r6_coeff = -2628.14;
     params.lj_r12_coeff = 4.62388e+06;
@@ -4401,7 +4401,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(-4.42082, 3.22745, -0.707415, 0.0487179);
   }
   {  // 9 24
-    EtableParamsOnePair<float>& params = analytic_parameters[187];
+    EtableParamsOnePair<float> &params = analytic_parameters[187];
     params.hydrogen_interaction = 1;
     params.maxd2 = 7.55;
     params.ljrep_linear_ramp_d2_cutoff = 2.7225;
@@ -4418,7 +4418,7 @@ void EtableParamsInit::init_EtableParams(
     params.lj_radius_2 = 1;
   }
   {  // 9 25
-    EtableParamsOnePair<float>& params = analytic_parameters[188];
+    EtableParamsOnePair<float> &params = analytic_parameters[188];
     params.hydrogen_interaction = 1;
     params.maxd2 = 8.7;
     params.ljrep_linear_ramp_d2_cutoff = 3.1329;
@@ -4435,7 +4435,7 @@ void EtableParamsInit::init_EtableParams(
     params.lj_radius_2 = 1.2;
   }
   {  // 10 10
-    EtableParamsOnePair<float>& params = analytic_parameters[189];
+    EtableParamsOnePair<float> &params = analytic_parameters[189];
     params.ljrep_linear_ramp_d2_cutoff = 4.41;
     params.lj_r6_coeff = -876.485;
     params.lj_r12_coeff = 805606;
@@ -4466,7 +4466,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(-4.96463, 3.23521, -0.664684, 0.0438981);
   }
   {  // 10 11
-    EtableParamsOnePair<float>& params = analytic_parameters[190];
+    EtableParamsOnePair<float> &params = analytic_parameters[190];
     params.ljrep_linear_ramp_d2_cutoff = 4.41;
     params.lj_r6_coeff = -876.485;
     params.lj_r12_coeff = 805606;
@@ -4497,7 +4497,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(-2.48231, 1.6176, -0.332342, 0.0219491);
   }
   {  // 10 12
-    EtableParamsOnePair<float>& params = analytic_parameters[191];
+    EtableParamsOnePair<float> &params = analytic_parameters[191];
     params.ljrep_linear_ramp_d2_cutoff = 4.41;
     params.lj_r6_coeff = -876.485;
     params.lj_r12_coeff = 805606;
@@ -4514,7 +4514,7 @@ void EtableParamsInit::init_EtableParams(
     params.lj_radius_2 = 1.75;
   }
   {  // 10 13
-    EtableParamsOnePair<float>& params = analytic_parameters[192];
+    EtableParamsOnePair<float> &params = analytic_parameters[192];
     params.ljrep_linear_ramp_d2_cutoff = 2.4336;
     params.lj_r6_coeff = -120.326;
     params.lj_r12_coeff = 18585.2;
@@ -4539,7 +4539,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(-4.78732, 3.11966, -0.640945, 0.0423303);
   }
   {  // 10 14
-    EtableParamsOnePair<float>& params = analytic_parameters[193];
+    EtableParamsOnePair<float> &params = analytic_parameters[193];
     params.ljrep_linear_ramp_d2_cutoff = 3.24;
     params.lj_r6_coeff = -283.953;
     params.lj_r12_coeff = 103501;
@@ -4568,7 +4568,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(1.10945, -1.35758, 0.666201, -0.106755);
   }
   {  // 10 15
-    EtableParamsOnePair<float>& params = analytic_parameters[194];
+    EtableParamsOnePair<float> &params = analytic_parameters[194];
     params.ljrep_linear_ramp_d2_cutoff = 3.24;
     params.lj_r6_coeff = -326.227;
     params.lj_r12_coeff = 118910;
@@ -4599,7 +4599,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(-2.35294, 1.53829, -0.316686, 0.0209439);
   }
   {  // 10 16
-    EtableParamsOnePair<float>& params = analytic_parameters[195];
+    EtableParamsOnePair<float> &params = analytic_parameters[195];
     params.ljrep_linear_ramp_d2_cutoff = 3.24;
     params.lj_r6_coeff = -283.953;
     params.lj_r12_coeff = 103501;
@@ -4626,7 +4626,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(-4.78732, 3.11966, -0.640945, 0.0423303);
   }
   {  // 10 17
-    EtableParamsOnePair<float>& params = analytic_parameters[196];
+    EtableParamsOnePair<float> &params = analytic_parameters[196];
     params.ljrep_linear_ramp_d2_cutoff = 4.7961;
     params.lj_r6_coeff = -923.635;
     params.lj_r12_coeff = 1.09201e+06;
@@ -4655,7 +4655,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(1.32259, -1.38193, 0.511917, -0.0625125);
   }
   {  // 10 18
-    EtableParamsOnePair<float>& params = analytic_parameters[197];
+    EtableParamsOnePair<float> &params = analytic_parameters[197];
     params.ljrep_linear_ramp_d2_cutoff = 4.41;
     params.lj_r6_coeff = -876.485;
     params.lj_r12_coeff = 805606;
@@ -4684,7 +4684,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(1.34842, -1.4778, 0.584918, -0.0760524);
   }
   {  // 10 19
-    EtableParamsOnePair<float>& params = analytic_parameters[198];
+    EtableParamsOnePair<float> &params = analytic_parameters[198];
     params.ljrep_linear_ramp_d2_cutoff = 5.0625;
     params.lj_r6_coeff = -598.672;
     params.lj_r12_coeff = 832428;
@@ -4710,7 +4710,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(-10.5055, 6.84593, -1.40652, 0.0928915);
   }
   {  // 10 20
-    EtableParamsOnePair<float>& params = analytic_parameters[199];
+    EtableParamsOnePair<float> &params = analytic_parameters[199];
     params.ljrep_linear_ramp_d2_cutoff = 5.0625;
     params.lj_r6_coeff = -1016.1;
     params.lj_r12_coeff = 1.41284e+06;
@@ -4736,7 +4736,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(-6.51607, 4.24621, -0.872397, 0.0576163);
   }
   {  // 10 21
-    EtableParamsOnePair<float>& params = analytic_parameters[200];
+    EtableParamsOnePair<float> &params = analytic_parameters[200];
     params.ljrep_linear_ramp_d2_cutoff = 3.24;
     params.lj_r6_coeff = -283.953;
     params.lj_r12_coeff = 103501;
@@ -4765,7 +4765,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(0.948249, -1.16032, 0.569402, -0.0912438);
   }
   {  // 10 22
-    EtableParamsOnePair<float>& params = analytic_parameters[201];
+    EtableParamsOnePair<float> &params = analytic_parameters[201];
     params.ljrep_linear_ramp_d2_cutoff = 5.4756;
     params.lj_r6_coeff = -2628.14;
     params.lj_r12_coeff = 4.62388e+06;
@@ -4799,7 +4799,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(-4.42082, 3.22745, -0.707415, 0.0487179);
   }
   {  // 10 23
-    EtableParamsOnePair<float>& params = analytic_parameters[202];
+    EtableParamsOnePair<float> &params = analytic_parameters[202];
     params.ljrep_linear_ramp_d2_cutoff = 5.4756;
     params.lj_r6_coeff = -2628.14;
     params.lj_r12_coeff = 4.62388e+06;
@@ -4833,7 +4833,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(-4.42082, 3.22745, -0.707415, 0.0487179);
   }
   {  // 10 24
-    EtableParamsOnePair<float>& params = analytic_parameters[203];
+    EtableParamsOnePair<float> &params = analytic_parameters[203];
     params.hydrogen_interaction = 1;
     params.maxd2 = 7.55;
     params.ljrep_linear_ramp_d2_cutoff = 2.7225;
@@ -4850,7 +4850,7 @@ void EtableParamsInit::init_EtableParams(
     params.lj_radius_2 = 1;
   }
   {  // 10 25
-    EtableParamsOnePair<float>& params = analytic_parameters[204];
+    EtableParamsOnePair<float> &params = analytic_parameters[204];
     params.hydrogen_interaction = 1;
     params.maxd2 = 8.7;
     params.ljrep_linear_ramp_d2_cutoff = 3.1329;
@@ -4867,7 +4867,7 @@ void EtableParamsInit::init_EtableParams(
     params.lj_radius_2 = 1.2;
   }
   {  // 11 11
-    EtableParamsOnePair<float>& params = analytic_parameters[205];
+    EtableParamsOnePair<float> &params = analytic_parameters[205];
     params.ljrep_linear_ramp_d2_cutoff = 4.41;
     params.lj_r6_coeff = -876.485;
     params.lj_r12_coeff = 805606;
@@ -4898,7 +4898,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(-2.48231, 1.6176, -0.332342, 0.0219491);
   }
   {  // 11 12
-    EtableParamsOnePair<float>& params = analytic_parameters[206];
+    EtableParamsOnePair<float> &params = analytic_parameters[206];
     params.ljrep_linear_ramp_d2_cutoff = 4.41;
     params.lj_r6_coeff = -876.485;
     params.lj_r12_coeff = 805606;
@@ -4915,7 +4915,7 @@ void EtableParamsInit::init_EtableParams(
     params.lj_radius_2 = 1.75;
   }
   {  // 11 13
-    EtableParamsOnePair<float>& params = analytic_parameters[207];
+    EtableParamsOnePair<float> &params = analytic_parameters[207];
     params.ljrep_linear_ramp_d2_cutoff = 2.4336;
     params.lj_r6_coeff = -120.326;
     params.lj_r12_coeff = 18585.2;
@@ -4938,7 +4938,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(-2.39366, 1.55983, -0.320472, 0.0211652);
   }
   {  // 11 14
-    EtableParamsOnePair<float>& params = analytic_parameters[208];
+    EtableParamsOnePair<float> &params = analytic_parameters[208];
     params.ljrep_linear_ramp_d2_cutoff = 3.24;
     params.lj_r6_coeff = -283.953;
     params.lj_r12_coeff = 103501;
@@ -4967,7 +4967,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(1.10945, -1.35758, 0.666201, -0.106755);
   }
   {  // 11 15
-    EtableParamsOnePair<float>& params = analytic_parameters[209];
+    EtableParamsOnePair<float> &params = analytic_parameters[209];
     params.ljrep_linear_ramp_d2_cutoff = 3.24;
     params.lj_r6_coeff = -326.227;
     params.lj_r12_coeff = 118910;
@@ -4998,7 +4998,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(-2.35294, 1.53829, -0.316686, 0.0209439);
   }
   {  // 11 16
-    EtableParamsOnePair<float>& params = analytic_parameters[210];
+    EtableParamsOnePair<float> &params = analytic_parameters[210];
     params.ljrep_linear_ramp_d2_cutoff = 3.24;
     params.lj_r6_coeff = -283.953;
     params.lj_r12_coeff = 103501;
@@ -5025,7 +5025,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(-2.39366, 1.55983, -0.320472, 0.0211652);
   }
   {  // 11 17
-    EtableParamsOnePair<float>& params = analytic_parameters[211];
+    EtableParamsOnePair<float> &params = analytic_parameters[211];
     params.ljrep_linear_ramp_d2_cutoff = 4.7961;
     params.lj_r6_coeff = -923.635;
     params.lj_r12_coeff = 1.09201e+06;
@@ -5054,7 +5054,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(1.32259, -1.38193, 0.511917, -0.0625125);
   }
   {  // 11 18
-    EtableParamsOnePair<float>& params = analytic_parameters[212];
+    EtableParamsOnePair<float> &params = analytic_parameters[212];
     params.ljrep_linear_ramp_d2_cutoff = 4.41;
     params.lj_r6_coeff = -876.485;
     params.lj_r12_coeff = 805606;
@@ -5078,7 +5078,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(1.34842, -1.4778, 0.584918, -0.0760524);
   }
   {  // 11 19
-    EtableParamsOnePair<float>& params = analytic_parameters[213];
+    EtableParamsOnePair<float> &params = analytic_parameters[213];
     params.ljrep_linear_ramp_d2_cutoff = 5.0625;
     params.lj_r6_coeff = -598.672;
     params.lj_r12_coeff = 832428;
@@ -5104,7 +5104,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(-5.25275, 3.42297, -0.703259, 0.0464458);
   }
   {  // 11 20
-    EtableParamsOnePair<float>& params = analytic_parameters[214];
+    EtableParamsOnePair<float> &params = analytic_parameters[214];
     params.ljrep_linear_ramp_d2_cutoff = 5.0625;
     params.lj_r6_coeff = -1016.1;
     params.lj_r12_coeff = 1.41284e+06;
@@ -5130,7 +5130,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(-3.25804, 2.12311, -0.436199, 0.0288081);
   }
   {  // 11 21
-    EtableParamsOnePair<float>& params = analytic_parameters[215];
+    EtableParamsOnePair<float> &params = analytic_parameters[215];
     params.ljrep_linear_ramp_d2_cutoff = 3.24;
     params.lj_r6_coeff = -283.953;
     params.lj_r12_coeff = 103501;
@@ -5159,7 +5159,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(0.948249, -1.16032, 0.569402, -0.0912438);
   }
   {  // 11 22
-    EtableParamsOnePair<float>& params = analytic_parameters[216];
+    EtableParamsOnePair<float> &params = analytic_parameters[216];
     params.ljrep_linear_ramp_d2_cutoff = 5.4756;
     params.lj_r6_coeff = -2628.14;
     params.lj_r12_coeff = 4.62388e+06;
@@ -5192,7 +5192,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(-4.42082, 3.22745, -0.707415, 0.0487179);
   }
   {  // 11 23
-    EtableParamsOnePair<float>& params = analytic_parameters[217];
+    EtableParamsOnePair<float> &params = analytic_parameters[217];
     params.ljrep_linear_ramp_d2_cutoff = 5.4756;
     params.lj_r6_coeff = -2628.14;
     params.lj_r12_coeff = 4.62388e+06;
@@ -5225,7 +5225,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(-4.42082, 3.22745, -0.707415, 0.0487179);
   }
   {  // 11 24
-    EtableParamsOnePair<float>& params = analytic_parameters[218];
+    EtableParamsOnePair<float> &params = analytic_parameters[218];
     params.hydrogen_interaction = 1;
     params.maxd2 = 7.55;
     params.ljrep_linear_ramp_d2_cutoff = 2.7225;
@@ -5242,7 +5242,7 @@ void EtableParamsInit::init_EtableParams(
     params.lj_radius_2 = 1;
   }
   {  // 11 25
-    EtableParamsOnePair<float>& params = analytic_parameters[219];
+    EtableParamsOnePair<float> &params = analytic_parameters[219];
     params.hydrogen_interaction = 1;
     params.maxd2 = 8.7;
     params.ljrep_linear_ramp_d2_cutoff = 3.1329;
@@ -5259,7 +5259,7 @@ void EtableParamsInit::init_EtableParams(
     params.lj_radius_2 = 1.2;
   }
   {  // 12 12
-    EtableParamsOnePair<float>& params = analytic_parameters[220];
+    EtableParamsOnePair<float> &params = analytic_parameters[220];
     params.ljrep_linear_ramp_d2_cutoff = 4.41;
     params.lj_r6_coeff = -876.485;
     params.lj_r12_coeff = 805606;
@@ -5274,7 +5274,7 @@ void EtableParamsInit::init_EtableParams(
     params.lj_radius_2 = 1.75;
   }
   {  // 12 13
-    EtableParamsOnePair<float>& params = analytic_parameters[221];
+    EtableParamsOnePair<float> &params = analytic_parameters[221];
     params.ljrep_linear_ramp_d2_cutoff = 2.4336;
     params.lj_r6_coeff = -120.326;
     params.lj_r12_coeff = 18585.2;
@@ -5291,7 +5291,7 @@ void EtableParamsInit::init_EtableParams(
     params.lj_radius_2 = 1.55;
   }
   {  // 12 14
-    EtableParamsOnePair<float>& params = analytic_parameters[222];
+    EtableParamsOnePair<float> &params = analytic_parameters[222];
     params.ljrep_linear_ramp_d2_cutoff = 3.24;
     params.lj_r6_coeff = -283.953;
     params.lj_r12_coeff = 103501;
@@ -5308,7 +5308,7 @@ void EtableParamsInit::init_EtableParams(
     params.lj_radius_2 = 1.55;
   }
   {  // 12 15
-    EtableParamsOnePair<float>& params = analytic_parameters[223];
+    EtableParamsOnePair<float> &params = analytic_parameters[223];
     params.ljrep_linear_ramp_d2_cutoff = 3.24;
     params.lj_r6_coeff = -326.227;
     params.lj_r12_coeff = 118910;
@@ -5325,7 +5325,7 @@ void EtableParamsInit::init_EtableParams(
     params.lj_radius_2 = 1.55;
   }
   {  // 12 16
-    EtableParamsOnePair<float>& params = analytic_parameters[224];
+    EtableParamsOnePair<float> &params = analytic_parameters[224];
     params.ljrep_linear_ramp_d2_cutoff = 3.24;
     params.lj_r6_coeff = -283.953;
     params.lj_r12_coeff = 103501;
@@ -5342,7 +5342,7 @@ void EtableParamsInit::init_EtableParams(
     params.lj_radius_2 = 1.55;
   }
   {  // 12 17
-    EtableParamsOnePair<float>& params = analytic_parameters[225];
+    EtableParamsOnePair<float> &params = analytic_parameters[225];
     params.ljrep_linear_ramp_d2_cutoff = 4.7961;
     params.lj_r6_coeff = -923.635;
     params.lj_r12_coeff = 1.09201e+06;
@@ -5359,7 +5359,7 @@ void EtableParamsInit::init_EtableParams(
     params.lj_radius_2 = 1.9;
   }
   {  // 12 18
-    EtableParamsOnePair<float>& params = analytic_parameters[226];
+    EtableParamsOnePair<float> &params = analytic_parameters[226];
     params.ljrep_linear_ramp_d2_cutoff = 4.41;
     params.lj_r6_coeff = -876.485;
     params.lj_r12_coeff = 805606;
@@ -5376,7 +5376,7 @@ void EtableParamsInit::init_EtableParams(
     params.lj_radius_2 = 1.75;
   }
   {  // 12 19
-    EtableParamsOnePair<float>& params = analytic_parameters[227];
+    EtableParamsOnePair<float> &params = analytic_parameters[227];
     params.ljrep_linear_ramp_d2_cutoff = 5.0625;
     params.lj_r6_coeff = -598.672;
     params.lj_r12_coeff = 832428;
@@ -5397,7 +5397,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(1.53882, -1.52631, 0.525698, -0.0600964);
   }
   {  // 12 20
-    EtableParamsOnePair<float>& params = analytic_parameters[228];
+    EtableParamsOnePair<float> &params = analytic_parameters[228];
     params.ljrep_linear_ramp_d2_cutoff = 5.0625;
     params.lj_r6_coeff = -1016.1;
     params.lj_r12_coeff = 1.41284e+06;
@@ -5414,7 +5414,7 @@ void EtableParamsInit::init_EtableParams(
     params.lj_radius_2 = 2;
   }
   {  // 12 21
-    EtableParamsOnePair<float>& params = analytic_parameters[229];
+    EtableParamsOnePair<float> &params = analytic_parameters[229];
     params.ljrep_linear_ramp_d2_cutoff = 3.24;
     params.lj_r6_coeff = -283.953;
     params.lj_r12_coeff = 103501;
@@ -5431,7 +5431,7 @@ void EtableParamsInit::init_EtableParams(
     params.lj_radius_2 = 1.55;
   }
   {  // 12 22
-    EtableParamsOnePair<float>& params = analytic_parameters[230];
+    EtableParamsOnePair<float> &params = analytic_parameters[230];
     params.ljrep_linear_ramp_d2_cutoff = 5.4756;
     params.lj_r6_coeff = -2628.14;
     params.lj_r12_coeff = 4.62388e+06;
@@ -5455,7 +5455,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(2.7105, -2.56537, 0.834515, -0.0902296);
   }
   {  // 12 23
-    EtableParamsOnePair<float>& params = analytic_parameters[231];
+    EtableParamsOnePair<float> &params = analytic_parameters[231];
     params.ljrep_linear_ramp_d2_cutoff = 5.4756;
     params.lj_r6_coeff = -2628.14;
     params.lj_r12_coeff = 4.62388e+06;
@@ -5479,7 +5479,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(2.7105, -2.56537, 0.834515, -0.0902296);
   }
   {  // 12 24
-    EtableParamsOnePair<float>& params = analytic_parameters[232];
+    EtableParamsOnePair<float> &params = analytic_parameters[232];
     params.hydrogen_interaction = 1;
     params.maxd2 = 7.55;
     params.ljrep_linear_ramp_d2_cutoff = 2.7225;
@@ -5496,7 +5496,7 @@ void EtableParamsInit::init_EtableParams(
     params.lj_radius_2 = 1;
   }
   {  // 12 25
-    EtableParamsOnePair<float>& params = analytic_parameters[233];
+    EtableParamsOnePair<float> &params = analytic_parameters[233];
     params.hydrogen_interaction = 1;
     params.maxd2 = 8.7;
     params.ljrep_linear_ramp_d2_cutoff = 3.1329;
@@ -5513,7 +5513,7 @@ void EtableParamsInit::init_EtableParams(
     params.lj_radius_2 = 1.2;
   }
   {  // 13 13
-    EtableParamsOnePair<float>& params = analytic_parameters[234];
+    EtableParamsOnePair<float> &params = analytic_parameters[234];
     params.ljrep_linear_ramp_d2_cutoff = 2.4336;
     params.lj_r6_coeff = -98.297;
     params.lj_r12_coeff = 15182.7;
@@ -5534,7 +5534,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(-1.18611, 0.979328, -0.2276, 0.016221);
   }
   {  // 13 14
-    EtableParamsOnePair<float>& params = analytic_parameters[235];
+    EtableParamsOnePair<float> &params = analytic_parameters[235];
     params.ljrep_linear_ramp_d2_cutoff = 2.4336;
     params.lj_r6_coeff = -98.297;
     params.lj_r12_coeff = 15182.7;
@@ -5555,7 +5555,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(-1.11087, 0.917206, -0.213163, 0.0151921);
   }
   {  // 13 15
-    EtableParamsOnePair<float>& params = analytic_parameters[236];
+    EtableParamsOnePair<float> &params = analytic_parameters[236];
     params.ljrep_linear_ramp_d2_cutoff = 2.4336;
     params.lj_r6_coeff = -112.931;
     params.lj_r12_coeff = 17443.1;
@@ -5578,7 +5578,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(-2.26891, 1.48336, -0.305376, 0.0201959);
   }
   {  // 13 16
-    EtableParamsOnePair<float>& params = analytic_parameters[237];
+    EtableParamsOnePair<float> &params = analytic_parameters[237];
     params.ljrep_linear_ramp_d2_cutoff = 2.4336;
     params.lj_r6_coeff = -98.297;
     params.lj_r12_coeff = 15182.7;
@@ -5597,7 +5597,7 @@ void EtableParamsInit::init_EtableParams(
     params.lj_radius_2 = 1.55;
   }
   {  // 13 17
-    EtableParamsOnePair<float>& params = analytic_parameters[238];
+    EtableParamsOnePair<float> &params = analytic_parameters[238];
     params.ljrep_linear_ramp_d2_cutoff = 4.2849;
     params.lj_r6_coeff = -538.071;
     params.lj_r12_coeff = 453653;
@@ -5624,7 +5624,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(1.31904, -1.43146, 0.558276, -0.0719809);
   }
   {  // 13 18
-    EtableParamsOnePair<float>& params = analytic_parameters[239];
+    EtableParamsOnePair<float> &params = analytic_parameters[239];
     params.ljrep_linear_ramp_d2_cutoff = 2.4336;
     params.lj_r6_coeff = -120.326;
     params.lj_r12_coeff = 18585.2;
@@ -5642,7 +5642,7 @@ void EtableParamsInit::init_EtableParams(
     params.lj_radius_2 = 1.75;
   }
   {  // 13 19
-    EtableParamsOnePair<float>& params = analytic_parameters[240];
+    EtableParamsOnePair<float> &params = analytic_parameters[240];
     params.ljrep_linear_ramp_d2_cutoff = 4.5369;
     params.lj_r6_coeff = -352.009;
     params.lj_r12_coeff = 352284;
@@ -5668,7 +5668,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(-1.31714, 1.08327, -0.251329, 0.0178951);
   }
   {  // 13 20
-    EtableParamsOnePair<float>& params = analytic_parameters[241];
+    EtableParamsOnePair<float> &params = analytic_parameters[241];
     params.ljrep_linear_ramp_d2_cutoff = 4.5369;
     params.lj_r6_coeff = -597.447;
     params.lj_r12_coeff = 597915;
@@ -5690,7 +5690,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(3.15759, -3.34315, 1.25125, -0.155012);
   }
   {  // 13 21
-    EtableParamsOnePair<float>& params = analytic_parameters[242];
+    EtableParamsOnePair<float> &params = analytic_parameters[242];
     params.ljrep_linear_ramp_d2_cutoff = 2.4336;
     params.lj_r6_coeff = -98.297;
     params.lj_r12_coeff = 15182.7;
@@ -5711,7 +5711,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(-1.03563, 0.855085, -0.198725, 0.0141631);
   }
   {  // 13 22
-    EtableParamsOnePair<float>& params = analytic_parameters[243];
+    EtableParamsOnePair<float> &params = analytic_parameters[243];
     params.ljrep_linear_ramp_d2_cutoff = 4.9284;
     params.lj_r6_coeff = -1565.5;
     params.lj_r12_coeff = 2.00832e+06;
@@ -5742,7 +5742,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(-4.26293, 3.11218, -0.68215, 0.046978);
   }
   {  // 13 23
-    EtableParamsOnePair<float>& params = analytic_parameters[244];
+    EtableParamsOnePair<float> &params = analytic_parameters[244];
     params.ljrep_linear_ramp_d2_cutoff = 4.9284;
     params.lj_r6_coeff = -1565.5;
     params.lj_r12_coeff = 2.00832e+06;
@@ -5773,7 +5773,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(-4.26293, 3.11218, -0.68215, 0.046978);
   }
   {  // 13 24
-    EtableParamsOnePair<float>& params = analytic_parameters[245];
+    EtableParamsOnePair<float> &params = analytic_parameters[245];
     params.hydrogen_interaction = 1;
     params.maxd2 = 3.05;
     params.ljrep_linear_ramp_d2_cutoff = 1.1025;
@@ -5790,7 +5790,7 @@ void EtableParamsInit::init_EtableParams(
     params.lj_radius_2 = 1;
   }
   {  // 13 25
-    EtableParamsOnePair<float>& params = analytic_parameters[246];
+    EtableParamsOnePair<float> &params = analytic_parameters[246];
     params.hydrogen_interaction = 1;
     params.maxd2 = 7.55;
     params.ljrep_linear_ramp_d2_cutoff = 2.7225;
@@ -5807,7 +5807,7 @@ void EtableParamsInit::init_EtableParams(
     params.lj_radius_2 = 1.2;
   }
   {  // 14 14
-    EtableParamsOnePair<float>& params = analytic_parameters[247];
+    EtableParamsOnePair<float> &params = analytic_parameters[247];
     params.ljrep_linear_ramp_d2_cutoff = 3.4596;
     params.lj_r6_coeff = -282.404;
     params.lj_r12_coeff = 125317;
@@ -5834,7 +5834,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(1.00584, -1.22146, 0.586618, -0.0914942);
   }
   {  // 14 15
-    EtableParamsOnePair<float>& params = analytic_parameters[248];
+    EtableParamsOnePair<float> &params = analytic_parameters[248];
     params.ljrep_linear_ramp_d2_cutoff = 3.4596;
     params.lj_r6_coeff = -324.448;
     params.lj_r12_coeff = 143974;
@@ -5863,7 +5863,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(-2.26891, 1.48336, -0.305376, 0.0201959);
   }
   {  // 14 16
-    EtableParamsOnePair<float>& params = analytic_parameters[249];
+    EtableParamsOnePair<float> &params = analytic_parameters[249];
     params.ljrep_linear_ramp_d2_cutoff = 3.4596;
     params.lj_r6_coeff = -282.404;
     params.lj_r12_coeff = 125317;
@@ -5886,7 +5886,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(1.00584, -1.22146, 0.586618, -0.0914942);
   }
   {  // 14 17
-    EtableParamsOnePair<float>& params = analytic_parameters[250];
+    EtableParamsOnePair<float> &params = analytic_parameters[250];
     params.ljrep_linear_ramp_d2_cutoff = 4.2849;
     params.lj_r6_coeff = -538.071;
     params.lj_r12_coeff = 453653;
@@ -5913,7 +5913,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(1.31904, -1.43146, 0.558276, -0.0719809);
   }
   {  // 14 18
-    EtableParamsOnePair<float>& params = analytic_parameters[251];
+    EtableParamsOnePair<float> &params = analytic_parameters[251];
     params.ljrep_linear_ramp_d2_cutoff = 3.24;
     params.lj_r6_coeff = -283.953;
     params.lj_r12_coeff = 103501;
@@ -5935,7 +5935,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(0.94681, -1.15049, 0.561599, -0.0896352);
   }
   {  // 14 19
-    EtableParamsOnePair<float>& params = analytic_parameters[252];
+    EtableParamsOnePair<float> &params = analytic_parameters[252];
     params.ljrep_linear_ramp_d2_cutoff = 4.5369;
     params.lj_r6_coeff = -352.009;
     params.lj_r12_coeff = 352284;
@@ -5959,7 +5959,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(-1.15004, 0.945841, -0.219444, 0.0156248);
   }
   {  // 14 20
-    EtableParamsOnePair<float>& params = analytic_parameters[253];
+    EtableParamsOnePair<float> &params = analytic_parameters[253];
     params.ljrep_linear_ramp_d2_cutoff = 4.5369;
     params.lj_r6_coeff = -597.447;
     params.lj_r12_coeff = 597915;
@@ -5981,7 +5981,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(2.757, -2.91901, 1.09251, -0.135346);
   }
   {  // 14 21
-    EtableParamsOnePair<float>& params = analytic_parameters[254];
+    EtableParamsOnePair<float> &params = analytic_parameters[254];
     params.ljrep_linear_ramp_d2_cutoff = 3.4596;
     params.lj_r6_coeff = -282.404;
     params.lj_r12_coeff = 125317;
@@ -6006,7 +6006,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(0.85969, -1.04398, 0.501383, -0.0782002);
   }
   {  // 14 22
-    EtableParamsOnePair<float>& params = analytic_parameters[255];
+    EtableParamsOnePair<float> &params = analytic_parameters[255];
     params.ljrep_linear_ramp_d2_cutoff = 4.9284;
     params.lj_r6_coeff = -1565.5;
     params.lj_r12_coeff = 2.00832e+06;
@@ -6037,7 +6037,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(-4.26293, 3.11218, -0.68215, 0.046978);
   }
   {  // 14 23
-    EtableParamsOnePair<float>& params = analytic_parameters[256];
+    EtableParamsOnePair<float> &params = analytic_parameters[256];
     params.ljrep_linear_ramp_d2_cutoff = 4.9284;
     params.lj_r6_coeff = -1565.5;
     params.lj_r12_coeff = 2.00832e+06;
@@ -6068,7 +6068,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(-4.26293, 3.11218, -0.68215, 0.046978);
   }
   {  // 14 24
-    EtableParamsOnePair<float>& params = analytic_parameters[257];
+    EtableParamsOnePair<float> &params = analytic_parameters[257];
     params.hydrogen_interaction = 1;
     params.maxd2 = 3.05;
     params.ljrep_linear_ramp_d2_cutoff = 1.1025;
@@ -6085,7 +6085,7 @@ void EtableParamsInit::init_EtableParams(
     params.lj_radius_2 = 1;
   }
   {  // 14 25
-    EtableParamsOnePair<float>& params = analytic_parameters[258];
+    EtableParamsOnePair<float> &params = analytic_parameters[258];
     params.hydrogen_interaction = 1;
     params.maxd2 = 7.55;
     params.ljrep_linear_ramp_d2_cutoff = 2.7225;
@@ -6102,7 +6102,7 @@ void EtableParamsInit::init_EtableParams(
     params.lj_radius_2 = 1.2;
   }
   {  // 15 15
-    EtableParamsOnePair<float>& params = analytic_parameters[259];
+    EtableParamsOnePair<float> &params = analytic_parameters[259];
     params.ljrep_linear_ramp_d2_cutoff = 3.4596;
     params.lj_r6_coeff = -372.752;
     params.lj_r12_coeff = 165409;
@@ -6133,7 +6133,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(-2.26891, 1.48336, -0.305376, 0.0201959);
   }
   {  // 15 16
-    EtableParamsOnePair<float>& params = analytic_parameters[260];
+    EtableParamsOnePair<float> &params = analytic_parameters[260];
     params.ljrep_linear_ramp_d2_cutoff = 3.4596;
     params.lj_r6_coeff = -324.448;
     params.lj_r12_coeff = 143974;
@@ -6160,7 +6160,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(-2.26891, 1.48336, -0.305376, 0.0201959);
   }
   {  // 15 17
-    EtableParamsOnePair<float>& params = analytic_parameters[261];
+    EtableParamsOnePair<float> &params = analytic_parameters[261];
     params.ljrep_linear_ramp_d2_cutoff = 4.2849;
     params.lj_r6_coeff = -618.179;
     params.lj_r12_coeff = 521193;
@@ -6189,7 +6189,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(1.31904, -1.43146, 0.558276, -0.0719809);
   }
   {  // 15 18
-    EtableParamsOnePair<float>& params = analytic_parameters[262];
+    EtableParamsOnePair<float> &params = analytic_parameters[262];
     params.ljrep_linear_ramp_d2_cutoff = 3.24;
     params.lj_r6_coeff = -326.227;
     params.lj_r12_coeff = 118910;
@@ -6213,7 +6213,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(0.94681, -1.15049, 0.561599, -0.0896352);
   }
   {  // 15 19
-    EtableParamsOnePair<float>& params = analytic_parameters[263];
+    EtableParamsOnePair<float> &params = analytic_parameters[263];
     params.ljrep_linear_ramp_d2_cutoff = 4.5369;
     params.lj_r6_coeff = -404.416;
     params.lj_r12_coeff = 404732;
@@ -6239,7 +6239,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(-4.97899, 3.25514, -0.670131, 0.0443188);
   }
   {  // 15 20
-    EtableParamsOnePair<float>& params = analytic_parameters[264];
+    EtableParamsOnePair<float> &params = analytic_parameters[264];
     params.ljrep_linear_ramp_d2_cutoff = 4.5369;
     params.lj_r6_coeff = -686.394;
     params.lj_r12_coeff = 686932;
@@ -6265,7 +6265,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(-3.08823, 2.01901, -0.415651, 0.0274889);
   }
   {  // 15 21
-    EtableParamsOnePair<float>& params = analytic_parameters[265];
+    EtableParamsOnePair<float> &params = analytic_parameters[265];
     params.ljrep_linear_ramp_d2_cutoff = 3.4596;
     params.lj_r6_coeff = -324.448;
     params.lj_r12_coeff = 143974;
@@ -6294,7 +6294,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(0.85969, -1.04398, 0.501383, -0.0782002);
   }
   {  // 15 22
-    EtableParamsOnePair<float>& params = analytic_parameters[266];
+    EtableParamsOnePair<float> &params = analytic_parameters[266];
     params.ljrep_linear_ramp_d2_cutoff = 4.9284;
     params.lj_r6_coeff = -1798.57;
     params.lj_r12_coeff = 2.30732e+06;
@@ -6325,7 +6325,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(-4.26293, 3.11218, -0.68215, 0.046978);
   }
   {  // 15 23
-    EtableParamsOnePair<float>& params = analytic_parameters[267];
+    EtableParamsOnePair<float> &params = analytic_parameters[267];
     params.ljrep_linear_ramp_d2_cutoff = 4.9284;
     params.lj_r6_coeff = -1798.57;
     params.lj_r12_coeff = 2.30732e+06;
@@ -6356,7 +6356,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(-4.26293, 3.11218, -0.68215, 0.046978);
   }
   {  // 15 24
-    EtableParamsOnePair<float>& params = analytic_parameters[268];
+    EtableParamsOnePair<float> &params = analytic_parameters[268];
     params.hydrogen_interaction = 1;
     params.maxd2 = 3.05;
     params.ljrep_linear_ramp_d2_cutoff = 1.1025;
@@ -6373,7 +6373,7 @@ void EtableParamsInit::init_EtableParams(
     params.lj_radius_2 = 1;
   }
   {  // 15 25
-    EtableParamsOnePair<float>& params = analytic_parameters[269];
+    EtableParamsOnePair<float> &params = analytic_parameters[269];
     params.hydrogen_interaction = 1;
     params.maxd2 = 7.55;
     params.ljrep_linear_ramp_d2_cutoff = 2.7225;
@@ -6390,7 +6390,7 @@ void EtableParamsInit::init_EtableParams(
     params.lj_radius_2 = 1.2;
   }
   {  // 16 16
-    EtableParamsOnePair<float>& params = analytic_parameters[270];
+    EtableParamsOnePair<float> &params = analytic_parameters[270];
     params.ljrep_linear_ramp_d2_cutoff = 3.4596;
     params.lj_r6_coeff = -282.404;
     params.lj_r12_coeff = 125317;
@@ -6411,7 +6411,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(1.30539, -1.58999, 0.771585, -0.121244);
   }
   {  // 16 17
-    EtableParamsOnePair<float>& params = analytic_parameters[271];
+    EtableParamsOnePair<float> &params = analytic_parameters[271];
     params.ljrep_linear_ramp_d2_cutoff = 4.2849;
     params.lj_r6_coeff = -538.071;
     params.lj_r12_coeff = 453653;
@@ -6438,7 +6438,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(1.31904, -1.43146, 0.558276, -0.0719809);
   }
   {  // 16 18
-    EtableParamsOnePair<float>& params = analytic_parameters[272];
+    EtableParamsOnePair<float> &params = analytic_parameters[272];
     params.ljrep_linear_ramp_d2_cutoff = 3.24;
     params.lj_r6_coeff = -283.953;
     params.lj_r12_coeff = 103501;
@@ -6460,7 +6460,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(0.94681, -1.15049, 0.561599, -0.0896352);
   }
   {  // 16 19
-    EtableParamsOnePair<float>& params = analytic_parameters[273];
+    EtableParamsOnePair<float> &params = analytic_parameters[273];
     params.ljrep_linear_ramp_d2_cutoff = 4.5369;
     params.lj_r6_coeff = -352.009;
     params.lj_r12_coeff = 352284;
@@ -6482,7 +6482,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(3.03929, -3.21789, 1.20437, -0.149204);
   }
   {  // 16 20
-    EtableParamsOnePair<float>& params = analytic_parameters[274];
+    EtableParamsOnePair<float> &params = analytic_parameters[274];
     params.ljrep_linear_ramp_d2_cutoff = 4.5369;
     params.lj_r6_coeff = -597.447;
     params.lj_r12_coeff = 597915;
@@ -6504,7 +6504,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(1.88513, -1.99591, 0.747012, -0.0925445);
   }
   {  // 16 21
-    EtableParamsOnePair<float>& params = analytic_parameters[275];
+    EtableParamsOnePair<float> &params = analytic_parameters[275];
     params.ljrep_linear_ramp_d2_cutoff = 3.4596;
     params.lj_r6_coeff = -282.404;
     params.lj_r12_coeff = 125317;
@@ -6527,7 +6527,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(0.85969, -1.04398, 0.501383, -0.0782002);
   }
   {  // 16 22
-    EtableParamsOnePair<float>& params = analytic_parameters[276];
+    EtableParamsOnePair<float> &params = analytic_parameters[276];
     params.ljrep_linear_ramp_d2_cutoff = 4.9284;
     params.lj_r6_coeff = -1565.5;
     params.lj_r12_coeff = 2.00832e+06;
@@ -6558,7 +6558,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(-4.26293, 3.11218, -0.68215, 0.046978);
   }
   {  // 16 23
-    EtableParamsOnePair<float>& params = analytic_parameters[277];
+    EtableParamsOnePair<float> &params = analytic_parameters[277];
     params.ljrep_linear_ramp_d2_cutoff = 4.9284;
     params.lj_r6_coeff = -1565.5;
     params.lj_r12_coeff = 2.00832e+06;
@@ -6589,7 +6589,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(-4.26293, 3.11218, -0.68215, 0.046978);
   }
   {  // 16 24
-    EtableParamsOnePair<float>& params = analytic_parameters[278];
+    EtableParamsOnePair<float> &params = analytic_parameters[278];
     params.hydrogen_interaction = 1;
     params.maxd2 = 3.05;
     params.ljrep_linear_ramp_d2_cutoff = 1.1025;
@@ -6606,7 +6606,7 @@ void EtableParamsInit::init_EtableParams(
     params.lj_radius_2 = 1;
   }
   {  // 16 25
-    EtableParamsOnePair<float>& params = analytic_parameters[279];
+    EtableParamsOnePair<float> &params = analytic_parameters[279];
     params.hydrogen_interaction = 1;
     params.maxd2 = 7.55;
     params.ljrep_linear_ramp_d2_cutoff = 2.7225;
@@ -6623,7 +6623,7 @@ void EtableParamsInit::init_EtableParams(
     params.lj_radius_2 = 1.2;
   }
   {  // 17 17
-    EtableParamsOnePair<float>& params = analytic_parameters[280];
+    EtableParamsOnePair<float> &params = analytic_parameters[280];
     params.ljrep_linear_ramp_d2_cutoff = 5.1984;
     params.lj_r6_coeff = -963.5;
     params.lj_r12_coeff = 1.45052e+06;
@@ -6650,7 +6650,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(2.68214, -2.61852, 0.885636, -0.0994545);
   }
   {  // 17 18
-    EtableParamsOnePair<float>& params = analytic_parameters[281];
+    EtableParamsOnePair<float> &params = analytic_parameters[281];
     params.ljrep_linear_ramp_d2_cutoff = 4.7961;
     params.lj_r6_coeff = -923.635;
     params.lj_r12_coeff = 1.09201e+06;
@@ -6674,7 +6674,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(2.05236, -2.15258, 0.799589, -0.0978583);
   }
   {  // 17 19
-    EtableParamsOnePair<float>& params = analytic_parameters[282];
+    EtableParamsOnePair<float> &params = analytic_parameters[282];
     params.ljrep_linear_ramp_d2_cutoff = 5.4756;
     params.lj_r6_coeff = -620.577;
     params.lj_r12_coeff = 1.09183e+06;
@@ -6700,7 +6700,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(-1.2362, 0.938856, -0.209935, 0.014633);
   }
   {  // 17 20
-    EtableParamsOnePair<float>& params = analytic_parameters[283];
+    EtableParamsOnePair<float> &params = analytic_parameters[283];
     params.ljrep_linear_ramp_d2_cutoff = 5.4756;
     params.lj_r6_coeff = -1053.27;
     params.lj_r12_coeff = 1.8531e+06;
@@ -6722,7 +6722,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(3.1108, -2.93943, 0.9552, -0.103182);
   }
   {  // 17 21
-    EtableParamsOnePair<float>& params = analytic_parameters[284];
+    EtableParamsOnePair<float> &params = analytic_parameters[284];
     params.ljrep_linear_ramp_d2_cutoff = 4.2849;
     params.lj_r6_coeff = -538.071;
     params.lj_r12_coeff = 453653;
@@ -6749,7 +6749,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(2.05783, -2.2504, 0.88222, -0.114238);
   }
   {  // 17 22
-    EtableParamsOnePair<float>& params = analytic_parameters[285];
+    EtableParamsOnePair<float> &params = analytic_parameters[285];
     params.ljrep_linear_ramp_d2_cutoff = 5.9049;
     params.lj_r6_coeff = -2700.21;
     params.lj_r12_coeff = 5.95797e+06;
@@ -6782,7 +6782,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(-5.80233, 4.23603, -0.928482, 0.0639422);
   }
   {  // 17 23
-    EtableParamsOnePair<float>& params = analytic_parameters[286];
+    EtableParamsOnePair<float> &params = analytic_parameters[286];
     params.ljrep_linear_ramp_d2_cutoff = 5.9049;
     params.lj_r6_coeff = -2700.21;
     params.lj_r12_coeff = 5.95797e+06;
@@ -6815,7 +6815,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(-5.80233, 4.23603, -0.928482, 0.0639422);
   }
   {  // 17 24
-    EtableParamsOnePair<float>& params = analytic_parameters[287];
+    EtableParamsOnePair<float> &params = analytic_parameters[287];
     params.hydrogen_interaction = 1;
     params.maxd2 = 8.4;
     params.ljrep_linear_ramp_d2_cutoff = 3.0276;
@@ -6832,7 +6832,7 @@ void EtableParamsInit::init_EtableParams(
     params.lj_radius_2 = 1;
   }
   {  // 17 25
-    EtableParamsOnePair<float>& params = analytic_parameters[288];
+    EtableParamsOnePair<float> &params = analytic_parameters[288];
     params.hydrogen_interaction = 1;
     params.maxd2 = 9.6;
     params.ljrep_linear_ramp_d2_cutoff = 3.4596;
@@ -6849,7 +6849,7 @@ void EtableParamsInit::init_EtableParams(
     params.lj_radius_2 = 1.2;
   }
   {  // 18 18
-    EtableParamsOnePair<float>& params = analytic_parameters[289];
+    EtableParamsOnePair<float> &params = analytic_parameters[289];
     params.ljrep_linear_ramp_d2_cutoff = 4.41;
     params.lj_r6_coeff = -876.485;
     params.lj_r12_coeff = 805606;
@@ -6868,7 +6868,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(1.01837, -1.11998, 0.445868, -0.0582361);
   }
   {  // 18 19
-    EtableParamsOnePair<float>& params = analytic_parameters[290];
+    EtableParamsOnePair<float> &params = analytic_parameters[290];
     params.ljrep_linear_ramp_d2_cutoff = 5.0625;
     params.lj_r6_coeff = -598.672;
     params.lj_r12_coeff = 832428;
@@ -6894,7 +6894,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(-1.26919, 0.99302, -0.225241, 0.0158322);
   }
   {  // 18 20
-    EtableParamsOnePair<float>& params = analytic_parameters[291];
+    EtableParamsOnePair<float> &params = analytic_parameters[291];
     params.ljrep_linear_ramp_d2_cutoff = 5.0625;
     params.lj_r6_coeff = -1016.1;
     params.lj_r12_coeff = 1.41284e+06;
@@ -6916,7 +6916,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(3.07889, -3.05387, 1.05182, -0.120242);
   }
   {  // 18 21
-    EtableParamsOnePair<float>& params = analytic_parameters[292];
+    EtableParamsOnePair<float> &params = analytic_parameters[292];
     params.ljrep_linear_ramp_d2_cutoff = 3.24;
     params.lj_r6_coeff = -283.953;
     params.lj_r12_coeff = 103501;
@@ -6938,7 +6938,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(0.94681, -1.15049, 0.561599, -0.0896352);
   }
   {  // 18 22
-    EtableParamsOnePair<float>& params = analytic_parameters[293];
+    EtableParamsOnePair<float> &params = analytic_parameters[293];
     params.ljrep_linear_ramp_d2_cutoff = 5.4756;
     params.lj_r6_coeff = -2628.14;
     params.lj_r12_coeff = 4.62388e+06;
@@ -6971,7 +6971,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(-1.73675, 1.26793, -0.277913, 0.0191392);
   }
   {  // 18 23
-    EtableParamsOnePair<float>& params = analytic_parameters[294];
+    EtableParamsOnePair<float> &params = analytic_parameters[294];
     params.ljrep_linear_ramp_d2_cutoff = 5.4756;
     params.lj_r6_coeff = -2628.14;
     params.lj_r12_coeff = 4.62388e+06;
@@ -7004,7 +7004,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(-1.73675, 1.26793, -0.277913, 0.0191392);
   }
   {  // 18 24
-    EtableParamsOnePair<float>& params = analytic_parameters[295];
+    EtableParamsOnePair<float> &params = analytic_parameters[295];
     params.hydrogen_interaction = 1;
     params.maxd2 = 7.55;
     params.ljrep_linear_ramp_d2_cutoff = 2.7225;
@@ -7021,7 +7021,7 @@ void EtableParamsInit::init_EtableParams(
     params.lj_radius_2 = 1;
   }
   {  // 18 25
-    EtableParamsOnePair<float>& params = analytic_parameters[296];
+    EtableParamsOnePair<float> &params = analytic_parameters[296];
     params.hydrogen_interaction = 1;
     params.maxd2 = 8.7;
     params.ljrep_linear_ramp_d2_cutoff = 3.1329;
@@ -7038,7 +7038,7 @@ void EtableParamsInit::init_EtableParams(
     params.lj_radius_2 = 1.2;
   }
   {  // 19 19
-    EtableParamsOnePair<float>& params = analytic_parameters[297];
+    EtableParamsOnePair<float> &params = analytic_parameters[297];
     params.ljrep_linear_ramp_d2_cutoff = 5.76;
     params.lj_r6_coeff = -398.131;
     params.lj_r12_coeff = 815373;
@@ -7061,7 +7061,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(-1.13218, 1.05155, -0.335692, 0.0355754);
   }
   {  // 19 20
-    EtableParamsOnePair<float>& params = analytic_parameters[298];
+    EtableParamsOnePair<float> &params = analytic_parameters[298];
     params.ljrep_linear_ramp_d2_cutoff = 5.76;
     params.lj_r6_coeff = -675.728;
     params.lj_r12_coeff = 1.38389e+06;
@@ -7082,7 +7082,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(-1.13218, 1.05155, -0.335692, 0.0355754);
   }
   {  // 19 21
-    EtableParamsOnePair<float>& params = analytic_parameters[299];
+    EtableParamsOnePair<float> &params = analytic_parameters[299];
     params.ljrep_linear_ramp_d2_cutoff = 4.5369;
     params.lj_r6_coeff = -352.009;
     params.lj_r12_coeff = 352284;
@@ -7104,7 +7104,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(3.79911, -4.02236, 1.50546, -0.186505);
   }
   {  // 19 22
-    EtableParamsOnePair<float>& params = analytic_parameters[300];
+    EtableParamsOnePair<float> &params = analytic_parameters[300];
     params.ljrep_linear_ramp_d2_cutoff = 6.2001;
     params.lj_r6_coeff = -1722.72;
     params.lj_r12_coeff = 4.40021e+06;
@@ -7134,7 +7134,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(-9.35477, 6.82952, -1.49694, 0.103091);
   }
   {  // 19 23
-    EtableParamsOnePair<float>& params = analytic_parameters[301];
+    EtableParamsOnePair<float> &params = analytic_parameters[301];
     params.ljrep_linear_ramp_d2_cutoff = 6.2001;
     params.lj_r6_coeff = -1722.72;
     params.lj_r12_coeff = 4.40021e+06;
@@ -7164,7 +7164,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(-9.35477, 6.82952, -1.49694, 0.103091);
   }
   {  // 19 24
-    EtableParamsOnePair<float>& params = analytic_parameters[302];
+    EtableParamsOnePair<float> &params = analytic_parameters[302];
     params.hydrogen_interaction = 1;
     params.maxd2 = 9;
     params.ljrep_linear_ramp_d2_cutoff = 3.24;
@@ -7181,7 +7181,7 @@ void EtableParamsInit::init_EtableParams(
     params.lj_radius_2 = 1;
   }
   {  // 19 25
-    EtableParamsOnePair<float>& params = analytic_parameters[303];
+    EtableParamsOnePair<float> &params = analytic_parameters[303];
     params.hydrogen_interaction = 1;
     params.maxd2 = 10.25;
     params.ljrep_linear_ramp_d2_cutoff = 3.6864;
@@ -7198,7 +7198,7 @@ void EtableParamsInit::init_EtableParams(
     params.lj_radius_2 = 1.2;
   }
   {  // 20 20
-    EtableParamsOnePair<float>& params = analytic_parameters[304];
+    EtableParamsOnePair<float> &params = analytic_parameters[304];
     params.ljrep_linear_ramp_d2_cutoff = 5.76;
     params.lj_r6_coeff = -1146.88;
     params.lj_r12_coeff = 2.34881e+06;
@@ -7219,7 +7219,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(-1.37303, 1.27716, -0.408543, 0.0433729);
   }
   {  // 20 21
-    EtableParamsOnePair<float>& params = analytic_parameters[305];
+    EtableParamsOnePair<float> &params = analytic_parameters[305];
     params.ljrep_linear_ramp_d2_cutoff = 4.5369;
     params.lj_r6_coeff = -597.447;
     params.lj_r12_coeff = 597915;
@@ -7241,7 +7241,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(2.35641, -2.49488, 0.933765, -0.115681);
   }
   {  // 20 22
-    EtableParamsOnePair<float>& params = analytic_parameters[306];
+    EtableParamsOnePair<float> &params = analytic_parameters[306];
     params.ljrep_linear_ramp_d2_cutoff = 6.2001;
     params.lj_r6_coeff = -2923.89;
     params.lj_r12_coeff = 7.46825e+06;
@@ -7271,7 +7271,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(-5.80233, 4.23603, -0.928482, 0.0639422);
   }
   {  // 20 23
-    EtableParamsOnePair<float>& params = analytic_parameters[307];
+    EtableParamsOnePair<float> &params = analytic_parameters[307];
     params.ljrep_linear_ramp_d2_cutoff = 6.2001;
     params.lj_r6_coeff = -2923.89;
     params.lj_r12_coeff = 7.46825e+06;
@@ -7301,7 +7301,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(-5.80233, 4.23603, -0.928482, 0.0639422);
   }
   {  // 20 24
-    EtableParamsOnePair<float>& params = analytic_parameters[308];
+    EtableParamsOnePair<float> &params = analytic_parameters[308];
     params.hydrogen_interaction = 1;
     params.maxd2 = 9;
     params.ljrep_linear_ramp_d2_cutoff = 3.24;
@@ -7318,7 +7318,7 @@ void EtableParamsInit::init_EtableParams(
     params.lj_radius_2 = 1;
   }
   {  // 20 25
-    EtableParamsOnePair<float>& params = analytic_parameters[309];
+    EtableParamsOnePair<float> &params = analytic_parameters[309];
     params.hydrogen_interaction = 1;
     params.maxd2 = 10.25;
     params.ljrep_linear_ramp_d2_cutoff = 3.6864;
@@ -7335,7 +7335,7 @@ void EtableParamsInit::init_EtableParams(
     params.lj_radius_2 = 1.2;
   }
   {  // 21 21
-    EtableParamsOnePair<float>& params = analytic_parameters[310];
+    EtableParamsOnePair<float> &params = analytic_parameters[310];
     params.ljrep_linear_ramp_d2_cutoff = 3.4596;
     params.lj_r6_coeff = -282.404;
     params.lj_r12_coeff = 125317;
@@ -7362,7 +7362,7 @@ void EtableParamsInit::init_EtableParams(
         ExtraQuadraticRepulsion(2.1, 3.6, 2, -6, 4.5);
   }
   {  // 21 22
-    EtableParamsOnePair<float>& params = analytic_parameters[311];
+    EtableParamsOnePair<float> &params = analytic_parameters[311];
     params.ljrep_linear_ramp_d2_cutoff = 4.9284;
     params.lj_r6_coeff = -1565.5;
     params.lj_r12_coeff = 2.00832e+06;
@@ -7393,7 +7393,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(-4.26293, 3.11218, -0.68215, 0.046978);
   }
   {  // 21 23
-    EtableParamsOnePair<float>& params = analytic_parameters[312];
+    EtableParamsOnePair<float> &params = analytic_parameters[312];
     params.ljrep_linear_ramp_d2_cutoff = 4.9284;
     params.lj_r6_coeff = -1565.5;
     params.lj_r12_coeff = 2.00832e+06;
@@ -7424,7 +7424,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(-4.26293, 3.11218, -0.68215, 0.046978);
   }
   {  // 21 24
-    EtableParamsOnePair<float>& params = analytic_parameters[313];
+    EtableParamsOnePair<float> &params = analytic_parameters[313];
     params.hydrogen_interaction = 1;
     params.maxd2 = 3.05;
     params.ljrep_linear_ramp_d2_cutoff = 1.1025;
@@ -7441,7 +7441,7 @@ void EtableParamsInit::init_EtableParams(
     params.lj_radius_2 = 1;
   }
   {  // 21 25
-    EtableParamsOnePair<float>& params = analytic_parameters[314];
+    EtableParamsOnePair<float> &params = analytic_parameters[314];
     params.hydrogen_interaction = 1;
     params.maxd2 = 7.55;
     params.ljrep_linear_ramp_d2_cutoff = 2.7225;
@@ -7458,7 +7458,7 @@ void EtableParamsInit::init_EtableParams(
     params.lj_radius_2 = 1.2;
   }
   {  // 22 22
-    EtableParamsOnePair<float>& params = analytic_parameters[315];
+    EtableParamsOnePair<float> &params = analytic_parameters[315];
     params.ljrep_linear_ramp_d2_cutoff = 6.6564;
     params.lj_r6_coeff = -7395.99;
     params.lj_r12_coeff = 2.33764e+07;
@@ -7495,7 +7495,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(-13.7361, 10.0281, -2.19804, 0.151373);
   }
   {  // 22 23
-    EtableParamsOnePair<float>& params = analytic_parameters[316];
+    EtableParamsOnePair<float> &params = analytic_parameters[316];
     params.ljrep_linear_ramp_d2_cutoff = 6.6564;
     params.lj_r6_coeff = -7395.99;
     params.lj_r12_coeff = 2.33764e+07;
@@ -7532,7 +7532,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(-13.7361, 10.0281, -2.19804, 0.151373);
   }
   {  // 22 24
-    EtableParamsOnePair<float>& params = analytic_parameters[317];
+    EtableParamsOnePair<float> &params = analytic_parameters[317];
     params.hydrogen_interaction = 1;
     params.maxd2 = 9.9;
     params.ljrep_linear_ramp_d2_cutoff = 3.5721;
@@ -7549,7 +7549,7 @@ void EtableParamsInit::init_EtableParams(
     params.lj_radius_2 = 1;
   }
   {  // 22 25
-    EtableParamsOnePair<float>& params = analytic_parameters[318];
+    EtableParamsOnePair<float> &params = analytic_parameters[318];
     params.hydrogen_interaction = 1;
     params.maxd2 = 11.2;
     params.ljrep_linear_ramp_d2_cutoff = 4.0401;
@@ -7566,7 +7566,7 @@ void EtableParamsInit::init_EtableParams(
     params.lj_radius_2 = 1.2;
   }
   {  // 23 23
-    EtableParamsOnePair<float>& params = analytic_parameters[319];
+    EtableParamsOnePair<float> &params = analytic_parameters[319];
     params.ljrep_linear_ramp_d2_cutoff = 6.6564;
     params.lj_r6_coeff = -7395.99;
     params.lj_r12_coeff = 2.33764e+07;
@@ -7603,7 +7603,7 @@ void EtableParamsInit::init_EtableParams(
         CubicPolynomial(-13.7361, 10.0281, -2.19804, 0.151373);
   }
   {  // 23 24
-    EtableParamsOnePair<float>& params = analytic_parameters[320];
+    EtableParamsOnePair<float> &params = analytic_parameters[320];
     params.hydrogen_interaction = 1;
     params.maxd2 = 9.9;
     params.ljrep_linear_ramp_d2_cutoff = 3.5721;
@@ -7620,7 +7620,7 @@ void EtableParamsInit::init_EtableParams(
     params.lj_radius_2 = 1;
   }
   {  // 23 25
-    EtableParamsOnePair<float>& params = analytic_parameters[321];
+    EtableParamsOnePair<float> &params = analytic_parameters[321];
     params.hydrogen_interaction = 1;
     params.maxd2 = 11.2;
     params.ljrep_linear_ramp_d2_cutoff = 4.0401;
@@ -7637,7 +7637,7 @@ void EtableParamsInit::init_EtableParams(
     params.lj_radius_2 = 1.2;
   }
   {  // 24 24
-    EtableParamsOnePair<float>& params = analytic_parameters[322];
+    EtableParamsOnePair<float> &params = analytic_parameters[322];
     params.hydrogen_interaction = 1;
     params.maxd2 = 4;
     params.ljrep_linear_ramp_d2_cutoff = 1.44;
@@ -7654,7 +7654,7 @@ void EtableParamsInit::init_EtableParams(
     params.lj_radius_2 = 1;
   }
   {  // 24 25
-    EtableParamsOnePair<float>& params = analytic_parameters[323];
+    EtableParamsOnePair<float> &params = analytic_parameters[323];
     params.hydrogen_interaction = 1;
     params.maxd2 = 4.85;
     params.ljrep_linear_ramp_d2_cutoff = 1.7424;
@@ -7671,7 +7671,7 @@ void EtableParamsInit::init_EtableParams(
     params.lj_radius_2 = 1.2;
   }
   {  // 25 25
-    EtableParamsOnePair<float>& params = analytic_parameters[324];
+    EtableParamsOnePair<float> &params = analytic_parameters[324];
     params.hydrogen_interaction = 1;
     params.maxd2 = 5.75;
     params.ljrep_linear_ramp_d2_cutoff = 2.0736;

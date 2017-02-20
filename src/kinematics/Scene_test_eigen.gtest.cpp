@@ -35,11 +35,11 @@ struct Xform : Eigen::Transform<double, 3, Eigen::AffineCompact> {
   Xform() {}
   Xform(Vec t, double a, Vec ax) : BASE(AA(a, ax)) { translation() = t; }
   template <class T>
-  Xform(T const& t) : BASE(t) {}
+  Xform(T const &t) : BASE(t) {}
 };
 
 // Xform inverse(Xform const & x){ return x.inverse(); }
-std::ostream& operator<<(std::ostream& out, Xform const& x) {
+std::ostream &operator<<(std::ostream &out, Xform const &x) {
   return out << "t(" << x.translation().transpose() << ")";
 }
 
@@ -49,12 +49,12 @@ TEST(Scene_eigen, eigen_transform) {
   Xform x(aa);
   // cout << x << endl;
   Eigen::Vector3d v(0, 0, 0);
-  x* v;
+  x *v;
   Eigen::RowVector3d rv(0, 0, 0);
   // x*rv; // not allowed
   Eigen::Vector3f vf(0, 0, 0);
   // x*vf // not allowed
-  x* vf.cast<double>();
+  x *vf.cast<double>();
   Eigen::RowVector4d v4(0, 0, 0, 0);
   // x*v4; // not allowed
 }
@@ -65,8 +65,8 @@ typedef std::pair<Index2, Index2> Index4;
 
 struct Xactor : actor::ActorConcept<Xform, int> {
   Xactor() : actor::ActorConcept<Xform, int>() {}
-  Xactor(Position const& p, int d) : actor::ActorConcept<Xform, int>(p, d) {}
-  Xactor(Xactor const& a, Position const& moveby) {
+  Xactor(Position const &p, int d) : actor::ActorConcept<Xform, int>(p, d) {}
+  Xactor(Xactor const &a, Position const &moveby) {
     position_ = moveby * a.position();
     data_ = a.data_;
   }
@@ -79,15 +79,15 @@ struct ScoreX {
   typedef Xactor Interaction;
   static std::string name() { return "ScoreADI"; }
   template <class Config>
-  Result operator()(Interaction const& a, Config const&) const {
+  Result operator()(Interaction const &a, Config const &) const {
     return a.data_;
   }
 };
-std::ostream& operator<<(std::ostream& out, ScoreX const& s) {
+std::ostream &operator<<(std::ostream &out, ScoreX const &s) {
   return out << s.name();
 }
 
-double distance(Xform const& a, Xform const& b) {
+double distance(Xform const &a, Xform const &b) {
   return (a.translation() - b.translation()).norm();
 }
 
@@ -99,18 +99,18 @@ struct ScoreXX {
   typedef std::pair<Xactor, Xactor> Interaction;
   static std::string name() { return "ScoreADIADI"; }
   template <class Config>
-  Result operator()(Actor1 const& a1, Actor2 const& a2, Config const&) const {
+  Result operator()(Actor1 const &a1, Actor2 const &a2, Config const &) const {
     ++ncalls;
     // cout << a.first << " " << a.second << endl;
     return distance(a1.position(), a2.position());
   }
   template <class Config>
-  Result operator()(Interaction const& i, Config const& c) const {
+  Result operator()(Interaction const &i, Config const &c) const {
     return this->template operator()<Config>(i.first, i.second, c);
   }
 };
 size_t ScoreXX::ncalls = 0;
-std::ostream& operator<<(std::ostream& out, ScoreXX const& s) {
+std::ostream &operator<<(std::ostream &out, ScoreXX const &s) {
   return out << s.name();
 }
 
@@ -145,9 +145,9 @@ TEST(Scene_eigen, relative_relations_preserved) {
   x1 = scene.get_actor<Xactor>(0, 0);
   x2 = scene.get_actor<Xactor>(1, 0);
 
-  tie(a1, a2) = scene.get_interaction_absolute<std::pair<Xactor, Xactor> >(
+  tie(a1, a2) = scene.get_interaction_absolute<std::pair<Xactor, Xactor>>(
       std::make_pair(std::make_pair(0, 1), std::make_pair(0, 0)));
-  tie(r1, r2) = scene.get_interaction<std::pair<Xactor, Xactor> >(
+  tie(r1, r2) = scene.get_interaction<std::pair<Xactor, Xactor>>(
       std::make_pair(std::make_pair(0, 1), std::make_pair(0, 0)));
 
   ASSERT_TRUE(x1.position().isApprox(a1.position()));
@@ -259,7 +259,8 @@ TEST(Scene_eigen, relative_relations_preserved) {
 // scene.add_symframe(i+1);
 // 		for(Scene::Index i = 0; i < NBOD; ++i){
 // 			for(Scene::Index j = 0; j < NACT; ++j){
-// 				scene.mutable_conformation_asym(i).add_actor( ADI(j,i)
+// 				scene.mutable_conformation_asym(i).add_actor(
+// ADI(j,i)
 // );
 // 			}
 // 		}
@@ -294,11 +295,15 @@ TEST(Scene_eigen, relative_relations_preserved) {
 // c2.get<Actor2>().size();
 // 			// 		for(Scene::Index j1 = 0; j1 < NACT1;
 // ++j1){
-// 			// 			Actor1 a1( c1.get<Actor1>()[j1], p1
+// 			// 			Actor1 a1( c1.get<Actor1>()[j1],
+// p1
 // );
-// 			// 			for(Scene::Index j2 = 0; j2 < NACT2;
+// 			// 			for(Scene::Index j2 = 0; j2 <
+// NACT2;
 // ++j2){
-// 			// 				Actor2 a2( c2.get<Actor2>()[j2], p2
+// 			// 				Actor2 a2(
+// c2.get<Actor2>()[j2],
+// p2
 // );
 // 			// 				visitor( a1, a2,
 // i1<NBOD&&i2<NBOD?1.0:0.5 );

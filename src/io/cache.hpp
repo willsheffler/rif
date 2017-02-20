@@ -22,7 +22,7 @@ namespace scheme {
 namespace io {
 
 template <class T>
-T test_serialization(T const& ref) {
+T test_serialization(T const &ref) {
   T t;
 #ifdef CEREAL
   std::ostringstream oss;
@@ -44,7 +44,7 @@ T test_serialization(T const& ref) {
 }
 
 template <class T>
-bool read_cache(std::string const& location, T& t) {
+bool read_cache(std::string const &location, T &t) {
 #ifdef CEREAL
   using namespace boost::iostreams;
   // std::cout << "read_cache  '" << location << "'" << std::endl;
@@ -67,7 +67,7 @@ bool read_cache(std::string const& location, T& t) {
 }
 
 template <class T>
-void write_cache(std::string const& location, T& t) {
+void write_cache(std::string const &location, T &t) {
 #ifdef CEREAL
   namespace fs = boost::filesystem;
   if (location.size() == 0) return;

@@ -8,75 +8,75 @@ namespace scheme {
 namespace numeric {
 
 template <class M>
-typename M::Scalar const& xx(M const& m) {
+typename M::Scalar const &xx(M const &m) {
   return m(0, 0);
 }
 template <class M>
-typename M::Scalar const& xy(M const& m) {
+typename M::Scalar const &xy(M const &m) {
   return m(0, 1);
 }
 template <class M>
-typename M::Scalar const& xz(M const& m) {
+typename M::Scalar const &xz(M const &m) {
   return m(0, 2);
 }
 template <class M>
-typename M::Scalar const& yx(M const& m) {
+typename M::Scalar const &yx(M const &m) {
   return m(1, 0);
 }
 template <class M>
-typename M::Scalar const& yy(M const& m) {
+typename M::Scalar const &yy(M const &m) {
   return m(1, 1);
 }
 template <class M>
-typename M::Scalar const& yz(M const& m) {
+typename M::Scalar const &yz(M const &m) {
   return m(1, 2);
 }
 template <class M>
-typename M::Scalar const& zx(M const& m) {
+typename M::Scalar const &zx(M const &m) {
   return m(2, 0);
 }
 template <class M>
-typename M::Scalar const& zy(M const& m) {
+typename M::Scalar const &zy(M const &m) {
   return m(2, 1);
 }
 template <class M>
-typename M::Scalar const& zz(M const& m) {
+typename M::Scalar const &zz(M const &m) {
   return m(2, 2);
 }
 template <class M>
-typename M::Scalar& xx(M& m) {
+typename M::Scalar &xx(M &m) {
   return m(0, 0);
 }
 template <class M>
-typename M::Scalar& xy(M& m) {
+typename M::Scalar &xy(M &m) {
   return m(0, 1);
 }
 template <class M>
-typename M::Scalar& xz(M& m) {
+typename M::Scalar &xz(M &m) {
   return m(0, 2);
 }
 template <class M>
-typename M::Scalar& yx(M& m) {
+typename M::Scalar &yx(M &m) {
   return m(1, 0);
 }
 template <class M>
-typename M::Scalar& yy(M& m) {
+typename M::Scalar &yy(M &m) {
   return m(1, 1);
 }
 template <class M>
-typename M::Scalar& yz(M& m) {
+typename M::Scalar &yz(M &m) {
   return m(1, 2);
 }
 template <class M>
-typename M::Scalar& zx(M& m) {
+typename M::Scalar &zx(M &m) {
   return m(2, 0);
 }
 template <class M>
-typename M::Scalar& zy(M& m) {
+typename M::Scalar &zy(M &m) {
   return m(2, 1);
 }
 template <class M>
-typename M::Scalar& zz(M& m) {
+typename M::Scalar &zz(M &m) {
   return m(2, 2);
 }
 
@@ -86,7 +86,7 @@ struct get_scalar {
 };
 
 template <class T>
-T sin_cos_range(T const& t) {
+T sin_cos_range(T const &t) {
   return t;
 }
 
@@ -177,7 +177,7 @@ T sin_cos_range(T const& t) {
 /// 2. theta close to pi (South Pole singularity)
 /// For these, we take: phi=acos(xx), theta = 0 (resp. Pi/2), psi = 0
 template <class M, class E>
-void euler_angles(M const& m, E& euler) {
+void euler_angles(M const &m, E &euler) {
   typedef typename get_scalar<M>::type T;
   static T const pi = boost::math::constants::pi<T>();
   static T const pi_2 = boost::math::constants::pi<T>() * (T)2;
@@ -218,7 +218,7 @@ void euler_angles(M const& m, E& euler) {
 
 ///@brief euler to matrix
 template <class M, class E>
-void from_euler_angles(E const& euler, M& m) {
+void from_euler_angles(E const &euler, M &m) {
   typedef typename get_scalar<M>::type T;
   T const ce1(std::cos(euler[0])), se1(std::sin(euler[0]));
   T const ce2(std::cos(euler[1])), se2(std::sin(euler[1]));
@@ -235,7 +235,7 @@ void from_euler_angles(E const& euler, M& m) {
 }
 
 template <class M, class E>
-void euler_angles_deg(M const& m, E& euler) {
+void euler_angles_deg(M const &m, E &euler) {
   typedef typename get_scalar<M>::type T;
   static T const rad_to_deg = 180.0 / boost::math::constants::pi<T>();
   euler_angles(m, euler);
@@ -244,7 +244,7 @@ void euler_angles_deg(M const& m, E& euler) {
   euler[2] = euler[2] * rad_to_deg;
 }
 template <class M, class E>
-void from_euler_angles_deg(E const& erad, M& m) {
+void from_euler_angles_deg(E const &erad, M &m) {
   typedef typename get_scalar<M>::type T;
   static T const deg_to_rad = boost::math::constants::pi<T>() / 180.0;
   E euler;

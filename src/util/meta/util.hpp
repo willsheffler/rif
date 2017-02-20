@@ -21,12 +21,12 @@ struct showint;
 template <class T>
 struct is_pair : m::false_ {};
 template <class A, class B>
-struct is_pair<std::pair<A, B> > : m::true_ {};
+struct is_pair<std::pair<A, B>> : m::true_ {};
 
 template <class T>
 struct is_homo_pair : m::false_ {};
 template <class A>
-struct is_homo_pair<std::pair<A, A> > : m::true_ {};
+struct is_homo_pair<std::pair<A, A>> : m::true_ {};
 
 template <class T>
 struct first_type {
@@ -84,7 +84,7 @@ struct has_const_call_oper_3 {
   template <typename U, R (U::*)(A, B, C) const>
   struct SFINAE {};
   template <typename U>
-  static char Test(SFINAE<U, &U::operator()>*);
+  static char Test(SFINAE<U, &U::operator()> *);
   template <typename U>
   static int Test(...);
   static const bool value = sizeof(Test<T>(0)) == sizeof(char);
@@ -96,7 +96,7 @@ struct has_subscript_oper {
   template <typename U, R (U::*)(A)>
   struct SFINAE {};
   template <typename U>
-  static char Test(SFINAE < U, &U::operator[]>*);
+  static char Test(SFINAE < U, &U::operator[]> *);
   template <typename U>
   static int Test(...);
   static const bool value = sizeof(Test<T>(0)) == sizeof(char);
@@ -108,7 +108,7 @@ struct has_const_subscript_oper {
   template <typename U, R (U::*)(A) const>
   struct SFINAE {};
   template <typename U>
-  static char Test(SFINAE < U, &U::operator[]>*);
+  static char Test(SFINAE < U, &U::operator[]> *);
   template <typename U>
   static int Test(...);
   static const bool value = sizeof(Test<T>(0)) == sizeof(char);
@@ -121,7 +121,7 @@ struct has_const_subscript_oper {
     template <typename U, R (U::*)(A, B, C)>                      \
     struct SFINAE {};                                             \
     template <typename U>                                         \
-    static char Test(SFINAE<U, &U::MEMBER>*);                     \
+    static char Test(SFINAE<U, &U::MEMBER> *);                    \
     template <typename U>                                         \
     static int Test(...);                                         \
     static const bool value = sizeof(Test<T>(0)) == sizeof(char); \
@@ -133,7 +133,7 @@ struct has_const_subscript_oper {
     template <typename U, R (U::*)() const>                       \
     struct SFINAE {};                                             \
     template <typename U>                                         \
-    static char Test(SFINAE<U, &U::MEMBER>*);                     \
+    static char Test(SFINAE<U, &U::MEMBER> *);                    \
     template <typename U>                                         \
     static int Test(...);                                         \
     static const bool value = sizeof(Test<T>(0)) == sizeof(char); \
@@ -145,7 +145,7 @@ struct has_const_subscript_oper {
     template <typename U, R (U::*)(A, B) const>                   \
     struct SFINAE {};                                             \
     template <typename U>                                         \
-    static char Test(SFINAE<U, &U::MEMBER>*);                     \
+    static char Test(SFINAE<U, &U::MEMBER> *);                    \
     template <typename U>                                         \
     static int Test(...);                                         \
     static const bool value = sizeof(Test<T>(0)) == sizeof(char); \
@@ -157,7 +157,7 @@ struct has_const_subscript_oper {
     template <typename U, R (U::*)(A, B, C) const>                \
     struct SFINAE {};                                             \
     template <typename U>                                         \
-    static char Test(SFINAE<U, &U::MEMBER>*);                     \
+    static char Test(SFINAE<U, &U::MEMBER> *);                    \
     template <typename U>                                         \
     static int Test(...);                                         \
     static const bool value = sizeof(Test<T>(0)) == sizeof(char); \
@@ -169,7 +169,7 @@ struct has_const_subscript_oper {
     template <typename U, R (U::*)(A, B, C, D) const>                \
     struct SFINAE {};                                                \
     template <typename U>                                            \
-    static char Test(SFINAE<U, &U::MEMBER>*);                        \
+    static char Test(SFINAE<U, &U::MEMBER> *);                       \
     template <typename U>                                            \
     static int Test(...);                                            \
     static const bool value = sizeof(Test<T>(0)) == sizeof(char);    \

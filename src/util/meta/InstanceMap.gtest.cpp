@@ -22,7 +22,7 @@ namespace mpl = boost::mpl;
 
 TEST(InstanceMap, fusion_map_test) {
   {
-    typedef bf::map<bf::pair<int, char>, bf::pair<double, std::string> >
+    typedef bf::map<bf::pair<int, char>, bf::pair<double, std::string>>
         map_type;
 
     map_type m(bf::make_pair<int>('X'), bf::make_pair<double>("Men"));
@@ -98,7 +98,7 @@ TEST(InstanceMap, holds_types) {
     ASSERT_EQ(imap.get<float>(), 1.2345f);
   }
   {
-    InstanceMap<Types, std::vector<_1> > imap;
+    InstanceMap<Types, std::vector<_1>> imap;
     imap.get<int>().push_back(1);
     imap.get<char>().push_back('C');
     imap.get<float>().push_back(1.2345f);
@@ -109,17 +109,17 @@ TEST(InstanceMap, holds_types) {
     imap.get<float>().push_back(1.2345f);
     ASSERT_EQ(imap.get<float>().size(), 3);
 
-    InstanceMap<Types, std::vector<_1> > imap2 = imap;
+    InstanceMap<Types, std::vector<_1>> imap2 = imap;
     ASSERT_TRUE(imap2 == imap);
   }
-  bf::map<bf::pair<int, int>, bf::pair<char, char>, bf::pair<float, float> >
+  bf::map<bf::pair<int, int>, bf::pair<char, char>, bf::pair<float, float>>
       test;
   // bf::for_each( test, PrintInstanceType() );
 }
 
 TEST(InstanceMap, can_use_fusion_pairs_directly) {
   // "usual" way
-  InstanceMap<m::vector<int, char>, m::vector<char, float> > zip_imap;
+  InstanceMap<m::vector<int, char>, m::vector<char, float>> zip_imap;
   zip_imap.get<int>() = 'a';
   zip_imap.get<char>() = 1.234f;
   ASSERT_EQ(zip_imap.get<int>(), 'a');
@@ -127,14 +127,13 @@ TEST(InstanceMap, can_use_fusion_pairs_directly) {
 
   // make fusion map directly
   f::result_of::as_map<
-      m::vector<f::pair<int, char>, f::pair<char, float> > >::type fmap;
+      m::vector<f::pair<int, char>, f::pair<char, float>>>::type fmap;
   f::at_key<int>(fmap) = 'a';
   f::at_key<char>(fmap) = 1.234f;
   ASSERT_EQ(f::at_key<int>(fmap), 'a');
   ASSERT_EQ(f::at_key<char>(fmap), 1.234f);
 
-  InstanceMap<m::vector<f::pair<int, char>, f::pair<char, float> >,
-              FUSION_PAIRS>
+  InstanceMap<m::vector<f::pair<int, char>, f::pair<char, float>>, FUSION_PAIRS>
       imap;
   imap.get<int>() = 'a';
   imap.get<char>() = 1.234f;
@@ -144,12 +143,12 @@ TEST(InstanceMap, can_use_fusion_pairs_directly) {
 
 TEST(InstanceMap, serialization) {
 #ifdef CEREAL
-  InstanceMap<m::vector<int, char, float> > imap;
+  InstanceMap<m::vector<int, char, float>> imap;
   imap.get<int>() = 1;
   imap.get<char>() = 'C';
   imap.get<float>() = 1.2345f;
   ASSERT_EQ(imap, io::test_serialization(imap));
-  InstanceMap<m::vector<int, char, float> > const& cimap = imap;
+  InstanceMap<m::vector<int, char, float>> const &cimap = imap;
   ASSERT_EQ(imap, io::test_serialization(cimap));
 #endif
 }
@@ -178,8 +177,9 @@ TEST(InstanceMap, subtyping) {
     ASSERT_EQ(imap.get<float>(), 1.2345f);
     // bf::for_each((TEST::Base&)imap,PrintInstanceType());
 
-    //		typename TEST::Base & test1 = static_cast< typename TEST::Base & >(
-    //imap );
+    //		typename TEST::Base & test1 = static_cast< typename TEST::Base &
+    //>(
+    // imap );
 
     // typename boost::fusion::detail::map_impl<0> & test2 = static_cast<
     // boost::fusion::detail::map_impl<0> & >( imap );

@@ -10,9 +10,9 @@ namespace score {
 
 struct EtableParamsInit {
   ///@brief horrible function to fill horrible rosetta datastructure of LJ/LK
-  ///params
+  /// params
   static void init_EtableParams(
-      std::vector<EtableParamsOnePair<float> >& analytic_parameters);
+      std::vector<EtableParamsOnePair<float>> &analytic_parameters);
 };
 }
 }

@@ -193,7 +193,8 @@ double min_cube_side(T const &coords) {
 // 			bestrot = qrand;
 // 			bestdodec = rotdodec;
 // 			double const area = side*side*side;
-// 			cout << "min cube side: " << side << " vol: " << area << "
+// 			cout << "min cube side: " << side << " vol: " << area <<
+// "
 // dodec vol frac: " << area / area0 << " " << i << endl;
 // 			cout << bestrot << endl;
 // 		}
@@ -344,7 +345,8 @@ vector<Quaterniond> make_half120cell();
 
 // 	cout << "\t\tstatic T const h120[240] = {" << endl;
 // 	BOOST_FOREACH(Quaterniond q,half120cell){
-// 		cout << "\t\t\t" << setprecision(17)  << q.x() << "," << q.y() <<
+// 		cout << "\t\t\t" << setprecision(17)  << q.x() << "," << q.y()
+// <<
 // "," << q.z() << "," << q.w() << "," << endl;
 // 	}
 // 	cout << "\t\t}" << endl;
@@ -352,7 +354,8 @@ vector<Quaterniond> make_half120cell();
 // 	cout << "\t\tstatic T const h120inv[240] = {" << endl;
 // 	BOOST_FOREACH(Quaterniond q,half120cell){
 // 		q = q.inverse();
-// 		cout << "\t\t\t" << setprecision(17)  << q.x() << "," << q.y() <<
+// 		cout << "\t\t\t" << setprecision(17)  << q.x() << "," << q.y()
+// <<
 // "," << q.z() << "," << q.w() << "," << endl;
 // 	}
 // 	cout << "\t\t}" << endl;
@@ -371,7 +374,8 @@ vector<Quaterniond> make_half120cell();
 // 	for(int i = 0; i < 12; ++i){
 // 		Vector3d nbr0 = half120cell[nbrs(0,i)].coeffs().block(0,0,3,1);
 // 		nbr0 /= nbr0.norm();
-// 		cout << "\t\t\t" << setprecision(17)  << nbr0[0] << "," << nbr0[1]
+// 		cout << "\t\t\t" << setprecision(17)  << nbr0[0] << "," <<
+// nbr0[1]
 // << "," << nbr0[2] << "," << endl;
 // 	}
 // 	cout << "\t\t}" << endl;
@@ -438,7 +442,8 @@ vector<Quaterniond> make_half120cell();
 // 			mincube = side;
 // 			bestm4 = randm4;
 // 			double const area = side*side*side;
-// 			cout << "min cube side: " << side << " vol: " << area << "
+// 			cout << "min cube side: " << side << " vol: " << area <<
+// "
 // dodec vol frac: " << area / area0 << endl;
 // 		}
 // 	}
@@ -671,7 +676,8 @@ TEST(hecatonicosachoron, covering) {
 // 		std::ofstream
 // out(("h120_"+boost::lexical_cast<std::string>(r)+".pdb").c_str());
 // 		size_t count1 = 0, count2 = 0;
-// 		// cout << r << " " << nest.size(r) << " " << (beg>>(4*(10-r))) <<
+// 		// cout << r << " " << nest.size(r) << " " << (beg>>(4*(10-r)))
+// <<
 // endl;
 // 		// continue;
 // 		// for(size_t i = beg>>(4*(10-r)); i < nest.size(r); ++i){
@@ -681,18 +687,21 @@ TEST(hecatonicosachoron, covering) {
 // 				++count2;
 // 				if( count1 > N) break;
 // 				Matrix3d m = nest.value();
-// 				// cout << r << " " << i << " " << q.coeffs().transpose()
+// 				// cout << r << " " << i << " " <<
+// q.coeffs().transpose()
 // << endl;
 // 				 Vector3d ximg = m * X;
 // 				 Vector3d yimg = m * Y;
 // 				 Vector3d zimg = m * Z;;
 // 				 // cout << r << " " << nest.cell_index(i,r) <<
 // endl;
-// 				 io::dump_pdb_atom(out, nest.cell_index(i,r)<5?"H":"O"
+// 				 io::dump_pdb_atom(out,
+// nest.cell_index(i,r)<5?"H":"O"
 // ,60*ximg);
 // 				 io::dump_pdb_atom(out,
 // nest.cell_index(i,r)<5?"H":"NI",60*yimg);
-// 				 io::dump_pdb_atom(out, nest.cell_index(i,r)<5?"H":"N"
+// 				 io::dump_pdb_atom(out,
+// nest.cell_index(i,r)<5?"H":"N"
 // ,60*zimg);
 // 			}
 // 		}

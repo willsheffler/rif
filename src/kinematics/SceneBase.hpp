@@ -35,13 +35,13 @@ struct SceneBase {
     Index isym = this->sym_index_map(i);
     return this->symframes_.at(isym) * positions_.at(i);
   }
-  void set_position(Index i, Position const& newp) { positions_.at(i) = newp; }
+  void set_position(Index i, Position const &newp) { positions_.at(i) = newp; }
   template <class Actor>
-  bool add_actor(Index ib, Actor const& actor) {
+  bool add_actor(Index ib, Actor const &actor) {
     boost::any any_actor = actor;
     return add_actor(ib, any_actor);
   }
-  virtual bool add_actor(Index ib, boost::any const& a) { return false; }
+  virtual bool add_actor(Index ib, boost::any const &a) { return false; }
 
   template <class Actor>
   Actor get_actor(Index ib, Index ia) const {
@@ -49,17 +49,17 @@ struct SceneBase {
     get_actor(ib, ia, any_actor);
     return boost::any_cast<Actor>(any_actor);
   }
-  virtual bool get_actor(Index ib, Index ia, boost::any& a) const {
+  virtual bool get_actor(Index ib, Index ia, boost::any &a) const {
     return false;
   }
 
   template <class Actor>
-  Actor& get_nonconst_actor(Index ib, Index ia) {
+  Actor &get_nonconst_actor(Index ib, Index ia) {
     boost::any any_actor = util::meta::type2type<Actor>();
     get_nonconst_actor(ib, ia, any_actor);
-    return *boost::any_cast<Actor*>(any_actor);
+    return *boost::any_cast<Actor *>(any_actor);
   }
-  virtual bool get_nonconst_actor(Index ib, Index ia, boost::any& a) {
+  virtual bool get_nonconst_actor(Index ib, Index ia, boost::any &a) {
     return false;
   }
 
@@ -68,7 +68,7 @@ struct SceneBase {
     boost::any any_actor = util::meta::type2type<Actor>();
     return num_actors(ib, any_actor);
   }
-  virtual int num_actors(Index ib, boost::any const& a) const { return -1; }
+  virtual int num_actors(Index ib, boost::any const &a) const { return -1; }
 
   template <class Actor>
   bool clear_actors(Index ib) {
@@ -76,28 +76,28 @@ struct SceneBase {
     boost::any any_actor = a;
     return clear_actors(ib, any_actor);
   }
-  virtual bool clear_actors(Index ib, boost::any const& a) { return false; }
+  virtual bool clear_actors(Index ib, boost::any const &a) { return false; }
 
   // symmetry stuff, doesn't need to be Conformation-sepcific
   void update_symmetry(Index nbodies) {
     n_bodies_ = nbodies;
     n_sym_bodies_ = n_bodies_ * ((Index)symframes_.size());
   }
-  Index sym_index_map(Index& i) const {
+  Index sym_index_map(Index &i) const {
     Index isym = i / n_bodies_;
     i = i % n_bodies_;
     return isym;
   }
 
-  void set_symmetry(std::vector<Position> const& sym) {
+  void set_symmetry(std::vector<Position> const &sym) {
     symframes_ = sym;
     update_symmetry(n_bodies_);
   }
-  void add_symframe(Position const& symframe) {
+  void add_symframe(Position const &symframe) {
     symframes_.push_back(symframe);
     update_symmetry(n_bodies_);
   }
-  std::vector<Position> const& symframes() const { return symframes_; }
+  std::vector<Position> const &symframes() const { return symframes_; }
   Index nbodies() const { return n_sym_bodies_; }
   Index nbodies_asym() const { return n_bodies_; }
 };

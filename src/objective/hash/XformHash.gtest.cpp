@@ -20,7 +20,7 @@ typedef Eigen::Transform<double, 3, Eigen::AffineCompact> Xform;
 // typedef Eigen::Affine3d Xform;
 
 template <template <class X> class XformHash>
-int get_num_ori_cells(int ori_nside, double& xcov) {
+int get_num_ori_cells(int ori_nside, double &xcov) {
   std::mt19937 rng((unsigned int)time(0) + 7693487);
   XformHash<Xform> xh(1.0, ori_nside, 512.0);
   int n_ori_bins;
@@ -300,9 +300,11 @@ TEST(XformHash_Quat_BCC7_Zorder, num_ori_cells) {
 // TEST( XformHash_bt24_BCC6, num_ori_cells ){
 // 	for(int i = 19; i < 65; ++i){
 // 		double xcov;
-// 		int num_ori_cells = get_num_ori_cells<XformHash_bt24_BCC6>( i, xcov
+// 		int num_ori_cells = get_num_ori_cells<XformHash_bt24_BCC6>( i,
+// xcov
 // );
-// 		printf("XformHash_bt24_BCC6 %2d %7d %8.3f\n",i, num_ori_cells, xcov
+// 		printf("XformHash_bt24_BCC6 %2d %7d %8.3f\n",i, num_ori_cells,
+// xcov
 // );
 // 		std::cout.flush();
 // 	}

@@ -18,7 +18,7 @@ TEST(ParamMap, UnitMap_get_neighboring_cells) {
     typedef UnitMap<2> MapType;
     MapType umap(1);
     std::vector<size_t> cnb;
-    std::back_insert_iterator<std::vector<size_t> > biter(cnb);
+    std::back_insert_iterator<std::vector<size_t>> biter(cnb);
 
     cnb.clear();
     umap.get_neighboring_cells(MapType::ValueType(1.5, 0.5), 0, 0.4, biter);
@@ -40,7 +40,7 @@ TEST(ParamMap, UnitMap_get_neighboring_cells) {
     typedef UnitMap<2> MapType;
     MapType umap(100);
     std::vector<size_t> cnb;
-    std::back_insert_iterator<std::vector<size_t> > biter(cnb);
+    std::back_insert_iterator<std::vector<size_t>> biter(cnb);
 
     cnb.clear();
     umap.get_neighboring_cells(MapType::ValueType(1.5, 0.5), 0, 0.4, biter);
@@ -109,7 +109,7 @@ TEST(ScaleMap, ScaleMap_get_neighboring_cells_244) {
   MapType umap(MapType::Params(0, 0), MapType::Params(4, 4),
                MapType::Indices(4, 4));
   std::vector<size_t> cnb;
-  std::back_insert_iterator<std::vector<size_t> > biter(cnb);
+  std::back_insert_iterator<std::vector<size_t>> biter(cnb);
   int i;
 
   cnb.clear();
@@ -212,7 +212,7 @@ TEST(ScaleMap, ScaleMap_get_neighboring_cells_433) {
   MapType umap(MapType::Params(0, 0, 0, 0), MapType::Params(3, 3, 3, 3),
                MapType::Indices(3, 3, 3, 3));
   std::vector<size_t> cnb;
-  std::back_insert_iterator<std::vector<size_t> > biter(cnb);
+  std::back_insert_iterator<std::vector<size_t>> biter(cnb);
   int i;
 
   cnb.clear();
@@ -280,7 +280,7 @@ TEST(ScaleMap, ScaleMap_get_neighboring_cells_433_m1) {
   MapType umap(MapType::Params(0, 0, 0, 0) - 1.0,
                MapType::Params(3, 3, 3, 3) - 1.0, MapType::Indices(3, 3, 3, 3));
   std::vector<size_t> cnb;
-  std::back_insert_iterator<std::vector<size_t> > biter(cnb);
+  std::back_insert_iterator<std::vector<size_t>> biter(cnb);
   int i;
 
   cnb.clear();
@@ -348,7 +348,7 @@ TEST(ScaleMap, ScaleMap_get_neighboring_cells_433_o2) {
   MapType umap(MapType::Params(0, 0, 0, 0) / 2.0,
                MapType::Params(3, 3, 3, 3) / 2.0, MapType::Indices(3, 3, 3, 3));
   std::vector<size_t> cnb;
-  std::back_insert_iterator<std::vector<size_t> > biter(cnb);
+  std::back_insert_iterator<std::vector<size_t>> biter(cnb);
   int i;
 
   cnb.clear();
@@ -417,7 +417,7 @@ TEST(ScaleMap, ScaleMap_get_neighboring_cells_433_o5m1) {
                MapType::Params(3, 3, 3, 3) / 5.0 - 1.0,
                MapType::Indices(3, 3, 3, 3));
   std::vector<size_t> cnb;
-  std::back_insert_iterator<std::vector<size_t> > biter(cnb);
+  std::back_insert_iterator<std::vector<size_t>> biter(cnb);
   int i;
 
   cnb.clear();

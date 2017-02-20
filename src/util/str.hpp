@@ -7,7 +7,7 @@
 namespace scheme {
 
 template <class T>
-std::string str(T const& t) {
+std::string str(T const &t) {
   std::ostringstream oss;
   oss << t;
   return oss.str();

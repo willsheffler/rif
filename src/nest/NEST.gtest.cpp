@@ -137,12 +137,12 @@ void test_store_pointer_virtual() {
   typedef util::SimpleArray<DIM, double> VAL;
   NEST<DIM, VAL, UnitMap, StoreValue, size_t, double, true> nest_val(2);
   NEST<DIM, VAL, UnitMap, StorePointer, size_t, double, true> nest_ptr(2);
-  NestBase<size_t>* nest_val_virtual = &nest_val;
-  NestBase<size_t>* nest_ptr_virtual = &nest_ptr;
-  StorePointer<VAL>* ptr_store =
-      dynamic_cast<StorePointer<VAL>*>(nest_ptr_virtual);
-  StorePointer<VAL>* ptr_store_fail =
-      dynamic_cast<StorePointer<VAL>*>(nest_val_virtual);
+  NestBase<size_t> *nest_val_virtual = &nest_val;
+  NestBase<size_t> *nest_ptr_virtual = &nest_ptr;
+  StorePointer<VAL> *ptr_store =
+      dynamic_cast<StorePointer<VAL> *>(nest_ptr_virtual);
+  StorePointer<VAL> *ptr_store_fail =
+      dynamic_cast<StorePointer<VAL> *>(nest_val_virtual);
   ASSERT_TRUE(ptr_store);
   ASSERT_FALSE(ptr_store_fail);
   VAL val_pointed_to;
@@ -233,7 +233,7 @@ TEST(NEST, virtual_get_index) {
 
   typedef util::SimpleArray<2, double> VAL;
   NEST<2, VAL, UnitMap, util::StoreNothing, uint64_t, double, true> nest;
-  NestBase<uint64_t>* nestp = &nest;
+  NestBase<uint64_t> *nestp = &nest;
 
   boost::any a;
   for (int resl = 0; resl < 6; ++resl) {

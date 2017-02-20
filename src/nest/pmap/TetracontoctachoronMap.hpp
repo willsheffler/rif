@@ -24,7 +24,7 @@ Float cell_width() {
 }
 
 template <class Float, class Index>
-Eigen::Map<Eigen::Quaternion<Float> const> hbt24_cellcen(Index const& i) {
+Eigen::Map<Eigen::Quaternion<Float> const> hbt24_cellcen(Index const &i) {
   // Float const * tmp = numeric::get_raw_48cell_half<Float>() + 4*i;
   // std::cout << "   raw hbt24_cellcen " << tmp[0] << " " << tmp[1] << " " <<
   // tmp[2] << " " << tmp[3] << std::endl;
@@ -59,10 +59,10 @@ struct TetracontoctachoronMap {
 
   ///@brief sets value to parameters without change
   ///@return false iff invalid parameters
-  bool params_to_value(Params const& params, Index cell_index, Index resl,
-                       Value& value) const {
+  bool params_to_value(Params const &params, Index cell_index, Index resl,
+                       Value &value) const {
     // // cout << "        set p0 " << params << endl;
-    Float const& w(cell_width<Float>());
+    Float const &w(cell_width<Float>());
 
     Params p = params * one_over_nside_;
 
@@ -120,8 +120,8 @@ struct TetracontoctachoronMap {
 
   ///@brief sets params/cell_index from value
   ///@note necessary for value lookup and neighbor lookup
-  bool value_to_params(Value const& value, Index /*resl*/, Params& params,
-                       Index& cell_index) const {
+  bool value_to_params(Value const &value, Index /*resl*/, Params &params,
+                       Index &cell_index) const {
     Quaternion<Float> q(value);
     // q = numeric::to_half_cell(q);
     // // cout << "get q  " << q.coeffs().transpose() << endl;
@@ -170,7 +170,7 @@ struct TetracontoctachoronMap {
 
   ///@brief get parameter space repr of Value for particular cell
   ///@note necessary only for neighbor lookup
-  void value_to_params_for_cell(Value const& value, Params& params) const {
+  void value_to_params_for_cell(Value const &value, Params &params) const {
     std::cerr << "Not Implemented" << std::endl;
     std::exit(-1);
   }
@@ -178,13 +178,13 @@ struct TetracontoctachoronMap {
   ///@brief return the cell_index of neighboring cells within radius of value
   ///@note delta parameter is in "Parameter Space"
   template <class OutIter>
-  void get_neighboring_cells(Value const& value, Float radius,
+  void get_neighboring_cells(Value const &value, Float radius,
                              OutIter out) const {
     std::cerr << "Not Implemented" << std::endl;
     std::exit(-1);
   }
 
-  static Float const* get_covrad_data() {
+  static Float const *get_covrad_data() {
     static Float const covrad[25] = {
         62.76235,  // 1
         38.63604,  // 2
@@ -216,7 +216,7 @@ struct TetracontoctachoronMap {
   }
 
   static int get_nside_for_rot_resl_deg(Float rot_resl_deg) {
-    static Float const* covrad = get_covrad_data();
+    static Float const *covrad = get_covrad_data();
     int nside = 0;
     while (covrad[nside] > rot_resl_deg && nside < 23) {
       // std::cout << nside << " " << covrad[nside] << std::endl;
@@ -226,11 +226,11 @@ struct TetracontoctachoronMap {
   }
 
   ///@brief aka covering radius max distance from bin center to any value within
-  ///bin
+  /// bin
   Float bin_circumradius(Index resl) const {
     BOOST_VERIFY(resl < 6);
     if (resl == 0) {
-      static Float const* covrad = get_covrad_data();
+      static Float const *covrad = get_covrad_data();
       if (nside_ > 25) {
         std::cerr
             << "TetracontoctachoronMap::bin_circumradius > 25 not implemented"
@@ -263,9 +263,9 @@ struct TetracontoctachoronMap {
 };
 
 template <int DIM, class Value, class Index, class Float>
-std::ostream& operator<<(
-    std::ostream& out,
-    TetracontoctachoronMap<DIM, Value, Index, Float> const& tm) {
+std::ostream &operator<<(
+    std::ostream &out,
+    TetracontoctachoronMap<DIM, Value, Index, Float> const &tm) {
   out << "TetracontoctachoronMap nside = " << tm.nside_
       << " covrad0 = " << tm.bin_circumradius(0) * 180.0 / M_PI;
   return out;

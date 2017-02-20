@@ -31,8 +31,8 @@ struct QuaternionMap {
   QuaternionMap() {}
   ///@brief
   ///@return false iff invalid parameters
-  bool params_to_value(Params const& params, Index /*cell_index*/, Index resl,
-                       Value& value) const {
+  bool params_to_value(Params const &params, Index /*cell_index*/, Index resl,
+                       Value &value) const {
     for (size_t i = 0; i < DIM; ++i) assert(0.0 <= params[i]);
     // assert( params[0] <= (Float)num_cells_ );
     for (size_t i = 1; i < DIM; ++i) assert(params[i] <= 1.0);
@@ -68,8 +68,8 @@ struct QuaternionMap {
   }
   ///@brief
   ///@note necessary for value lookup and neighbor lookup
-  bool value_to_params(Value const& value, Index resl, Params& params,
-                       Index& cell_index) const {
+  bool value_to_params(Value const &value, Index resl, Params &params,
+                       Index &cell_index) const {
     ///@note neighbor lookups require out of bounds mappings to be valid
     cell_index = 0;
     value_to_params_for_cell(value, resl, params, 0);
@@ -77,8 +77,8 @@ struct QuaternionMap {
   }
   ///@brief
   ///@note necessary only for neighbor lookup
-  void value_to_params_for_cell(Value const& value, Index /*resl*/,
-                                Params& params, Index /*cell_index*/
+  void value_to_params_for_cell(Value const &value, Index /*resl*/,
+                                Params &params, Index /*cell_index*/
                                 ) const {
     assert(fabs(value.norm() - 1.0) < 0.0001);
     for (size_t i = 0; i < DIM; ++i)
@@ -95,7 +95,7 @@ struct QuaternionMap {
   ///@brief
   ///@note delta parameter is in "Parameter Space"
   template <class OutIter>
-  void get_neighboring_cells(Value const& value, Index /*resl*/,
+  void get_neighboring_cells(Value const &value, Index /*resl*/,
                              Float param_delta, OutIter out) const {
     // // Float param_delta = 1.0 / (Float)(1<<resl);
     // // this BIG thing is to ensure rounding goes down
@@ -109,7 +109,7 @@ struct QuaternionMap {
     // for(int i = lb; i <= ub; ++i) *(out++) = i;
   }
   ///@brief aka covering radius max distance from bin center to any value within
-  ///bin
+  /// bin
   Float bin_circumradius(Index resl) const { return 2.0 / (Float)(1 << resl); }
   ///@brief maximum distance from the bin center which must be within the bin
   Float bin_inradius(Index resl) const { return 3.0 / (Float)(1 << resl); }

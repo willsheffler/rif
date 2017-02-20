@@ -13,7 +13,7 @@ namespace util {
 using std::cout;
 using std::endl;
 
-void testfunc(SimpleArray<3, int> const& /*a*/) {}
+void testfunc(SimpleArray<3, int> const & /*a*/) {}
 
 TEST(NESTED_FOR, interface_test) {
   SimpleArray<3, int> lb(0, 0, 3), ub(4, 2, 3);
@@ -24,7 +24,7 @@ template <class Indices>
 struct TestFun {
   size_t sum, ncalls;
   TestFun() : sum(0), ncalls(0) {}
-  void func_to_call(int dummyi, int dummyj, Indices const& indices) {
+  void func_to_call(int dummyi, int dummyj, Indices const &indices) {
     // std::cerr << "func_to_call " << dummyi << " " << dummyj << " " <<
     // indices.transpose() << std::endl;
     sum += indices.sum() + dummyi + dummyj;
@@ -58,7 +58,7 @@ template <class Indices>
 struct RecordCalls {
   // std::vector<Indices,Eigen::aligned_allocator<Indices> > calls;
   std::vector<Indices> calls;
-  void operator()(Indices const& i) { calls.push_back(i); }
+  void operator()(Indices const &i) { calls.push_back(i); }
 };
 
 TEST(NESTED_FOR, check_all_output) {

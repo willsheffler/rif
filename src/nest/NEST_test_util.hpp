@@ -46,7 +46,7 @@ void generic_test_index_nesting_of_bincenters(
 template <typename Nest>
 void generic_test_coverage_of_value(
     Nest nest, typename Nest::ValueType value,
-    std::vector<double>& largest_d2_for_r,
+    std::vector<double> &largest_d2_for_r,
     typename Nest::IndexType rmax = Nest::MAX_RESL_ONE_CELL - 2) {
   typedef typename Nest::ValueType Value;
   typedef typename Nest::IndexType Index;

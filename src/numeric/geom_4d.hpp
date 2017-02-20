@@ -13,7 +13,7 @@ static bool is_not_0(float a) {
   return fabs(a) > 0.0001;
 }  // need something higher than numeric_limits::epsilon
 template <class Q>
-Q to_half_cell(Q const& q) {
+Q to_half_cell(Q const &q) {
   return is_not_0(q.w())
              ? (q.w() > 0 ? q : Q(-q.w(), -q.x(), -q.y(), -q.z()))
              : (
@@ -28,7 +28,7 @@ Q to_half_cell(Q const& q) {
 }
 
 template <class Float>
-static Float const* get_raw_48cell() {
+static Float const *get_raw_48cell() {
   static Float const r = sqrt(2) / 2;
   static Float const h = 0.5;
   static Float const raw48[48 * 4] = {
@@ -85,7 +85,7 @@ static Float const* get_raw_48cell() {
 }
 
 template <class V4, class Index>
-void get_cell_48cell(V4 const& quat, Index& cell) {
+void get_cell_48cell(V4 const &quat, Index &cell) {
   typedef typename V4::Scalar Float;
   V4 const quat_pos = quat.cwiseAbs();
   V4 tmpv = quat_pos;
@@ -133,7 +133,7 @@ void get_cell_48cell(V4 const& quat, Index& cell) {
 }
 
 template <class Float>
-static Float const* get_raw_48cell_half() {
+static Float const *get_raw_48cell_half() {
   static Float const r = sqrt(2) / 2;
   static Float const h = 0.5;
   static Float const raw48[24 * 4] = {
@@ -166,7 +166,7 @@ static Float const* get_raw_48cell_half() {
 }
 
 template <class V4, class Index>
-void get_cell_48cell_half(V4 const& quat, Index& cell) {
+void get_cell_48cell_half(V4 const &quat, Index &cell) {
   typedef typename V4::Scalar Float;
   V4 const quat_pos = quat.cwiseAbs();
   V4 tmpv = quat_pos;

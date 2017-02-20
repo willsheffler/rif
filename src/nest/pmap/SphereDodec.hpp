@@ -17,7 +17,7 @@ using std::endl;
 using namespace Eigen;
 
 namespace dodec_data {
-double* get_dodec_cell_centers() {
+double *get_dodec_cell_centers() {
   static double p = (1.0 + sqrt(5.0)) / 2.0;
   static double n = sqrt(1.0 + p * p);
   static double dodec_cell_centers[12 * 3] = {
@@ -44,9 +44,9 @@ struct SphereDodec {
 
   ///@brief sets value to parameters without change
   ///@return false iff invalid parameters
-  bool params_to_value(Params const& params, Index cell_index, Index resl,
-                       Value& value) const {
-    Map<Matrix<double, 3, 12> > const cell_centers(
+  bool params_to_value(Params const &params, Index cell_index, Index resl,
+                       Value &value) const {
+    Map<Matrix<double, 3, 12>> const cell_centers(
         dodec_data::get_dodec_cell_centers());
     std::cout << cell_centers << std::endl;
     for (int i = 0; i < 12; ++i) {
@@ -79,22 +79,22 @@ struct SphereDodec {
 
   ///@brief sets params/cell_index from value
   ///@note necessary for value lookup and neighbor lookup
-  bool value_to_params(Value const& value, Index resl, Params& params,
-                       Index& cell_index) const;
+  bool value_to_params(Value const &value, Index resl, Params &params,
+                       Index &cell_index) const;
 
   ///@brief get parameter space repr of Value for particular cell
   ///@note necessary only for neighbor lookup
-  void value_to_params_for_cell(Value const& value, Index resl,
-                                Params& params) const;
+  void value_to_params_for_cell(Value const &value, Index resl,
+                                Params &params) const;
 
   ///@brief return the cell_index of neighboring cells within radius of value
   ///@note delta parameter is in "Parameter Space"
   template <class OutIter>
-  void get_neighboring_cells(Value const& value, Float radius,
+  void get_neighboring_cells(Value const &value, Float radius,
                              OutIter out) const;
 
   ///@brief aka covering radius max distance from bin center to any value within
-  ///bin
+  /// bin
   Float bin_circumradius(Index resl) const;
 
   ///@brief maximum distance from the bin center which must be within the bin

@@ -86,7 +86,7 @@ struct UMASK_I_D {
     static const uint64_t VAL =
         SAFE_LSHIFT<uint64_t,
                     N_BITS_LO<BITCOUNT>::VAL & N_BITS_LO<MAXBITS<D>::VAL>::VAL,
-                    D*(MAXBITS<D>::VAL - 1) + 1 - BITCOUNT>::VAL;
+                    D *(MAXBITS<D>::VAL - 1) + 1 - BITCOUNT>::VAL;
   };
   static const uint64_t VAL =
       ZDI_IMPL<MAXBITS<D>::VAL / POW<D, ITER>::VAL, 0>::VAL;

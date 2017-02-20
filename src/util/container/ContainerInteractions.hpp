@@ -59,11 +59,11 @@ struct ContainerInteractionsIter
 };
 
 ///@brief Default implementation of ContainerInteractions, double loop over all
-///by []/size()
+/// by []/size()
 template <class Xform, class Container1, class Container2, class Index>
 struct ContainerInteractions {
   typedef std::pair<ContainerInteractionsIter<Index>,
-                    ContainerInteractionsIter<Index> >
+                    ContainerInteractionsIter<Index>>
       Range;
   static void get_interaction_range(Xform const &,  // X * A = B, X = B * ~A
                                     Container1 const &c1, Container2 const &c2,
@@ -96,7 +96,7 @@ struct get_citer {
   typedef typename T::const_iterator type;
 };
 template <class I>
-struct get_citer<std::pair<I, I> > {
+struct get_citer<std::pair<I, I>> {
   typedef I type;
 };
 }

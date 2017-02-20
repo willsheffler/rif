@@ -148,7 +148,7 @@ struct get_placeholder_type {
 };
 template <class T1, class T2, class I>
 struct get_placeholder_type<std::pair<T1, T2>, I> {
-  typedef typename std::pair<std::pair<I, I>, std::pair<I, I> > type;
+  typedef typename std::pair<std::pair<I, I>, std::pair<I, I>> type;
 };
 
 template <class Scene>
@@ -194,7 +194,7 @@ struct ActorGetter {
   template <class Actor>
   void operator()(Actor const &) {
     try {
-      boost::any_cast<util::meta::type2type<Actor> >(actor_exemplar_);
+      boost::any_cast<util::meta::type2type<Actor>>(actor_exemplar_);
       actor_ = scene_.template get_actor<Actor>(ib_, ia_);
       success_ = true;
     } catch (const boost::bad_any_cast &) {
@@ -223,7 +223,7 @@ struct ActorGetterNonconst {
   template <class Actor>
   void operator()(Actor const &) {
     try {
-      boost::any_cast<util::meta::type2type<Actor> >(actor_exemplar_);
+      boost::any_cast<util::meta::type2type<Actor>>(actor_exemplar_);
       actor_ = &scene_.template get_nonconst_actor<Actor>(ib_, ia_);
       success_ = true;
     } catch (const boost::bad_any_cast &) {
@@ -267,7 +267,7 @@ struct ActorCounter {
   template <class Actor>
   void operator()(Actor const &) {
     try {
-      boost::any_cast<util::meta::type2type<Actor> >(actor_);
+      boost::any_cast<util::meta::type2type<Actor>>(actor_);
       count_ = scene_.template num_actors<Actor>(ib_);
     } catch (const boost::bad_any_cast &) {
       return;
@@ -481,7 +481,7 @@ struct Scene : public SceneBase<_Position, _Index> {
 
   template <class Actor>
   std::pair<SceneIter1B<This, Actor, Symmetric, ActorCopy>,
-            SceneIter1B<This, Actor, Symmetric, ActorCopy> >
+            SceneIter1B<This, Actor, Symmetric, ActorCopy>>
   get_actors() const {
     typedef SceneIter1B<This, Actor, Symmetric, ActorCopy> Iter;
     Iter beg = Iter::make_begin(*this);
@@ -490,7 +490,7 @@ struct Scene : public SceneBase<_Position, _Index> {
   }
   template <class Actor>
   std::pair<SceneIter1B<This, Actor, NotSymmetric, ActorCopy>,
-            SceneIter1B<This, Actor, NotSymmetric, ActorCopy> >
+            SceneIter1B<This, Actor, NotSymmetric, ActorCopy>>
   get_actors_asym() const {
     typedef SceneIter1B<This, Actor, NotSymmetric, ActorCopy> Iter;
     Iter beg = Iter::make_begin(*this);
@@ -499,7 +499,7 @@ struct Scene : public SceneBase<_Position, _Index> {
   }
   template <class Actor>
   std::pair<SceneIter1B<This, Actor, Symmetric, PlaceHolder>,
-            SceneIter1B<This, Actor, Symmetric, PlaceHolder> >
+            SceneIter1B<This, Actor, Symmetric, PlaceHolder>>
   get_actors_placeholder() const {
     typedef SceneIter1B<This, Actor, Symmetric, PlaceHolder> Iter;
     Iter beg = Iter::make_begin(*this);
@@ -508,7 +508,7 @@ struct Scene : public SceneBase<_Position, _Index> {
   }
   template <class Actor>
   std::pair<SceneIter1B<This, Actor, NotSymmetric, PlaceHolder>,
-            SceneIter1B<This, Actor, NotSymmetric, PlaceHolder> >
+            SceneIter1B<This, Actor, NotSymmetric, PlaceHolder>>
   get_actors_placeholder_asym() const {
     typedef SceneIter1B<This, Actor, NotSymmetric, PlaceHolder> Iter;
     Iter beg = Iter::make_begin(*this);
@@ -521,7 +521,7 @@ struct Scene : public SceneBase<_Position, _Index> {
 
   template <class Visitor>
   typename boost::disable_if<
-      util::meta::is_pair<typename Visitor::Interaction> >::type
+      util::meta::is_pair<typename Visitor::Interaction>>::type
   visit(Visitor &visitor) const {
     typedef typename Visitor::Interaction Actor;
     typedef typename f::result_of::value_at_key<Conformation, Actor>::type
@@ -539,19 +539,19 @@ struct Scene : public SceneBase<_Position, _Index> {
     }
   }
   template <class Visitor, class Actor>
-  typename boost::enable_if<impl::has_type_Position<Actor> >::type
+  typename boost::enable_if<impl::has_type_Position<Actor>>::type
   visit_1b_inner(Visitor &visitor, Actor const &a_0, Position const &p) const {
     visitor(Actor(a_0, p));
   }
   template <class Visitor, class Actor>
-  typename boost::disable_if<impl::has_type_Position<Actor> >::type
+  typename boost::disable_if<impl::has_type_Position<Actor>>::type
   visit_1b_inner(Visitor &visitor, Actor const &a_0, Position const &) const {
     visitor(a_0);
   }
 
   template <class Visitor>
   typename boost::enable_if<
-      util::meta::is_pair<typename Visitor::Interaction> >::type
+      util::meta::is_pair<typename Visitor::Interaction>>::type
   visit(Visitor &visitor) const {
     typedef typename Visitor::Interaction::first_type Actor1;
     typedef typename Visitor::Interaction::second_type Actor2;
@@ -610,11 +610,11 @@ struct Scene : public SceneBase<_Position, _Index> {
   }
 
   ///@brief visit_2b_inner specialization handles case where both actors are
-  ///positionable (not fixed)
+  /// positionable (not fixed)
   template <class Visitor, class Actor1, class Actor2>
   typename boost::enable_if<m::and_<
       impl::get_RequireAbsolutePositioning_false_<Visitor>,
-      impl::has_type_Position<Actor1>, impl::has_type_Position<Actor2> > >::type
+      impl::has_type_Position<Actor1>, impl::has_type_Position<Actor2>>>::type
   visit_2b_inner(Visitor &visitor, Actor1 const &a1_0, Actor2 const &a2_0,
                  Position const &p1, Position const &p2, Position const &,
                  double w) const {
@@ -623,14 +623,14 @@ struct Scene : public SceneBase<_Position, _Index> {
     Actor2 a2(a2_0, p2);
     // TODO: wrap this call in a check for
     // has_const_call_oper_3<Visitor,void,Actor1 const &,Actor2 const &,double>
-    visitor.template operator()<std::pair<Actor1, Actor2> >(a1, a2, w);
+    visitor.template operator()<std::pair<Actor1, Actor2>>(a1, a2, w);
   }
 
   ///@brief visit_2b_inner specialization handles case where Actor1 is fixed
   template <class Visitor, class Actor1, class Actor2>
   typename boost::enable_if<
-      m::and_<m::not_<impl::get_RequireAbsolutePositioning_false_<Visitor> >,
-              impl::has_type_Position<Actor2> > >::type
+      m::and_<m::not_<impl::get_RequireAbsolutePositioning_false_<Visitor>>,
+              impl::has_type_Position<Actor2>>>::type
   visit_2b_inner(Visitor &visitor, Actor1 const &a1_0, Actor2 const &a2_0,
                  Position const &, Position const &, Position const &rel_pos,
                  double w) const {
@@ -639,31 +639,31 @@ struct Scene : public SceneBase<_Position, _Index> {
     // TODO: remove requirement to form pair; will be more efficient if fixed a1
     // is passet through w/o copy
     // visitor( std::make_pair(a1_0,a2), w );
-    visitor.template operator()<std::pair<Actor1, Actor2> >(a1_0, a2, w);
+    visitor.template operator()<std::pair<Actor1, Actor2>>(a1_0, a2, w);
   }
 
   template <class Visitor, class Actor1, class Actor2>
   typename boost::enable_if<
       m::and_<impl::has_type_Position<Actor1>,
-              m::not_<impl::has_type_Position<Actor2> > > >::type
+              m::not_<impl::has_type_Position<Actor2>>>>::type
   visit_2b_inner(Visitor &visitor, Actor1 const &a1_0, Actor2 const &a2_0,
                  Position const &, Position const &, Position const &rel_pos,
                  double w) const {
     // cout << "FIXED Actor2" << endl;
     Actor1 a1(a1_0, inverse(rel_pos));
-    visitor.template operator()<std::pair<Actor1, Actor2> >(a1, a2_0, w);
+    visitor.template operator()<std::pair<Actor1, Actor2>>(a1, a2_0, w);
   }
 
   ///@brief visit_2b_inner specialization is an error and will not compile
   template <class Visitor, class Actor1, class Actor2>
   typename boost::enable_if<
-      m::and_<m::not_<impl::has_type_Position<Actor1> >,
-              m::not_<impl::has_type_Position<Actor2> > > >::type
+      m::and_<m::not_<impl::has_type_Position<Actor1>>,
+              m::not_<impl::has_type_Position<Actor2>>>>::type
   visit_2b_inner(Visitor &, Actor1 const &, Actor2 const &, Position const &,
                  Position const &, double) const {
     cout << "This SHOULD NEVER HAPPEN" << endl;
     BOOST_STATIC_ASSERT((m::or_<impl::has_type_Position<Actor1>,
-                                impl::has_type_Position<Actor2> >::value));
+                                impl::has_type_Position<Actor2>>::value));
   }
 
   /////////////////////////// interaction iteration
@@ -686,8 +686,8 @@ struct Scene : public SceneBase<_Position, _Index> {
         typename m::if_<
             util::meta::is_homo_pair<Interaction>,
             SceneIter2B<This, Interaction, CountPairUpperTriangle>,
-            SceneIter2B<This, Interaction, CountPairNoDuplicates> >::type,
-        SceneIter1B<This, Interaction, NotSymmetric, PlaceHolder> >::type type;
+            SceneIter2B<This, Interaction, CountPairNoDuplicates>>::type,
+        SceneIter1B<This, Interaction, NotSymmetric, PlaceHolder>>::type type;
   };
 
   template <class Interaction>
@@ -704,21 +704,21 @@ struct Scene : public SceneBase<_Position, _Index> {
   }
 
   ///@brief gets a concrete interaction (Actor or pair of Actors) from a
-  ///SceneIter
+  /// SceneIter
   template <class Iter>
   typename Iter::Interaction get_interaction(Iter const &iter) const {
     return get_interaction<typename Iter::Interaction>(*iter);
   }
 
   ///@brief gets a concrete interaction (Actor or pair of Actors) from a
-  ///SceneIter
+  /// SceneIter
   template <class Iter>
   typename Iter::Interaction get_interaction_absolute(Iter const &iter) const {
     return get_interaction_absolute<typename Iter::Interaction>(*iter);
   }
 
   ///@brief gets a concrete interaction (Actor or pair of Actors) from a
-  ///placeholder
+  /// placeholder
   template <class Interaction>
   typename boost::disable_if<util::meta::is_pair<Interaction>,
                              Interaction>::type
@@ -733,7 +733,7 @@ struct Scene : public SceneBase<_Position, _Index> {
   }
 
   ///@brief gets a concrete interaction (Actor or pair of Actors) from a
-  ///placeholder
+  /// placeholder
   template <class Interaction>
   typename boost::disable_if<util::meta::is_pair<Interaction>,
                              Interaction>::type
@@ -765,25 +765,25 @@ struct Scene : public SceneBase<_Position, _Index> {
   }
 
   ///@brief gets a concrete interaction (Actor or pair of Actors) from a
-  ///placeholder
+  /// placeholder
   template <class Interaction>
   typename boost::enable_if<util::meta::is_pair<Interaction>, Interaction>::type
   get_interaction(
       typename impl::get_placeholder_type<Interaction, Index>::type const &ph)
       const {
     return get_interaction_from_placeholder_2b<
-        Interaction, impl::AccessVisitor<Interaction> >(ph);
+        Interaction, impl::AccessVisitor<Interaction>>(ph);
   }
 
   ///@brief gets a concrete interaction (Actor or pair of Actors) from a
-  ///placeholder
+  /// placeholder
   template <class Interaction>
   typename boost::enable_if<util::meta::is_pair<Interaction>, Interaction>::type
   get_interaction_absolute(
       typename impl::get_placeholder_type<Interaction, Index>::type const &ph)
       const {
     return get_interaction_from_placeholder_2b<
-        Interaction, impl::AccessVisitorAbsolute<Interaction> >(ph);
+        Interaction, impl::AccessVisitorAbsolute<Interaction>>(ph);
   }
 
   ///@brief default weight is 1.0
@@ -793,7 +793,7 @@ struct Scene : public SceneBase<_Position, _Index> {
   }
   ///@brief for symmetry, if either body not in asym unit, weight should be 0.5
   double get_weight_from_placeholder(
-      std::pair<std::pair<Index, Index>, std::pair<Index, Index> > const &ph)
+      std::pair<std::pair<Index, Index>, std::pair<Index, Index>> const &ph)
       const {
     return (ph.first.first < this->nbodies_asym() &&
             ph.first.second < this->nbodies_asym())

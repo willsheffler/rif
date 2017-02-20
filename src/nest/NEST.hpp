@@ -37,7 +37,7 @@ struct NestBase {
 
   ///@brief virtual virtual function to set the state of this nest
   ///@detail will consume DIM indices from hindices vector, starting at iindex,
-  ///then will increment iindex
+  /// then will increment iindex
   ///        for use in composite data structures containing NestBases
   ///@returns false if invalid index
   virtual bool virtual_get_state(std::vector<Index> const &indices,
@@ -67,7 +67,7 @@ struct NestBase {
 namespace impl {
 
 ////////////////// these functions will call nest.get_index iff the parameter
-///map has
+/// map has
 ////////////////// the necessary value_to_params function
 SCHEME_HAS_CONST_MEMBER_FUNCTION_4(value_to_params)
 
@@ -177,11 +177,11 @@ struct Empty {};
 ///@tparam Value type of value the grid represents
 ///@tparam ParamMap structure mapping from parameter space into Value space
 ///@tparam StoragePolicy defines storage of Values, possibly allowing Nests to
-///wrap pointers
+/// wrap pointers
 ///@tparam Index index type, default size_t
 ///@tparam Float floating point type for internal parameters, default double
 ///@tparam bool is_virtual if you really want to optimize your code, you can set
-///this to false
+/// this to false
 ///@note floats have plenty of precision for internal parameters
 template <int _DIM, class _Value = util::SimpleArray<_DIM, double>,
           template <int, class, class, class> class ParamMap = pmap::UnitMap,
@@ -312,9 +312,9 @@ struct NEST :  // policy-based design, see Modern C++ Design
     return true;
   }
   ///@brief get the index vector of a value WRT a particular cell, may be out of
-  ///the cell bounds!
+  /// the cell bounds!
   ///@detail this is used mainly for neighbor lookups -- some neighbors may be
-  ///within the cell even if the value isn't
+  /// within the cell even if the value isn't
   ///@returns nothing because the index vector isn't checked for validity
   void get_indicies_for_cell(Value const &v, Index resl, Index cell_index,
                              Indices &indices_out) const {
@@ -330,7 +330,7 @@ struct NEST :  // policy-based design, see Modern C++ Design
     }
   }
   ///@brief get the zorder index corresponding to and index vector and
-  ///cell_index at resolution resl
+  /// cell_index at resolution resl
   Index get_index(Indices const &indices, Index cell_index, Index resl) const {
     assert(resl <= MAX_RESL_ONE_CELL);  // not rigerous check if Ncells > 1
     Index index = 0;
@@ -350,7 +350,7 @@ struct NEST :  // policy-based design, see Modern C++ Design
   }
 
   ///@brief helper function for looping over neighbors and accumulating their
-  ///indices
+  /// indices
   template <class OutIter>
   void push_index(SignedIndices const &indices, Index cell_index, Index resl,
                   OutIter out) const {
@@ -382,7 +382,7 @@ struct NEST :  // policy-based design, see Modern C++ Design
     util::NESTED_FOR<DIM>(lb, ub, functor);
   }
   ///@brief put the zorder indices of all neighbors of bin for Value v at
-  ///resolution resl into OutIter out
+  /// resolution resl into OutIter out
   ///@return false iff Value v itself dosen't have a valid index in this NEST
   template <class OutIter>
   bool get_neighbors(Value const &v, Index resl, OutIter out) const {
@@ -391,7 +391,7 @@ struct NEST :  // policy-based design, see Modern C++ Design
     // get neighbors for each neighboring cell
     if (get_index(v, resl) == std::numeric_limits<Index>::max()) return false;
     std::vector<Index> nbr_cells;
-    std::back_insert_iterator<std::vector<Index> > inserter(nbr_cells);
+    std::back_insert_iterator<std::vector<Index>> inserter(nbr_cells);
     Float param_delta = 1.0 / (Float)(1 << resl);
     // std::cout << "DELTA " << param_delta << std::endl;
     this->get_neighboring_cells(v, resl, param_delta, inserter);
@@ -404,7 +404,7 @@ struct NEST :  // policy-based design, see Modern C++ Design
     return true;
   }
   ///@brief put the zorder indices of all neighbor bins within a particular cell
-  ///for Value v at resolution
+  /// for Value v at resolution
   ///@brief resl into OutIter out
   template <class OutIter>
   void get_neighbors_for_cell(Value const &v, Index resl, Index cell_index,
@@ -433,7 +433,7 @@ struct NEST :  // policy-based design, see Modern C++ Design
   }
   ///@brief virtual virtual function to set the state of this nest
   ///@detail will consume DIM indices from hindices vector, starting at iindex,
-  ///then will increment iindex
+  /// then will increment iindex
   ///        for use in composite data structures containing NestBases
   ///@return false iff invalid index
   virtual bool virtual_get_state(std::vector<Index> const &hindices,
@@ -481,7 +481,7 @@ std::ostream &operator<<(std::ostream &out,
                               is_virtual> const &nest) {
   out << "NEST  dim " << DIM << "(todo: print types, StoragePolicy, is_virtual)"
       << std::endl;
-  out << "parammap: " << static_cast<ParamMap<DIM, Value, Index, Float> >(nest);
+  out << "parammap: " << static_cast<ParamMap<DIM, Value, Index, Float>>(nest);
   return out;
 }
 

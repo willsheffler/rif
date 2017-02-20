@@ -82,7 +82,7 @@ struct copy_objective_if_interaction_equal {
   template <class Interaction>
   struct apply
       : m::copy_if<Objectives, objective_interactions_equal<Interaction>,
-                   m::back_inserter<f::vector<> > > {};
+                   m::back_inserter<f::vector<>>> {};
 };
 
 typedef struct {
@@ -533,10 +533,9 @@ struct ObjectiveFunction {
   typedef _Config Config;
 
   ///@typedef only for error checking, make sure Objectives are non-redundant
-  typedef
-      typename m::copy<Objectives,
-                       m::inserter<m::set<>, m::insert<m::_1, m::_2> > >::type
-          UniqueObjectives;
+  typedef typename m::copy<Objectives,
+                           m::inserter<m::set<>, m::insert<m::_1, m::_2>>>::type
+      UniqueObjectives;
 
   BOOST_STATIC_ASSERT((m::size<UniqueObjectives>::value ==
                        m::size<Objectives>::value));
@@ -547,13 +546,13 @@ struct ObjectiveFunction {
       m::copy<typename       // copy to mpl::set so unique
               m::transform<  // all InteractionTypes Type from Obectives
                   Objectives, traits::interaction_type>::type,
-              m::inserter<m::set<>, m::insert<m::_1, m::_2> > >::type,
-      m::back_inserter<m::vector<> > >::type InteractionTypes;
+              m::inserter<m::set<>, m::insert<m::_1, m::_2>>>::type,
+      m::back_inserter<m::vector<>>>::type InteractionTypes;
 
   ///@typedef mpl::vector of Objectives for each unique PetalsType
   typedef typename m::transform<
       InteractionTypes, impl::copy_objective_if_interaction_equal<Objectives>,
-      m::back_inserter<m::vector<> > >::type InteractionObjectives;
+      m::back_inserter<m::vector<>>>::type InteractionObjectives;
 
   ///@typedef ObjectiveMap
   typedef util::meta::InstanceMap<InteractionTypes, InteractionObjectives>
@@ -561,12 +560,12 @@ struct ObjectiveFunction {
 
   ///@typedef Results
   typedef util::meta::NumericInstanceMap<Objectives,
-                                         impl::get_Result_double<m::_1> >
+                                         impl::get_Result_double<m::_1>>
       Results;
 
   ///@typedef Scratches
   typedef util::meta::InstanceMap<Objectives,
-                                  impl::get_Scratch_NullScratch<m::_1> >
+                                  impl::get_Scratch_NullScratch<m::_1>>
       Scratches;
 
   ///@typedef Weights
@@ -606,7 +605,7 @@ struct ObjectiveFunction {
         SourceInteractionTypes;
     typedef typename m::eval_if<
         boost::is_same<void, SourceInteractionTypes>, InteractionTypes,
-        util::meta::intersect<InteractionTypes, SourceInteractionTypes> >::type
+        util::meta::intersect<InteractionTypes, SourceInteractionTypes>>::type
         MutualInteractionTypes;
     BOOST_STATIC_ASSERT((m::size<MutualInteractionTypes>::value));
 
@@ -615,7 +614,7 @@ struct ObjectiveFunction {
 #ifdef DEBUG_IO
     std::cout << "ObjectiveFunction pre" << std::endl;
 #endif
-    m::for_each<MutualInteractionTypes, util::meta::type2type<m::_1> >(
+    m::for_each<MutualInteractionTypes, util::meta::type2type<m::_1>>(
         impl::EvalObjectivesPre<InteractionSource, ObjectiveMap, Results,
                                 Scratches, Config>(source, objective_map_,
                                                    results, scratches, config));
@@ -623,7 +622,7 @@ struct ObjectiveFunction {
 #ifdef DEBUG_IO
     std::cout << "ObjectiveFunction operator()" << std::endl;
 #endif
-    m::for_each<MutualInteractionTypes, util::meta::type2type<m::_1> >(
+    m::for_each<MutualInteractionTypes, util::meta::type2type<m::_1>>(
         impl::EvalObjectives<InteractionSource, ObjectiveMap, Results,
                              Scratches, Config>(source, objective_map_, results,
                                                 scratches, config));
@@ -631,7 +630,7 @@ struct ObjectiveFunction {
 #ifdef DEBUG_IO
     std::cout << "ObjectiveFunction post" << std::endl;
 #endif
-    m::for_each<MutualInteractionTypes, util::meta::type2type<m::_1> >(
+    m::for_each<MutualInteractionTypes, util::meta::type2type<m::_1>>(
         impl::EvalObjectivesPost<InteractionSource, ObjectiveMap, Results,
                                  Scratches, Config>(
             source, objective_map_, results, scratches, config));

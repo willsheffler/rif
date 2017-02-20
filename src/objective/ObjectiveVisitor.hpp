@@ -14,14 +14,14 @@ template <class Objective, class Config>
 struct ObjectiveVisitor {
   typedef typename Objective::Interaction Interaction;
   typedef typename objv_impl::get_Result_double<Objective>::type Result;
-  Objective const& objective_;
-  Config const& config_;
+  Objective const &objective_;
+  Config const &config_;
   Result result_;
   void clear() { result_ = 0; }
-  ObjectiveVisitor(Objective const& o, Config const& c)
+  ObjectiveVisitor(Objective const &o, Config const &c)
       : objective_(o), config_(c), result_() {}
 
-  void operator()(Interaction const& i, double const& weight) {
+  void operator()(Interaction const &i, double const &weight) {
     Result r = objective_.template operator()(i, config_);
     result_ += weight * r;
   }
@@ -32,8 +32,8 @@ struct ObjectiveVisitor {
   template <class I>
 #endif
   typename boost::enable_if<util::meta::is_pair<I>, void>::type operator()(
-      typename I::first_type const& i, typename I::second_type const& j,
-      double const& weight) {
+      typename I::first_type const &i, typename I::second_type const &j,
+      double const &weight) {
     Result r = objective_.template operator()(i, j, config_);
     result_ += weight * r;
   }

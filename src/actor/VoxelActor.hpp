@@ -15,14 +15,14 @@ struct VoxelActor {
   typedef _Float Float;
   typedef objective::voxel::VoxelArray<3, Float> VoxelArray;
   // typedef std::vector<std::vector<shared_ptr< VoxelArray > > > Voxels;
-  typedef std::vector<std::vector<VoxelArray*> > Voxels;
+  typedef std::vector<std::vector<VoxelArray *>> Voxels;
 
   // Position position_;
   Voxels voxels_;
 
   VoxelActor() {}
 
-  VoxelActor(Voxels const& v) : voxels_(v) {}
+  VoxelActor(Voxels const &v) : voxels_(v) {}
 
   // VoxelActor( Position const & p, Voxels const * v ) :  voxels_(v) {}
 
@@ -42,7 +42,7 @@ struct VoxelActor {
   // Position const &
   // position() const { return position_; }
 
-  Voxels const& voxels() const { return voxels_; }
+  Voxels const &voxels() const { return voxels_; }
 
   // bool operator==(THIS const & o) const { return o.position_==position_ &&
   // o.voxels_==voxels_; }
@@ -54,7 +54,7 @@ struct VoxelActor {
 
   ///@brief necessary for testing only
   template <class Archive>
-  void serialize(Archive& ar, const unsigned int) {
+  void serialize(Archive &ar, const unsigned int) {
     // ar & position_;
     // ar & voxels_;
     std::exit(-1);
@@ -62,12 +62,12 @@ struct VoxelActor {
 };
 
 template <class X, class F>
-std::ostream& operator<<(std::ostream& out, VoxelActor<X, F> const& va) {
+std::ostream &operator<<(std::ostream &out, VoxelActor<X, F> const &va) {
   return out << "VoxelActor";
 }
 
 template <class X, class F, class MetaData>
-void write_pdb(std::ostream&, VoxelActor<X, F> const&, MetaData const&) {
+void write_pdb(std::ostream &, VoxelActor<X, F> const &, MetaData const &) {
   ;
 }
 
@@ -77,7 +77,7 @@ struct Score_Voxel_vs_Atom {
   typedef std::pair<VoxelActor, Atom> Interaction;
   static std::string name() { return "Score_Voxel_vs_Atom"; }
   template <class Config>
-  Result operator()(VoxelActor const& v, Atom const& a, Config const& c) const {
+  Result operator()(VoxelActor const &v, Atom const &a, Config const &c) const {
     // std::cout << "score voxel vs atom " << a.data().atomname << std::endl;
     // std::cout << "   resl " << c << std::endl;
     // std::cout << "   type " << a.type() << std::endl;
@@ -93,13 +93,13 @@ struct Score_Voxel_vs_Atom {
       return a.type() > 17 ? std::max(0.0f, score) : score;
   }
   template <class Pair, class Config>
-  Result operator()(Pair const& p, Config const& c) const {
+  Result operator()(Pair const &p, Config const &c) const {
     return this->operator()(p.first, p.second, c);
   }
 };
 template <class A, class B>
-std::ostream& operator<<(std::ostream& out,
-                         Score_Voxel_vs_Atom<A, B> const& si) {
+std::ostream &operator<<(std::ostream &out,
+                         Score_Voxel_vs_Atom<A, B> const &si) {
   return out << si.name();
 }
 }

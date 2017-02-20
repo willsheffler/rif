@@ -14,14 +14,14 @@ namespace chemical {
 std::vector<std::string> get_pdb_lines(std::string resn, bool hydrogen);
 
 struct RosettaAtypeMap {
-  static int get_atom_type(std::string const& aname, std::string const& rname) {
+  static int get_atom_type(std::string const &aname, std::string const &rname) {
     return rosetta::rosetta_atom_type(aname, rname);
   }
 };
 
 template <class Atom, class AtypeMap = RosettaAtypeMap>
 struct LigandFactory {
-  Atom make_atom_pdbline(std::string const& _line, int atype = -1) {
+  Atom make_atom_pdbline(std::string const &_line, int atype = -1) {
     /*
 ATOM      1  N1  BTN X   1       0.696 -12.422   3.375  1.00 20.00           N
 */
@@ -103,7 +103,7 @@ ATOM      1  N1  BTN X   1       0.696 -12.422   3.375  1.00 20.00           N
   template <class Iter>
   void make_atoms(Iter outiter, std::string resn, bool hydrogen = true) {
     std::vector<std::string> lines = get_pdb_lines(resn, hydrogen);
-    BOOST_FOREACH (std::string const& line, lines) {
+    BOOST_FOREACH (std::string const &line, lines) {
       *outiter++ = make_atom_pdbline(line);
     }
   }

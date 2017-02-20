@@ -31,8 +31,8 @@ struct FieldCache3D : public VoxelArray<3, Float> {
   FieldCache3D() : cache_loc_("") {}
 
   template <class F1, class F2, class F3>
-  FieldCache3D(Field3D<Float> const& field, F1 const& lb, F2 const& ub,
-               F3 const& cs, std::string const& cache_loc = "",
+  FieldCache3D(Field3D<Float> const &field, F1 const &lb, F2 const &ub,
+               F3 const &cs, std::string const &cache_loc = "",
                bool no_init = false, int oversample = 1)
       : BASE(lb, ub, cs), cache_loc_(cache_loc) {
     typename BASE::Indices extents;
@@ -71,7 +71,7 @@ struct FieldCache3D : public VoxelArray<3, Float> {
 #endif
   }
 
-  Float sample_field(Field3D<Float> const& field, Float3 cen,
+  Float sample_field(Field3D<Float> const &field, Float3 cen,
                      int oversample) const {
     Float const om = 1.0 / oversample;
     Float const oo = om / 2.0 - 0.5;
@@ -92,7 +92,7 @@ struct FieldCache3D : public VoxelArray<3, Float> {
     return mn;
   }
 
-  double check_against_field(Field3D<Float> const& field, int oversample = 1,
+  double check_against_field(Field3D<Float> const &field, int oversample = 1,
                              float tolerance = 0.0001) const {
     int nerror(0), nsamp(0);
     {
@@ -154,8 +154,8 @@ struct BoundingFieldCache3D : public VoxelArray<3, Float> {
   // Float spread_;
   // std::string cache_loc_;
   template <class F>
-  BoundingFieldCache3D(VoxelArray<3, Float> const& ref, Float spread,
-                       F const& cs, std::string cache_loc = "",
+  BoundingFieldCache3D(VoxelArray<3, Float> const &ref, Float spread,
+                       F const &cs, std::string cache_loc = "",
                        bool no_init = false)
       : BASE(ref.lb_ - spread, ref.ub_ + spread, cs)  //,
                                                       // ref_(ref),
@@ -202,8 +202,8 @@ struct BoundingFieldCache3D : public VoxelArray<3, Float> {
     io::write_cache(cache_loc, *this);
 #endif
   }
-  Float calc_agg_val(VoxelArray<3, Float> const& ref, float spread,
-                     Float3 const& f3) const {
+  Float calc_agg_val(VoxelArray<3, Float> const &ref, float spread,
+                     Float3 const &f3) const {
     Float3 beg = ref.lb_.max(f3 - spread) + ref.cs_ / 2.0;
     Float3 end = ref.ub_.min(f3 + spread);
     Float3 idx;

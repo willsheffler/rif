@@ -22,7 +22,7 @@ TEST(SimpleArray, iteration) {
   SimpleArray<3, int> a;
   int v;
   v = 0;
-  BOOST_FOREACH (int& i, std::make_pair(a.begin(), a.end()))
+  BOOST_FOREACH (int &i, std::make_pair(a.begin(), a.end()))
     i = ++v;
   v = 0;
   BOOST_FOREACH (int i, std::make_pair(a.begin(), a.end()))
@@ -30,12 +30,12 @@ TEST(SimpleArray, iteration) {
   v = 0;
   BOOST_FOREACH (int i, a)
     ASSERT_EQ(++v, i);
-  SimpleArray<3, int> const& r = a;
+  SimpleArray<3, int> const &r = a;
   v = 0;
   BOOST_FOREACH (int i, std::make_pair(r.begin(), r.end()))
     ASSERT_EQ(++v, i);
   v = 0;
-  BOOST_FOREACH (int const& i, r)
+  BOOST_FOREACH (int const &i, r)
     ASSERT_EQ(++v, i);
 }
 }

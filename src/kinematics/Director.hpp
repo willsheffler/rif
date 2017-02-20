@@ -35,7 +35,7 @@ struct Director {
   typedef _Index Index;
   typedef SceneBase<Position, Index> Scene;
 
-  virtual bool set_scene(BigIndex const& i, int resl, Scene& scene) const = 0;
+  virtual bool set_scene(BigIndex const &i, int resl, Scene &scene) const = 0;
 
   virtual BigIndex size(int resl) const = 0;
 };
@@ -56,20 +56,20 @@ struct NestDirector
   NestDirector() : ibody_(0), nest_() {}
   NestDirector(Index ibody) : ibody_(ibody), nest_() {}
   template <class A>
-  NestDirector(A const& a, Index ibody) : ibody_(ibody), nest_(a) {}
+  NestDirector(A const &a, Index ibody) : ibody_(ibody), nest_(a) {}
   template <class A, class B>
-  NestDirector(A const& a, B const& b, Index ibody)
+  NestDirector(A const &a, B const &b, Index ibody)
       : ibody_(ibody), nest_(a, b) {}
   template <class A, class B, class C>
-  NestDirector(A const& a, B const& b, C const& c, Index ibody)
+  NestDirector(A const &a, B const &b, C const &c, Index ibody)
       : ibody_(ibody), nest_(a, b, c) {}
   template <class A, class B, class C, class D>
-  NestDirector(A const& a, B const& b, C const& c, D const& d, Index ibody)
+  NestDirector(A const &a, B const &b, C const &c, D const &d, Index ibody)
       : ibody_(ibody), nest_(a, b, c, d) {}
 
-  Nest const& nest() const { return nest_; }
+  Nest const &nest() const { return nest_; }
 
-  virtual bool set_scene(BigIndex const& i, int resl, Scene& scene) const {
+  virtual bool set_scene(BigIndex const &i, int resl, Scene &scene) const {
     Position p;
     bool success = nest_.get_state(i, resl, p);
     if (!success) return false;
@@ -81,7 +81,7 @@ struct NestDirector
 };
 
 template <class Nest>
-std::ostream& operator<<(std::ostream& out, NestDirector<Nest> const& d) {
+std::ostream &operator<<(std::ostream &out, NestDirector<Nest> const &d) {
   out << "NestDirector " << d.nest();
   return out;
 }
@@ -110,14 +110,14 @@ struct SceneTree {
 
   // mutable Position tmp_;
 
-  SceneTree(Position const& edge_xform = Position::Identity())
+  SceneTree(Position const &edge_xform = Position::Identity())
       : edge_xform_(edge_xform) {}
 
   void add_body(Index ibody) { bodies_.push_back(ibody); }
   void add_position_nest(NestP nestp) { position_nests_.push_back(nestp); }
   void add_child(SceneTreeP child) { children_.push_back(child); }
 
-  void get_nests(std::vector<NestP>& nests) const {
+  void get_nests(std::vector<NestP> &nests) const {
     nests.insert(nests.end(), position_nests_.begin(), position_nests_.end());
     nests.insert(nests.end(), sym_elem_nests_.begin(), sym_elem_nests_.end());
     nests.insert(nests.end(), conformation_nests_.begin(),
@@ -125,7 +125,7 @@ struct SceneTree {
     BOOST_FOREACH (SceneTreeP child, children_) { child->get_nests(nests); }
   }
 
-  void get_dofs(std::vector<boost::any>& dofs) const {
+  void get_dofs(std::vector<boost::any> &dofs) const {
     for (int ipos = 0; ipos < position_nests_.size(); ++ipos) {
       // std::cerr << "create temporary Position" << std::endl;
       dofs.push_back(new Position);
@@ -141,7 +141,7 @@ struct SceneTree {
   void clear_empty_dofs(std::vector<boost::any>::iterator idofs) const {
     for (int ipos = 0; ipos < position_nests_.size(); ++ipos) {
       // std::cerr << "delete temporary Position" << std::endl;
-      delete boost::any_cast<Position*>(*idofs);
+      delete boost::any_cast<Position *>(*idofs);
       ++idofs;
     }
     if (sym_elem_nests_.size())
@@ -153,13 +153,13 @@ struct SceneTree {
     }
   }
 
-  void set_scene(Position const& parent_position,
+  void set_scene(Position const &parent_position,
                  std::vector<boost::any>::const_iterator idof,
-                 Scene& scene) const {
+                 Scene &scene) const {
     Position position(edge_xform_ * parent_position);
     for (int ipos = 0; ipos < position_nests_.size(); ++ipos) {
       // std::cerr << "set_scene get nest xform" << std::endl;
-      Position& nest_xform(*boost::any_cast<Position*>(*idof));
+      Position &nest_xform(*boost::any_cast<Position *>(*idof));
       // std::cerr << "set_scene get nest xform DONE" << std::endl;
       position = nest_xform * position;
       ++idof;
@@ -186,7 +186,7 @@ struct TreeDirector : public Director<_Position, _BigIndex, _Index> {
   typedef _Index Index;
   typedef _Position Position;
   // typedef SceneTree<Position,Index> SceneTree;
-  typedef shared_ptr<SceneTree<Position, Index> > SceneTreeP;
+  typedef shared_ptr<SceneTree<Position, Index>> SceneTreeP;
   typedef SceneBase<Position, Index> Scene;
   typedef nest::NestBase<Index> Nest;
   typedef shared_ptr<Nest> NestP;
@@ -203,7 +203,7 @@ struct TreeDirector : public Director<_Position, _BigIndex, _Index> {
     multinest_.init(nests);
   }
 
-  virtual bool set_scene(BigIndex const& i, int resl, Scene& scene) const {
+  virtual bool set_scene(BigIndex const &i, int resl, Scene &scene) const {
     std::vector<boost::any> tmp_dofs;
     // std::cerr << "get_dofs" << std::endl;
     root_->get_dofs(tmp_dofs);

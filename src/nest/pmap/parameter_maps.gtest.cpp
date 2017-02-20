@@ -426,23 +426,23 @@ void test_coverage_random_ScaleMap() {
 
 TEST(NEST_ScaleMap, test_coverage_DIM_1_to_9) {
   test_coverage_random_ScaleMap<
-      NEST<1, util::SimpleArray<1, double>, ScaleMap> >();
+      NEST<1, util::SimpleArray<1, double>, ScaleMap>>();
   test_coverage_random_ScaleMap<
-      NEST<2, util::SimpleArray<2, double>, ScaleMap> >();
+      NEST<2, util::SimpleArray<2, double>, ScaleMap>>();
   test_coverage_random_ScaleMap<
-      NEST<3, util::SimpleArray<3, double>, ScaleMap> >();
+      NEST<3, util::SimpleArray<3, double>, ScaleMap>>();
   test_coverage_random_ScaleMap<
-      NEST<4, util::SimpleArray<4, double>, ScaleMap> >();
+      NEST<4, util::SimpleArray<4, double>, ScaleMap>>();
   test_coverage_random_ScaleMap<
-      NEST<5, util::SimpleArray<5, double>, ScaleMap> >();
+      NEST<5, util::SimpleArray<5, double>, ScaleMap>>();
   test_coverage_random_ScaleMap<
-      NEST<6, util::SimpleArray<6, double>, ScaleMap> >();
+      NEST<6, util::SimpleArray<6, double>, ScaleMap>>();
   test_coverage_random_ScaleMap<
-      NEST<7, util::SimpleArray<7, double>, ScaleMap> >();
+      NEST<7, util::SimpleArray<7, double>, ScaleMap>>();
   test_coverage_random_ScaleMap<
-      NEST<8, util::SimpleArray<8, double>, ScaleMap> >();
+      NEST<8, util::SimpleArray<8, double>, ScaleMap>>();
   test_coverage_random_ScaleMap<
-      NEST<9, util::SimpleArray<9, double>, ScaleMap> >();
+      NEST<9, util::SimpleArray<9, double>, ScaleMap>>();
 }
 }
 }

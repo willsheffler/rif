@@ -34,13 +34,13 @@ struct XformHashNeighborCrappyIterator
   typedef typename XformHash::Key Key;
   int i1, i2, i3, ix, iy, iz;
   bool end;
-  XformHash const* xh;
-  std::vector<uint64_t> const* ori_nbrs_;
-  std::vector<util::SimpleArray<3, int16_t> > const* shifts_;
+  XformHash const *xh;
+  std::vector<uint64_t> const *ori_nbrs_;
+  std::vector<util::SimpleArray<3, int16_t>> const *shifts_;
   // std::set<Key> seenit_;
   // google::dense_hash_set<Key> seenit_;
 
-  XformHashNeighborCrappyIterator(XformHashNeighbors<XformHash, UNIQUE>& xhn,
+  XformHashNeighborCrappyIterator(XformHashNeighbors<XformHash, UNIQUE> &xhn,
                                   Key key, bool _end = false)
       : xh(&xhn.hasher_),
         ori_nbrs_(&xhn.get_ori_neighbors(key)),
@@ -86,7 +86,7 @@ struct XformHashNeighborCrappyIterator
     // }
     return k;
   }
-  bool equal(THIS const& o) const {
+  bool equal(THIS const &o) const {
     if (end && o.end)
       return true;
     else
@@ -97,21 +97,21 @@ struct XformHashNeighborCrappyIterator
   }
 };
 template <class XformHash, bool UNIQUE>
-std::ostream& operator<<(
-    std::ostream& out,
-    XformHashNeighborCrappyIterator<XformHash, UNIQUE> const& i) {
+std::ostream &operator<<(
+    std::ostream &out,
+    XformHashNeighborCrappyIterator<XformHash, UNIQUE> const &i) {
   return out << "XformHashNeighborCrappyIterator( " << i.i1 << " " << i.i2
              << " " << i.i3 << " " << i.end << " )";
 }
 
 template <class H>
 struct InitHash {
-  static void init_hash(H&) {}
+  static void init_hash(H &) {}
 };
 
 template <class K, class V>
-struct InitHash<google::dense_hash_map<K, V> > {
-  static void init_hash(google::dense_hash_map<K, V>& h) {
+struct InitHash<google::dense_hash_map<K, V>> {
+  static void init_hash(google::dense_hash_map<K, V> &h) {
     h.set_empty_key(std::numeric_limits<K>::max());
   }
 };
@@ -127,10 +127,10 @@ struct XformHashNeighbors {
   Float cart_bound_, ang_bound_, quat_bound_;
   int nsamp_;
   // google::sparse_hash_map< Key, std::vector<Key> > ori_cache_;
-  typedef std::map<Key, std::vector<Key> > OriCache;
+  typedef std::map<Key, std::vector<Key>> OriCache;
   // typedef google::dense_hash_map< Key, std::vector<Key> > OriCache;
   OriCache ori_cache_;
-  std::vector<util::SimpleArray<3, int16_t> > cart_shifts_;
+  std::vector<util::SimpleArray<3, int16_t>> cart_shifts_;
 
   size_t n_queries_, n_cache_miss_;
 
@@ -184,11 +184,11 @@ struct XformHashNeighbors {
     return std::make_pair(neighbors_begin(key), neighbors_end(key));
   }
 
-  std::vector<util::SimpleArray<3, int16_t> > const& get_cart_shifts() const {
+  std::vector<util::SimpleArray<3, int16_t>> const &get_cart_shifts() const {
     return cart_shifts_;
   }
 
-  std::vector<Key> const& get_ori_neighbors(Key key) {
+  std::vector<Key> const &get_ori_neighbors(Key key) {
     ++n_queries_;
     Key ori_key = key & XformHash::ORI_MASK;
     if (ori_cache_.find(ori_key) == ori_cache_.end()) {
@@ -230,7 +230,7 @@ struct XformHashNeighbors {
         // out.close();
 
       } else {
-        std::vector<Key> const& asym_nbrs = get_ori_neighbors(asym_key);
+        std::vector<Key> const &asym_nbrs = get_ori_neighbors(asym_key);
         // std::cout << "set sym_key nbrs from asym_nbrs " << asym_nbrs.size()
         // << ", store in " << ori_key << " " << ori_cache_.size() << std::endl;
         ori_cache_.insert(
@@ -270,12 +270,12 @@ struct XformHashNeighbors {
     return ori_cache_[ori_key];
   }
 
-  void merge(XformHashNeighbors<XformHash, UNIQUE> const& that) {
-    BOOST_FOREACH (typename OriCache::value_type const& v, that.ori_cache_) {
+  void merge(XformHashNeighbors<XformHash, UNIQUE> const &that) {
+    BOOST_FOREACH (typename OriCache::value_type const &v, that.ori_cache_) {
       if (ori_cache_.find(v.first) == ori_cache_.end()) {
         ori_cache_.insert(v);
       } else {
-        std::vector<Key>& mykeys(ori_cache_.find(v.first)->second);
+        std::vector<Key> &mykeys(ori_cache_.find(v.first)->second);
         BOOST_FOREACH (Key k, v.second) {
           if (std::find(mykeys.begin(), mykeys.end(), k) == mykeys.end()) {
             mykeys.push_back(k);
@@ -285,7 +285,7 @@ struct XformHashNeighbors {
     }
   }
 
-  bool save(std::ostream& out) {
+  bool save(std::ostream &out) {
     // no way to check if the stream was opened binary!
     // if( ! (out.flags() & std::ios::binary) ){
     // 	std::cerr << "XformMap::save must be binary ostream" << std::endl;
@@ -300,33 +300,33 @@ struct XformHashNeighbors {
     oss << "Angular Bound: " << ang_bound_ << std::endl;
     oss << "=========== begin binary data ===========" << std::endl;
     size_t s = oss.str().size();
-    out.write((char*)&s, sizeof(size_t));
+    out.write((char *)&s, sizeof(size_t));
     out.write(oss.str().c_str(), s);
     // begin binary data
     s = hasher_.name().size();
     // std::cout << "SIZE " << s << std::endl;
-    out.write((char*)&s, sizeof(size_t));
+    out.write((char *)&s, sizeof(size_t));
     out.write(hasher_.name().c_str(), hasher_.name().size() * sizeof(char));
 
-    out.write((char*)&hasher_, sizeof(XformHash));
-    out.write((char*)&cart_bound_, sizeof(Float));
-    out.write((char*)&ang_bound_, sizeof(Float));
-    out.write((char*)&quat_bound_, sizeof(Float));
-    out.write((char*)&nsamp_, sizeof(int));
+    out.write((char *)&hasher_, sizeof(XformHash));
+    out.write((char *)&cart_bound_, sizeof(Float));
+    out.write((char *)&ang_bound_, sizeof(Float));
+    out.write((char *)&quat_bound_, sizeof(Float));
+    out.write((char *)&nsamp_, sizeof(int));
 
     // std::map< Key, std::vector<Key> > ori_cache_;
     // std::vector< util::SimpleArray<3,int16_t> > cart_shifts_;
     size_t nentries = ori_cache_.size();
-    out.write((char*)&nentries, sizeof(size_t));
+    out.write((char *)&nentries, sizeof(size_t));
     for (typename OriCache::iterator j = ori_cache_.begin();
          j != ori_cache_.end(); ++j) {
       Key key = j->first;
-      out.write((char*)&key, sizeof(Key));
+      out.write((char *)&key, sizeof(Key));
       s = j->second.size();
-      out.write((char*)&s, sizeof(size_t));
+      out.write((char *)&s, sizeof(size_t));
       for (size_t k = 0; k < s; ++k) {
         Key key2 = j->second[k];
-        out.write((char*)&key2, sizeof(Key));
+        out.write((char *)&key2, sizeof(Key));
       }
     }
 
@@ -334,20 +334,20 @@ struct XformHashNeighbors {
 
     return true;
   }
-  bool load(std::istream& in) {
+  bool load(std::istream &in) {
     // no way to check if the stream was opened binary!
     // if( ! (in.flags() & std::ios::binary) ){
     // 	std::cerr << "XformMap::save must be binary ostream" << std::endl;
     // 	return false;
     // }
     size_t s;
-    in.read((char*)&s, sizeof(size_t));
+    in.read((char *)&s, sizeof(size_t));
     char buf[9999];
     for (int i = 0; i < 9999; ++i) buf[i] = 0;
     in.read(buf, s);
     std::cout << "XformHashNeighbors load, description: " << std::endl;
     std::cout << std::string(buf).substr(37, s - 80) << std::endl;
-    in.read((char*)&s, sizeof(size_t));
+    in.read((char *)&s, sizeof(size_t));
     // std::cout << "SIZE IN " << s << std::endl;
     for (int i = 0; i < 9999; ++i) buf[i] = 0;
     in.read(buf, s);
@@ -358,32 +358,32 @@ struct XformHashNeighbors {
       return false;
     }
     XformHash test;
-    in.read((char*)&test, sizeof(XformHash));
+    in.read((char *)&test, sizeof(XformHash));
     if (test != hasher_) {
       std::cerr << "XformHashNeighbors::load, hasher mismatch!" << std::endl;
       return false;
     }
     Float cart_bound, ang_bound, quat_bound;
     int nsamp;
-    in.read((char*)&cart_bound, sizeof(Float));
+    in.read((char *)&cart_bound, sizeof(Float));
     if (cart_bound != cart_bound_) {
       std::cerr << "XformHashNeighbors::load, cart_bound mismatch, expected "
                 << cart_bound_ << " got " << cart_bound << std::endl;
       return false;
     }
-    in.read((char*)&ang_bound, sizeof(Float));
+    in.read((char *)&ang_bound, sizeof(Float));
     if (ang_bound != ang_bound_) {
       std::cerr << "XformHashNeighbors::load, ang_bound mismatch, expected "
                 << ang_bound_ << " got " << ang_bound << std::endl;
       return false;
     }
-    in.read((char*)&quat_bound, sizeof(Float));
+    in.read((char *)&quat_bound, sizeof(Float));
     if (quat_bound != quat_bound_) {
       std::cerr << "XformHashNeighbors::load, quat_bound mismatch, expected "
                 << quat_bound_ << " got " << quat_bound << std::endl;
       return false;
     }
-    in.read((char*)&nsamp, sizeof(int));
+    in.read((char *)&nsamp, sizeof(int));
     if (nsamp != nsamp_) {
       std::cerr << "XformHashNeighbors::load, nsamp mismatch, expected "
                 << nsamp_ << " got " << nsamp << std::endl;
@@ -391,17 +391,17 @@ struct XformHashNeighbors {
     }
 
     size_t nentries;
-    in.read((char*)&nentries, sizeof(size_t));
+    in.read((char *)&nentries, sizeof(size_t));
     for (size_t i = 0; i < nentries; ++i) {
       Key key;
-      in.read((char*)&key, sizeof(Key));
-      std::vector<Key>& v =
+      in.read((char *)&key, sizeof(Key));
+      std::vector<Key> &v =
           ori_cache_.insert(std::make_pair(key, std::vector<Key>()))
               .first->second;
-      in.read((char*)&s, sizeof(size_t));
+      in.read((char *)&s, sizeof(size_t));
       for (size_t k = 0; k < s; ++k) {
         Key key2;
-        in.read((char*)&key2, sizeof(Key));
+        in.read((char *)&key2, sizeof(Key));
         v.push_back(key2);
       }
     }

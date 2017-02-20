@@ -51,13 +51,13 @@ TEST(xform_perf, preformance) {
   cout << "EIGEN_VECTORIZE is NOT set" << endl;
 #endif
   cout << "AffineCompact d ";
-  test_xform_perf<Eigen::Transform<double, 3, Eigen::AffineCompact> >();
+  test_xform_perf<Eigen::Transform<double, 3, Eigen::AffineCompact>>();
   cout << "Affine        d ";
-  test_xform_perf<Eigen::Transform<double, 3, Eigen::Affine> >();
+  test_xform_perf<Eigen::Transform<double, 3, Eigen::Affine>>();
   cout << "AffineCompact f ";
-  test_xform_perf<Eigen::Transform<float, 3, Eigen::AffineCompact> >();
+  test_xform_perf<Eigen::Transform<float, 3, Eigen::AffineCompact>>();
   cout << "Affine        f ";
-  test_xform_perf<Eigen::Transform<float, 3, Eigen::Affine> >();
+  test_xform_perf<Eigen::Transform<float, 3, Eigen::Affine>>();
   // cout << "XformHash_bt24_Cubic_Zorder"; test_xform_perf<
   // XformHash_bt24_Cubic_Zorder >();
 }

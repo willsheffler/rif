@@ -243,12 +243,12 @@ struct TwoBodyTable {
     }
   }
 
-  shared_ptr<TwoBodyTable<Data> > create_subtable(
+  shared_ptr<TwoBodyTable<Data>> create_subtable(
       std::vector<bool> const &res_selection,
-      std::vector<std::vector<float> > const
+      std::vector<std::vector<float>> const
           &new1b,  // always in global numbering
       float filter1bthresh) const {
-    shared_ptr<TwoBodyTable<Data> > newt_p = make_shared<TwoBodyTable<Data> >();
+    shared_ptr<TwoBodyTable<Data>> newt_p = make_shared<TwoBodyTable<Data>>();
     TwoBodyTable &newt(*newt_p);
     // size_t nres_, nrot_;
     // Array2D onebody_;

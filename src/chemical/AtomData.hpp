@@ -24,12 +24,12 @@ struct AtomData {
   static bool default_ishet() { return false; }
   static float default_occ() { return 1.0; }
   static float default_bfac() { return 0.0; }
-  AtomData(std::string const& _atomname = AtomData::default_atomname(),
-           std::string const& _resname = AtomData::default_resname(),
+  AtomData(std::string const &_atomname = AtomData::default_atomname(),
+           std::string const &_resname = AtomData::default_resname(),
            char _chain = AtomData::default_chain(),
            int _resnum = AtomData::default_resnum(),
            int _atomnum = AtomData::default_atomnum(),
-           std::string const& _elem = AtomData::default_elem(),
+           std::string const &_elem = AtomData::default_elem(),
            bool _ishet = AtomData::default_ishet(),
            float _occ = AtomData::default_occ(),
            float _bfac = AtomData::default_bfac())
@@ -43,14 +43,14 @@ struct AtomData {
         occ(_occ),
         bfac(_bfac) {}
 
-  bool operator==(AtomData const& o) const {
+  bool operator==(AtomData const &o) const {
     return atomname == o.atomname && resname == o.resname && elem == o.elem &&
            atomnum == o.atomnum && resnum == o.resnum && chain == o.chain &&
            ishet == o.ishet && occ == o.occ && bfac == o.bfac;
   }
 };
 
-inline std::ostream& operator<<(std::ostream& out, AtomData const& a) {
+inline std::ostream &operator<<(std::ostream &out, AtomData const &a) {
   if (a.atomname != AtomData::default_atomname()) out << a.atomname << ", ";
   if (a.resname != AtomData::default_resname()) out << a.resname << ", ";
   if (a.chain != AtomData::default_chain()) out << a.chain << ", ";

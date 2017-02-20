@@ -35,11 +35,11 @@ struct ScoreADI {
   typedef ADI Interaction;
   static std::string name() { return "ScoreADI"; }
   template <class Config>
-  Result operator()(Interaction const& a, Config const&) const {
+  Result operator()(Interaction const &a, Config const &) const {
     return a.data_;
   }
 };
-std::ostream& operator<<(std::ostream& out, ScoreADI const& s) {
+std::ostream &operator<<(std::ostream &out, ScoreADI const &s) {
   return out << s.name();
 }
 
@@ -51,18 +51,18 @@ struct ScoreADIADI {
   typedef std::pair<ADI, ADI> Interaction;
   static std::string name() { return "ScoreADIADI"; }
   template <class Config>
-  Result operator()(Actor1 const& a1, Actor2 const& a2, Config const&) const {
+  Result operator()(Actor1 const &a1, Actor2 const &a2, Config const &) const {
     ++ncalls;
     // cout << a.first << " " << a.second << endl;
     return distance(a1.position(), a2.position());
   }
   template <class Config>
-  Result operator()(Interaction const& i, Config const& c) const {
+  Result operator()(Interaction const &i, Config const &c) const {
     return this->template operator()<Config>(i.first, i.second, c);
   }
 };
 size_t ScoreADIADI::ncalls = 0;
-std::ostream& operator<<(std::ostream& out, ScoreADIADI const& s) {
+std::ostream &operator<<(std::ostream &out, ScoreADIADI const &s) {
   return out << s.name();
 }
 
@@ -71,7 +71,7 @@ struct ScoreADC {
   typedef ADC Interaction;
   static std::string name() { return "ScoreADC"; }
   template <class Config>
-  Result operator()(Interaction const& a, Config const&) const {
+  Result operator()(Interaction const &a, Config const &) const {
     switch (a.data_) {
       case '1':
         return 1;
@@ -89,7 +89,7 @@ struct ScoreADC {
     return 0;
   }
 };
-std::ostream& operator<<(std::ostream& out, ScoreADC const& s) {
+std::ostream &operator<<(std::ostream &out, ScoreADC const &s) {
   return out << s.name();
 }
 
@@ -98,15 +98,15 @@ struct ScoreADCADI {
   typedef std::pair<ADC, ADI> Interaction;
   static std::string name() { return "ScoreADCADI"; }
   template <class Config>
-  Result operator()(ADC const& adc, ADI const& adi, Config const&) const {
+  Result operator()(ADC const &adc, ADI const &adi, Config const &) const {
     return 10 * distance(adc.position(), adi.position());
   }
   template <class Config>
-  Result operator()(Interaction const& i, Config const& c) const {
+  Result operator()(Interaction const &i, Config const &c) const {
     return this->operator()(i.first, i.second, c);
   }
 };
-std::ostream& operator<<(std::ostream& out, ScoreADCADI const& s) {
+std::ostream &operator<<(std::ostream &out, ScoreADCADI const &s) {
   return out << s.name();
 }
 
@@ -182,7 +182,7 @@ TEST(SceneObjective, symmetry) {
 }
 
 template <class Scene, class Visitor>
-void performance_test_helper(Scene const& scene, Visitor& visitor) {
+void performance_test_helper(Scene const &scene, Visitor &visitor) {
   typedef ADI Actor1;
   typedef ADI Actor2;
   typedef typename Scene::Conformation Conformation;
@@ -192,14 +192,14 @@ void performance_test_helper(Scene const& scene, Visitor& visitor) {
   Index const NBOD = (Index)scene.bodies_.size();
   Index const NSYM = (Index)scene.symframes_.size() + 1;
   for (Index i1 = 0; i1 < NBOD * NSYM; ++i1) {
-    Conformation const& c1 = scene.conformation(i1);
-    Position const& p1 = scene.position(i1);
+    Conformation const &c1 = scene.conformation(i1);
+    Position const &p1 = scene.position(i1);
     Index const NACT1 = (Index)c1.template get<Actor1>().size();
     for (Index i2 = 0; i2 < NBOD * NSYM; ++i2) {
       if (i1 >= NBOD && i2 >= NBOD) continue;
       if (i2 <= i1) continue;
-      Conformation const& c2 = scene.conformation(i2);
-      Position const& p2 = scene.position(i2);
+      Conformation const &c2 = scene.conformation(i2);
+      Position const &p2 = scene.position(i2);
       Index const NACT2 = (Index)c2.template get<Actor2>().size();
       for (Index j1 = 0; j1 < NACT1; ++j1) {
         Actor1 a1(c1.template get<Actor1>()[j1], p1);

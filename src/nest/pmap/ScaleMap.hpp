@@ -22,7 +22,7 @@ namespace pmap {
 ///@tparam Float float type, default double
 ///@note NEST num_cells MUST agree with cell_sizes_
 ///@note bounds and cell indices are represented as SimpleArrays (like params)
-///NOT Value Types
+/// NOT Value Types
 template <int DIM, class Value = util::SimpleArray<DIM, double>,
           class Index = uint64_t, class Float = typename Value::Scalar>
 struct ScaleMap {
@@ -49,10 +49,10 @@ struct ScaleMap {
   Index num_cells_;
 
  public:
-  Params const& lower_bound() const { return lower_bound_; }
-  Params const& upper_bound() const { return upper_bound_; }
-  Params const& cell_width() const { return cell_width_; }
-  Indices const& cell_sizes() const { return cell_sizes_; }
+  Params const &lower_bound() const { return lower_bound_; }
+  Params const &upper_bound() const { return upper_bound_; }
+  Params const &cell_width() const { return cell_width_; }
+  Indices const &cell_sizes() const { return cell_sizes_; }
 
   static std::string pmap_name() {
     return "ScaleMap<" + boost::lexical_cast<std::string>(DIM) + ">";
@@ -67,26 +67,26 @@ struct ScaleMap {
   }
   ///@brief construct with default lb, ub
   template <class I>
-  ScaleMap(I const& bs) : cell_sizes_(bs) {
+  ScaleMap(I const &bs) : cell_sizes_(bs) {
     lower_bound_.fill(0);
     upper_bound_.fill(1);
     init();
   }
   ///@brief construct with default bs
   template <class P>
-  ScaleMap(P const& lb, P const& ub) : lower_bound_(lb), upper_bound_(ub) {
+  ScaleMap(P const &lb, P const &ub) : lower_bound_(lb), upper_bound_(ub) {
     cell_sizes_.fill(1);
     init();
   }
   ///@brief construct with specified lb, ub and bs
   template <class P, class I>
-  ScaleMap(P const& lb, P const& ub, I const& bs)
+  ScaleMap(P const &lb, P const &ub, I const &bs)
       : lower_bound_(lb), upper_bound_(ub), cell_sizes_(bs) {
     init();
   }
 
   template <class I>
-  void init(I const& bs) {
+  void init(I const &bs) {
     cell_sizes_ = bs;
     lower_bound_.fill(0);
     upper_bound_.fill(1);
@@ -94,7 +94,7 @@ struct ScaleMap {
   }
 
   template <class P>
-  void init(P const& lb, P const& ub) {
+  void init(P const &lb, P const &ub) {
     lower_bound_ = lb;
     upper_bound_ = ub;
     cell_sizes_.fill(1);
@@ -102,7 +102,7 @@ struct ScaleMap {
   }
 
   template <class P, class I>
-  void init(P const& lb, P const& ub, I const& bs) {
+  void init(P const &lb, P const &ub, I const &bs) {
     lower_bound_ = lb;
     upper_bound_ = ub;
     cell_sizes_ = bs;
@@ -122,8 +122,8 @@ struct ScaleMap {
 
   ///@brief sets value based on cell_index and parameters using geometric bounds
   ///@return false iff invalid parameters
-  bool params_to_value(Params const& params, Index cell_index, Index resl,
-                       Value& value) const {
+  bool params_to_value(Params const &params, Index cell_index, Index resl,
+                       Value &value) const {
     for (size_t i = 0; i < DIM; ++i) {
       assert(cell_sizes_[i] > 0);
       assert(cell_sizes_[i] < 100000);
@@ -135,8 +135,8 @@ struct ScaleMap {
   }
 
   ///@brief sets params/cell_index from value
-  bool value_to_params(Value const& value, Index resl, Params& params,
-                       Index& cell_index) const {
+  bool value_to_params(Value const &value, Index resl, Params &params,
+                       Index &cell_index) const {
     value_to_params_for_cell(value, resl, params, 0);
     cell_index = 0;
     for (size_t i = 0; i < DIM; ++i) {
@@ -153,7 +153,7 @@ struct ScaleMap {
   }
 
   ///@brief sets params/cell_index from value
-  void value_to_params_for_cell(Value const& value, Index resl, Params& params,
+  void value_to_params_for_cell(Value const &value, Index resl, Params &params,
                                 Index cell_index) const {
     Indices cell_indices = cellindex_to_indices(cell_index);
     // std::cout << "CIDX " << cell_indices.transpose() << std::endl;
@@ -167,7 +167,7 @@ struct ScaleMap {
     }
   }
 
-  Index indices_to_cellindex(Indices const& indices) const {
+  Index indices_to_cellindex(Indices const &indices) const {
     Index index = 0;
     for (size_t i = 0; i < DIM; ++i) {
       assert(indices[i] < cell_sizes_[i]);
@@ -186,7 +186,7 @@ struct ScaleMap {
   }
 
   template <class OutIter>
-  void push_cell_index(SignedIndices const& indices, OutIter out) const {
+  void push_cell_index(SignedIndices const &indices, OutIter out) const {
     *(out++) = indices_to_cellindex(indices.template cast<size_t>());
   }
 
@@ -209,7 +209,7 @@ struct ScaleMap {
   ///@brief return the cell_index of neighboring cells within delta of value
   ///@note delta parameter is in "Parameter Space"
   template <class OutIter>
-  void get_neighboring_cells(Value const& value, Index resl, Float param_delta,
+  void get_neighboring_cells(Value const &value, Index resl, Float param_delta,
                              OutIter out) const {
     // Float param_delta = 1.0 / (Float)(1<<resl);
     assert(param_delta > 0);
@@ -238,7 +238,7 @@ struct ScaleMap {
   }
 
   ///@brief aka covering radius max distance from bin center to any value within
-  ///bin
+  /// bin
   Float bin_circumradius(Index resl) const {
     Params width =
         (upper_bound_ - lower_bound_) / cell_sizes_.template cast<Float>();
@@ -259,8 +259,8 @@ struct ScaleMap {
 };
 
 template <int DIM, class Value, class Index, class Float>
-std::ostream& operator<<(std::ostream& out,
-                         ScaleMap<DIM, Value, Index, Float> const& sm) {
+std::ostream &operator<<(std::ostream &out,
+                         ScaleMap<DIM, Value, Index, Float> const &sm) {
   out << "ScaleMap cell_sizes = " << sm.cell_sizes()
       << " cell_widths = " << sm.cell_width();
   return out;

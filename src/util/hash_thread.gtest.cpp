@@ -30,30 +30,30 @@ using std::endl;
 template <class K, class V, class GetMap, size_t SEG = 0>
 struct SegmentedMap {
   typedef typename GetMap::template apply<
-      K, util::SimpleArray<1 << SEG, V, true> >::type MAP;
+      K, util::SimpleArray<1 << SEG, V, true>>::type MAP;
   typedef typename MAP::const_iterator const_iterator;
 
   MAP map;
 
   SegmentedMap() { map.set_empty_key(std::numeric_limits<K>::max()); }
 
-  const_iterator find(K const& k) const { return map.find(k >> SEG); }
+  const_iterator find(K const &k) const { return map.find(k >> SEG); }
 
   const_iterator end() const { return map.end(); }
 
-  void insert(std::pair<K, V> const& v) {
+  void insert(std::pair<K, V> const &v) {
     map.insert(std::make_pair(v.first >> SEG, v.second));
   }
 
-  V const& operator[](K const& k) const {
+  V const &operator[](K const &k) const {
     return map.find(k >> SEG)->second.operator[](k % (1 << SEG));
   }
 
-  V& operator[](K const& k) { return map[k >> SEG][k % (1 << SEG)]; }
+  V &operator[](K const &k) { return map[k >> SEG][k % (1 << SEG)]; }
 };
 
 template <class Map>
-void fill_map(Map& h, int64_t MAXIDX, int64_t sparsity = 100ll) {
+void fill_map(Map &h, int64_t MAXIDX, int64_t sparsity = 100ll) {
   int64_t NFILL = MAXIDX / sparsity;
 
   std::mt19937 rng((uint64_t)0);
@@ -70,9 +70,9 @@ void fill_map(Map& h, int64_t MAXIDX, int64_t sparsity = 100ll) {
 }
 
 template <class Map>
-void test_map(Map* hp, double* runtime, int64_t MAXIDX, int64_t NITER,
-              std::mt19937* rng0) {
-  Map const& h(*hp);
+void test_map(Map *hp, double *runtime, int64_t MAXIDX, int64_t NITER,
+              std::mt19937 *rng0) {
+  Map const &h(*hp);
 
   int64_t NROW = 1;
   NITER /= NROW;
@@ -118,7 +118,7 @@ TEST(test_hash_thread, google_hash_thread) {
   int maxNthread = 16;
 
   std::mt19937 rng((unsigned int)time(0));
-  typedef google::dense_hash_map<uint64_t, util::SimpleArray<8, double> > D;
+  typedef google::dense_hash_map<uint64_t, util::SimpleArray<8, double>> D;
   D d;
   d.set_empty_key(std::numeric_limits<uint64_t>::max());
 
@@ -179,8 +179,8 @@ TEST(test_hash_thread, google_hash_thread) {
 // nthread:    16   24.468 ns / lookup    2.447 s runtime   40.870 M lookup/sec
 // 2.554 M lookup/sec/thread
 
-void test_array(float const* const h, double* runtime, size_t N, int64_t NITER,
-                std::mt19937* rng) {
+void test_array(float const *const h, double *runtime, size_t N, int64_t NITER,
+                std::mt19937 *rng) {
   std::uniform_int_distribution<int64_t> randindex(0, N);
   // h.resize(NFILL/2);
 
@@ -245,8 +245,8 @@ TEST(test_hash_thread, simple_array_thread) {
   data.clear();
 }
 
-void test_multiarray(boost::multi_array<float, 1> const* hp, double* runtime,
-                     int64_t NITER, std::mt19937* rng) {
+void test_multiarray(boost::multi_array<float, 1> const *hp, double *runtime,
+                     int64_t NITER, std::mt19937 *rng) {
   std::uniform_int_distribution<int64_t> randindex(0, hp->shape()[0]);
   // h.resize(NFILL/2);
 

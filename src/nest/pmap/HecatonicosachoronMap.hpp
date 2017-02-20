@@ -17,12 +17,12 @@ using std::endl;
 
 ///@brief flip through origin iff q.w < 0
 template <class Q>
-Q to_half_cell(Q const& q) {
+Q to_half_cell(Q const &q) {
   return q.w() >= 0 ? q : Q(-q.w(), -q.x(), -q.y(), -q.z());
 }
 
 template <class T>
-static T const* get_h120() {
+static T const *get_h120() {
   static T const h120[240] = {0,
                               0,
                               0,
@@ -266,7 +266,7 @@ static T const* get_h120() {
   return h120;
 }
 template <class T>
-static T const* get_h120inv() {
+static T const *get_h120inv() {
   static T const h120inv[240] = {-0,
                                  -0,
                                  -0,
@@ -511,7 +511,7 @@ static T const* get_h120inv() {
 }
 
 template <class Int>
-static Int const* get_h120_nbrs() {
+static Int const *get_h120_nbrs() {
   static Int const h120_nbrs[60 * 12] = {
       4,  5,  6,  17, 18, 19, 26, 27, 28, 35, 36, 37, 7,  10, 13, 20, 23, 29,
       32, 38, 42, 45, 50, 55, 9,  11, 15, 22, 30, 33, 39, 44, 46, 52, 56, 58,
@@ -557,7 +557,7 @@ static Int const* get_h120_nbrs() {
 }
 
 template <class T>
-static T const* get_cellfaces() {
+static T const *get_cellfaces() {
   // static T const cellfaces[36] = {
   static T const cellfaces[18] = {
       // half are opposites of the other half!
@@ -577,23 +577,23 @@ static T const* get_cellfaces() {
 }
 
 template <class Float, class Index>
-Eigen::Map<Eigen::Quaternion<Float> const> h120_cellcen(Index const& i) {
+Eigen::Map<Eigen::Quaternion<Float> const> h120_cellcen(Index const &i) {
   return Eigen::Map<Eigen::Quaternion<Float> const>(get_h120<Float>() + 4 * i);
 }
 template <class Float, class Index>
-Eigen::Map<Eigen::Quaternion<Float> const> h120_cellceninv(Index const& i) {
+Eigen::Map<Eigen::Quaternion<Float> const> h120_cellceninv(Index const &i) {
   return Eigen::Map<Eigen::Quaternion<Float> const>(get_h120inv<Float>() +
                                                     4 * i);
 }
 template <class Float, class Index, class Index2>
-Eigen::Map<Eigen::Quaternion<Float> const> h120_cellnbr(Index const& i,
-                                                        Index2 const& j) {
+Eigen::Map<Eigen::Quaternion<Float> const> h120_cellnbr(Index const &i,
+                                                        Index2 const &j) {
   return Eigen::Map<Eigen::Quaternion<Float> const>(
       get_h120<Float>() + 4 * get_h120_nbrs<uint8_t>()[12 * i + j]);
 }
 template <class Float, class Index, class Index2>
-Eigen::Map<Eigen::Quaternion<Float> const> h120_cellnbrinv(Index const& i,
-                                                           Index2 const& j) {
+Eigen::Map<Eigen::Quaternion<Float> const> h120_cellnbrinv(Index const &i,
+                                                           Index2 const &j) {
   return Eigen::Map<Eigen::Quaternion<Float> const>(
       get_h120inv<Float>() + 4 * get_h120_nbrs<uint8_t>()[12 * i + j]);
 }
@@ -621,10 +621,10 @@ struct HecatonicosachoronMap {
 
   ///@brief sets value to parameters without change
   ///@return false iff invalid parameters
-  bool params_to_value(Params const& params, Index cell_index, Index resl,
-                       Value& value) const {
+  bool params_to_value(Params const &params, Index cell_index, Index resl,
+                       Value &value) const {
     // cout << "        set p0 " << params << endl;
-    Float const& w(cell_width<Float>());
+    Float const &w(cell_width<Float>());
     Matrix<Float, 3, 1> p(w * (params[0] - 0.5), w * (params[1] - 0.5),
                           w * (params[2] - 0.5));
     // cout << "      set p  " << p.transpose() << endl;
@@ -669,8 +669,8 @@ struct HecatonicosachoronMap {
 
   ///@brief sets params/cell_index from value
   ///@note necessary for value lookup and neighbor lookup
-  bool value_to_params(Value const& value, Index /*resl*/, Params& params,
-                       Index& cell_index) const {
+  bool value_to_params(Value const &value, Index /*resl*/, Params &params,
+                       Index &cell_index) const {
     Quaternion<Float> q(value);
     // q = to_half_cell(q);
     // cout << "get q  " << q.coeffs().transpose() << endl;
@@ -712,16 +712,16 @@ struct HecatonicosachoronMap {
 
   ///@brief get parameter space repr of Value for particular cell
   ///@note necessary only for neighbor lookup
-  void value_to_params_for_cell(Value const& value, Params& params) const;
+  void value_to_params_for_cell(Value const &value, Params &params) const;
 
   ///@brief return the cell_index of neighboring cells within radius of value
   ///@note delta parameter is in "Parameter Space"
   template <class OutIter>
-  void get_neighboring_cells(Value const& value, Float radius,
+  void get_neighboring_cells(Value const &value, Float radius,
                              OutIter out) const;
 
   ///@brief aka covering radius max distance from bin center to any value within
-  ///bin
+  /// bin
   Float bin_circumradius(Index resl) const {}
 
   ///@brief maximum distance from the bin center which must be within the bin

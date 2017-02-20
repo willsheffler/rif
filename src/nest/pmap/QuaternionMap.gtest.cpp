@@ -153,7 +153,8 @@ TEST(QuaternionMap, covering) {
   // 		std::ofstream
   // out(("quatmaptest_"+boost::lexical_cast<std::string>(r)+".pdb").c_str());
   // 		size_t count = 0;
-  // 		// cout << r << " " << nest.size(r) << " " << (beg>>(4*(10-r))) <<
+  // 		// cout << r << " " << nest.size(r) << " " << (beg>>(4*(10-r)))
+  // <<
   // endl;
   // 		// continue;
   // 		for(size_t i = beg>>(4*(10-r)); i < nest.size(r); ++i){
@@ -161,7 +162,9 @@ TEST(QuaternionMap, covering) {
   // 				++count;
   // 				if( count > 300) break;
   // 				Eigen::Quaterniond q = nest.value();
-  // 				cout << r << " " << i << " " << q.coeffs().transpose() <<
+  // 				cout << r << " " << i << " " <<
+  // q.coeffs().transpose()
+  // <<
   // endl;
   // 				 V ximg = q.matrix() * X;
   // 				 V yimg = q.matrix() * Y;

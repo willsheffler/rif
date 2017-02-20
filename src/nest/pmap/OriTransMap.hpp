@@ -43,12 +43,12 @@ struct OriTransMap {
   OriTransMap() {}
 
   template <class P, class I>
-  OriTransMap(Float rot_resl_deg, P const& lb, P const& ub, I const& bs) {
+  OriTransMap(Float rot_resl_deg, P const &lb, P const &ub, I const &bs) {
     init(rot_resl_deg, lb, ub, bs);
   }
 
   template <class P, class I>
-  void init(Float rot_resl_deg, P const& lb, P const& ub, I const& bs) {
+  void init(Float rot_resl_deg, P const &lb, P const &ub, I const &bs) {
     int const ori_nside = OriMap::get_nside_for_rot_resl_deg(rot_resl_deg);
     ori_map_.init(ori_nside);
     trans_map_.init(lb, ub, bs);
@@ -60,8 +60,8 @@ struct OriTransMap {
 
   ///@brief sets value to parameters without change
   ///@return false iff invalid parameters
-  bool params_to_value(Params const& params, Index cell_index, Index resl,
-                       Value& value) const {
+  bool params_to_value(Params const &params, Index cell_index, Index resl,
+                       Value &value) const {
     Index const ncori = ori_map_.num_cells();
     Index const cori = cell_index % ncori;
     Index const ctrans = cell_index / ncori;
@@ -81,8 +81,8 @@ struct OriTransMap {
 
   ///@brief sets params/cell_index from value
   ///@note necessary for value lookup and neighbor lookup
-  bool value_to_params(Value const& value, Index resl, Params& params,
-                       Index& cell_index) const {
+  bool value_to_params(Value const &value, Index resl, Params &params,
+                       Index &cell_index) const {
     V v;
     M m;
     for (int i = 0; i < 3; ++i) {
@@ -118,8 +118,8 @@ struct OriTransMap {
 };
 
 template <int D, class V, class I, class F>
-std::ostream& operator<<(std::ostream& out,
-                         OriTransMap<D, V, I, F> const& otm) {
+std::ostream &operator<<(std::ostream &out,
+                         OriTransMap<D, V, I, F> const &otm) {
   out << "OriMap: " << otm.ori_map_ << std::endl;
   out << "TransMap: " << otm.trans_map_;
   return out;

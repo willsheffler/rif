@@ -21,7 +21,7 @@ class StoragePolicy {
   // Value const & value() const;
  protected:
   ///@brief set the value
-  void set_stored_value(Value const& v);
+  void set_stored_value(Value const &v);
   ///@return nonconst reference to stored Value
   // Value & nonconst_value();
 };
@@ -31,15 +31,15 @@ class StoragePolicy {
 template <class Value>
 struct StoreValue {
   StoreValue() : value_() {}
-  StoreValue(Value const& v) : value_(v) {}
+  StoreValue(Value const &v) : value_(v) {}
   ///@return const reference to stored Value
-  Value const& value() const { return value_; }
+  Value const &value() const { return value_; }
 
  protected:
   ///@brief set the value
-  void set_stored_value(Value const& v) { value_ = v; }
+  void set_stored_value(Value const &v) { value_ = v; }
   ///@return nonconst reference to stored Value
-  Value& nonconst_value() { return value_; }
+  Value &nonconst_value() { return value_; }
   Value value_;
   ~StoreValue() {}
 };
@@ -53,7 +53,7 @@ struct StoreNothing {
   // Value const & value() const { return value_; }
  protected:
   ///@brief set the value
-  void set_stored_value(Value const& v) {}
+  void set_stored_value(Value const &v) {}
   ///@return nonconst reference to stored Value
   // Value & nonconst_value() { return value_; }
   ~StoreNothing() {}
@@ -65,17 +65,17 @@ struct StoreNothing {
 template <class Value>
 struct StorePointer {
   ///@return const reference to stored Value
-  Value const& value() const { return *value_; }
+  Value const &value() const { return *value_; }
   /// @brief switch the pointer the this policy manages
   /// @param new_pointer
-  void set_pointer(Value* new_pointer) { value_ = new_pointer; }
+  void set_pointer(Value *new_pointer) { value_ = new_pointer; }
 
  protected:
   ///@brief set the value
-  void set_stored_value(Value const& v) { *value_ = v; }
+  void set_stored_value(Value const &v) { *value_ = v; }
   ///@return nonconst reference to stored Value
-  Value& nonconst_value() { return *value_; }
-  Value* value_;
+  Value &nonconst_value() { return *value_; }
+  Value *value_;
   ~StorePointer() {}
 };
 
@@ -85,16 +85,16 @@ struct StorePointer {
 template <class Value>
 struct StoreSharedPointer {
   ///@return const reference to stored Value
-  Value const& value() const { return *value_; }
+  Value const &value() const { return *value_; }
   /// @brief switch the pointer the this policy manages
   /// @param new_pointer
-  void set_pointer(Value* new_pointer) { value_ = new_pointer; }
+  void set_pointer(Value *new_pointer) { value_ = new_pointer; }
 
  protected:
   ///@brief set the value
-  void set_stored_value(Value const& v) { *value_ = v; }
+  void set_stored_value(Value const &v) { *value_ = v; }
   ///@return nonconst reference to stored Value
-  Value& nonconst_value() { return *value_; }
+  Value &nonconst_value() { return *value_; }
   shared_ptr<Value> value_;
   ~StoreSharedPointer() {}
 };

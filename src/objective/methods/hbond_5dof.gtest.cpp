@@ -18,22 +18,22 @@ using std::cout;
 using std::endl;
 
 template <class T>
-std::string str(T const& t) {
+std::string str(T const &t) {
   return boost::lexical_cast<std::string>(t);
 }
 
 template <class M, class T>
-std::vector<T> operator*(M const& m, std::vector<T> const& v) {
+std::vector<T> operator*(M const &m, std::vector<T> const &v) {
   std::vector<T> r(v);
-  BOOST_FOREACH (T& t, r)
+  BOOST_FOREACH (T &t, r)
     t = T(t, m);
   return r;
 }
 
 template <class T>
-void dump_pdb(std::vector<T> const& v, std::string fname) {
+void dump_pdb(std::vector<T> const &v, std::string fname) {
   std::ofstream out(fname.c_str());
-  BOOST_FOREACH (T const& t, v)
+  BOOST_FOREACH (T const &t, v)
     io::dump_pdb_atom(out, t);
   out.close();
 }
@@ -61,7 +61,7 @@ TEST(hbond_5dof, DISABLED_test) {
   Eigen::Quaterniond q(fabs(gauss(rng)), gauss(rng), gauss(rng), gauss(rng));
   q.normalize();
   Xform frame1 = Xform::Identity();  //( q.matrix() ); frame1.translation() =
-                                     //Vector3d(0,0,2);
+                                     // Vector3d(0,0,2);
   // frame1.makeAffine();
 
   dump_pdb(frame1 * gly, "test1.pdb");

@@ -136,7 +136,7 @@ TEST(RosettaField, test_btn) {
   ASSERT_NEAR(rf.compute_rosetta_energy(0, -16, 7, 4), -0.034172565f, 0.001);
 
   F3 lb(9e9, 9e9, 9e9), ub(-9e9, -9e9, -9e9);
-  for (auto const& a : rf.atoms_) {
+  for (auto const &a : rf.atoms_) {
     lb = lb.min(a.position());
     ub = ub.max(a.position());
   }

@@ -17,7 +17,7 @@ struct SimpleAtom {
   SimpleAtom() : position_(0, 0, 0), type_(0) {}
 
   template <class P>
-  SimpleAtom(P const& p, int16_t type = 0, int8_t restype = 0,
+  SimpleAtom(P const &p, int16_t type = 0, int8_t restype = 0,
              int8_t atomnum = 0)
       : position_(p[0], p[1], p[2]),
         type_(type),
@@ -25,7 +25,7 @@ struct SimpleAtom {
         atomnum_(atomnum) {}
 
   template <class Xform>
-  SimpleAtom(SimpleAtom const& a, Xform const& moveby) {
+  SimpleAtom(SimpleAtom const &a, Xform const &moveby) {
     position_ = moveby * a.position();
     type_ = a.type_;
     restype_ = a.restype_;
@@ -39,16 +39,16 @@ struct SimpleAtom {
   void set_restype(int8_t i) { restype_ = i; }
   void set_atomnum(int8_t i) { atomnum_ = i; }
 
-  Position const& position() const { return position_; }
+  Position const &position() const { return position_; }
 
   template <class P>
-  void set_position(P const& pos) {
+  void set_position(P const &pos) {
     position_[0] = pos[0];
     position_[1] = pos[1];
     position_[2] = pos[2];
   }
 
-  bool operator==(SimpleAtom<Position> const& o) const {
+  bool operator==(SimpleAtom<Position> const &o) const {
     return numeric::approx_eq(o.position_, position_) && o.type_ == type_ &&
            o.restype_ == restype_ && o.atomnum_ == atomnum_;
   }
@@ -61,13 +61,13 @@ struct SimpleAtom {
 };
 
 template <class P>
-std::ostream& operator<<(std::ostream& out, SimpleAtom<P> const& x) {
+std::ostream &operator<<(std::ostream &out, SimpleAtom<P> const &x) {
   return out << "SimpleAtom( " << x.position() << ", " << x.type() << " )";
 }
 
 template <class P, class MetaData>
-void write_pdb(std::ostream& out, SimpleAtom<P> const& a,
-               MetaData const& meta) {
+void write_pdb(std::ostream &out, SimpleAtom<P> const &a,
+               MetaData const &meta) {
   io::dump_pdb_atom(out, a.position(),
                     meta.atom_data(a.restype(), a.atomnum()));
 }
@@ -83,13 +83,13 @@ struct Atom {
   // data_(new AtomData) {}
 
   template <class P>
-  Atom(P const& p, int type = 0,
-       std::string const& atomname = AtomData::default_atomname(),
-       std::string const& resname = AtomData::default_resname(),
+  Atom(P const &p, int type = 0,
+       std::string const &atomname = AtomData::default_atomname(),
+       std::string const &resname = AtomData::default_resname(),
        char chain = AtomData::default_chain(),
        int resnum = AtomData::default_resnum(),
        int atomnum = AtomData::default_atomnum(),
-       std::string const& elem = AtomData::default_elem(),
+       std::string const &elem = AtomData::default_elem(),
        bool ishet = AtomData::default_ishet(),
        float occ = AtomData::default_occ(),
        float bfac = AtomData::default_bfac())
@@ -105,7 +105,7 @@ struct Atom {
   // ~Atom(){ delete data_; }
 
   template <class Xform>
-  Atom(Atom const& a, Xform const& moveby) {
+  Atom(Atom const &a, Xform const &moveby) {
     position_ = moveby * a.position();
     type_ = a.type_;
     data_ = a.data_;
@@ -113,19 +113,19 @@ struct Atom {
 
   int type() const { return type_; }
   void set_type(int i) { type_ = i; }
-  AtomData const& data() const { return *data_; }
-  AtomData& nonconst_data() { return *data_; }
+  AtomData const &data() const { return *data_; }
+  AtomData &nonconst_data() { return *data_; }
 
-  Position const& position() const { return position_; }
+  Position const &position() const { return position_; }
 
   template <class P>
-  void set_position(P const& pos) {
+  void set_position(P const &pos) {
     position_[0] = pos[0];
     position_[1] = pos[1];
     position_[2] = pos[2];
   }
 
-  bool operator==(Atom<Position> const& o) const {
+  bool operator==(Atom<Position> const &o) const {
     return numeric::approx_eq(o.position_, position_) && o.type_ == type_ &&
            o.data_ == data_;
   }
@@ -138,13 +138,13 @@ struct Atom {
 };
 
 template <class P>
-std::ostream& operator<<(std::ostream& out, Atom<P> const& x) {
+std::ostream &operator<<(std::ostream &out, Atom<P> const &x) {
   return out << "Atom( " << x.position() << ", " << x.type() << ", " << x.data()
              << " )";
 }
 
 template <class P, class MetaData>
-void write_pdb(std::ostream& out, Atom<P> const& a, MetaData const&) {
+void write_pdb(std::ostream &out, Atom<P> const &a, MetaData const &) {
   io::dump_pdb_atom(out, a.position(), a.data());
 }
 }

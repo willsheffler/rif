@@ -25,31 +25,31 @@ using std::endl;
 template <class K, class V, class GetMap, size_t SEG = 0>
 struct SegmentedMap {
   typedef typename GetMap::template apply<
-      K, util::SimpleArray<1 << SEG, V, true> >::type MAP;
+      K, util::SimpleArray<1 << SEG, V, true>>::type MAP;
   typedef typename MAP::const_iterator const_iterator;
 
   MAP map;
 
   SegmentedMap() { map.set_empty_key(std::numeric_limits<K>::max()); }
 
-  const_iterator find(K const& k) const { return map.find(k >> SEG); }
+  const_iterator find(K const &k) const { return map.find(k >> SEG); }
 
   const_iterator end() const { return map.end(); }
 
-  void insert(std::pair<K, V> const& v) {
+  void insert(std::pair<K, V> const &v) {
     map.insert(std::make_pair(v.first >> SEG, v.second));
   }
 
-  V const& operator[](K const& k) const {
+  V const &operator[](K const &k) const {
     return map.find(k >> SEG)->second.operator[](k % (1 << SEG));
   }
 
-  V& operator[](K const& k) { return map[k >> SEG][k % (1 << SEG)]; }
+  V &operator[](K const &k) { return map[k >> SEG][k % (1 << SEG)]; }
 };
 
 template <class Map>
-void test_map(Map* hp, int64_t MAXIDX, int64_t NSAMP) {
-  Map& h(*hp);
+void test_map(Map *hp, int64_t MAXIDX, int64_t NSAMP) {
+  Map &h(*hp);
 
   int64_t NROW = 1;
   NSAMP /= NROW;
@@ -76,7 +76,7 @@ void test_map(Map* hp, int64_t MAXIDX, int64_t NSAMP) {
 }
 
 template <class Map>
-void fill_map(Map& h, int64_t MAXIDX, int64_t sparsity = 100ll) {
+void fill_map(Map &h, int64_t MAXIDX, int64_t sparsity = 100ll) {
   int64_t NFILL = MAXIDX / sparsity;
 
   std::mt19937 rng((uint64_t)0);
@@ -91,8 +91,8 @@ void fill_map(Map& h, int64_t MAXIDX, int64_t sparsity = 100ll) {
 }
 
 template <class Map>
-void fill_and_test_map(Map* hp) {
-  Map& h(*hp);
+void fill_and_test_map(Map *hp) {
+  Map &h(*hp);
   int64_t MAXIDX = 3000ll * 1000ll * 1000ll;
   int64_t NFILL = MAXIDX / 100ll;
   int64_t NROW = 1;
@@ -167,7 +167,7 @@ struct GoogleDense {
 // }
 
 template <class MAP1, class MAP2>
-void test_2map(MAP1& m, std::string lm, MAP2& n, std::string ln) {
+void test_2map(MAP1 &m, std::string lm, MAP2 &n, std::string ln) {
   int64_t MAXIDX = 10 * 1000 * 1000;
   int64_t NFILL = MAXIDX / 10;
   int64_t NROW = 1;

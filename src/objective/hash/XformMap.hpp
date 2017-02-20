@@ -23,17 +23,17 @@ template <int ArrayBits, class Key, class Value>
 struct XfromMapSerializer {
   // typedef util::SimpleArray< (1<<ArrayBits), Value >  ValArray;
   typedef Value ValArray;
-  bool operator()(std::istream* in, std::pair<Key const, ValArray>* val) const {
-    Key& k = const_cast<Key&>(val->first);
-    in->read((char*)&k, sizeof(Key));
-    in->read((char*)&val->second, sizeof(ValArray));
+  bool operator()(std::istream *in, std::pair<Key const, ValArray> *val) const {
+    Key &k = const_cast<Key &>(val->first);
+    in->read((char *)&k, sizeof(Key));
+    in->read((char *)&val->second, sizeof(ValArray));
     // std::cout << "READ " << k << " " << val->second << std::endl;
     return true;
   }
-  bool operator()(std::ostream* out,
-                  std::pair<Key const, ValArray> const& val) const {
-    out->write((char*)&val.first, sizeof(Key));
-    out->write((char*)&val.second, sizeof(ValArray));
+  bool operator()(std::ostream *out,
+                  std::pair<Key const, ValArray> const &val) const {
+    out->write((char *)&val.first, sizeof(Key));
+    out->write((char *)&val.second, sizeof(ValArray));
     return true;
   }
 };
@@ -46,7 +46,7 @@ template <class _Xform,
           template <class X> class _Hasher = XformHash_Quat_BCC7_Zorder,
           // class ElementSerializer = XfromMapSerializer< ArrayBits, uint64_t,
           // Value >
-          class ElementSerializer = XfromMapSerializer<0, uint64_t, _Value> >
+          class ElementSerializer = XfromMapSerializer<0, uint64_t, _Value>>
 struct XformMap {
   // BOOST_STATIC_ASSERT(( ArrayBits >= 0 ));
   typedef _Value Value;
@@ -109,10 +109,10 @@ struct XformMap {
     // iter->second[k1] = val;
     //       return true;
   }
-  bool insert(Xform const& x, Value const& val) {
+  bool insert(Xform const &x, Value const &val) {
     return this->insert(hasher_.get_key(x), val);
   }
-  bool insert_min(Xform const& x, Value const& val) {
+  bool insert_min(Xform const &x, Value const &val) {
     Key k = hasher_.get_key(x);
     typename Map::iterator i = map_.find(k);
     if (i == map_.end()) {
@@ -134,12 +134,12 @@ struct XformMap {
     }
     return iter->second;
   }
-  Value operator[](Xform const& x) const {
+  Value operator[](Xform const &x) const {
     return this->operator[](hasher_.get_key(x));
   }
 
-  int insert_sphere(Xform const& x, Float lever_bound, Float lever, Value value,
-                    XformHashNeighbors<Hasher>& nbcache) {
+  int insert_sphere(Xform const &x, Float lever_bound, Float lever, Value value,
+                    XformHashNeighbors<Hasher> &nbcache) {
     Float thresh2 = lever_bound + cart_resl_ / 2.0;
     thresh2 = thresh2 * thresh2;
     Key key = hasher_.get_key(x);
@@ -216,7 +216,7 @@ struct XformMap {
     return count;
   }
 
-  bool save(std::ostream& out, std::string const& description) {
+  bool save(std::ostream &out, std::string const &description) {
     // no way to check if the stream was opened binary!
     // if( ! (out.flags() & std::ios::binary) ){
     // 	std::cerr << "XformMap::save must be binary ostream" << std::endl;
@@ -238,18 +238,18 @@ struct XformMap {
     oss << "User Description: " << description << std::endl;
     oss << "=========== begin binary data ===========" << std::endl;
     size_t s = oss.str().size();
-    out.write((char*)&s, sizeof(size_t));
+    out.write((char *)&s, sizeof(size_t));
     out.write(oss.str().c_str(), s);
     // begin binary data
     s = hasher_.name().size();
     // std::cout << "SIZE " << s << std::endl;
-    out.write((char*)&s, sizeof(size_t));
+    out.write((char *)&s, sizeof(size_t));
     out.write(hasher_.name().c_str(), hasher_.name().size() * sizeof(char));
     // int tmp = ArrayBits;
     // out.write( (char*)&tmp, sizeof(int) );
-    out.write((char*)&cart_resl_, sizeof(Float));
-    out.write((char*)&ang_resl_, sizeof(Float));
-    out.write((char*)&cart_bound_, sizeof(Float));
+    out.write((char *)&cart_resl_, sizeof(Float));
+    out.write((char *)&ang_resl_, sizeof(Float));
+    out.write((char *)&cart_bound_, sizeof(Float));
     // std::cout << "SIZE OUT " << map_.size() << std::endl;
     if (!map_.serialize(element_serializer_, &out)) {
       std::cerr << "XfromMap::load failed to unserialize sparsehash"
@@ -258,21 +258,21 @@ struct XformMap {
     }
     return true;
   }
-  bool load(std::istream& in, std::string& description) {
+  bool load(std::istream &in, std::string &description) {
     // no way to check if the stream was opened binary!
     // if( ! (in.flags() & std::ios::binary) ){
     // 	std::cerr << "XformMap::save must be binary ostream" << std::endl;
     // 	return false;
     // }
     size_t s;
-    in.read((char*)&s, sizeof(size_t));
+    in.read((char *)&s, sizeof(size_t));
     char buf[9999];
     for (int i = 0; i < 9999; ++i) buf[i] = 0;
     in.read(buf, s);
     // std::cout << "XformMap load, description: " << std::endl;
     description = std::string(buf).substr(37, s - 80);
     // std::cout << description << std::endl;
-    in.read((char*)&s, sizeof(size_t));
+    in.read((char *)&s, sizeof(size_t));
     // std::cout << "SIZE IN " << s << std::endl;
     for (int i = 0; i < 9999; ++i) buf[i] = 0;
     in.read(buf, s);
@@ -291,9 +291,9 @@ struct XformMap {
     // }
 
     Float cart_resl, ang_resl, cart_bound;
-    in.read((char*)&cart_resl, sizeof(Float));
-    in.read((char*)&ang_resl, sizeof(Float));
-    in.read((char*)&cart_bound, sizeof(Float));
+    in.read((char *)&cart_resl, sizeof(Float));
+    in.read((char *)&ang_resl, sizeof(Float));
+    in.read((char *)&cart_bound, sizeof(Float));
     // std::cout << "read:" << cart_resl << " " << ang_resl << std::endl;
     if (cart_resl_ != -1 && cart_resl_ != cart_resl) {
       std::cerr << "XformMap::load, hasher cart_resl mismatch, expected "
@@ -319,14 +319,14 @@ struct XformMap {
     // std::cout << "SIZE IN " << map_.size() << std::endl;
     return true;
   }
-  bool load(std::istream& in) {
+  bool load(std::istream &in) {
     std::string dummy;
     return load(in, dummy);
   }
 };
 
 template <class X, class V, template <class C> class H, class S>
-std::ostream& operator<<(std::ostream& out, XformMap<X, V, H, S> const& xmap) {
+std::ostream &operator<<(std::ostream &out, XformMap<X, V, H, S> const &xmap) {
   return out << xmap.hasher_.name();
 }
 }
