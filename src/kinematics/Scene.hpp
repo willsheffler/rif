@@ -69,21 +69,21 @@ struct BodyTplt {
   }
 
   // BodyTplt( BodyTplt const & proto ){
-  // 	conformation_ = make_shared<ConformationConst>( proto ); // NO!!! Confs
+  //  conformation_ = make_shared<ConformationConst>( proto ); // NO!!! Confs
   // are CONST
   // }
 
   // template<class Actor>
   // Actor
   // get_actor(
-  // 	Index i
+  //  Index i
   // ) const {
-  // 	return Actor(this->value()->template get<Actor>().at(i),position_);
+  //  return Actor(this->value()->template get<Actor>().at(i),position_);
   // }
   // template<class Actor>
   // Actor
   // get_actor_unsafe(Index i) const {
-  // 	return Actor(this->value()->template get<Actor>()[i],position_);
+  //  return Actor(this->value()->template get<Actor>()[i],position_);
   // }
 
   // Position const & position() const { return position_; }
@@ -276,9 +276,9 @@ struct ActorCounter {
 };
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////
 ////////////////////////// Scene / //////////////////////////
-///////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////
 
 ///@brief default implementation for inverse
 template <typename T>
@@ -327,14 +327,14 @@ struct Scene : public SceneBase<_Position, _Index> {
   virtual ~Scene() {}
 
 // virtual Position position(Index i) const {
-// 	Index isym = this->sym_index_map(i);
-// 	// if( isym == 0 )	return bodies_.at(i).position();
-// 	/*else*/ return this->symframes_.at(isym) * bodies_.at(i).position();
+//  Index isym = this->sym_index_map(i);
+//  // if( isym == 0 )  return bodies_.at(i).position();
+//  /*else*/ return this->symframes_.at(isym) * bodies_.at(i).position();
 // }
 // virtual void set_position(Index i, Position const & newp){
-// 	assert( bodies_.size() == this->positions_.size() );
-// 	assert(i < bodies_.size());
-// 	this->set_position(newp);
+//  assert( bodies_.size() == this->positions_.size() );
+//  assert(i < bodies_.size());
+//  this->set_position(newp);
 // }
 
 #ifdef CEREAL
@@ -370,9 +370,9 @@ struct Scene : public SceneBase<_Position, _Index> {
     assert(bodies_.size() == this->positions_.size());
   }
   // void add_body(Body const & b){
-  // 	bodies_.push_back(b);
-  // 	positions_.push_back(Position::Identity());
-  // 	this->update_symmetry( (Index)bodies_.size() );
+  //  bodies_.push_back(b);
+  //  positions_.push_back(Position::Identity());
+  //  this->update_symmetry( (Index)bodies_.size() );
   // }
   // void set_body(Index i, shared_ptr<ConformationConst> const & c){ bodies_[i]
   // = c; }
@@ -396,7 +396,7 @@ struct Scene : public SceneBase<_Position, _Index> {
   Position &__position_unsafe_asym__(Index i) { return this->positions_[i]; }
   Position const __position_unsafe__(Index i) const {
     Index isym = this->sym_index_map(i);
-    // if( isym == 0 )	return this->positions_[i];
+    // if( isym == 0 )  return this->positions_[i];
     /*else*/ return this->symframes_[isym] * this->positions_[i];
   }
   Conformation const &__conformation_unsafe_asym__(Index i) const {
@@ -582,12 +582,12 @@ struct Scene : public SceneBase<_Position, _Index> {
         // Index const NACT1 = c1.template get<Actor1>().size();
         // Index const NACT2 = c2.template get<Actor2>().size();
         // for(Index j1 = 0; j1 < NACT1; ++j1){
-        // 	Actor1 a1( c1.template get<Actor1>()[j1], p1 );
-        // 	for(Index j2 = 0; j2 < NACT2; ++j2){
-        // 		Actor2 a2( c2.template get<Actor2>()[j2], p2 );
-        // 		visitor( std::make_pair(a1,a2), i1<NBOD&&i2<NBOD?1.0:0.5
+        //  Actor1 a1( c1.template get<Actor1>()[j1], p1 );
+        //  for(Index j2 = 0; j2 < NACT2; ++j2){
+        //    Actor2 a2( c2.template get<Actor2>()[j2], p2 );
+        //    visitor( std::make_pair(a1,a2), i1<NBOD&&i2<NBOD?1.0:0.5
         // );
-        // 	}
+        //  }
         // }
 
         Container1 const &container1 = c1.template get<Actor1>();

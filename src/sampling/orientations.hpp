@@ -243,7 +243,7 @@ double pind(double ind, double delta, double sigma) {
 }
 
 auto read_karney_orientation_file(std::string fname) {
-  Eigen::MatrixXd quats;
+  Eigen::MatrixX4d quats;
   Eigen::VectorXd cover;
 
   std::ifstream file(fname.c_str(), std::ios_base::in | std::ios_base::binary);
@@ -302,7 +302,7 @@ auto read_karney_orientation_file(std::string fname) {
           s.Add(q.Times(s.Orientation(i)), s.Weight(i));
       }
       // s.Print(cout, euler, fine ? 7 : 6);
-      for (int i = 0; i < s.Number(); ++i) {
+      for (size_t i = 0; i < s.Number(); ++i) {
         quats(quats_i, 0) = s.Orientation(i).w;
         quats(quats_i, 1) = s.Orientation(i).x;
         quats(quats_i, 2) = s.Orientation(i).y;
@@ -325,7 +325,7 @@ auto read_karney_orientation_file(std::string fname) {
     }
     assert(s.Number() == ntot);
     // s.Print(cout, euler, fine ? 7 : 6);
-    for (int i = 0; i < s.Number(); ++i) {
+    for (size_t i = 0; i < s.Number(); ++i) {
       quats(quats_i, 0) = s.Orientation(i).w;
       quats(quats_i, 1) = s.Orientation(i).x;
       quats(quats_i, 2) = s.Orientation(i).y;

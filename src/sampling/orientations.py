@@ -1,9 +1,10 @@
 import os
-from riflib_cpp.sampling.orientations import read_karney_orientation_file
+import riflib.sampling.orientations as ori
 import pandas as pd
+import numpy as np
 
 import sys
-if sys.version_info[0] < 3: 
+if sys.version_info[0] < 3:
     from StringIO import StringIO
 else:
     from io import StringIO
@@ -17,10 +18,8 @@ c48u1             24 62.80  1.57514 0.70000  0.00
 c48n9            216 36.47  2.89689 0.26091  7.00
 c48u27           648 20.83  1.64091 0.33582  0.00
 c48u83          1992 16.29  2.42065 0.25970  0.00
-c48u157         3768 14.49  3.22614 0.20710  0.00
 c48u181         4344 12.29  2.27013 0.19415  0.00
 c48n309         7416  9.72  1.91567 0.15167  1.86
-c48u519        12456  9.05  2.60257 0.13807  0.00
 c48n527        12648  8.17  1.94334 0.12599  1.86
 c48u815        19560  7.40  2.23719 0.11607  0.00
 c48u1153       27672  6.60  2.23735 0.10330  0.00
@@ -30,13 +29,11 @@ c48u2219       53256  5.27  2.20117 0.08249  0.00
 c48u2867       68808  5.24  2.79649 0.07531  0.00
 c48u2947       70728  4.71  2.07843 0.07359  0.00
 c48u3733       89592  4.37  2.11197 0.06836  0.00
-c48u4701      112824  4.22  2.39041 0.06372  0.00
 c48u4749      113976  4.00  2.05300 0.06248  0.00
 c48u5879      141096  3.74  2.07325 0.05837  0.00
 c48u7111      170664  3.53  2.11481 0.05514  0.00
 c48u8649      207576  3.26  2.02898 0.05094  0.00
 c48u10305     247320  3.102 2.08130 0.048456 2/41.2973
-c48u12083     289992  3.096 2.42678 0.046023 #
 c48u12251     294024  2.903 2.02950 0.045354 2s/18.2657
 c48u14251     342024  2.767 2.04269 0.043215 2/46.2973
 c48u16533     396792  2.655 2.09385 0.041421 2/48.2973
@@ -79,19 +76,27 @@ c48u312831   7507944  0.978 1.97997 0.015266 2s/54.2657
 """
 karney_index = pd.read_csv(StringIO(karney_index_str), sep='\s+')
 
+
 def karney_name_by_radius(cr):
     i = sum(karney_index.radius > cr)
     if i == karney_index.shape[0]:
         i -= 1
-    return karney_index.iloc[i,0]
+    return karney_index.iloc[i, 0]
+
 
 def quaternion_set_with_covering_radius_degrees(cr=63):
     print os.getcwd()
-    fname = DATA_PATH + karney_name_by_radius(cr)+'.grid.gz'
-    return read_karney_orientation_file(fname)
+    fname = DATA_PATH + karney_name_by_radius(cr) + '.grid.gz'
+    return ori.read_karney_orientation_file(fname)
     print 'oarsitn'
 
+
 def quaternion_set_by_name(name):
-    fname = DATA_PATH + name +'.grid.gz'
+    fname = DATA_PATH + name + '.grid.gz'
     assert name in karney_index.name.values
-    return read_karney_orientation_file(fname)
+    return ori.read_karney_orientation_file(fname)
+
+
+def filter_quaternion_set_axis_within(quats, axis, angle):
+    quats = np.quaternion.as_quat_array(quats)
+    print quats[0]

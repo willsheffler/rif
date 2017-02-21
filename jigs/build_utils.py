@@ -1,5 +1,5 @@
 from __future__ import absolute_import, division, print_function
-from builtins import *
+from builtins import bytes
 
 import glob
 import os
@@ -23,7 +23,8 @@ def get_proj_root():
 def get_build_dir(d, cfg='Release'):
     """get directory setup.py builds stuff in, d is lib or temp"""
     version = '{}.{}'.format(sys.version_info.major, sys.version_info.minor)
-    libdir = glob.glob(get_proj_root() + '/build_setup_py_'+cfg+'/' + d + '*' + version)
+    libdir = (glob.glob(get_proj_root() + '/build_setup_py_' +
+                        cfg + '/' + d + '*' + version))
     assert len(libdir) < 2
     if libdir:
         return libdir[0]
@@ -34,6 +35,7 @@ def get_build_dir(d, cfg='Release'):
 def which(program):
     """like linux which"""
     import os
+
     def is_exe(fpath):
         return os.path.isfile(fpath) and os.access(fpath, os.X_OK)
 
@@ -57,23 +59,23 @@ def add_to_pypath(newpath):
     current = None
     if 'PYTHONPATH' in os.environ:
         current = os.environ['PYTHONPATH']
-    os.environ['PYTHONPATH'] = ':'.join(os.path.abspath(path) for path in newpath)
+    os.environ['PYTHONPATH'] = ':'.join(os.path.abspath(p) for p in newpath)
     if current:
         os.environ['PYTHONPATH'] += ':' + current
 
 
 def rebuild_setup_py_riflib(cfg='Release'):
     proj_root = get_proj_root()
-    if os.system('cd ' + proj_root + '; '+sys.executable+' setup.py build --build-base=build_setup_py_'+cfg):
+    if os.system('cd ' + proj_root + '; ' + sys.executable +
+                 ' setup.py build --build-base=build_setup_py_' + cfg):
         return -1
-
 
 
 def rebuild_fast(target='riflib_cpp', cfg='Release', redo_cmake=False):
     makeexe = 'ninja'
     if not which('ninja'):
         makeexe = 'make'
-    proj_root = get_proj_root()
+    # proj_root = get_proj_root()
     cmake_dir = get_build_dir('temp', cfg=cfg)
     if not cmake_dir or redo_cmake:
         if rebuild_setup_py_riflib(cfg=cfg):
@@ -103,7 +105,11 @@ def riflib_is_installed():
 
 def is_devel_install():
     proj_root = get_proj_root()
-    return proj_root+'/src' in sys.path
+    return proj_root + '/src' in sys.path
+
+
+def rif_is_installed():
+    return False
 
 
 def remove_installed_riflib():
@@ -117,19 +123,23 @@ def build_and_run_pytest(redo_cmake=False):
     # remove_installed_rif()
     proj_root = get_proj_root()
     print('calling rebuild_fast')
-    if rebuild_fast(target='riflib_cpp gtest_all', cfg='Release', redo_cmake=redo_cmake):
+    if rebuild_fast(target='riflib_cpp gtest_all',
+                    cfg='Release', redo_cmake=redo_cmake):
         sys.exit(-1)
-    pypath = [
-        os.path.abspath(get_build_dir('lib')),
-        proj_root + '/external',
-    ]
+    pypath = [os.path.abspath(get_build_dir('lib')),
+              proj_root + '/external',
+              ]
     # need to use sys.path for this process
     sys.path = pypath + sys.path
     # need to use PYTHONPATH env for xdist subprocessess
     add_to_pypath(pypath)
-    # TODO both here and in docs, this gets messed up when riflib is actually installed
+    # TODO both here and in docs, this gets messed
+    #      up when riflib is actually installed
     import pytest
     if sys.version_info.major is 2:
         proj_root = bytes(proj_root, 'ascii')
-    pytest.main(["."]) # assuming we execute from ide dir
-
+    args = [x for x in sys.argv[1:] if x.endswith('.py')]
+    if not args:
+        args = ['.']
+    print("ARGS:", args)
+    pytest.main(args)

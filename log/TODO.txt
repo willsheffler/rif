@@ -1,0 +1,11 @@
+TODO build system run one file
+
+TODO visualize orientation sets
+
+TODO make cones from orientation sets, see what ~1500 gets you
+
+TODO visualize bcc lattice
+
+TODO visualize rays in 6x4D bcc lattice cubefaces
+
+TODO auto-pep8 somehow
