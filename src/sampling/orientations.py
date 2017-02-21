@@ -1,5 +1,5 @@
 import os
-from riflib_cpp.sampling.orientations import read_karney_orientation_file
+from rif_cpp.sampling.orientations import read_karney_orientation_file
 import pandas as pd
 import numpy as np
 import quaternion as quat
@@ -101,16 +101,3 @@ def quaternion_set_by_name(name):
 def filter_quaternion_set_axis_within(quats, axis, angle):
     quats = quat.as_quat_array(quats)
     print quats
-    import __main__
-    __main__.pymol_argv = ['pymol', '-qei']
-
-    # Importing the PyMOL module will create the window.
-    import pymol
-
-    # Call the function below before using any PyMOL modules.
-    pymol.finish_launching()
-
-    from pymol import cmd
-    cmd.stereo('walleye')
-    cmd.set('stereo_shift', 0.23)
-    cmd.set('stereo_angle', 1.0)

@@ -95,8 +95,7 @@ struct Atom {
        float bfac = AtomData::default_bfac())
       : position_(p[0], p[1], p[2]),
         type_(type),
-        data_(scheme::make_shared<
-              AtomData>(  // TODO: why do I need riflib:: here?
+        data_(scheme::make_shared<AtomData>(  // TODO: why do I need rif:: here?
             // data_(new AtomData(
             atomname, resname, chain, resnum, atomnum, elem, ishet, occ,
             bfac)) {}

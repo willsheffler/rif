@@ -1,1 +1,1 @@
-from riflib_cpp.numeric import *
+from rif_cpp.numeric import *

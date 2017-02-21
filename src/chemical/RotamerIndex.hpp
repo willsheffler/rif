@@ -423,26 +423,26 @@ struct RotamerIndex {
       for (int irot = 0; irot < size(); ++irot) {
         uniq_sum += (irot == structural_parent_of_.at(irot));
         // if( structural_parent_of_.at(irot)==irot ){
-        // 	std::cerr << "chi12_parent: " << irot << " " << resname(irot);
-        // 	for( int ichi = 0; ichi < nchi(irot); ++ichi){
-        // 		std::cerr << " " << chi(irot,ichi);
-        // 	}
-        // 	// std::cerr << std::endl;
-        // 	int nchild = 0;
-        // 	for( int jrot = irot+1; jrot < size(); ++jrot ){
-        // 		if( structural_parent_of_.at(jrot) == irot ){
-        // 			// std::cerr << "       child: " << jrot << " "
+        //  std::cerr << "chi12_parent: " << irot << " " << resname(irot);
+        //  for( int ichi = 0; ichi < nchi(irot); ++ichi){
+        //    std::cerr << " " << chi(irot,ichi);
+        //  }
+        //  // std::cerr << std::endl;
+        //  int nchild = 0;
+        //  for( int jrot = irot+1; jrot < size(); ++jrot ){
+        //    if( structural_parent_of_.at(jrot) == irot ){
+        //      // std::cerr << "       child: " << jrot << " "
         // <<
         // resname(jrot);
-        // 			// for( int ichi = 0; ichi < nchi(jrot);
+        //      // for( int ichi = 0; ichi < nchi(jrot);
         // ++ichi){
-        // 				// std::cerr << " " << chi(jrot,ichi);
-        // 			// }
-        // 			// std::cerr << std::endl;
-        // 			nchild++;
-        // 		}
-        // 	}
-        // 	std::cerr << " nchild: " << nchild << std::endl;
+        //        // std::cerr << " " << chi(jrot,ichi);
+        //      // }
+        //      // std::cerr << std::endl;
+        //      nchild++;
+        //    }
+        //  }
+        //  std::cerr << " nchild: " << nchild << std::endl;
         // }
       }
       std::cerr << "total num structural_parents_ "
@@ -660,8 +660,8 @@ struct RotamerIndex {
     // out << "MODEL " << resname(irot) << " " << ++rescount << " " << irot << "
     // HBONDERS" << std::endl;
     // for( auto const & h : rotamers_.at(irot).hbonders_ ){
-    // 	out << riflib::io::dump_pdb_atom(h.first) << std::endl;
-    // 	out << riflib::io::dump_pdb_atom(h.second) << std::endl;
+    //  out << rif::io::dump_pdb_atom(h.first) << std::endl;
+    //  out << rif::io::dump_pdb_atom(h.second) << std::endl;
     // }
     for (auto const &hr : rotamers_.at(irot).donors_) {
       scheme::io::dump_pdb_atom_resname_atomname(out, "DON", "CDON",

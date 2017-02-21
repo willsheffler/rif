@@ -1,1 +1,1 @@
-from riflib_cpp.test import *
+from rif_cpp.test import *

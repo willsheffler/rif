@@ -38,7 +38,7 @@ T test_serialization(T const &ref) {
   iarchive >> t;
 // std::cout << "40" << std::endl;
 #else
-  std::cerr << "riflib::io::test_serialization NO CEREAL" << std::endl;
+  std::cerr << "rif::io::test_serialization NO CEREAL" << std::endl;
 #endif
   return t;
 }
@@ -61,7 +61,7 @@ bool read_cache(std::string const &location, T &t) {
   cereal::BinaryInputArchive archive(stdin);
   archive >> t;
 #else
-  std::cerr << "riflib::io::test_serialization NO CEREAL" << std::endl;
+  std::cerr << "rif::io::test_serialization NO CEREAL" << std::endl;
 #endif
   return true;
 }
@@ -87,7 +87,7 @@ void write_cache(std::string const &location, T &t) {
   // system("ls");
   BOOST_VERIFY(fs::exists(fs::path(location)));
 #else
-  std::cerr << "riflib::io::test_serialization NO CEREAL" << std::endl;
+  std::cerr << "rif::io::test_serialization NO CEREAL" << std::endl;
 #endif
 }
 }

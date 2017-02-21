@@ -1,3 +1,6 @@
-from riflib_cpp import *
-import riflib_cpp
-__version__ = riflib_cpp.__version__
+from rif_cpp import *
+import rif_cpp
+# import chemical
+import util
+
+__version__ = rif_cpp.__version__

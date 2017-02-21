@@ -1,0 +1,29 @@
+#include <pybind11/pybind11.h>
+
+namespace py = pybind11;
+
+{{forward}}
+
+PYBIND11_PLUGIN(rif_cpp) {
+    py::module rif("rif_cpp", R"pbdoc(
+        rif docs
+        -----------------------
+
+        .. currentmodule:: rif
+
+        .. autosummary::
+           :toctree: _generate
+
+    )pbdoc");
+
+{{code}}
+
+#ifdef VERSION_INFO
+    rif.attr("__version__") = py::str(VERSION_INFO);
+#else
+    rif.attr("__version__") = py::str("dev");
+#endif
+
+    return rif.ptr();
+
+}

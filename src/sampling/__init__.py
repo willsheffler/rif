@@ -1,1 +1,1 @@
-from riflib_cpp.sampling import *
+from rif_cpp.sampling import *

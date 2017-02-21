@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.3)
-project(riflib)
+project(rif)
 
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14 -DCXX11 -DCXX14")
@@ -30,32 +30,33 @@ endfunction()
 function(build_python_bindings)
     execute_process(COMMAND python ${CMAKE_SOURCE_DIR}/jigs/pybind_source_gen.py ${CMAKE_SOURCE_DIR}/src)
     FILE(GLOB_RECURSE PY_CPP "./src/[0-9a-zA-Z_]*.pybind.cpp")
-    pybind11_add_module( riflib_cpp src/riflib.gen.cpp ${PY_CPP} )
-    target_link_libraries( riflib_cpp PRIVATE ${EXTRA_LIBS} )
+    pybind11_add_module( rif_cpp src/rif.gen.cpp ${PY_CPP} )
+    target_link_libraries( rif_cpp PRIVATE ${EXTRA_LIBS} )
+    execute_process(COMMAND python ${CMAKE_SOURCE_DIR}/jigs/gen__init__.py)
     execute_process(COMMAND python ${CMAKE_SOURCE_DIR}/jigs/cp_filtered.py .py
-        ${CMAKE_SOURCE_DIR}/src ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/riflib)
+        ${CMAKE_SOURCE_DIR}/src ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/rif)
 endfunction()
 
 
 function(BUILD_GTESTS)
     add_subdirectory(external/googletest)
     include_directories("external/googletest/include")
-    list(APPEND EXTRA_LIBS gtest )
+    list(APPEND EXTRA_LIBS gtest)
 
     # shitty "data" files to compile faster TODO: remove these
     list(APPEND LIB_CPP src/rosetta/score/EtableParams_init.lib.cpp
                         src/rosetta/atype_map.lib.cpp
                         src/chemical/ligand_factory.lib.cpp)
     set_source_files_properties(${LIB_CPP} PROPERTIES COMPILE_FLAGS -O0)
-    add_library(riflib_data ${LIB_CPP})
+    add_library(rif_data ${LIB_CPP})
 
 
     file(GLOB_RECURSE TEST_CPP "src/[0-9a-zA-Z_]*.gtest.cpp")
     add_executable(gtest_all src/test/gtest_all.cpp ${TEST_CPP})
-    target_link_libraries(gtest_all riflib_data ${EXTRA_LIBS})
+    target_link_libraries(gtest_all rif_data ${EXTRA_LIBS})
 
     add_executable(gtest_wip src/test/gtest_wip.cpp)
-    target_link_libraries(gtest_wip riflib_data ${EXTRA_LIBS})
+    target_link_libraries(gtest_wip rif_data ${EXTRA_LIBS})
 endfunction()
 
 

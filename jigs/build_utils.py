@@ -64,21 +64,21 @@ def add_to_pypath(newpath):
         os.environ['PYTHONPATH'] += ':' + current
 
 
-def rebuild_setup_py_riflib(cfg='Release'):
+def rebuild_setup_py_rif(cfg='Release'):
     proj_root = get_proj_root()
     if os.system('cd ' + proj_root + '; ' + sys.executable +
                  ' setup.py build --build-base=build_setup_py_' + cfg):
         return -1
 
 
-def rebuild_fast(target='riflib_cpp', cfg='Release', redo_cmake=False):
+def rebuild_fast(target='rif_cpp', cfg='Release', redo_cmake=False):
     makeexe = 'ninja'
     if not which('ninja'):
         makeexe = 'make'
     # proj_root = get_proj_root()
     cmake_dir = get_build_dir('temp', cfg=cfg)
     if not cmake_dir or redo_cmake:
-        if rebuild_setup_py_riflib(cfg=cfg):
+        if rebuild_setup_py_rif(cfg=cfg):
             return -1
         cmake_dir = get_build_dir('temp', cfg=cfg)
 
@@ -87,20 +87,20 @@ def rebuild_fast(target='riflib_cpp', cfg='Release', redo_cmake=False):
 
 def make_docs(kind='html'):
     proj_root = get_proj_root()
-    rebuild_setup_py_riflib()
+    rebuild_setup_py_rif()
     add_to_pypath(get_build_dir('lib'))
     os.system('cd ' + proj_root + '/docs; make ' + kind)
 
 
-def riflib_is_installed():
-    riflib_loader = False
+def rif_is_installed():
+    rif_loader = False
     try:
         import pkgutil
-        riflib_loader = pkgutil.find_loader('riflib')
+        rif_loader = pkgutil.find_loader('rif')
     except ImportError:
         import importlib
-        riflib_loader = importlib.util.find_spec('riflib')
-    return riflib_loader is not None
+        rif_loader = importlib.util.find_spec('rif')
+    return rif_loader is not None
 
 
 def is_devel_install():
@@ -112,18 +112,18 @@ def rif_is_installed():
     return False
 
 
-def remove_installed_riflib():
-    if riflib_is_installed():
-        os.system('echo y | ' + sys.executable + ' -m pip uninstall riflib')
+def remove_installed_rif():
+    if rif_is_installed():
+        os.system('echo y | ' + sys.executable + ' -m pip uninstall rif')
         assert is_devel_install() or not rif_is_installed()
-        print('uninstalled riflib from ' + sys.executable)
+        print('uninstalled rif from ' + sys.executable)
 
 
 def build_and_run_pytest(redo_cmake=False):
     # remove_installed_rif()
     proj_root = get_proj_root()
     print('calling rebuild_fast')
-    if rebuild_fast(target='riflib_cpp gtest_all',
+    if rebuild_fast(target='rif_cpp gtest_all',
                     cfg='Release', redo_cmake=redo_cmake):
         sys.exit(-1)
     pypath = [os.path.abspath(get_build_dir('lib')),
@@ -134,13 +134,12 @@ def build_and_run_pytest(redo_cmake=False):
     # need to use PYTHONPATH env for xdist subprocessess
     add_to_pypath(pypath)
     # TODO both here and in docs, this gets messed
-    #      up when riflib is actually installed
+    #      up when rif is actually installed
     import pytest
     if sys.version_info.major is 2:
         proj_root = bytes(proj_root, 'ascii')
     args = [x for x in sys.argv[1:] if x.endswith('.py') and
             os.path.basename(x).startswith('test')]
-    print("ARGS:", sys.argv[1:])
     if not args:
         args = ['.']
     pytest.main(args)

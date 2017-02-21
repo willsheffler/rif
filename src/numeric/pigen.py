@@ -1,1 +1,1 @@
-from riflib_cpp.numeric.pigen import *
+from rif_cpp.numeric.pigen import *

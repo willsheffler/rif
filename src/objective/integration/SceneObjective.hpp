@@ -56,8 +56,8 @@ struct SceneObjectiveParametric
     return results.sum();
   }
   virtual void score(SceneBase const &s, std::vector<float> &vec) const {
-    // ::devel::riflib::print_eigenxform( s.position(0) );
-    // ::devel::riflib::print_eigenxform( s.position(1) );
+    // ::devel::rif::print_eigenxform( s.position(0) );
+    // ::devel::rif::print_eigenxform( s.position(1) );
     Scene const &scene = static_cast<Scene const &>(s);
     objective(scene, config).vector(vec);
   }
