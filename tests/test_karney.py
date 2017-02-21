@@ -2,6 +2,7 @@ from riflib.test.test_numpy import np_array_info
 import numpy as np
 import riflib.sampling.orientations as ori
 import pytest
+from riflib.visualize.vispymol import launch_pymol
 
 
 def test_numpy_binding():
@@ -54,3 +55,9 @@ def test_filter_by_axis():
     q, w = ori.quaternion_set_with_covering_radius_degrees(100)
     print q.shape
     ori.filter_quaternion_set_axis_within(q, np.array((1, 0, 0)), 90.0)
+
+    def foo():
+        pass
+
+    # todo why no -qei?????!?!?!?
+    launch_pymol(foo)

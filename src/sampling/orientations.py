@@ -1,7 +1,8 @@
 import os
-import riflib.sampling.orientations as ori
+from riflib_cpp.sampling.orientations import read_karney_orientation_file
 import pandas as pd
 import numpy as np
+import quaternion as quat
 
 import sys
 if sys.version_info[0] < 3:
@@ -87,16 +88,29 @@ def karney_name_by_radius(cr):
 def quaternion_set_with_covering_radius_degrees(cr=63):
     print os.getcwd()
     fname = DATA_PATH + karney_name_by_radius(cr) + '.grid.gz'
-    return ori.read_karney_orientation_file(fname)
+    return read_karney_orientation_file(fname)
     print 'oarsitn'
 
 
 def quaternion_set_by_name(name):
     fname = DATA_PATH + name + '.grid.gz'
     assert name in karney_index.name.values
-    return ori.read_karney_orientation_file(fname)
+    return read_karney_orientation_file(fname)
 
 
 def filter_quaternion_set_axis_within(quats, axis, angle):
-    quats = np.quaternion.as_quat_array(quats)
-    print quats[0]
+    quats = quat.as_quat_array(quats)
+    print quats
+    import __main__
+    __main__.pymol_argv = ['pymol', '-qei']
+
+    # Importing the PyMOL module will create the window.
+    import pymol
+
+    # Call the function below before using any PyMOL modules.
+    pymol.finish_launching()
+
+    from pymol import cmd
+    cmd.stereo('walleye')
+    cmd.set('stereo_shift', 0.23)
+    cmd.set('stereo_angle', 1.0)
