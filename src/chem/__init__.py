@@ -1,1 +1,1 @@
-import biochem
+from . import biochem

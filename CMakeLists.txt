@@ -28,20 +28,24 @@ endfunction()
 
 
 function(build_python_bindings)
-    execute_process(COMMAND python ${CMAKE_SOURCE_DIR}/tools/pybind_source_gen.py ${CMAKE_SOURCE_DIR}/src)
+    execute_process(COMMAND python ${CMAKE_SOURCE_DIR}/tools/pybind_source_gen.py ${CMAKE_SOURCE_DIR}/src
+                    RESULT_VARIABLE STATUS)
+    if(NOT "${STATUS}" STREQUAL "0")
+        message(FATAL_ERROR "pybind_source_gen.py failed: ${STATUS}")
+    endif()
     FILE(GLOB_RECURSE PY_CPP "./src/[0-9a-zA-Z_]*.pybind.cpp")
     pybind11_add_module( rif_cpp src/rif.gen.cpp ${PY_CPP} )
     target_link_libraries( rif_cpp PRIVATE ${EXTRA_LIBS} )
     execute_process(COMMAND python ${CMAKE_SOURCE_DIR}/tools/gen__init__.py src
         WORKING_DIRECTORY ${CMAKE_SOURCE_DIR} RESULT_VARIABLE STATUS)
     if(NOT "${STATUS}" STREQUAL "0")
-        message(FATAL_ERROR "process failed: ${STATUS}")
+        message(FATAL_ERROR "gen__init__.py failed: ${STATUS}")
     endif()
     execute_process(COMMAND python ${CMAKE_SOURCE_DIR}/tools/cp_filtered.py .py
         ${CMAKE_SOURCE_DIR}/src ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/rif
         RESULT_VARIABLE STATUS)
     if(NOT "${STATUS}" STREQUAL "0")
-        message(FATAL_ERROR "process failed: ${STATUS}")
+        message(FATAL_ERROR "cp_filtered.py failed: ${STATUS}")
     endif()
 endfunction()
 

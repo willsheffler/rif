@@ -6,16 +6,18 @@ import quaternion as quat
 
 import sys
 if sys.version_info[0] < 3:
-    from StringIO import StringIO
+    from io import BytesIO
+    StrIO = BytesIO
 else:
     from io import StringIO
+    StrIO = StringIO
 
 
 DATA_PATH = 'data/orientations/karney/'
 
 with open(DATA_PATH + 'index.dat') as fin:
     karney_index_str = fin.read()
-karney_index = pd.read_csv(StringIO(karney_index_str), sep='\s+')
+karney_index = pd.read_csv(StrIO(karney_index_str), sep='\s+')
 
 
 def quats_from_karney_file(fname):
@@ -32,7 +34,7 @@ def karney_name_by_radius(cr):
 
 
 def quaternion_set_with_covering_radius_degrees(cr=63):
-    print os.getcwd()
+    print(os.getcwd())
     fname = DATA_PATH + karney_name_by_radius(cr) + '.grid.gz'
     return quats_from_karney_file(fname)
 
@@ -44,5 +46,5 @@ def quaternion_set_by_name(name):
 
 
 def filter_quaternion_set_axis_within(quats, axis, angle):
-    print quats
+    print(quats)
     return quats

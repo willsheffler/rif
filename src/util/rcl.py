@@ -1,4 +1,4 @@
-from __future__ import print_function
+
 
 """
 Rosetta Compatibility Layer
@@ -141,7 +141,7 @@ def add_atom_types_to_rosettaDB(newprops, extradict, typeset='fa_standard'):
                  typeset + '/atom_properties.txt')
     updated = update_roesettaDB_file(atomprops, newprops)
     any_updates = any_updates or updated
-    for extraname, extraval in extradict.items():
+    for extraname, extraval in list(extradict.items()):
         mypath = (ROSETTA_DB + '/chem/atom_type_sets/' +
                   typeset + '/extras/' + extraname + '.txt')
         updated = update_roesettaDB_file(mypath, extraval)

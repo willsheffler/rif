@@ -17,13 +17,14 @@ def get_pybind_modules(srcpath):
         'find {} -regex [^.].+pybind.cpp'.format(srcpath).split())
     pymodules = OrderedDict()
     for pybindfile in pbfiles.splitlines():
-        print "found pybind file", pybindfile
+        print("found pybind file", pybindfile)
         try:
             grepped = subprocess.check_output(
                 ['grep', '-H', 'RIFLIB_PYBIND_', pybindfile])
         except:
             continue
         for line in grepped.splitlines():
+            line = str(line)
             match = re.match(
                 r".*src/(.+).pybind.cpp\:.* RIFLIB_PYBIND_(\w+)", line)
             # print 'line:', line
@@ -47,12 +48,12 @@ def update_file_if_needed(destfile, newcontent):
         assert os.path.exists(testfile)
         diff = subprocess.call(['diff', testfile, destfile])
     if diff:
-        print 'pybind_source_gen.py: updating', destfile
+        print('pybind_source_gen.py: updating', destfile)
         if os.path.exists(destfile):
             os.remove(destfile)
         os.rename(testfile, destfile)
     else:
-        print "pybind_source_gen.py: rif.pybind.cpp is up to date"
+        print("pybind_source_gen.py: rif.pybind.cpp is up to date")
         os.remove(testfile)
 
 
@@ -66,7 +67,7 @@ def shitty_make_code(pymodules):
                   '").def_submodule("'.join(path.split('/')) +
                   '");\n')
     code2 += '\n'
-    for func, path in pymodules.items():
+    for func, path in list(pymodules.items()):
         code1 += 'void RIFLIB_PYBIND_' + func + '(py::module & m);\n'
         code2 += '    RIFLIB_PYBIND_' + func + \
             '(' + path.replace('/', '__') + ');\n'
@@ -79,7 +80,7 @@ def mkdir_if_necessary(path):
 
 def mkfile_if_necessary(path, content):
     if not os.path.exists(path):
-        print 'pybind_source_gen.py MAKING:', path
+        print('pybind_source_gen.py MAKING:', path)
         with open(path, 'w') as out:
             out.write(content)
 

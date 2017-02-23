@@ -28,7 +28,7 @@ def compact_etable_plot(df, title=None, size=2.2, col_wrap=8,
     sns.set(style="ticks")
     grid = sns.FacetGrid(df, col='t', size=size, col_wrap=col_wrap, aspect=aspect)
     grid.map(plt.axhline, y=0, ls=":", c='.5')
-    for score, col in scores.items():
+    for score, col in list(scores.items()):
         grid.map(plt.plot, 'dist', score, marker=marker, lw=lw, ms=ms, color=col)
     grid.set(xticks=xticks, yticks=yticks, xlim=xlim, ylim=ylim)
     grid.fig.tight_layout(h_pad=1, w_pad=0)

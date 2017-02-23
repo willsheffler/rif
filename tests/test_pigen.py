@@ -26,7 +26,7 @@ def test_Vector3f():
 
 def test_Matrix33f():
     m = M()
-    print m
+    print(m)
     assert m == m
     assert m.isApprox(m.inverse())
     assert (m * m).isApprox(m)
@@ -36,7 +36,7 @@ def test_Matrix33f():
 
 def test_Transform3f():
     x = X()
-    print x
-    print x.inverse()
+    print(x)
+    print(x.inverse())
     assert x.isApprox(x.inverse())
     # assert 0

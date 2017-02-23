@@ -24,7 +24,7 @@ def main():
                 # print 'removing', path
                 os.remove(path)
                 count += 1
-    print 'removed', count, '.pyc and build/*.py files'
+    print('removed', count, '.pyc and build/*.py files')
 
 
 if __name__ == '__main__':

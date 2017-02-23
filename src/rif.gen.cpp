@@ -24,9 +24,9 @@ PYBIND11_PLUGIN(rif_cpp) {
     )pbdoc");
 
     py::module test__test_numpy = rif.def_submodule("test").def_submodule("test_numpy");
-    py::module sampling__orientations = rif.def_submodule("sampling").def_submodule("orientations");
     py::module test__example = rif.def_submodule("test").def_submodule("example");
     py::module numeric__pigen = rif.def_submodule("numeric").def_submodule("pigen");
+    py::module sampling__orientations = rif.def_submodule("sampling").def_submodule("orientations");
 
     RIFLIB_PYBIND_sampling_orientations(sampling__orientations);
     RIFLIB_PYBIND_numeric_pigen(numeric__pigen);

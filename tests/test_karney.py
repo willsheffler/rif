@@ -25,7 +25,7 @@ def test_karney_oddball():
 def test_karney_10():
     quat, weight = ori.quaternion_set_with_covering_radius_degrees(10)
     assert len(quat) == 7416
-    print weight[:10]
+    print(weight[:10])
     assert abs(1.0 - weight.mean()) < 0.00001
 
 

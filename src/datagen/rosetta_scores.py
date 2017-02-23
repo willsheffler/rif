@@ -1,4 +1,4 @@
-from __future__ import absolute_import, division, print_function, unicode_literals
+
 from builtins import *
 
 import random
@@ -29,7 +29,7 @@ def make_atype_charges():
             #     print iatype, resn, res.atom_name(ia+1)
             charge = res.atomic_charge(ia + 1)
             atomic_charges[iatype].append(charge)
-    for i, charges in atomic_charges.items():
+    for i, charges in list(atomic_charges.items()):
         # print i, rcl.ats()[i].name(), np.mean(charges), np.std(charges)
         avg_iatype_charge[rcl.ats()[i].name()] = np.mean(charges)
     return avg_iatype_charge
@@ -194,7 +194,7 @@ def make_eframes(spec, multiprocess=False,
         with ProcessPoolExecutor(ncpu) as executor:
             eframes = executor.map(run_make_eframe_for_atoms, jobs)
     else:
-        eframes = map(run_make_eframe_for_atoms, jobs)
+        eframes = list(map(run_make_eframe_for_atoms, jobs))
     eframe = pd.concat(eframes)
     return eframe
 
