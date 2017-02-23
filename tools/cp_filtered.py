@@ -12,6 +12,7 @@ def main():
     dst = sys.argv[3]
     extfiles = subprocess.check_output(
         'find {} -regex [^.].+{}'.format(src, ext).split())
+    assert extfiles
     for extfile in extfiles.splitlines():
         newfile = extfile.replace(src, dst)
         os.system('mkdir -p ' + os.path.dirname(newfile))

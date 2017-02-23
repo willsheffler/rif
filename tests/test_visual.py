@@ -1,9 +1,9 @@
-from rif.visualize.vispymol import launch_pymol
+import pytest
+from rif.visual.vispymol import launch_pymol
 
 
+@pytest.mark.skip
 def test_launch_pymol():
     def foo():
         pass
-
-    # todo why no -qei?????!?!?!?
-    launch_pymol(foo)
+    launch_pymol(foo, args='-qc')

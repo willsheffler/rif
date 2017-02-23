@@ -88,7 +88,7 @@ class CMakeBuild(build_ext):
             cmake_args += ['-DCMAKE_BUILD_TYPE=' + cfg]
             # build_args += ['--', '-j'+str(multiprocessing.cpu_count()), 'rif']
             build_args += ['--', '-j' + str(multiprocessing.cpu_count())]
-
+        build_args.append('rif_cpp')
         env = os.environ.copy()
         env['CXXFLAGS'] = '{} -DVERSION_INFO=\\"{}\\"'.format(env.get('CXXFLAGS', ''),
                                                               self.distribution.get_version())
@@ -105,11 +105,14 @@ setup(
     version='0.0.1',
     author='Will Sheffler',
     author_email='willsheffler@gmail.com',
-    description='C++ based support libraries for rif',
+    description='Rotamer Interaction Field protein design library',
     long_description='',
-    ext_modules=[CMakeExtension('rif')],
+    url='https://github.com/willsheffler/rif',
+    ext_modules=[CMakeExtension('rif_cpp')],
     cmdclass=dict(build_ext=CMakeBuild),
     zip_safe=False,
+    setup_requires=['pytest-runner'],
+    tests_require=['pytest', 'pytest-xdist',
+                   'hypothesis', 'colorama', 'pytest_cpp', 'jinja2'],
     test_suite='pytest',
-    tests_require=['pytest', 'hypothesis', 'colorama', 'pytest_cpp', 'jinja2'],
 )

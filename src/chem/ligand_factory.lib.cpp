@@ -1,4 +1,4 @@
-#include "chemical/ligand_factory.hpp"
+#include "chem/ligand_factory.hpp"
 
 #include <iterator>
 

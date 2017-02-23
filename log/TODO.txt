@@ -1,11 +1,8 @@
  X   build system run one file
-
 TODO visualize orientation sets
-
 TODO make cones from orientation sets, see what ~1500 gets you
-
 TODO visualize bcc lattice
-
 TODO visualize rays in 6x4D bcc lattice cubefaces
+ X   auto-pep8 somehow
+TODO set pytest.ini stuff from scipts -- _thisfile no cpp,xdist
 
-TODO auto-pep8 somehow

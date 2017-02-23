@@ -28,13 +28,21 @@ endfunction()
 
 
 function(build_python_bindings)
-    execute_process(COMMAND python ${CMAKE_SOURCE_DIR}/jigs/pybind_source_gen.py ${CMAKE_SOURCE_DIR}/src)
+    execute_process(COMMAND python ${CMAKE_SOURCE_DIR}/tools/pybind_source_gen.py ${CMAKE_SOURCE_DIR}/src)
     FILE(GLOB_RECURSE PY_CPP "./src/[0-9a-zA-Z_]*.pybind.cpp")
     pybind11_add_module( rif_cpp src/rif.gen.cpp ${PY_CPP} )
     target_link_libraries( rif_cpp PRIVATE ${EXTRA_LIBS} )
-    execute_process(COMMAND python ${CMAKE_SOURCE_DIR}/jigs/gen__init__.py)
-    execute_process(COMMAND python ${CMAKE_SOURCE_DIR}/jigs/cp_filtered.py .py
-        ${CMAKE_SOURCE_DIR}/src ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/rif)
+    execute_process(COMMAND python ${CMAKE_SOURCE_DIR}/tools/gen__init__.py src
+        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR} RESULT_VARIABLE STATUS)
+    if(NOT "${STATUS}" STREQUAL "0")
+        message(FATAL_ERROR "process failed: ${STATUS}")
+    endif()
+    execute_process(COMMAND python ${CMAKE_SOURCE_DIR}/tools/cp_filtered.py .py
+        ${CMAKE_SOURCE_DIR}/src ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/rif
+        RESULT_VARIABLE STATUS)
+    if(NOT "${STATUS}" STREQUAL "0")
+        message(FATAL_ERROR "process failed: ${STATUS}")
+    endif()
 endfunction()
 
 
@@ -46,7 +54,7 @@ function(BUILD_GTESTS)
     # shitty "data" files to compile faster TODO: remove these
     list(APPEND LIB_CPP src/rosetta/score/EtableParams_init.lib.cpp
                         src/rosetta/atype_map.lib.cpp
-                        src/chemical/ligand_factory.lib.cpp)
+                        src/chem/ligand_factory.lib.cpp)
     set_source_files_properties(${LIB_CPP} PROPERTIES COMPILE_FLAGS -O0)
     add_library(rif_data ${LIB_CPP})
 

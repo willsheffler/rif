@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 
 #include "actor/Atom.hpp"
-#include "chemical/ligand_factory.hpp"
+#include "chem/ligand_factory.hpp"
 #include "numeric/euler_angles.hpp"
 
 #include <Eigen/Geometry>

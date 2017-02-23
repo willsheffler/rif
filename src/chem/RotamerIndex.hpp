@@ -1,8 +1,8 @@
 #ifndef INCLUDED_chemical_RotamerIndex_HH
 #define INCLUDED_chemical_RotamerIndex_HH
 
-#include "chemical/AtomData.hpp"
-#include "chemical/stub.hpp"
+#include "chem/AtomData.hpp"
+#include "chem/stub.hpp"
 #include "io/dump_pdb_atom.hpp"
 #include "util/assert.hpp"
 #include "util/str.hpp"

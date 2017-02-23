@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include "chemical/stub.hpp"
+#include "chem/stub.hpp"
 
 #include <iostream>
 

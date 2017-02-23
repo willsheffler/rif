@@ -64,7 +64,7 @@
 // #include "rosetta/score/AnalyticEvaluation.gtest.cpp"
 // #include "rosetta/score/RosettaField.gtest.cpp"
 
-// #include "chemical/ligand_factory.gtest.cpp"
+// #include "chem/ligand_factory.gtest.cpp"
 
 // #include "objective/methods/hbond_5dof.gtest.cpp"
 
@@ -75,7 +75,7 @@
 
 // #include "objective/storage/RotamerScores.gtest.cpp"
 
-// #include "chemical/RotamerIndex.gtest.cpp"
+// #include "chem/RotamerIndex.gtest.cpp"
 
 // #include "objective/storage/TwoBodyTable.gtest.cpp"
 
@@ -83,7 +83,7 @@
 
 // #include "search/SpatialBandB.gtest.cpp"
 
-// #include "chemical/stub.gtest.cpp"
+// #include "chem/stub.gtest.cpp"
 
 #include "numeric/cube_to_sphere.gtest.cpp"
 // #include "sampling/orientations.gtest.cpp"

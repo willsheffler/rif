@@ -2,30 +2,30 @@
 	"build_systems":
 	[
 		{
+			"file_regex": "^[ ]*File \"(...*?)\", line ([0-9]*)",
 			"name": "cmake_build_and_run_pytest",
-		    "file_regex": "^[ ]*File \"(...*?)\", line ([0-9]*)",
-			"shell_cmd": "cd $folder && python jigs/cmake_build_and_run_pytest.py 2>&1 | tee log/pytest.log"
+			"shell_cmd": "cd $folder && python tools/cmake_build_and_run_pytest.py 2>&1 | tee log/pytest.log"
 		},
 		{
+			"file_regex": "^[ ]*File \"(...*?)\", line ([0-9]*)",
 			"name": "cmake_build_and_run_pytest_thisfile",
-		    "file_regex": "^[ ]*File \"(...*?)\", line ([0-9]*)",
-			"shell_cmd": "cd $folder && python jigs/cmake_build_and_run_pytest.py $file 2>&1 | tee log/pytest.log"
+			"shell_cmd": "cd $folder && python tools/cmake_build_and_run_pytest.py $file 2>&1 | tee log/pytest.log"
 		},
 		{
+			"file_regex": "^[ ]*File \"(...*?)\", line ([0-9]*)",
 			"name": "build_and_run_pytest",
-		    "file_regex": "^[ ]*File \"(...*?)\", line ([0-9]*)",
-			"shell_cmd": "cd $folder && python jigs/build_and_run_pytest.py 2>&1 | tee log/pytest.log"
+			"shell_cmd": "cd $folder && python tools/build_and_run_pytest.py 2>&1 | tee log/pytest.log"
 		},
 		{
+			"file_regex": "^(..[^:]*):([0-9]+):?([0-9]+)?:? (.*)$",
 			"name": "build_and_run_gtest_wip",
-            "file_regex": "^(..[^:]*):([0-9]+):?([0-9]+)?:? (.*)$",
-			"shell_cmd": "cd $folder && python jigs/build_and_run_gtest_wip.py 2>&1 | tee log/gtest_wip.log"
+			"shell_cmd": "cd $folder && python tools/build_and_run_gtest_wip.py 2>&1 | tee log/gtest_wip.log"
 		},
 		{
 			"file_regex": "^[ ]*File \"(...*?)\", line ([0-9]*)",
 			"name": "Anaconda Python Builder",
 			"selector": "source.python",
-			"shell_cmd": "\"python\" -u \"$file\""
+			"shell_cmd": "\"/usr/bin/python\" -u \"$file\""
 		}
 	],
 	"folders":

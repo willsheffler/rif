@@ -20,3 +20,5 @@ docs/_generate
 build_manual
 log/gtest_wip.log
 log/pytest.log
+.tox
+dist

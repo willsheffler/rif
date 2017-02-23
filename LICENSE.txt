@@ -1,0 +1,1 @@
+I intend to release this code with a permissive license as soon as I decide which one. probably apache.

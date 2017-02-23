@@ -1,7 +1,7 @@
 import pytest
 
 import rif
-import rif.chemical.biochem as biochem
+import rif.chem.biochem as biochem
 import rif.util.rcl as rcl
 
 
@@ -16,4 +16,4 @@ def test_rif_atypes():
     for atype in rosetta_std_atypes:
         if atype == 'VIRT':
             continue
-        assert atype in rif.chemistry.biochem.rif_atype_names
+        assert atype in rif.chem.biochem.rif_atype_names

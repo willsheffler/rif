@@ -2,7 +2,7 @@
 #define INCLUDED_actor_Atom_HH
 
 #include <iostream>
-#include "chemical/AtomData.hpp"
+#include "chem/AtomData.hpp"
 #include "io/dump_pdb_atom.hpp"
 #include "numeric/util.hpp"
 #include "types.hpp"

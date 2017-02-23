@@ -1,7 +1,7 @@
 #ifndef INCLUDED_io_dump_pdb_atom_HH
 #define INCLUDED_io_dump_pdb_atom_HH
 
-#include "chemical/AtomData.hpp"
+#include "chem/AtomData.hpp"
 
 #include <boost/assert.hpp>
 #include <cassert>

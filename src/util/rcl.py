@@ -21,7 +21,7 @@ try:
     from rosetta.numeric import xyzVector_double_t as xyzVector
 
     create_score_function = rosetta.core.scoring.ScoreFunctionFactory.create_score_function
-    ROSETTA_DB = pyrosetta.rosetta_database_from_env()
+    ROSETTA_DB = pyrosetta._rosetta_database_from_env()
     HAVE_PYROSETTA = True
 except ImportError as e:
     HAVE_PYROSETTA = False
@@ -59,7 +59,7 @@ def init_check(options='-beta_nov15', fail_if_options_dont_match=True):
         if fail_if_options_dont_match:
             raise ReInitError(
                 'attempt to init rosetta with different options: previous: {}, thiscall: {}'
-                    .format(pyrosetta_init_options, options))
+                .format(pyrosetta_init_options, options))
 
 
 def ats():
@@ -102,7 +102,7 @@ def add_residue_types_to_rosettaDB(newfiles, comment="## RIF added restypes",
                                    typeset='fa_standard'):
     """return true if update was done"""
     assert newfiles
-    mypath = (ROSETTA_DB + '/chemical/residue_type_sets/' +
+    mypath = (ROSETTA_DB + '/chem/residue_type_sets/' +
               typeset + '/residue_types.txt')
     update_needed = list()
     with open(mypath, 'r') as f:
@@ -123,7 +123,7 @@ def add_residue_types_to_rosettaDB(newfiles, comment="## RIF added restypes",
 
 def update_roesettaDB_file(fname, newtext):
     if not os.path.exists(fname):
-        raise RosettaDBError('rosettaDB file doesnt exist: '+fname)
+        raise RosettaDBError('rosettaDB file doesnt exist: ' + fname)
     with open(fname, 'r') as f:
         update_needed = newtext not in f.read()
     if update_needed:
@@ -137,13 +137,13 @@ def update_roesettaDB_file(fname, newtext):
 
 def add_atom_types_to_rosettaDB(newprops, extradict, typeset='fa_standard'):
     any_updates = False
-    atomprops = (ROSETTA_DB + '/chemical/atom_type_sets/' +
+    atomprops = (ROSETTA_DB + '/chem/atom_type_sets/' +
                  typeset + '/atom_properties.txt')
     updated = update_roesettaDB_file(atomprops, newprops)
     any_updates = any_updates or updated
     for extraname, extraval in extradict.items():
-        mypath = (ROSETTA_DB + '/chemical/atom_type_sets/' +
-                  typeset + '/extras/'+extraname+'.txt')
+        mypath = (ROSETTA_DB + '/chem/atom_type_sets/' +
+                  typeset + '/extras/' + extraname + '.txt')
         updated = update_roesettaDB_file(mypath, extraval)
         any_updates = any_updates or updated
     return any_updates
