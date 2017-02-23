@@ -111,8 +111,8 @@ setup(
     ext_modules=[CMakeExtension('rif_cpp')],
     cmdclass=dict(build_ext=CMakeBuild),
     zip_safe=False,
-    setup_requires=['pytest-runner'],
-    tests_require=['pytest', 'pytest-xdist',
+    setup_requires=['wheel', 'pytest-runner'],
+    tests_require=['pytest', 'pytest-xdist', 'tox',
                    'hypothesis', 'colorama', 'pytest_cpp', 'jinja2'],
     test_suite='pytest',
 )

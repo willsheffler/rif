@@ -1,0 +1,10 @@
+future
+jinja2
+pytest
+pytest-xdist
+-e external/hacked_packages/pytest-cpp-0.4
+hypothesis
+colorama
+numpy
+pandas
+numpy-quaternion

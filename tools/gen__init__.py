@@ -15,7 +15,8 @@ def main():
         'find {} -regex [^.].+[.]py'.format(src).split()).split()
     packages = set()
     for pyfile in pyfiles:
-        if os.path.basename(pyfile).startswith('_test'):
+        if (os.path.basename(pyfile).startswith('test') or
+                os.path.basename(pyfile).endswith('test')):
             continue
         packages.update(all_parent_dirs(pyfile))
     for p in packages:

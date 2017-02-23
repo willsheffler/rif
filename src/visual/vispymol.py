@@ -1,7 +1,14 @@
 import __main__
-import pymol
+import pytest
+import rif.visual
+try:
+    import pymol
+    HAVE_PYMOL = True
+except ImportError:
+    HAVE_PYMOL = False
 
 
+@pytest.mark.skipif('not rif.visual.HAVE_PYMOL')
 def launch_pymol(doit, args='-qei'):
     # pymol doesn't seem to get these args
     __main__.pymol_argv = ['pymol', args]
