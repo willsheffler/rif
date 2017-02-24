@@ -52,8 +52,9 @@ class CMakeBuild(build_ext):
         try:
             out = subprocess.check_output(['cmake', '--version'])
         except OSError:
-            raise RuntimeError("CMake must be installed to build the following extensions: " +
-                               ", ".join(e.name for e in self.extensions))
+            raise RuntimeError(
+                "CMake must be installed to build the following extensions: " +
+                ", ".join(e.name for e in self.extensions))
 
         if platform.system() == "Windows":
             cmake_version = LooseVersion(
@@ -90,8 +91,9 @@ class CMakeBuild(build_ext):
             build_args += ['--', '-j' + str(multiprocessing.cpu_count())]
         build_args.append('rif_cpp')
         env = os.environ.copy()
-        env['CXXFLAGS'] = '{} -DVERSION_INFO=\\"{}\\"'.format(env.get('CXXFLAGS', ''),
-                                                              self.distribution.get_version())
+        env['CXXFLAGS'] = '{} -DVERSION_INFO=\\"{}\\"'.format(
+            env.get('CXXFLAGS', ''),
+            self.distribution.get_version())
         if not os.path.exists(self.build_temp):
             os.makedirs(self.build_temp)
         subprocess.check_call(['cmake', ext.sourcedir] +

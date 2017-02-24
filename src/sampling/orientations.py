@@ -1,7 +1,7 @@
 import os
 from rif_cpp.sampling.orientations import read_karney_orientation_file
 import pandas as pd
-import numpy as np
+# import numpy as np
 import quaternion as quat
 
 import sys
