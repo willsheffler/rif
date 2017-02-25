@@ -89,7 +89,8 @@ class CMakeBuild(build_ext):
             cmake_args += ['-DCMAKE_BUILD_TYPE=' + cfg]
             # build_args += ['--', '-j'+str(multiprocessing.cpu_count()), 'rif']
             build_args += ['--', '-j' + str(multiprocessing.cpu_count())]
-        build_args.append('rif_cpp')
+        # probably best to build everythong
+        # build_args.append('rif_cpp')
         env = os.environ.copy()
         env['CXXFLAGS'] = '{} -DVERSION_INFO=\\"{}\\"'.format(
             env.get('CXXFLAGS', ''),
