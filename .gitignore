@@ -22,3 +22,6 @@ log/gtest_wip.log
 log/pytest.log
 .tox
 dist
+*.gen.cpp
+*.gen.hpp
+*.gen.py

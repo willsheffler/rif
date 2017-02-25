@@ -140,5 +140,5 @@ def build_and_run_pytest(redo_cmake=False):
     args = [x for x in sys.argv[1:] if x.endswith('.py') and
             os.path.basename(x).startswith('test')]
     if not args:
-        args = ['.', '-n4']
+        args = ['.', '-n4', '--ignore', 'build']
     pytest.main(args)
