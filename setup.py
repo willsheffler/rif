@@ -33,7 +33,14 @@ def which(program):
     return None
 
 
-def infer_config(path):
+def get_my_compiler():
+    my_compiler = os.getenv('CXX', '').replace('/', '')
+    if not my_compiler:
+        my_compiler = "DEFAULT_CXX"
+    return my_compiler
+
+
+def infer_config_from_build_dirname(path):
     path = path.split('/')[0]
     if path.startswith('build_setup_py_'):
         return path.replace('build_setup_py_', '')
@@ -49,6 +56,9 @@ class CMakeExtension(Extension):
 class CMakeBuild(build_ext):
 
     def run(self):
+        my_compiler = get_my_compiler()
+        if my_compiler and not self.build_temp.endswith(my_compiler):
+            self.build_temp += '-' + my_compiler
         try:
             out = subprocess.check_output(['cmake', '--version'])
         except OSError:
@@ -65,16 +75,25 @@ class CMakeBuild(build_ext):
         for ext in self.extensions:
             self.build_extension(ext)
 
+    def get_ext_fullpath(self, ext_name):
+        my_compiler = get_my_compiler()
+        defaultname = build_ext.get_ext_fullpath(self, ext_name)
+        extra = '-' + my_compiler if my_compiler else ''
+        path = os.path.dirname(defaultname) + extra + \
+            '/' + os.path.basename(defaultname)
+        return path, defaultname
+
     def build_extension(self, ext):
-        extdir = os.path.abspath(os.path.dirname(
-            self.get_ext_fullpath(ext.name)))
+        extdir, defaultextdir = self.get_ext_fullpath(ext.name)
+        extdir = os.path.abspath(os.path.dirname(extdir))
+        defaultextdir = os.path.abspath(os.path.dirname(defaultextdir))
         cmake_args = ['-DCMAKE_LIBRARY_OUTPUT_DIRECTORY=' + extdir,
                       '-DPYTHON_EXECUTABLE=' + sys.executable,
                       ]
         if which('ninja'):
             cmake_args.append('-GNinja')
 
-        cfg = infer_config(self.build_temp)
+        cfg = infer_config_from_build_dirname(self.build_temp)
         if not cfg:
             cfg = 'Debug' if self.debug else 'Release'
         build_args = ['--config', cfg]
@@ -87,7 +106,8 @@ class CMakeBuild(build_ext):
             build_args += ['--', '/m']
         else:
             cmake_args += ['-DCMAKE_BUILD_TYPE=' + cfg]
-            # build_args += ['--', '-j'+str(multiprocessing.cpu_count()), 'rif']
+            # build_args += ['--', '-j'+str(multiprocessing.cpu_count()),
+            # 'rif']
             build_args += ['--', '-j' + str(multiprocessing.cpu_count())]
         # probably best to build everythong
         # build_args.append('rif_cpp')
@@ -101,6 +121,8 @@ class CMakeBuild(build_ext):
                               cmake_args, cwd=self.build_temp, env=env)
         subprocess.check_call(['cmake', '--build', '.'] +
                               build_args, cwd=self.build_temp)
+        if not os.path.exists(defaultextdir):
+            os.symlink(extdir, defaultextdir)
 
 
 setup(

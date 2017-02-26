@@ -4,22 +4,27 @@
 		{
 			"file_regex": "^[ ]*File \"(...*?)\", line ([0-9]*)",
 			"name": "cmake_build_and_run_pytest",
-			"shell_cmd": "cd $folder && python tools/cmake_build_and_run_pytest.py 2>&1 | tee log/pytest.log"
+			"shell_cmd": "cd $folder && python tools/cmake_build_and_run_pytest.py 2>&1 | tee log/subl_build.log"
 		},
 		{
 			"file_regex": "^[ ]*File \"(...*?)\", line ([0-9]*)",
 			"name": "cmake_build_and_run_pytest_thisfile",
-			"shell_cmd": "cd $folder && python tools/cmake_build_and_run_pytest.py $file 2>&1 | tee log/pytest.log"
+			"shell_cmd": "cd $folder && python tools/cmake_build_and_run_pytest.py $file 2>&1 | tee log/subl_build.log"
 		},
 		{
 			"file_regex": "^[ ]*File \"(...*?)\", line ([0-9]*)",
 			"name": "build_and_run_pytest",
-			"shell_cmd": "cd $folder && python tools/build_and_run_pytest.py 2>&1 | tee log/pytest.log"
+			"shell_cmd": "cd $folder && python tools/build_and_run_pytest.py 2>&1 | tee log/subl_build.log"
+		},
+		{
+			"file_regex": "^[ ]*File \"(...*?)\", line ([0-9]*)",
+			"name": "run_tox",
+			"shell_cmd": "cd $folder && tox 2>&1 | tee log/subl_build.log"
 		},
 		{
 			"file_regex": "^(..[^:]*):([0-9]+):?([0-9]+)?:? (.*)$",
 			"name": "build_and_run_gtest_wip",
-			"shell_cmd": "cd $folder && python tools/build_and_run_gtest_wip.py 2>&1 | tee log/gtest_wip.log"
+			"shell_cmd": "cd $folder && python tools/build_and_run_gtest_wip.py 2>&1 | tee log/subl_build.log"
 		},
 		{
 			"file_regex": "^[ ]*File \"(...*?)\", line ([0-9]*)",

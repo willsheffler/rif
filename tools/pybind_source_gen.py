@@ -106,9 +106,9 @@ def make_py_stencils(pymodules, srcdir):
                             path.replace('/', '.') + ' import *\n')
 
 
-def main(template_fname, srcdir):
+def main(template_fname, srcdir, dstdir):
     "generate pybind sources"
-    destfile = template_fname.replace('.jinja', '')
+    destfile = dstdir + os.path.basename(template_fname.replace('.jinja', ''))
     pymodules = get_pybind_modules(srcdir)  # assume in top level project dir
     make_py_stencils(pymodules, srcdir)
     forward, code = shitty_make_code(pymodules)
@@ -119,7 +119,9 @@ def main(template_fname, srcdir):
 
 if __name__ == '__main__':
     import sys
-    assert len(sys.argv) == 2
+    assert len(sys.argv) == 3
     srcdir = sys.argv[1]
+    dstdir = sys.argv[2]
     srcdir += '/' if not srcdir.endswith('/') else ''
-    main(srcdir + 'rif.gen.cpp.jinja', srcdir)
+    dstdir += '/' if not dstdir.endswith('/') else ''
+    main(srcdir + 'rif.gen.cpp.jinja', srcdir, dstdir)

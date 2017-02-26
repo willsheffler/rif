@@ -17,25 +17,16 @@ include_directories("/usr/local/include")
 include_directories("/opt/local/include")
 link_directories("/usr/local/lib")
 #link_directories("/opt/local/lib")
-list(APPEND EXTRA_LIBS boost_system)
-list(APPEND EXTRA_LIBS boost_iostreams)
+list(APPEND extra_libs boost_system)
+list(APPEND extra_libs boost_iostreams)
 
-function(PRINT_CONFIG)
+function(print_config)
     message("CMAKE_BUILD_TYPE: " ${CMAKE_BUILD_TYPE})
     message("CMAKE_CXX_FLAGS: " ${CMAKE_CXX_FLAGS})
-    message("EXTRA_LIBS: " ${EXTRA_LIBS})
+    message("extra_libs: " ${extra_libs})
 endfunction()
 
-
-function(build_python_bindings)
-    execute_process(COMMAND python ${CMAKE_SOURCE_DIR}/tools/pybind_source_gen.py ${CMAKE_SOURCE_DIR}/src
-                    RESULT_VARIABLE STATUS)
-    if(NOT "${STATUS}" STREQUAL "0")
-        message(FATAL_ERROR "pybind_source_gen.py failed: ${STATUS}")
-    endif()
-    FILE(GLOB_RECURSE PY_CPP "./src/[0-9a-zA-Z_]*.pybind.cpp")
-    pybind11_add_module( rif_cpp src/rif.gen.cpp ${PY_CPP} )
-    target_link_libraries( rif_cpp PRIVATE ${EXTRA_LIBS} )
+function(make_any_missing__init__py_and_copy_py_to_liboutdir)
     execute_process(COMMAND python ${CMAKE_SOURCE_DIR}/tools/gen__init__.py src
         WORKING_DIRECTORY ${CMAKE_SOURCE_DIR} RESULT_VARIABLE STATUS)
     if(NOT "${STATUS}" STREQUAL "0")
@@ -49,11 +40,20 @@ function(build_python_bindings)
     endif()
 endfunction()
 
+function(build_python_bindings)
+    make_any_missing__init__py_and_copy_py_to_liboutdir()
+    set(SRCGEN ${CMAKE_SOURCE_DIR}/tools/pybind_source_gen.py)
+    add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/rif.gen.cpp COMMAND python ${SRCGEN} ${CMAKE_SOURCE_DIR}/src ${CMAKE_CURRENT_BINARY_DIR})
+    FILE(GLOB_RECURSE PY_CPP "./src/[0-9a-zA-Z_]*.pybind.cpp")
+    pybind11_add_module(rif_cpp ${CMAKE_CURRENT_BINARY_DIR}/rif.gen.cpp ${PY_CPP})
+    target_link_libraries( rif_cpp PRIVATE ${extra_libs} )
+endfunction()
+
 
 function(BUILD_GTESTS)
     add_subdirectory(external/googletest)
     include_directories("external/googletest/include")
-    list(APPEND EXTRA_LIBS gtest)
+    list(APPEND extra_libs gtest)
 
     # shitty "data" files to compile faster TODO: remove these
     list(APPEND LIB_CPP src/rosetta/score/EtableParams_init.lib.cpp
@@ -62,17 +62,16 @@ function(BUILD_GTESTS)
     set_source_files_properties(${LIB_CPP} PROPERTIES COMPILE_FLAGS -O0)
     add_library(rif_data ${LIB_CPP})
 
-
     file(GLOB_RECURSE TEST_CPP "src/[0-9a-zA-Z_]*.gtest.cpp")
     add_executable(gtest_all src/test/gtest_all.cpp ${TEST_CPP})
-    target_link_libraries(gtest_all rif_data ${EXTRA_LIBS})
+    target_link_libraries(gtest_all rif_data ${extra_libs})
 
     add_executable(gtest_wip src/test/gtest_wip.cpp)
-    target_link_libraries(gtest_wip rif_data ${EXTRA_LIBS})
+    target_link_libraries(gtest_wip rif_data ${extra_libs})
 endfunction()
 
 
-PRINT_CONFIG()
+print_config()
 
 add_subdirectory(external/pybind11)
 build_python_bindings("")

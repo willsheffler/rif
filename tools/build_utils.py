@@ -1,8 +1,20 @@
+from __future__ import absolute_import, division, print_function
 from builtins import bytes
 
 import glob
 import os
 import sys
+
+import pytest
+
+# todo this is a dup from setup.py....
+
+
+def get_my_compiler():
+    my_compiler = os.getenv('CXX', '').replace('/', '')
+    if not my_compiler:
+        my_compiler = "DEFAULT_CXX"
+    return my_compiler
 
 
 def get_proj_root():
@@ -19,16 +31,33 @@ def get_proj_root():
     return proj_root
 
 
-def get_build_dir(d, cfg='Release'):
-    """get directory setup.py builds stuff in, d is lib or temp"""
+def get_build_dir(cfg='Release'):
+    path = get_proj_root() + '/build_setup_py_' + cfg
+    return path
+
+
+def get_cmake_dir(prefix, cfg):
+    """get directory setup.py builds stuff in, prefix is lib or temp"""
     version = '{}.{}'.format(sys.version_info.major, sys.version_info.minor)
-    libdir = (glob.glob(get_proj_root() + '/build_setup_py_' +
-                        cfg + '/' + d + '*' + version))
-    assert len(libdir) < 2
+    path = get_build_dir(cfg) + '/' + prefix + '*' + \
+        version + '-' + get_my_compiler()
+    libdir = (glob.glob(path))
+    if len(libdir) > 1:
+        print('ERROR get_cmake_dir', path)
+        print(libdir)
+        assert len(libdir) < 2
     if libdir:
         return libdir[0]
     else:
-        return None
+        raise IOError
+
+
+def get_ignored_dirs(cfg):
+    d, tgt = os.path.split(get_cmake_dir('temp', cfg))
+    path = get_build_dir(cfg)
+    decoys = os.listdir(path)
+    decoys.remove(tgt)
+    return [d + '/' + x for x in decoys]
 
 
 def which(program):
@@ -75,19 +104,22 @@ def rebuild_fast(target='rif_cpp', cfg='Release', redo_cmake=False):
     if not which('ninja'):
         makeexe = 'make'
     # proj_root = get_proj_root()
-    cmake_dir = get_build_dir('temp', cfg=cfg)
+    try:
+        cmake_dir = get_cmake_dir('temp', cfg=cfg)
+    except:
+        cmake_dir = None
     if not cmake_dir or redo_cmake:
         if rebuild_setup_py_rif(cfg=cfg):
             return -1
-        cmake_dir = get_build_dir('temp', cfg=cfg)
+        cmake_dir = get_cmake_dir('temp', cfg=cfg)
 
     return os.system('cd ' + cmake_dir + '; ' + makeexe + ' -j8 ' + target)
 
 
-def make_docs(kind='html'):
+def make_docs(kind='html', cfg='Release'):
     proj_root = get_proj_root()
     rebuild_setup_py_rif()
-    add_to_pypath(get_build_dir('lib'))
+    add_to_pypath(get_cmake_dir('lib', cfg=cfg))
     os.system('cd ' + proj_root + '/docs; make ' + kind)
 
 
@@ -119,26 +151,36 @@ def remove_installed_rif():
 
 
 def build_and_run_pytest(redo_cmake=False):
+    cfg = 'Release'
     # remove_installed_rif()
     proj_root = get_proj_root()
+    build_dir = get_build_dir(cfg)
     print('calling rebuild_fast')
+    if not os.path.exists(build_dir):
+        rebuild_setup_py_rif(cfg)
+    assert os.path.exists(build_dir)
     if rebuild_fast(target='rif_cpp gtest_all',
-                    cfg='Release', redo_cmake=redo_cmake):
+                    cfg=cfg, redo_cmake=redo_cmake):
         sys.exit(-1)
-    pypath = [os.path.abspath(get_build_dir('lib')),
-              proj_root + '/external',
-              ]
-    # need to use sys.path for this process
-    sys.path = pypath + sys.path
-    # need to use PYTHONPATH env for xdist subprocessess
-    add_to_pypath(pypath)
     # TODO both here and in docs, this gets messed
     #      up when rif is actually installed
-    import pytest
+    libdir = os.path.abspath(get_cmake_dir('lib', cfg))
+    print('adding to python path:', libdir)
+    assert os.path.exists(libdir)
+    # need to use sys.path for this process
+    sys.path.append(libdir)
+    # need to use PYTHONPATH env for xdist subprocessess
+    add_to_pypath(libdir)
+    assert libdir in os.environ['PYTHONPATH'].split(':')
+    assert libdir in sys.path
     if sys.version_info.major is 2:
         proj_root = bytes(proj_root, 'ascii')
     args = [x for x in sys.argv[1:] if x.endswith('.py') and
             os.path.basename(x).startswith('test')]
     if not args:
         args = ['.', '-n4', '--ignore', 'build']
+    # else:
+        # args += ['--ignore', 'build_setup_py_Release']
+    for decoy in get_ignored_dirs(cfg):
+        args += ['--ignore', decoy]
     pytest.main(args)

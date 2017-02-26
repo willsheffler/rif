@@ -6,7 +6,6 @@
 .tags*
 .hypothesis
 .idea
-*.egg-info
 .eggs
 build/
 build_setup_py*
@@ -18,8 +17,7 @@ docs/_generate
 *.sublime-workspace
 .clang_complete
 build_manual
-log/gtest_wip.log
-log/pytest.log
+log/subl_build.log
 .tox
 dist
 *.gen.cpp
