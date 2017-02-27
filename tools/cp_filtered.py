@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+from __future__ import print_function
 
 import os
 import sys
@@ -8,15 +9,16 @@ import shutil
 
 def main():
     ext = sys.argv[1]
-    dst = sys.argv[3]
     src = sys.argv[2]
-    extfiles = subprocess.check_output(
-        'find {} -regex [^.].+{}'.format(src, ext).split())
-    assert extfiles
-    for extfile in extfiles.splitlines():
-        newfile = extfile.replace(src.encode('utf-8'), dst.encode('utf-8'))
-        os.system(b'mkdir -p ' + os.path.dirname(newfile))
-        shutil.copy(extfile, newfile)
+    dst = sys.argv[3]
+    assert ext
+    assert src != dst
+    for root, dirs, files in os.walk(src):
+        for file in files:
+            if file.endswith(ext):
+                newfile = root.replace(src, dst) + '/' + file
+                os.system('mkdir -p ' + os.path.dirname(newfile))
+                shutil.copy(root + '/' + file, newfile)
 
 
 if __name__ == '__main__':

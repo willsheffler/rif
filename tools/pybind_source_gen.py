@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+from __future__ import print_function
+
 """generate main rifgen.gen.cpp pybind file with modules organized based on file paths
 of *.pybind.cpp components"""
 
@@ -16,23 +18,27 @@ def get_pybind_modules(srcpath):
     pbfiles = subprocess.check_output(
         'find {} -regex [^.].+pybind.cpp'.format(srcpath).split())
     pymodules = OrderedDict()
-    for pybindfile in pbfiles.splitlines():
-        print("found pybind file", pybindfile)
-        try:
-            grepped = subprocess.check_output(
-                ['grep', '-H', 'RIFLIB_PYBIND_', pybindfile])
-        except:
-            continue
-        for line in grepped.splitlines():
-            line = str(line)
-            match = re.match(
-                r".*src/(.+).pybind.cpp\:.* RIFLIB_PYBIND_(\w+)", line)
-            # print 'line:', line
-            # print match
-            # assert len(match.groups()) is 2
-            path = match.group(1)
-            func = match.group(2)
-            pymodules[func] = path
+    for root, _, files in os.walk(srcpath):
+        for basename in (x for x in files if x.endswith('.pybind.cpp')):
+            pybindfile = root + '/' + basename
+            print("found pybind file", pybindfile)
+            try:
+                # todo: replace this with python
+                grepped = subprocess.check_output(
+                    ['grep', '-H', 'RIFLIB_PYBIND_', pybindfile])
+                print('grepped', grepped)
+            except:
+                continue
+            for line in grepped.splitlines():
+                line = str(line)
+                match = re.match(
+                    r".*src/(.+).pybind.cpp\:.* RIFLIB_PYBIND_(\w+)", line)
+                # print 'line:', line
+                # print match
+                # assert len(match.groups()) is 2
+                path = match.group(1)
+                func = match.group(2)
+                pymodules[func] = path
     return pymodules
 
 
