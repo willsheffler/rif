@@ -33,7 +33,7 @@ sudo -H pip3 install numpy-quaternion
 python tools/cmake_build_and_run_pytest.py # convenient script to build and test without installing
 tox
 
------------------ mac 10.10 -------------------
+----------------- mac (tested on 10.10 and 10.12) -------------------
 brew install python cmake ninja boost
 /usr/local/bin/pip2 install future pytest-xdist hypothesis jinja2 tox numpy pandas
 /usr/local/bin/pip2 install numpy-quaternion
