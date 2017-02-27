@@ -12,3 +12,10 @@ pymol + pip packages: PyOpenGL OpenGLContext PyVRML97 pydispatcher
 SUBLIME SETUP
 I use sublime plugins EasyClangComplete, Git, C++11, GitGutter, SublimeLinter
 
+-------------- ubuntu 16.04 --------------
+sudo add-apt-repository ppa:ubuntu-toolchain-r/test
+sudo apt update
+sudo sudo apt install git
+git clone git@github.com:willsheffler/rif.git
+sudo apt-get install python-pip cmake ninja-build clang gcc-6 libboost-system-dev libboost-iostreams
+sudo -H pip2 install future pytest pytest-xdist pytest-sugar hypothesis
