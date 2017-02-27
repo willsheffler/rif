@@ -7,4 +7,3 @@ hypothesis
 colorama
 numpy
 pandas
-numpy-quaternion
