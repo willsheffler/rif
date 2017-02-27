@@ -82,6 +82,8 @@ def which(program):
 
 
 def add_to_pypath(newpath):
+    if isinstance(newpath, str):
+        newpath = [newpath]
     if not hasattr(newpath, '__iter__'):
         newpath = [newpath]
     current = None
@@ -171,8 +173,8 @@ def build_and_run_pytest(redo_cmake=False):
     sys.path.append(libdir)
     # need to use PYTHONPATH env for xdist subprocessess
     add_to_pypath(libdir)
-    assert libdir in os.environ['PYTHONPATH'].split(':')
     assert libdir in sys.path
+    assert libdir in os.environ['PYTHONPATH'].split(':')
     if sys.version_info.major is 2:
         proj_root = bytes(proj_root, 'ascii')
     args = [x for x in sys.argv[1:] if x.endswith('.py') and
