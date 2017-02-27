@@ -13,11 +13,12 @@ SUBLIME SETUP
 I use sublime plugins EasyClangComplete, Git, C++11, GitGutter, SublimeLinter
 
 -------------- ubuntu 16.04 --------------
+\# this ppa is to install gcc-6
 sudo add-apt-repository ppa:ubuntu-toolchain-r/test
 sudo apt update
 sudo sudo apt install git
 git clone git@github.com:willsheffler/rif.git
-sudo apt-get install python-pip python3-pip cmake ninja-build clang gcc-6 libboost-system-dev libboost-iostreams
+sudo apt-get install python-pip python3-pip cmake ninja-build clang g++-6 libboost-system-dev libboost-iostreams-dev
 cd external/hacked_packages/pytest-cpp-0.4 && sudo -H pip2 install . && cd -
 cd external/hacked_packages/pytest-cpp-0.4 && sudo -H pip3 install . && cd -
 sudo -H pip2 install future pytest-xdist hypothesis jinja2 tox numpy pandas
