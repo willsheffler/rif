@@ -7,7 +7,7 @@
 
 #include "util/SimpleArray.hpp"
 
-namespace scheme {
+namespace rif {
 namespace util {
 
 using std::cout;

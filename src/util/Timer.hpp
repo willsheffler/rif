@@ -1,9 +1,9 @@
-#ifndef INCLUDED_scheme_util_timer_HH
-#define INCLUDED_scheme_util_timer_HH
+#ifndef INCLUDED_util_timer_HH
+#define INCLUDED_util_timer_HH
 
 #include <chrono>
 
-namespace scheme {
+namespace rif {
 namespace util {
 
 template <class Clock = std::chrono::system_clock>

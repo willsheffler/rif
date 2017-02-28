@@ -1,5 +1,5 @@
-#ifndef INCLUDED_scheme_nest_maps_SphereQuad_HH
-#define INCLUDED_scheme_nest_maps_SphereQuad_HH
+#ifndef INCLUDED_nest_maps_SphereQuad_HH
+#define INCLUDED_nest_maps_SphereQuad_HH
 
 #include <Eigen/Dense>
 #include <boost/static_assert.hpp>
@@ -7,7 +7,7 @@
 #include <vector>
 #include "util/SimpleArray.hpp"
 
-namespace scheme {
+namespace rif {
 namespace nest {
 namespace pmap {
 

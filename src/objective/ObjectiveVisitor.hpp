@@ -3,7 +3,7 @@
 
 #include "util/meta/util.hpp"
 
-namespace scheme {
+namespace rif {
 namespace objective {
 
 namespace objv_impl {

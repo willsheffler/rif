@@ -12,7 +12,7 @@
 
 #include <fstream>
 
-namespace scheme {
+namespace rif {
 namespace nest {
 namespace pmap {
 namespace test {

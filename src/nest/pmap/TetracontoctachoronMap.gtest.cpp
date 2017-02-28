@@ -13,7 +13,7 @@
 
 #include <fstream>
 
-namespace scheme {
+namespace rif {
 namespace nest {
 namespace pmap {
 namespace test {
@@ -26,13 +26,13 @@ TEST(TetracontoctachoronMap, cell_lookup) {
   // HecatonicosachoronMap<> map;
   // HecatonicosachoronMap<>::Params p;
   // for( size_t i = 0; i < 60; ++i){
-  // 	size_t cell_index = 999;
-  // 	map.value_to_params( cellcen<double>(i).matrix(), 0, p, cell_index );
-  // 	// cout << p << endl;
-  // 	ASSERT_EQ( i, cell_index );
-  // 	ASSERT_NEAR( p[0], 0.5, 0.0000001 );
-  // 	ASSERT_NEAR( p[1], 0.5, 0.0000001 );
-  // 	ASSERT_NEAR( p[2], 0.5, 0.0000001 );
+  //  size_t cell_index = 999;
+  //  map.value_to_params( cellcen<double>(i).matrix(), 0, p, cell_index );
+  //  // cout << p << endl;
+  //  ASSERT_EQ( i, cell_index );
+  //  ASSERT_NEAR( p[0], 0.5, 0.0000001 );
+  //  ASSERT_NEAR( p[1], 0.5, 0.0000001 );
+  //  ASSERT_NEAR( p[2], 0.5, 0.0000001 );
   // }
 
   NEST<3, Matrix3d, TetracontoctachoronMap> nest;
@@ -170,61 +170,61 @@ TEST(TetracontoctachoronMap, nside_covering) {
 
 // TEST( TetracontoctachoronMap , visualize ){
 
-// 	std::mt19937 rng((unsigned int)time(0));
-// 	std::normal_distribution<> gauss;
-// 	std::uniform_real_distribution<> uniform;
+//  std::mt19937 rng((unsigned int)time(0));
+//  std::normal_distribution<> gauss;
+//  std::uniform_real_distribution<> uniform;
 
-// 	Quaterniond qrand( gauss(rng), gauss(rng), gauss(rng), gauss(rng) );
-// 	// Quaterniond qrand( 1,0,0,0 );
-// 	qrand.normalize();
-// 	Vector3d X = qrand*Vector3d(1,0  ,0  );
-// 	Vector3d Y = qrand*Vector3d(0,1.2,0  );
-// 	Vector3d Z = qrand*Vector3d(0,0  ,1.4);
+//  Quaterniond qrand( gauss(rng), gauss(rng), gauss(rng), gauss(rng) );
+//  // Quaterniond qrand( 1,0,0,0 );
+//  qrand.normalize();
+//  Vector3d X = qrand*Vector3d(1,0  ,0  );
+//  Vector3d Y = qrand*Vector3d(0,1.2,0  );
+//  Vector3d Z = qrand*Vector3d(0,0  ,1.4);
 
-// 	NEST<3,Matrix3d,TetracontoctachoronMap> nest;
-// 	// size_t beg = 0;
-// 	// while(!nest.set_state(beg,10)) beg =
+//  NEST<3,Matrix3d,TetracontoctachoronMap> nest;
+//  // size_t beg = 0;
+//  // while(!nest.set_state(beg,10)) beg =
 // std::max<size_t>(uniform(rng)*(nest.size(10)-1000),0);
 
-// 	for(size_t r = 0; r <= 8; ++r){
-// 		int N = 8*8*8;
-// 		// int beg = std::max( 0, (int)nest.size(r)/12 - N/2 );
-// 		int beg = 0;
-// 		std::ofstream
+//  for(size_t r = 0; r <= 8; ++r){
+//    int N = 8*8*8;
+//    // int beg = std::max( 0, (int)nest.size(r)/12 - N/2 );
+//    int beg = 0;
+//    std::ofstream
 // out(("tcoc_"+boost::lexical_cast<std::string>(r)+".pdb").c_str());
-// 		io::dump_pdb_atom(out,  "Z" ,0,Vector3d(0,0,0));
-// 		int count1 = 0, count2 = 0;
-// 		// cout << r << " " << nest.size(r) << " " << (beg>>(4*(10-r)))
+//    io::dump_pdb_atom(out,  "Z" ,0,Vector3d(0,0,0));
+//    int count1 = 0, count2 = 0;
+//    // cout << r << " " << nest.size(r) << " " << (beg>>(4*(10-r)))
 // <<
 // endl;
-// 		// continue;
-// 		// for(size_t i = beg>>(4*(10-r)); i < nest.size(r); ++i){
-// 		for(size_t i = beg; i < nest.size(r); ++i){
-// 			++count1;
-// 			if( nest.set_state(i,r) ){
-// 				++count2;
-// 				if( count1 > N) break;
-// 				Matrix3d m = nest.value();
-// 				// cout << r << " " << i << " " <<
+//    // continue;
+//    // for(size_t i = beg>>(4*(10-r)); i < nest.size(r); ++i){
+//    for(size_t i = beg; i < nest.size(r); ++i){
+//      ++count1;
+//      if( nest.set_state(i,r) ){
+//        ++count2;
+//        if( count1 > N) break;
+//        Matrix3d m = nest.value();
+//        // cout << r << " " << i << " " <<
 // q.coeffs().transpose()
 // << endl;
-// 				Vector3d ximg = m * X;
-// 				Vector3d yimg = m * Y;
-// 				Vector3d zimg = m * Z;;
-// 				// cout << r << " " << nest.cell_index(i,r) <<
+//        Vector3d ximg = m * X;
+//        Vector3d yimg = m * Y;
+//        Vector3d zimg = m * Z;;
+//        // cout << r << " " << nest.cell_index(i,r) <<
 // endl;
-// 				// out << "MODEL" << std::endl;
-// 				// io::dump_pdb_atom(out,  "Z"
+//        // out << "MODEL" << std::endl;
+//        // io::dump_pdb_atom(out,  "Z"
 // ,count2,Vector3d(0,0,0));
-// 				io::dump_pdb_atom(out, "O" ,count2,50*ximg);
-// 				io::dump_pdb_atom(out, "NI",count2,50*yimg);
-// 				io::dump_pdb_atom(out, "N" ,count2,50*zimg);
-// 				// out << "ENDMDL" << std::endl;
-// 			}
-// 		}
-// 		out.close();
-// 		cout << r << " " << count2 / (double)count1 << endl;
-// 	}
+//        io::dump_pdb_atom(out, "O" ,count2,50*ximg);
+//        io::dump_pdb_atom(out, "NI",count2,50*yimg);
+//        io::dump_pdb_atom(out, "N" ,count2,50*zimg);
+//        // out << "ENDMDL" << std::endl;
+//      }
+//    }
+//    out.close();
+//    cout << r << " " << count2 / (double)count1 << endl;
+//  }
 
 // }
 
@@ -235,7 +235,7 @@ TEST(TetracontoctachoronMap, check_unit) {
 
   TetracontoctachoronMap<> map;
 
-  scheme::util::SimpleArray<24, int> cellcount(0);
+  rif::util::SimpleArray<24, int> cellcount(0);
 
   // std::ofstream out("bt24_unit.pdb");
   Vector3d lb(9e9, 9e9, 9e9), ub(-9e9, -9e9, -9e9);

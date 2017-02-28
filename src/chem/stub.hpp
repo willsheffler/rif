@@ -3,7 +3,7 @@
 
 #include <Eigen/Geometry>
 
-namespace scheme {
+namespace rif {
 namespace chemical {
 
 template <class Xform, class Point>

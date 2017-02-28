@@ -1,5 +1,5 @@
-#ifndef INCLUDED_scheme_util_exit_HH
-#define INCLUDED_scheme_util_exit_HH
+#ifndef INCLUDED_util_exit_HH
+#define INCLUDED_util_exit_HH
 
 #include <iostream>
 

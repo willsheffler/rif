@@ -3,7 +3,7 @@
 
 #include <boost/mpl/bool.hpp>
 
-namespace scheme {
+namespace rif {
 namespace util {
 namespace meta {
 
@@ -44,39 +44,39 @@ struct __TO_EMPTY_TYPE_UTILITY__ {
   typedef __EMPTY_TYPE_UTILITY__ type;
 };
 
-#define SCHEME_MEMBER_TYPE_DEFAULT_TEMPLATE(MEMBER, DEFAULT)              \
-  template <typename T,                                                   \
-            typename Enable = scheme::util::meta::__EMPTY_TYPE_UTILITY__> \
-  struct get_##MEMBER##_##DEFAULT {                                       \
-    typedef DEFAULT type;                                                 \
-  };                                                                      \
-  template <typename T>                                                   \
-  struct get_##MEMBER##_##DEFAULT<                                        \
-      T, typename scheme::util::meta::__TO_EMPTY_TYPE_UTILITY__<          \
-             typename T::MEMBER>::type> {                                 \
-    typedef typename T::MEMBER type;                                      \
+#define SCHEME_MEMBER_TYPE_DEFAULT_TEMPLATE(MEMBER, DEFAULT)           \
+  template <typename T,                                                \
+            typename Enable = rif::util::meta::__EMPTY_TYPE_UTILITY__> \
+  struct get_##MEMBER##_##DEFAULT {                                    \
+    typedef DEFAULT type;                                              \
+  };                                                                   \
+  template <typename T>                                                \
+  struct get_##MEMBER##_##DEFAULT<                                     \
+      T, typename rif::util::meta::__TO_EMPTY_TYPE_UTILITY__<          \
+             typename T::MEMBER>::type> {                              \
+    typedef typename T::MEMBER type;                                   \
   };
 
-#define SCHEME_MEMBER_TYPE_DEFAULT_SELF_TEMPLATE(MEMBER)                  \
-  template <typename T,                                                   \
-            typename Enable = scheme::util::meta::__EMPTY_TYPE_UTILITY__> \
-  struct get_##MEMBER##_SELF {                                            \
-    typedef T type;                                                       \
-  };                                                                      \
-  template <typename T>                                                   \
-  struct get_##MEMBER##_SELF<                                             \
-      T, typename scheme::util::meta::__TO_EMPTY_TYPE_UTILITY__<          \
-             typename T::MEMBER>::type> {                                 \
-    typedef typename T::MEMBER type;                                      \
+#define SCHEME_MEMBER_TYPE_DEFAULT_SELF_TEMPLATE(MEMBER)               \
+  template <typename T,                                                \
+            typename Enable = rif::util::meta::__EMPTY_TYPE_UTILITY__> \
+  struct get_##MEMBER##_SELF {                                         \
+    typedef T type;                                                    \
+  };                                                                   \
+  template <typename T>                                                \
+  struct get_##MEMBER##_SELF<                                          \
+      T, typename rif::util::meta::__TO_EMPTY_TYPE_UTILITY__<          \
+             typename T::MEMBER>::type> {                              \
+    typedef typename T::MEMBER type;                                   \
   };
 
-#define SCHEME_HAS_MEMBER_TYPE(MEMBER)                                    \
-  template <typename T,                                                   \
-            typename Enable = scheme::util::meta::__EMPTY_TYPE_UTILITY__> \
-  struct has_type_##MEMBER : boost::mpl::false_ {};                       \
-  template <typename T>                                                   \
-  struct has_type_##MEMBER<                                               \
-      T, typename scheme::util::meta::__TO_EMPTY_TYPE_UTILITY__<          \
+#define SCHEME_HAS_MEMBER_TYPE(MEMBER)                                 \
+  template <typename T,                                                \
+            typename Enable = rif::util::meta::__EMPTY_TYPE_UTILITY__> \
+  struct has_type_##MEMBER : boost::mpl::false_ {};                    \
+  template <typename T>                                                \
+  struct has_type_##MEMBER<                                            \
+      T, typename rif::util::meta::__TO_EMPTY_TYPE_UTILITY__<          \
              typename T::MEMBER>::type> : boost::mpl::true_ {};
 
 template <typename T, class R, class A, class B, class C>
@@ -180,24 +180,24 @@ struct has_const_subscript_oper {
 
 // template< typename SeqOfSeq >
 // struct flatten {
-// 	typedef void type;
+//  typedef void type;
 // };
 
 // template< typename S, template<typename,typename> class pair = std::pair >
 // struct product1 {
-// 	template< typename T >
-// 	struct apply {
-// 		typedef typename
-// 			m::transform< S, pair<T,m::_1> >::type
-// 		type;
-// 	};
+//  template< typename T >
+//  struct apply {
+//    typedef typename
+//      m::transform< S, pair<T,m::_1> >::type
+//    type;
+//  };
 // };
 
 // template< typename S, typename T=S, template<typename,typename> class pair =
 // std::pair >
 // struct product {
-// 	typedef typename m::transform< S, product1<T,pair> >::type SeqOfSeq;
-// 	typedef typename flatten< SeqOfSeq >::type type;
+//  typedef typename m::transform< S, product1<T,pair> >::type SeqOfSeq;
+//  typedef typename flatten< SeqOfSeq >::type type;
 // };
 }
 }

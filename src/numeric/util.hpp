@@ -4,7 +4,7 @@
 #include <math.h>
 #include <limits>
 
-namespace scheme {
+namespace rif {
 namespace numeric {
 
 template <class X>

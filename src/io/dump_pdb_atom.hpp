@@ -8,7 +8,7 @@
 #include <iostream>
 #include <sstream>
 
-namespace scheme {
+namespace rif {
 namespace io {
 
 using chemical::AtomData;

@@ -8,7 +8,7 @@
 
 #include <boost/foreach.hpp>
 
-namespace scheme {
+namespace rif {
 namespace chemical {
 namespace test {
 

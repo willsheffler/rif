@@ -11,7 +11,7 @@
 
 #include <Eigen/Geometry>
 
-namespace scheme {
+namespace rif {
 namespace numeric {
 namespace test {
 
@@ -186,11 +186,11 @@ TEST(bcc_lattice, orientatin_coverage_4d) {
     test_orientatin_coverage_4d(i, 6 * NSAMP);
     std::cout.flush();
   }
-  // 	test_orientatin_coverage_4d(   8 , NSAMP );
-  // 	test_orientatin_coverage_4d(  16 , NSAMP );
-  // 	test_orientatin_coverage_4d(  32 , NSAMP );
-  // 	// test_orientatin_coverage_4d(  64 , NSAMP );
-  // 	// test_orientatin_coverage_4d( 128 , NSAMP );
+  //  test_orientatin_coverage_4d(   8 , NSAMP );
+  //  test_orientatin_coverage_4d(  16 , NSAMP );
+  //  test_orientatin_coverage_4d(  32 , NSAMP );
+  //  // test_orientatin_coverage_4d(  64 , NSAMP );
+  //  // test_orientatin_coverage_4d( 128 , NSAMP );
 }
 
 TEST(bcc_lattice, orientatin_coverage_3d_bt24) {

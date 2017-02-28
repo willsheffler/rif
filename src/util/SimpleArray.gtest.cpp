@@ -2,7 +2,7 @@
 #include <gtest/gtest.h>
 #include <boost/foreach.hpp>
 
-namespace scheme {
+namespace rif {
 namespace util {
 
 using std::cout;

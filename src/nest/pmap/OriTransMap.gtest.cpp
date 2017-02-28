@@ -3,7 +3,7 @@
 #include "nest/NEST.hpp"
 #include "nest/pmap/OriTransMap.hpp"
 
-namespace scheme {
+namespace rif {
 namespace nest {
 namespace pmap {
 

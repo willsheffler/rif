@@ -1,5 +1,5 @@
-#ifndef INCLUDED_scheme_nest_maps_OriTransMap_HH
-#define INCLUDED_scheme_nest_maps_OriTransMap_HH
+#ifndef INCLUDED_nest_maps_OriTransMap_HH
+#define INCLUDED_nest_maps_OriTransMap_HH
 
 #include "nest/pmap/ScaleMap.hpp"
 #include "nest/pmap/TetracontoctachoronMap.hpp"
@@ -12,7 +12,7 @@
 #include <iostream>
 #include <vector>
 
-namespace scheme {
+namespace rif {
 namespace nest {
 namespace pmap {
 
@@ -34,8 +34,8 @@ struct OriTransMap {
   typedef Eigen::Matrix<Float, 3, 1> V;
   typedef Eigen::Matrix<Float, 3, 3> M;
 
-  typedef scheme::nest::pmap::TetracontoctachoronMap<3, M, Index, Float> OriMap;
-  typedef scheme::nest::pmap::ScaleMap<3, V, Index, Float> TransMap;
+  typedef rif::nest::pmap::TetracontoctachoronMap<3, M, Index, Float> OriMap;
+  typedef rif::nest::pmap::ScaleMap<3, V, Index, Float> TransMap;
 
   OriMap ori_map_;
   TransMap trans_map_;
@@ -54,7 +54,7 @@ struct OriTransMap {
     trans_map_.init(lb, ub, bs);
     // cout << "OriMap: TetracontoctachoronMap, "
     //      << rot_resl_deg << " nside: " << ori_map_.nside_ << ", covrad: "
-    //    	 << ori_map_.bin_circumradius(0)*180.0/M_PI << ", size: " <<
+    //       << ori_map_.bin_circumradius(0)*180.0/M_PI << ", size: " <<
     //    ori_map_.num_cells() << endl;
   }
 

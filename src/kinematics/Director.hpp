@@ -25,7 +25,7 @@
 
 */
 
-namespace scheme {
+namespace rif {
 namespace kinematics {
 
 template <class _Position, class _BigIndex = uint64_t, class _Index = uint64_t>

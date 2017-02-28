@@ -3,7 +3,7 @@
 
 #include <utility>
 
-namespace scheme {
+namespace rif {
 namespace actor {
 
 template <class _Position, class _Data>

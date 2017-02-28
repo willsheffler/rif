@@ -8,7 +8,7 @@
 #include <boost/make_shared.hpp>
 #include <boost/tuple/tuple.hpp>
 
-namespace scheme {
+namespace rif {
 namespace kinematics {
 namespace test {
 
@@ -1340,81 +1340,81 @@ TEST(SceneIterator, interactions_twobody_hetero_sym) {
 
 // TEST(SceneIterator,bodies_hold_actors)
 // {
-// 	using std::make_pair;
+//  using std::make_pair;
 
-// 	typedef actor::ActorConcept<X1dim,int> ADI;
-// 	typedef actor::ActorConcept<X1dim,char> ADC;
-// 	typedef m::vector< ADI, ADC > Actors;
-// 	typedef m::vector< ADI, std::pair<ADI,ADC> > Interactions;
+//  typedef actor::ActorConcept<X1dim,int> ADI;
+//  typedef actor::ActorConcept<X1dim,char> ADC;
+//  typedef m::vector< ADI, ADC > Actors;
+//  typedef m::vector< ADI, std::pair<ADI,ADC> > Interactions;
 
-// 	typedef Scene<Actors,X1dim,size_t> Scene;
-// 	typedef size_t Index;
-// 	typedef std::pair<size_t,size_t> Index2;
-// 	typedef std::pair<Index2,Index2> Index4;
+//  typedef Scene<Actors,X1dim,size_t> Scene;
+//  typedef size_t Index;
+//  typedef std::pair<size_t,size_t> Index2;
+//  typedef std::pair<Index2,Index2> Index4;
 
-// 	typedef std::pair<ADI,ADC> Interaction;
-// 	typedef SceneIter<Scene,Interaction > Iter2;
-// 	typedef get_placeholder_type<Interaction,Index>::type PH;
+//  typedef std::pair<ADI,ADC> Interaction;
+//  typedef SceneIter<Scene,Interaction > Iter2;
+//  typedef get_placeholder_type<Interaction,Index>::type PH;
 
-// 	shared_ptr<Conformation> conf = make_shared<Conformation>();
-// 	conf->add_actor( ADI(0.0,0) );
-// 	// conf->add_actor( ADI(0.0,1) );
-// 	// conf->add_actor( ADI(0.0,2) );
-// 	// conf->add_actor( ADC(0.0,'0') );
-// 	shared_ptr<Conformation> conf2 = make_shared<Conformation>();
-// 	conf2->add_actor( ADI(1.0,0) );
-// 	// conf2->add_actor( ADI(1.0,1) );
-// 	conf2->add_actor( ADC(1.0,'0') );
-// 	// conf2->add_actor( ADC(1.0,'1') );
+//  shared_ptr<Conformation> conf = make_shared<Conformation>();
+//  conf->add_actor( ADI(0.0,0) );
+//  // conf->add_actor( ADI(0.0,1) );
+//  // conf->add_actor( ADI(0.0,2) );
+//  // conf->add_actor( ADC(0.0,'0') );
+//  shared_ptr<Conformation> conf2 = make_shared<Conformation>();
+//  conf2->add_actor( ADI(1.0,0) );
+//  // conf2->add_actor( ADI(1.0,1) );
+//  conf2->add_actor( ADC(1.0,'0') );
+//  // conf2->add_actor( ADC(1.0,'1') );
 
-// 	Scene s;
-// 	s.add_body(conf);
-// 	s.add_body(conf2);
+//  Scene s;
+//  s.add_body(conf);
+//  s.add_body(conf2);
 
-// 	SceneIter<Scene,ADI> beg,end;
-// 	tie(beg,end) = s.get_interactions<ADI>();
-// 	cout << *beg++ << " / " << *end << endl;
-// 	cout << *beg++ << " / " << *end << endl;
-// 	cout << *beg++ << " / " << *end << endl;
-// 	cout << *beg++ << " / " << *end << endl;
-// 	// BOOST_FOREACH( Index2 ip, iters1 ) cout << ip << endl;
+//  SceneIter<Scene,ADI> beg,end;
+//  tie(beg,end) = s.get_interactions<ADI>();
+//  cout << *beg++ << " / " << *end << endl;
+//  cout << *beg++ << " / " << *end << endl;
+//  cout << *beg++ << " / " << *end << endl;
+//  cout << *beg++ << " / " << *end << endl;
+//  // BOOST_FOREACH( Index2 ip, iters1 ) cout << ip << endl;
 
-// 	// {
-// 	// 	std::pair<Iter2,Iter2> iters2 =
+//  // {
+//  //  std::pair<Iter2,Iter2> iters2 =
 // s.get_interactions<Interaction>();
-// 	// 	BOOST_FOREACH( Index4 ip, iters2 ){
-// 	// 		Interaction::first_type a1;
-// 	// 		Interaction::second_type a2;
-// 	// 		boost::tie(a1,a2) = s.get_interaction<Interaction>(ip);
-// 	// 		cout << ip.first.first << " " << ip.second.first << " "
+//  //  BOOST_FOREACH( Index4 ip, iters2 ){
+//  //    Interaction::first_type a1;
+//  //    Interaction::second_type a2;
+//  //    boost::tie(a1,a2) = s.get_interaction<Interaction>(ip);
+//  //    cout << ip.first.first << " " << ip.second.first << " "
 // <<
 // a1 << "    ";
-// 	// 		cout << ip.first.second << " " << ip.second.second << "
+//  //    cout << ip.first.second << " " << ip.second.second << "
 // "
 // << a2 << endl;
-// 	// 	}
-// 	// }
+//  //  }
+//  // }
 
-// 	// {
-// 	// 	SceneIter<Scene,Interaction > beg,end;
-// 	// 	boost::tie(beg,end) = s.get_interactions<Interaction>();
-// 	// 	ASSERT_EQ( *beg, PH(make_pair(make_pair(0,0),make_pair(0,0))) );
+//  // {
+//  //  SceneIter<Scene,Interaction > beg,end;
+//  //  boost::tie(beg,end) = s.get_interactions<Interaction>();
+//  //  ASSERT_EQ( *beg, PH(make_pair(make_pair(0,0),make_pair(0,0))) );
 // ++beg;
-// 	// }
+//  // }
 
-// 	// ASSERT_EQ( s.body(0).get_actor<ADI>(0), ADI(0.0,0)    );
-// 	// ASSERT_EQ( s.body(0).get_actor<ADI>(1), ADI(1.0,0)    );
-// 	// ASSERT_EQ( s.body(0).get_actor<ADC>(0), ADC(2.0,'0')  );
-// 	// ASSERT_EQ( s.body(1).get_actor<ADI>(0), ADI(0.0,1)    );
-// 	// ASSERT_EQ( s.body(1).get_actor<ADI>(1), ADI(1.0,1)    );
-// 	// ASSERT_EQ( s.body(1).get_actor<ADC>(0), ADC(2.0,'1')  );
+//  // ASSERT_EQ( s.body(0).get_actor<ADI>(0), ADI(0.0,0)    );
+//  // ASSERT_EQ( s.body(0).get_actor<ADI>(1), ADI(1.0,0)    );
+//  // ASSERT_EQ( s.body(0).get_actor<ADC>(0), ADC(2.0,'0')  );
+//  // ASSERT_EQ( s.body(1).get_actor<ADI>(0), ADI(0.0,1)    );
+//  // ASSERT_EQ( s.body(1).get_actor<ADI>(1), ADI(1.0,1)    );
+//  // ASSERT_EQ( s.body(1).get_actor<ADC>(0), ADC(2.0,'1')  );
 
-// 	// ASSERT_THROW( s.body(2), std::out_of_range );
-// 	// ASSERT_THROW( s.body(1).get_actor<ADI>(2), std::out_of_range );
-// 	// // body.set_position(1.0);
-// 	// // cout << body.get_actor<ADI>(0) << endl;
+//  // ASSERT_THROW( s.body(2), std::out_of_range );
+//  // ASSERT_THROW( s.body(1).get_actor<ADI>(2), std::out_of_range );
+//  // // body.set_position(1.0);
+//  // // cout << body.get_actor<ADI>(0) << endl;
 
-// 	// cout << s << endl;
+//  // cout << s << endl;
 
 // }
 }

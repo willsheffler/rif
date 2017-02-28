@@ -9,7 +9,7 @@
 
 #include <set>
 
-namespace scheme {
+namespace rif {
 namespace objective {
 namespace storage {
 
@@ -234,8 +234,8 @@ struct TwoBodyTable {
             in.read((char *)&(twobody_[ir][jr].data()[k]), sizeof(Data));
             // static bool doit = true;
             // if( doit ){
-            // 	twobody_[ir][jr].data()[k] += 1.0;
-            // 	doit = false;
+            //  twobody_[ir][jr].data()[k] += 1.0;
+            //  doit = false;
             // }
           }
         }
@@ -320,42 +320,42 @@ struct TwoBodyTable {
   }
 
   // void deepcopy( TwoBodyTable<Data> const & that ) {
-  // 	// Array2D onebody_;
-  // 	// boost::multi_array< int, 2 > all2sel_, sel2all_;
-  // 	// std::vector<int> nsel_;
-  // 	// TwoBody twobody_;
-  // 	nres_ = that.nres_;
-  // 	nrot_ = that.nrot_;
-  // 	onebody_.resize(
+  //  // Array2D onebody_;
+  //  // boost::multi_array< int, 2 > all2sel_, sel2all_;
+  //  // std::vector<int> nsel_;
+  //  // TwoBody twobody_;
+  //  nres_ = that.nres_;
+  //  nrot_ = that.nrot_;
+  //  onebody_.resize(
   // boost::extents[that.onebody_.shape()[0]][that.onebody_.shape()[1]] );//
   // this seems crappy...
-  // 	all2sel_.resize(
+  //  all2sel_.resize(
   // boost::extents[that.all2sel_.shape()[0]][that.all2sel_.shape()[1]] );
-  // 	sel2all_.resize(
+  //  sel2all_.resize(
   // boost::extents[that.sel2all_.shape()[0]][that.sel2all_.shape()[1]] );
-  // 	ALWAYS_ASSERT( all2sel_.num_elements() == onebody_.num_elements() );
-  // 	ALWAYS_ASSERT( sel2all_.num_elements() == onebody_.num_elements() );
-  // 	for( int i = 0; i < that.onebody_.num_elements(); ++i ){
-  // 		onebody_.data()[i] = that.onebody_.data()[i];
-  // 		all2sel_.data()[i] = that.all2sel_.data()[i];
-  // 		sel2all_.data()[i] = that.sel2all_.data()[i];
-  // 	}
-  // 	nsel_.resize( that.nsel_.size() );
-  // 	for( int i = 0; i < nsel_.size(); ++i ) nsel_[i] = that.nsel_[i];
-  // 	twobody_.resize(
+  //  ALWAYS_ASSERT( all2sel_.num_elements() == onebody_.num_elements() );
+  //  ALWAYS_ASSERT( sel2all_.num_elements() == onebody_.num_elements() );
+  //  for( int i = 0; i < that.onebody_.num_elements(); ++i ){
+  //    onebody_.data()[i] = that.onebody_.data()[i];
+  //    all2sel_.data()[i] = that.all2sel_.data()[i];
+  //    sel2all_.data()[i] = that.sel2all_.data()[i];
+  //  }
+  //  nsel_.resize( that.nsel_.size() );
+  //  for( int i = 0; i < nsel_.size(); ++i ) nsel_[i] = that.nsel_[i];
+  //  twobody_.resize(
   // boost::extents[that.twobody_.shape()[0]][that.twobody_.shape()[1]] );
-  // 	for( int i = 0; i < nres_; ++i ){
-  // 	for( int j = 0; j < nres_; ++j ){
-  // 		twobody_[i][j].resize(
+  //  for( int i = 0; i < nres_; ++i ){
+  //  for( int j = 0; j < nres_; ++j ){
+  //    twobody_[i][j].resize(
   // boost::extents[that.twobody_[i][j].shape()[0]][that.twobody_[i][j].shape()[1]]
   // );
-  // 		ALWAYS_ASSERT( 0 == twobody_[i][j].num_elements() ||
+  //    ALWAYS_ASSERT( 0 == twobody_[i][j].num_elements() ||
   // nsel_[i]*nsel_[j] == twobody_[i][j].num_elements() );
-  // 		for( int k = 0; k < twobody_[i][j].num_elements(); ++k ){
-  // 			twobody_[i][j].data()[k] =
+  //    for( int k = 0; k < twobody_[i][j].num_elements(); ++k ){
+  //      twobody_[i][j].data()[k] =
   // that.twobody_[i][j].data()[k];
-  // 		}
-  // 	}}
+  //    }
+  //  }}
 
   // }
 };

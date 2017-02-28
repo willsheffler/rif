@@ -6,7 +6,7 @@
 #include "nest/pmap/ScaleMap.hpp"
 #include "nest/pmap/UnitMap.hpp"
 
-namespace scheme {
+namespace rif {
 namespace nest {
 namespace pmap {
 

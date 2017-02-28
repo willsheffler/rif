@@ -10,7 +10,7 @@
 #include "io/cache.hpp"
 #include "util/SimpleArray.hpp"
 
-namespace scheme {
+namespace rif {
 namespace util {
 namespace meta {
 

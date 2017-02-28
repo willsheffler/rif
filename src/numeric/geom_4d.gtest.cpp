@@ -12,7 +12,7 @@
 
 #include <fstream>
 
-namespace scheme {
+namespace rif {
 namespace nest {
 namespace pmap {
 
@@ -40,8 +40,8 @@ TEST(geom_4d, tetracontoctachoron_cell_lookup) {
 
   // std::ofstream out("test.pdb");
   // for(int i = 0; i < 48; ++i){
-  // 	if( t24.row(i).block(0,0,1,3).norm() < 0.9 )
-  // 		io::dump_pdb_atom(out,i,10*t24.row(i));
+  //  if( t24.row(i).block(0,0,1,3).norm() < 0.9 )
+  //    io::dump_pdb_atom(out,i,10*t24.row(i));
   // }
   // out.close();
 
@@ -114,8 +114,8 @@ TEST(geom_4d, tetracontoctachoron_half_cell_lookup) {
 
   // std::ofstream out("test.pdb");
   // for(int i = 0; i < 24; ++i){
-  // 	if( t24h.row(i).block(0,0,1,3).norm() < 0.9 )
-  // 		io::dump_pdb_atom(out,i,10*t24h.row(i));
+  //  if( t24h.row(i).block(0,0,1,3).norm() < 0.9 )
+  //    io::dump_pdb_atom(out,i,10*t24h.row(i));
   // }
   // out.close();
 

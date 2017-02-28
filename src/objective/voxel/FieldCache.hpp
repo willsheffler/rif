@@ -7,7 +7,7 @@
 // #include <boost/exception/all.hpp>
 #include <exception>
 
-namespace scheme {
+namespace rif {
 namespace objective {
 namespace voxel {
 
@@ -53,7 +53,7 @@ struct FieldCache3D : public VoxelArray<3, Float> {
       this->resize(extents);
     }  // else {
 #endif
-    // 	std::cout << "NO CACHE" << std::endl;
+    //  std::cout << "NO CACHE" << std::endl;
     // }
     if (!no_init) {
       for (int k = 0; k < this->shape()[2]; ++k) {
@@ -121,10 +121,10 @@ struct FieldCache3D : public VoxelArray<3, Float> {
       }
     }
     // if( nerror==0 ){
-    // 	#ifdef USE_OPENMP
-    // 	#pragma omp critical
-    // 	#endif
-    // 	std::cout << "    check_against_field pass " << nsamp-nerror << " of "
+    //  #ifdef USE_OPENMP
+    //  #pragma omp critical
+    //  #endif
+    //  std::cout << "    check_against_field pass " << nsamp-nerror << " of "
     // << nsamp << std::endl;
     // }
     return (double)nerror / (double)nsamp;
@@ -166,8 +166,8 @@ struct BoundingFieldCache3D : public VoxelArray<3, Float> {
       std::cout << "BoundingFieldCache3D warning: spread " << spread
                 << " less than ref cell_size.norm() " << ref.cs_.norm()
                 << std::endl;
-    //		Float3 lb = ref.lb_-spread;
-    //		Float3 ub = ref.ub_+spread;
+    //    Float3 lb = ref.lb_-spread;
+    //    Float3 ub = ref.ub_+spread;
     typename BASE::Indices extents;
     for (size_t i = 0; i < BASE::DIM; ++i) extents[i] = this->shape()[i];
 #ifdef CEREAL

@@ -6,7 +6,7 @@
 #include <boost/any.hpp>
 #include <iterator>  // std::ostream_iterator
 
-namespace scheme {
+namespace rif {
 namespace nest {
 namespace test {
 

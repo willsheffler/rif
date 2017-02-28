@@ -13,7 +13,7 @@
 
 // #include <Eigen/Core>
 
-namespace scheme {
+namespace rif {
 namespace nest {
 
 using std::cout;
@@ -57,11 +57,11 @@ TEST(NEST, particular_cases) {
 // // keep this out because #include <Eigen/Core> takes almost a second to
 // compile
 // TEST(NEST,works_with_eigen){
-// 	typedef Eigen::Matrix<float,2,1> MAT;
-// 	typedef NEST<2,MAT> Nest;
-// 	Nest nest;
-// 	MAT m; m << 0.5,0.5;
-// 	ASSERT_EQ( nest.set_and_get(0,0), m );
+//  typedef Eigen::Matrix<float,2,1> MAT;
+//  typedef NEST<2,MAT> Nest;
+//  Nest nest;
+//  MAT m; m << 0.5,0.5;
+//  ASSERT_EQ( nest.set_and_get(0,0), m );
 // }
 
 TEST(NEST, map_discrete) {

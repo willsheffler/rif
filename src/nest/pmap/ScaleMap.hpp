@@ -1,5 +1,5 @@
-#ifndef INCLUDED_scheme_nest_maps_ScaleMap_HH
-#define INCLUDED_scheme_nest_maps_ScaleMap_HH
+#ifndef INCLUDED_nest_maps_ScaleMap_HH
+#define INCLUDED_nest_maps_ScaleMap_HH
 
 #include <boost/bind.hpp>
 #include <boost/function.hpp>
@@ -11,7 +11,7 @@
 #include "util/SimpleArray.hpp"
 #include "util/template_loop.hpp"
 
-namespace scheme {
+namespace rif {
 namespace nest {
 namespace pmap {
 
@@ -193,17 +193,17 @@ struct ScaleMap {
   // template<class OutIter>
   // void get_neighbors(Indices const & indices, Index cell_index, Index resl,
   // OutIter out)  {
-  // 	// std::cout << indices.transpose() << std::endl;
-  // 	SignedIndices lb = ((indices.template cast<int>()-1).max(     0     ));
-  // 	SignedIndices ub = ((indices.template cast<int>()+1).min((1<<resl)-1));
-  // 	// std::cout << "IX " << indices.transpose() << " cell " << cell_index
+  //  // std::cout << indices.transpose() << std::endl;
+  //  SignedIndices lb = ((indices.template cast<int>()-1).max(     0     ));
+  //  SignedIndices ub = ((indices.template cast<int>()+1).min((1<<resl)-1));
+  //  // std::cout << "IX " << indices.transpose() << " cell " << cell_index
   // << std::endl;
-  // 	// std::cout << "LB " << lb.transpose() << std::endl;
-  // 	// std::cout << "UB " << ub.transpose() << std::endl;
-  // 	boost::function<void(SignedIndices)> functor;
-  // 	functor = boost::bind( & ThisType::template push_index<OutIter>, this,
+  //  // std::cout << "LB " << lb.transpose() << std::endl;
+  //  // std::cout << "UB " << ub.transpose() << std::endl;
+  //  boost::function<void(SignedIndices)> functor;
+  //  functor = boost::bind( & ThisType::template push_index<OutIter>, this,
   // _1, cell_index, resl, out );
-  // 	util::NESTED_FOR<DIM>(lb,ub,functor);
+  //  util::NESTED_FOR<DIM>(lb,ub,functor);
   // }
 
   ///@brief return the cell_index of neighboring cells within delta of value

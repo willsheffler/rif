@@ -19,7 +19,7 @@
 
 #include <boost/iterator/iterator_facade.hpp>
 
-namespace scheme {
+namespace rif {
 namespace util {
 namespace container {
 

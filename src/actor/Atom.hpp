@@ -7,7 +7,7 @@
 #include "numeric/util.hpp"
 #include "types.hpp"
 
-namespace scheme {
+namespace rif {
 namespace actor {
 
 template <class _Position>
@@ -78,8 +78,7 @@ template <class _Position>
 struct Atom {
   typedef _Position Position;
 
-  Atom()
-      : position_(0, 0, 0), type_(0), data_(scheme::make_shared<AtomData>()) {}
+  Atom() : position_(0, 0, 0), type_(0), data_(rif::make_shared<AtomData>()) {}
   // data_(new AtomData) {}
 
   template <class P>
@@ -95,7 +94,7 @@ struct Atom {
        float bfac = AtomData::default_bfac())
       : position_(p[0], p[1], p[2]),
         type_(type),
-        data_(scheme::make_shared<AtomData>(  // TODO: why do I need rif:: here?
+        data_(rif::make_shared<AtomData>(  // TODO: why do I need rif:: here?
             // data_(new AtomData(
             atomname, resname, chain, resnum, atomnum, elem, ishet, occ,
             bfac)) {}

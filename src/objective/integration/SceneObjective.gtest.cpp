@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-namespace scheme {
+namespace rif {
 namespace kinematics {
 namespace integration {}
 }

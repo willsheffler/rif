@@ -7,7 +7,7 @@
 #include <boost/any.hpp>
 #include <vector>
 
-namespace scheme {
+namespace rif {
 namespace kinematics {
 
 template <class _Position, class _Index = uint64_t>

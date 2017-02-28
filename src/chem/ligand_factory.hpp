@@ -8,7 +8,7 @@
 #include <boost/lexical_cast.hpp>
 #include <vector>
 
-namespace scheme {
+namespace rif {
 namespace chemical {
 
 std::vector<std::string> get_pdb_lines(std::string resn, bool hydrogen);

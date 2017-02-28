@@ -21,7 +21,7 @@
 
 #include <boost/iterator/iterator_facade.hpp>
 
-namespace scheme {
+namespace rif {
 namespace kinematics {
 
 namespace m = boost::mpl;
@@ -163,8 +163,8 @@ struct CountPairNoDuplicates {
   // static size_t get_j_end(size_t  ){ return 0; }
   // template<class Index>
   // static void get_end(size_t , size_t s1, Index & i, Index & j){
-  // 	i = s1;
-  // 	j = 0;
+  //  i = s1;
+  //  j = 0;
   // }
   static size_t max_body1(size_t, size_t s1) { return s1; }
 };
@@ -182,14 +182,14 @@ struct CountPairUpperTriangle {
   // // static size_t get_j_end(size_t n){ if(n==1) return 2; return n==0?0:n; }
   // template<class Index>
   // static void get_end(size_t s0, size_t s1, Index & i, Index & j){
-  // 	if     ( s0==0 ) { i = j = 0; }
-  // 	else if( s0==1 ) { i = 1; j = 2; }
-  // 	else {
-  // 		i = s0-1;
-  // 		j = s0;
-  // 		i += s0==s1?0:1;
-  // 		j += s0==s1?0:1;
-  // 	}
+  //  if     ( s0==0 ) { i = j = 0; }
+  //  else if( s0==1 ) { i = 1; j = 2; }
+  //  else {
+  //    i = s0-1;
+  //    j = s0;
+  //    i += s0==s1?0:1;
+  //    j += s0==s1?0:1;
+  //  }
   // }
   static size_t max_body1(size_t s0, size_t) { return s0; }
 };

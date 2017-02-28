@@ -12,7 +12,7 @@
 
 #include <Eigen/Geometry>
 
-namespace scheme {
+namespace rif {
 namespace numeric {
 namespace test {
 
@@ -20,37 +20,37 @@ using std::cout;
 using std::endl;
 
 // TEST(TEMPORARY,gm_20140905){
-// 	int NSAMP = 1000000;
-// 	std::mt19937 r((unsigned int)time(0));
-// 	std::uniform_real_distribution<> u;
-// 	Eigen::Matrix<double,6,6> dis; dis.fill(0);
-// 	for(int idata = 1; idata <= 6; ++idata ){
-// 		for(int irep  = 1; irep <= idata; ++irep ){
-// 			int totbin = 16<<(idata-1)*2;
-// 			int nbins = std::pow( totbin, 1.0/irep );
-// 			cout << idata << " " << irep << " " << totbin << " " <<
+//  int NSAMP = 1000000;
+//  std::mt19937 r((unsigned int)time(0));
+//  std::uniform_real_distribution<> u;
+//  Eigen::Matrix<double,6,6> dis; dis.fill(0);
+//  for(int idata = 1; idata <= 6; ++idata ){
+//    for(int irep  = 1; irep <= idata; ++irep ){
+//      int totbin = 16<<(idata-1)*2;
+//      int nbins = std::pow( totbin, 1.0/irep );
+//      cout << idata << " " << irep << " " << totbin << " " <<
 // std::pow(nbins,irep) << endl;
-// 			for(int iter = 0; iter < NSAMP; ++iter){
-// 				util::SimpleArray<6,double> samp(0.5);
-// 				for(int i=0; i<idata; ++i) samp[i] = u(r);
-// 				util::SimpleArray<6,double> rep(0.5);
-// 				for(int i=0; i<irep; ++i){
-// 					rep[i] =
+//      for(int iter = 0; iter < NSAMP; ++iter){
+//        util::SimpleArray<6,double> samp(0.5);
+//        for(int i=0; i<idata; ++i) samp[i] = u(r);
+//        util::SimpleArray<6,double> rep(0.5);
+//        for(int i=0; i<irep; ++i){
+//          rep[i] =
 // ((int)(samp[i]*nbins)+u(r))/nbins;
-// 				}
-// 				// cout << idata << " " << irep << " " << samp
+//        }
+//        // cout << idata << " " << irep << " " << samp
 // <<
 // endl;
-// 				// cout << idata << " " << irep << " " << rep <<
+//        // cout << idata << " " << irep << " " << rep <<
 // endl;
-// 				// cout << endl;
-// 				// std::exit(-1);
-// 				dis(irep-1,idata-1) += (samp-rep).norm();
-// 			}
-// 		}
-// 	}
-// 	dis = dis / (double)NSAMP * 100;
-// 	cout << dis << endl;
+//        // cout << endl;
+//        // std::exit(-1);
+//        dis(irep-1,idata-1) += (samp-rep).norm();
+//      }
+//    }
+//  }
+//  dis = dis / (double)NSAMP * 100;
+//  cout << dis << endl;
 // }
 
 TEST(bcc_lattice, centers_map) {
@@ -58,9 +58,9 @@ TEST(bcc_lattice, centers_map) {
   typedef util::SimpleArray<3, uint64_t> I;
 
   // {
-  // 	BCC<3,double> bcc(I(2,2,2),V(0,0,0),V(1,1,1));
-  // 	for(int i = 0; i < bcc.size(); ++i)
-  // 		cout << i << "\t" << bcc[i] << endl;
+  //  BCC<3,double> bcc(I(2,2,2),V(0,0,0),V(1,1,1));
+  //  for(int i = 0; i < bcc.size(); ++i)
+  //    cout << i << "\t" << bcc[i] << endl;
 
   // }
 
@@ -276,15 +276,15 @@ F test_bcc_neighbors(size_t NSAMP) {
   // io::dump_pdb_atom(out_bcc,i,LAT[i]*10.0);
   // out_bcc.close();
   // for(int i = 0; i < LAT.size(); ++i){
-  // 	std::vector<size_t> nbrs;
-  // 	LAT.neighbors( i, std::back_inserter(nbrs), true );
-  // 	// BOOST_FOREACH(size_t nbr, nbrs) cout << nbr << " " << LAT[nbr] <<
+  //  std::vector<size_t> nbrs;
+  //  LAT.neighbors( i, std::back_inserter(nbrs), true );
+  //  // BOOST_FOREACH(size_t nbr, nbrs) cout << nbr << " " << LAT[nbr] <<
   // endl;
-  // 	std::string s = boost::str(boost::format("%4i") % i);
-  // 	std::ofstream out("test_"+s+".pdb");
-  // 	BOOST_FOREACH(size_t nbr, nbrs)
+  //  std::string s = boost::str(boost::format("%4i") % i);
+  //  std::ofstream out("test_"+s+".pdb");
+  //  BOOST_FOREACH(size_t nbr, nbrs)
   // io::dump_pdb_atom(out,nbr,LAT[nbr]*10.0);
-  // 	out.close();
+  //  out.close();
   // }
 
   return maxrad_99;
@@ -296,10 +296,10 @@ TEST(bcc_lattice, neighbors) {
   NITER *= 50;
 #endif
   // for(int i = 3; i < 8; ++i){
-  // 	int nc = std::pow(3,i);
-  // 	int nbccFC = 1+2*i+std::pow(2,i);
-  // 	int nbccFCE = nbccFC + i*(i-1)/2 * 4;
-  // 	cout << "Nnbrs: " << i <<" cubic "<< nc << " bccFC " << nbccFC << "
+  //  int nc = std::pow(3,i);
+  //  int nbccFC = 1+2*i+std::pow(2,i);
+  //  int nbccFCE = nbccFC + i*(i-1)/2 * 4;
+  //  cout << "Nnbrs: " << i <<" cubic "<< nc << " bccFC " << nbccFC << "
   // bccFCE " << nbccFCE << endl;
   // }
   // Nnbrs: 3 cubic   27 bccFC  15 bccFCE  27
@@ -325,58 +325,58 @@ TEST(bcc_lattice, neighbors) {
 }
 
 // TEST(bcc_lattice,coverage_transform_7d){
-// 	using namespace Eigen;
-// 	typedef Transform<double,3,AffineCompact> Xform;
-// 	typedef util::SimpleArray<7,double> V;
-// 	typedef util::SimpleArray<7,size_t> I;
-// 	typedef Matrix<double,7,1> Vector7d;
-// 	std::mt19937 mt((unsigned int)time(0));
-// 	std::normal_distribution<> rnorm;
-// 	size_t Nside = 64;
-// 	V bounds = V(1.5,1.5,1.5,1.5,10,10,10);
-// 	BCC<7,double> bcc(I(Nside),-bounds,bounds);
+//  using namespace Eigen;
+//  typedef Transform<double,3,AffineCompact> Xform;
+//  typedef util::SimpleArray<7,double> V;
+//  typedef util::SimpleArray<7,size_t> I;
+//  typedef Matrix<double,7,1> Vector7d;
+//  std::mt19937 mt((unsigned int)time(0));
+//  std::normal_distribution<> rnorm;
+//  size_t Nside = 64;
+//  V bounds = V(1.5,1.5,1.5,1.5,10,10,10);
+//  BCC<7,double> bcc(I(Nside),-bounds,bounds);
 
-// 	Matrix<double,3,6> pts0;
-// 	pts0 <<  1, 0, 0,-2, 0, 0,
-// 	         0, 1, 0, 0,-1, 0,
-// 	         0, 0, 1, 0, 0,-1;
-// 	pts0.colwise() -= pts0.rowwise().sum()/pts0.cols();
+//  Matrix<double,3,6> pts0;
+//  pts0 <<  1, 0, 0,-2, 0, 0,
+//           0, 1, 0, 0,-1, 0,
+//           0, 0, 1, 0, 0,-1;
+//  pts0.colwise() -= pts0.rowwise().sum()/pts0.cols();
 
-// 	Xform X( AngleAxisd(2,Vector3d(1,2,3)) );
+//  Xform X( AngleAxisd(2,Vector3d(1,2,3)) );
 
-// 	// cout << pts0 << endl;
-// 	// cout << X*pts0 << endl;
+//  // cout << pts0 << endl;
+//  // cout << X*pts0 << endl;
 
-// 	int const NSAMP = 3;
-// 	for(int i = 0; i < NSAMP; ++i){
-// 		Vector4d quat( rnorm(mt), rnorm(mt), rnorm(mt), rnorm(mt) );
+//  int const NSAMP = 3;
+//  for(int i = 0; i < NSAMP; ++i){
+//    Vector4d quat( rnorm(mt), rnorm(mt), rnorm(mt), rnorm(mt) );
 // quat.normalize();
-// 		Vector3d trans( rnorm(mt), rnorm(mt), rnorm(mt) );
-// 		Vector7d samp;
-// 		samp.block(0,0,4,1) = quat;
-// 		samp.block(4,0,3,1) = trans;
-// 		// cout << samp.transpose() << endl;
-// 		V tmp = bcc[ bcc[ samp ] ];
-// 		Vector7d cen;
-// 		for(int i = 0; i < 7; ++i) cen[i] = tmp[i];
+//    Vector3d trans( rnorm(mt), rnorm(mt), rnorm(mt) );
+//    Vector7d samp;
+//    samp.block(0,0,4,1) = quat;
+//    samp.block(4,0,3,1) = trans;
+//    // cout << samp.transpose() << endl;
+//    V tmp = bcc[ bcc[ samp ] ];
+//    Vector7d cen;
+//    for(int i = 0; i < 7; ++i) cen[i] = tmp[i];
 
-// 		cout << samp.transpose() << endl;
-// 		cout << cen.transpose() << endl;
-// 		cout << endl;
+//    cout << samp.transpose() << endl;
+//    cout << cen.transpose() << endl;
+//    cout << endl;
 
-// // 	std::vector<size_t> indices(NSAMP);
-// // 	util::Timer<> lookup_time;
-// // 	for(int i = 0; i < NSAMP; ++i)
-// // 		indices[i] = bcc[samples[i]];
-// // 	cout << N << " lookup: " << (double)NSAMP / lookup_time.elapsed() <<
+// //   std::vector<size_t> indices(NSAMP);
+// //   util::Timer<> lookup_time;
+// //   for(int i = 0; i < NSAMP; ++i)
+// //     indices[i] = bcc[samples[i]];
+// //   cout << N << " lookup: " << (double)NSAMP / lookup_time.elapsed() <<
 // " sec" << endl;
 
-// // 	std::vector<V> centers(NSAMP);
-// // 	util::Timer<> getval_time;
-// // 	for(int i = 0; i < NSAMP; ++i)
-// // 		centers[i] = bcc[indices[i]];
+// //   std::vector<V> centers(NSAMP);
+// //   util::Timer<> getval_time;
+// //   for(int i = 0; i < NSAMP; ++i)
+// //     centers[i] = bcc[indices[i]];
 
-// 	}
+//  }
 
 // }
 

@@ -15,7 +15,7 @@
 
 #include <Eigen/Geometry>
 
-namespace scheme {
+namespace rif {
 namespace kinematics {
 namespace test_eigen {
 
@@ -179,152 +179,152 @@ TEST(Scene_eigen, relative_relations_preserved) {
 }
 
 // TEST(Scene_eigen,symmetry){
-// 	typedef	objective::ObjectiveFunction<
-// 		m::vector<
-// 			ScoreADI,
-// 			ScoreADC,
-// 			ScoreADIADI,
-// 			ScoreADCADI
-// 		>,
-// 		Config
-// 	> ObjFun;
-// 	typedef ObjFun::Results Results;
+//  typedef objective::ObjectiveFunction<
+//    m::vector<
+//      ScoreADI,
+//      ScoreADC,
+//      ScoreADIADI,
+//      ScoreADCADI
+//    >,
+//    Config
+//  > ObjFun;
+//  typedef ObjFun::Results Results;
 
-// 	ObjFun score;
+//  ObjFun score;
 
-// 	typedef m::vector< ADI, ADC > Actors;
-// 	typedef Conformation<Actors> Conformation;
-// 	typedef Scene<Conformation,X1dim,size_t> Scene;
+//  typedef m::vector< ADI, ADC > Actors;
+//  typedef Conformation<Actors> Conformation;
+//  typedef Scene<Conformation,X1dim,size_t> Scene;
 
-// 	Scene scene(2);
-// 	scene.add_symframe(10);
+//  Scene scene(2);
+//  scene.add_symframe(10);
 
-// 	ASSERT_EQ( score(scene).sum(), 0 );
+//  ASSERT_EQ( score(scene).sum(), 0 );
 
-// 	scene.mutable_conformation_asym(0).add_actor( ADI(0,1) );
-// 	scene.mutable_conformation_asym(1).add_actor( ADI(1,2) );
-// 	// check that symmetric interactiosn are downweighted by 0.5: 40/2 = 20
-// 	ASSERT_EQ( score(scene), Results(3,0,1+20,0) );
+//  scene.mutable_conformation_asym(0).add_actor( ADI(0,1) );
+//  scene.mutable_conformation_asym(1).add_actor( ADI(1,2) );
+//  // check that symmetric interactiosn are downweighted by 0.5: 40/2 = 20
+//  ASSERT_EQ( score(scene), Results(3,0,1+20,0) );
 
-// 	scene.mutable_conformation_asym(1).add_actor( ADI(0,1) );
-// 	scene.mutable_conformation_asym(1).add_actor( ADI(1,2) );
-// 	// check that symmetric interactiosn are downweighted by 0.5: 160/2 = 80
-// 	ASSERT_EQ( score(scene), Results(6,0,2+80,0) );
+//  scene.mutable_conformation_asym(1).add_actor( ADI(0,1) );
+//  scene.mutable_conformation_asym(1).add_actor( ADI(1,2) );
+//  // check that symmetric interactiosn are downweighted by 0.5: 160/2 = 80
+//  ASSERT_EQ( score(scene), Results(6,0,2+80,0) );
 
-// 	// scene.mutable_conformation_asym(1).add_actor( ADC(0,'1') );
-// 	// scene.mutable_conformation_asym(1).add_actor( ADC(0,'2') );
-// 	// ASSERT_EQ( score(scene), Results(20,3,16,80) );
+//  // scene.mutable_conformation_asym(1).add_actor( ADC(0,'1') );
+//  // scene.mutable_conformation_asym(1).add_actor( ADC(0,'2') );
+//  // ASSERT_EQ( score(scene), Results(20,3,16,80) );
 
 // }
 
 // TEST(Scene_eigen, performance){
 // // TEST(Scene_eigen,performance){
-// 	// TODO: speed up SceneIter iteration
-// 	//       iteration seems to take about 100 cycles per score call
+//  // TODO: speed up SceneIter iteration
+//  //       iteration seems to take about 100 cycles per score call
 // overhead
-// 	//       much of this is probably all the conditions for symmetry checks
-// 	//       could template out these and have both sym and asym scenes?
-// 	// FIX with visitation pattern, seems at least 10x faster
+//  //       much of this is probably all the conditions for symmetry checks
+//  //       could template out these and have both sym and asym scenes?
+//  // FIX with visitation pattern, seems at least 10x faster
 
-// 	std::cout << "This test performs 301.934M score calls, should
+//  std::cout << "This test performs 301.934M score calls, should
 // take about a second when compiled with optimizations." << std::endl;
 
-// 	typedef	objective::ObjectiveFunction<
-// 		m::vector<
-// 			ScoreADI,
-// 			ScoreADC,
-// 			ScoreADIADI,
-// 			ScoreADCADI
-// 		>,
-// 		Config
-// 	> ObjFun;
-// 	typedef ObjFun::Results Results;
+//  typedef objective::ObjectiveFunction<
+//    m::vector<
+//      ScoreADI,
+//      ScoreADC,
+//      ScoreADIADI,
+//      ScoreADCADI
+//    >,
+//    Config
+//  > ObjFun;
+//  typedef ObjFun::Results Results;
 
-// 	ObjFun score;
+//  ObjFun score;
 
-// 	typedef m::vector< ADI, ADC > Actors;
-// 	typedef Conformation<Actors> Conformation;
-// 	typedef Scene<Conformation,X1dim,uint32_t> Scene;
+//  typedef m::vector< ADI, ADC > Actors;
+//  typedef Conformation<Actors> Conformation;
+//  typedef Scene<Conformation,X1dim,uint32_t> Scene;
 
-// 	ScoreADIADI obj;
-// 	Config c;
-// 	objective::ObjectiveVisitor<ScoreADIADI,Config> visitor(obj,c);
+//  ScoreADIADI obj;
+//  Config c;
+//  objective::ObjectiveVisitor<ScoreADIADI,Config> visitor(obj,c);
 
-// 	Scene scene; {
-// 		Scene::Index const NBOD = 10;
-// 		Scene::Index const NSYM = 20;
-// 		Scene::Index const NACT = 400;
-// 		for(Scene::Index i = 0; i < NBOD; ++i) scene.add_body();
-// 		for(Scene::Index i = 0; i < NSYM-1; ++i)
+//  Scene scene; {
+//    Scene::Index const NBOD = 10;
+//    Scene::Index const NSYM = 20;
+//    Scene::Index const NACT = 400;
+//    for(Scene::Index i = 0; i < NBOD; ++i) scene.add_body();
+//    for(Scene::Index i = 0; i < NSYM-1; ++i)
 // scene.add_symframe(i+1);
-// 		for(Scene::Index i = 0; i < NBOD; ++i){
-// 			for(Scene::Index j = 0; j < NACT; ++j){
-// 				scene.mutable_conformation_asym(i).add_actor(
+//    for(Scene::Index i = 0; i < NBOD; ++i){
+//      for(Scene::Index j = 0; j < NACT; ++j){
+//        scene.mutable_conformation_asym(i).add_actor(
 // ADI(j,i)
 // );
-// 			}
-// 		}
-// 	}
+//      }
+//    }
+//  }
 
-// 	cout << score(scene).get<ScoreADIADI>() << " " <<
+//  cout << score(scene).get<ScoreADIADI>() << " " <<
 // (double)ScoreADIADI::ncalls/1000000.0 << "M" << endl;
-// 	ScoreADIADI::ncalls = 0;
-// 	return;
+//  ScoreADIADI::ncalls = 0;
+//  return;
 
-// 	if(false)
-// 	{
-// 			// typedef ADI Actor1;
-// 			// typedef ADI Actor2;
-// 			// typedef Scene::Position Position;
-// 			// Scene::Index const NBOD = scene.bodies_.size();
-// 			// Scene::Index const NSYM = scene.symframes_.size()+1;
-// 			// for(Scene::Index i1 = 0; i1 < NBOD*NSYM; ++i1){
-// 			// 	Conformation const & c1 =
+//  if(false)
+//  {
+//      // typedef ADI Actor1;
+//      // typedef ADI Actor2;
+//      // typedef Scene::Position Position;
+//      // Scene::Index const NBOD = scene.bodies_.size();
+//      // Scene::Index const NSYM = scene.symframes_.size()+1;
+//      // for(Scene::Index i1 = 0; i1 < NBOD*NSYM; ++i1){
+//      //  Conformation const & c1 =
 // scene.conformation(i1);
-// 			// 	Position     const & p1 = scene.position(i1);
-// 			// 	Scene::Index const NACT1 =
+//      //  Position     const & p1 = scene.position(i1);
+//      //  Scene::Index const NACT1 =
 // c1.get<Actor1>().size();
-// 			// 	for(Scene::Index i2 = 0; i2 < NBOD*NSYM; ++i2){
-// 			// 		if( i1 >= NBOD && i2 >= NBOD ) continue;
-// 			// 		if( i2 <= i1 ) continue;
-// 			// 		Conformation const & c2 =
+//      //  for(Scene::Index i2 = 0; i2 < NBOD*NSYM; ++i2){
+//      //    if( i1 >= NBOD && i2 >= NBOD ) continue;
+//      //    if( i2 <= i1 ) continue;
+//      //    Conformation const & c2 =
 // scene.conformation(i2);
-// 			// 		Position     const & p2 =
+//      //    Position     const & p2 =
 // scene.position(i2);
-// 			// 		Scene::Index const NACT2 =
+//      //    Scene::Index const NACT2 =
 // c2.get<Actor2>().size();
-// 			// 		for(Scene::Index j1 = 0; j1 < NACT1;
+//      //    for(Scene::Index j1 = 0; j1 < NACT1;
 // ++j1){
-// 			// 			Actor1 a1( c1.get<Actor1>()[j1],
+//      //      Actor1 a1( c1.get<Actor1>()[j1],
 // p1
 // );
-// 			// 			for(Scene::Index j2 = 0; j2 <
+//      //      for(Scene::Index j2 = 0; j2 <
 // NACT2;
 // ++j2){
-// 			// 				Actor2 a2(
+//      //        Actor2 a2(
 // c2.get<Actor2>()[j2],
 // p2
 // );
-// 			// 				visitor( a1, a2,
+//      //        visitor( a1, a2,
 // i1<NBOD&&i2<NBOD?1.0:0.5 );
-// 			// 			}
-// 			// 		}
-// 			// 	}
-// 			// }
-// 			// cout << visitor.result_ << " " <<
+//      //      }
+//      //    }
+//      //  }
+//      // }
+//      // cout << visitor.result_ << " " <<
 // (double)ScoreADIADI::ncalls/1000000.0 << endl;
-// 			// ScoreADIADI::ncalls = 0;
+//      // ScoreADIADI::ncalls = 0;
 
-// 	}
+//  }
 
-// 	if(false)
-// 		performance_test_helper(scene,visitor);
-// 	ScoreADIADI::ncalls = 0;
+//  if(false)
+//    performance_test_helper(scene,visitor);
+//  ScoreADIADI::ncalls = 0;
 
-// 	scene.visit(visitor);
-// 	cout << visitor.result_ << " " << (double)ScoreADIADI::ncalls/1000000.0
+//  scene.visit(visitor);
+//  cout << visitor.result_ << " " << (double)ScoreADIADI::ncalls/1000000.0
 // << "M" << endl;
-// 	ScoreADIADI::ncalls = 0;
+//  ScoreADIADI::ncalls = 0;
 
 // }
 }

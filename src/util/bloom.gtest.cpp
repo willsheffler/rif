@@ -8,7 +8,7 @@
 
 #include <sparsehash/dense_hash_map>
 
-namespace scheme {
+namespace rif {
 namespace util {
 namespace bloom_test {
 
@@ -36,42 +36,42 @@ using std::endl;
 // avg num configurations: 19 4202.5
 
 // TEST( TEMP_TEST, N_DOCK_DESIGN_GUESS ){
-// 	double cdf[4];
-//    	cdf[0] = 1.0;
-//    	cdf[1] = ( 0.369952-0.0285942 ) / ( 1.0-0.0285942 );
-//    	cdf[2] = ( 0.174289-0.0285942 ) / ( 1.0-0.0285942 );
-//    	cdf[3] = ( 0.077201-0.0285942 ) / ( 1.0-0.0285942 );
-//    	cout << cdf[3] << endl;
-//    	cout << cdf[2] << endl;
-//    	cout << cdf[1] << endl;
-//    	cout << cdf[0] << endl;
+//  double cdf[4];
+//      cdf[0] = 1.0;
+//      cdf[1] = ( 0.369952-0.0285942 ) / ( 1.0-0.0285942 );
+//      cdf[2] = ( 0.174289-0.0285942 ) / ( 1.0-0.0285942 );
+//      cdf[3] = ( 0.077201-0.0285942 ) / ( 1.0-0.0285942 );
+//      cout << cdf[3] << endl;
+//      cout << cdf[2] << endl;
+//      cout << cdf[1] << endl;
+//      cout << cdf[0] << endl;
 
-// 	std::mt19937 rng((uint64_t)time(0));
-// 	std::uniform_real_distribution<> uniform;
+//  std::mt19937 rng((uint64_t)time(0));
+//  std::uniform_real_distribution<> uniform;
 
-// 	int NSAMP = 10000000;
+//  int NSAMP = 10000000;
 
-// 	for( int NRES = 1; NRES < 20; ++NRES ){
-// 		double avg_tot_rot = 0;
-// 		for( int i = 0; i < NSAMP; ++i ){
-// 			std::vector<double> nrot(NRES);
-// 			for( int j = 0; j < NRES; ++j ){
-// 				double rand = uniform(rng);
-// 				if     ( rand < cdf[3] ) nrot[j] = 4;
-// 				else if( rand < cdf[2] ) nrot[j] = 3;
-// 				else if( rand < cdf[1] ) nrot[j] = 2;
-// 				else                     nrot[j] = 1;
-// 			}
-// 			int tot_rot = 1;
-// 			for( int j = 0; j < nrot.size(); ++j ) tot_rot *=
+//  for( int NRES = 1; NRES < 20; ++NRES ){
+//    double avg_tot_rot = 0;
+//    for( int i = 0; i < NSAMP; ++i ){
+//      std::vector<double> nrot(NRES);
+//      for( int j = 0; j < NRES; ++j ){
+//        double rand = uniform(rng);
+//        if     ( rand < cdf[3] ) nrot[j] = 4;
+//        else if( rand < cdf[2] ) nrot[j] = 3;
+//        else if( rand < cdf[1] ) nrot[j] = 2;
+//        else                     nrot[j] = 1;
+//      }
+//      int tot_rot = 1;
+//      for( int j = 0; j < nrot.size(); ++j ) tot_rot *=
 // nrot[j];
-// 			avg_tot_rot += tot_rot;
-// 		}
-// 		avg_tot_rot /= NSAMP;
-// 		cout << "avg num configurations: " << NRES << " " << avg_tot_rot
+//      avg_tot_rot += tot_rot;
+//    }
+//    avg_tot_rot /= NSAMP;
+//    cout << "avg num configurations: " << NRES << " " << avg_tot_rot
 // <<
 // endl;
-// 	}
+//  }
 // }
 
 #ifdef SCHEME_BENCHMARK
@@ -111,7 +111,7 @@ TEST(bloom, bloom_filter_example) {
 
   // std::cout << "ninserted: " << inserted.size() << std::endl;
   // BOOST_FOREACH( uint64_t index, inserted ){
-  // 	ASSERT_TRUE( filter.contains( index ) );
+  //  ASSERT_TRUE( filter.contains( index ) );
   // }
 
   {

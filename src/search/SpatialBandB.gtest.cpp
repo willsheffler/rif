@@ -10,7 +10,7 @@
 
 #include <boost/mpl/vector.hpp>
 
-namespace scheme {
+namespace rif {
 namespace search {
 namespace spbbtest {
 

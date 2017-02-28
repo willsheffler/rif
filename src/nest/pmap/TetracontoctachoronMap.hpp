@@ -1,5 +1,5 @@
-#ifndef INCLUDED_scheme_nest_maps_HecatonicosachoronMap_HH
-#define INCLUDED_scheme_nest_maps_HecatonicosachoronMap_HH
+#ifndef INCLUDED_nest_maps_HecatonicosachoronMap_HH
+#define INCLUDED_nest_maps_HecatonicosachoronMap_HH
 
 #include "numeric/geom_4d.hpp"
 
@@ -10,7 +10,7 @@
 #include <iostream>
 #include <vector>
 
-namespace scheme {
+namespace rif {
 namespace nest {
 namespace pmap {
 

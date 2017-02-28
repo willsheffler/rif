@@ -8,7 +8,7 @@
 #include <sparsehash/dense_hash_set>
 #include "util/Timer.hpp"
 
-namespace scheme {
+namespace rif {
 namespace objective {
 namespace hash {
 namespace xhtest {
@@ -288,26 +288,26 @@ TEST(XformHash_Quat_BCC7_Zorder, num_ori_cells) {
   }
 
   // for(int i = 2; i < 64; ++i){
-  // 	double xcov;
-  // 	int num_ori_cells = get_num_ori_cells<XformHash_Quat_BCC7_Zorder>( i,
+  //  double xcov;
+  //  int num_ori_cells = get_num_ori_cells<XformHash_Quat_BCC7_Zorder>( i,
   // xcov );
-  // 	printf("XformHash_Quat_BCC7_Zorder %2d %7d %8.3f\n",i, num_ori_cells,
+  //  printf("XformHash_Quat_BCC7_Zorder %2d %7d %8.3f\n",i, num_ori_cells,
   // xcov );
-  // 	std::cout.flush();
+  //  std::cout.flush();
   // }
 }
 
 // TEST( XformHash_bt24_BCC6, num_ori_cells ){
-// 	for(int i = 19; i < 65; ++i){
-// 		double xcov;
-// 		int num_ori_cells = get_num_ori_cells<XformHash_bt24_BCC6>( i,
+//  for(int i = 19; i < 65; ++i){
+//    double xcov;
+//    int num_ori_cells = get_num_ori_cells<XformHash_bt24_BCC6>( i,
 // xcov
 // );
-// 		printf("XformHash_bt24_BCC6 %2d %7d %8.3f\n",i, num_ori_cells,
+//    printf("XformHash_bt24_BCC6 %2d %7d %8.3f\n",i, num_ori_cells,
 // xcov
 // );
-// 		std::cout.flush();
-// 	}
+//    std::cout.flush();
+//  }
 // }
 
 template <template <class X> class XformHash>
@@ -364,7 +364,7 @@ void test_xform_hash_perf(double cart_resl, double ang_resl,
                         xh.approx_nori() / (cart_resl * cart_resl * cart_resl);
   printf(
       " %5.3f/%5.1f cr %5.3f dt %5.3f da %6.3f x2k: %7.3fns k2x: %7.3fns %9.3f "
-      "%7llu\n",
+      "%7lu\n",
       cart_resl, ang_resl, covrad, max_dt, max_da / ang_resl, time_key / N2,
       time_cen / N2, tot_cell_vol, xh.approx_nori());
 
@@ -412,47 +412,47 @@ TEST(XformHash, XformHash_bt24_BCC6) {
 }
 
 // TEST( XformHash, XformHash_bt24_BCC3 ){
-// 	unsigned int s = 0;
-// 	int N = 10*1000;
-// 	#ifdef SCHEME_BENCHMARK
-// 	N = 1*1000*1000;
-// 	#endif
-// 	cout << "XformHash_bt24_BCC3"; test_xform_hash_perf< XformHash_bt24_BCC3
+//  unsigned int s = 0;
+//  int N = 10*1000;
+//  #ifdef SCHEME_BENCHMARK
+//  N = 1*1000*1000;
+//  #endif
+//  cout << "XformHash_bt24_BCC3"; test_xform_hash_perf< XformHash_bt24_BCC3
 // >( 4.00 , 30.0, N, ++s );
-// 	cout << "XformHash_bt24_BCC3"; test_xform_hash_perf< XformHash_bt24_BCC3
+//  cout << "XformHash_bt24_BCC3"; test_xform_hash_perf< XformHash_bt24_BCC3
 // >( 2.00 , 20.0, N, ++s );
-// 	cout << "XformHash_bt24_BCC3"; test_xform_hash_perf< XformHash_bt24_BCC3
+//  cout << "XformHash_bt24_BCC3"; test_xform_hash_perf< XformHash_bt24_BCC3
 // >( 1.00 , 15.0, N, ++s );
-// 	cout << "XformHash_bt24_BCC3"; test_xform_hash_perf< XformHash_bt24_BCC3
+//  cout << "XformHash_bt24_BCC3"; test_xform_hash_perf< XformHash_bt24_BCC3
 // >( 0.50 , 10.0, N, ++s );
-// 	cout << "XformHash_bt24_BCC3"; test_xform_hash_perf< XformHash_bt24_BCC3
+//  cout << "XformHash_bt24_BCC3"; test_xform_hash_perf< XformHash_bt24_BCC3
 // >( 0.25 ,  5.0, N, ++s );
-// 	cout << "XformHash_bt24_BCC3"; test_xform_hash_perf< XformHash_bt24_BCC3
+//  cout << "XformHash_bt24_BCC3"; test_xform_hash_perf< XformHash_bt24_BCC3
 // >( 0.11 ,  3.3, N, ++s );
 // }
 
 // TEST( XformHash, preformance ){
 
-// 	cout << "XformHash_Quat_BCC7        "; test_xform_hash_perf<
+//  cout << "XformHash_Quat_BCC7        "; test_xform_hash_perf<
 // XformHash_Quat_BCC7         >( 2.0 , 1 );
-// 	cout << "XformHash_Quat_BCC7_Zorder "; test_xform_hash_perf<
+//  cout << "XformHash_Quat_BCC7_Zorder "; test_xform_hash_perf<
 // XformHash_Quat_BCC7_Zorder  >( 2.0 , 2 );
-// 	cout << "XformHash_bt24_BCC3        "; test_xform_hash_perf<
+//  cout << "XformHash_bt24_BCC3        "; test_xform_hash_perf<
 // XformHash_bt24_BCC3         >( 2.0 , 3 );
-// 	cout << "XformHash_bt24_BCC3_Zorder "; test_xform_hash_perf<
+//  cout << "XformHash_bt24_BCC3_Zorder "; test_xform_hash_perf<
 // XformHash_bt24_BCC3_Zorder  >( 2.0 , 4 );
-// 	cout << "XformHash_bt24_Cubic_Zorder"; test_xform_hash_perf<
+//  cout << "XformHash_bt24_Cubic_Zorder"; test_xform_hash_perf<
 // XformHash_bt24_Cubic_Zorder >( 2.0 , 5 );
 
-// 	cout << "XformHash_Quat_BCC7        "; test_xform_hash_perf<
+//  cout << "XformHash_Quat_BCC7        "; test_xform_hash_perf<
 // XformHash_Quat_BCC7         >( 0.25 , 1 );
-// 	cout << "XformHash_Quat_BCC7_Zorder "; test_xform_hash_perf<
+//  cout << "XformHash_Quat_BCC7_Zorder "; test_xform_hash_perf<
 // XformHash_Quat_BCC7_Zorder  >( 0.25 , 2 );
-// 	cout << "XformHash_bt24_BCC3        "; test_xform_hash_perf<
+//  cout << "XformHash_bt24_BCC3        "; test_xform_hash_perf<
 // XformHash_bt24_BCC3         >( 0.25 , 3 );
-// 	cout << "XformHash_bt24_BCC3_Zorder "; test_xform_hash_perf<
+//  cout << "XformHash_bt24_BCC3_Zorder "; test_xform_hash_perf<
 // XformHash_bt24_BCC3_Zorder  >( 0.25 , 4 );
-// 	cout << "XformHash_bt24_Cubic_Zorder"; test_xform_hash_perf<
+//  cout << "XformHash_bt24_Cubic_Zorder"; test_xform_hash_perf<
 // XformHash_bt24_Cubic_Zorder >( 0.25 , 5 );
 // }
 

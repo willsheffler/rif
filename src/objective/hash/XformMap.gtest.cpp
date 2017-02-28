@@ -11,7 +11,7 @@
 
 #include <fstream>
 
-namespace scheme {
+namespace rif {
 namespace objective {
 namespace hash {
 namespace xmtest {
@@ -52,10 +52,10 @@ TEST(XformMap, stores_correctly) {
        << " lookup rate: " << (double)NSAMP / t.elapsed() << " /sec ";
 
   // { // no way to check if stream in binary!
-  // 	std::cout << "following failure message is expected" << std::endl;
-  // 	std::ofstream out("test.sxm" );// , std::ios::binary );
-  // 	ASSERT_FALSE( xmap.save( out, "foo" ) );
-  // 	out.close();
+  //  std::cout << "following failure message is expected" << std::endl;
+  //  std::ofstream out("test.sxm" );// , std::ios::binary );
+  //  ASSERT_FALSE( xmap.save( out, "foo" ) );
+  //  out.close();
   // }
   std::ofstream out("test.sxm", std::ios::binary);
   ASSERT_TRUE(xmap.save(out, "foo"));
@@ -160,8 +160,8 @@ TEST(XformMap, insert_sphere) {
 
 TEST(XformMap, test_bt24_bcc6) {
   typedef Eigen::Transform<double, 3, Eigen::AffineCompact> EigenXform;
-  typedef scheme::objective::hash::XformMap<EigenXform, double,
-                                            XformHash_bt24_BCC6>
+  typedef rif::objective::hash::XformMap<EigenXform, double,
+                                         XformHash_bt24_BCC6>
       XMap;
 
   XMap xmap(1.0, 10.0);
@@ -169,12 +169,12 @@ TEST(XformMap, test_bt24_bcc6) {
 
 TEST(XformMap, DISABLED_test_float_double) {
   typedef Eigen::Transform<double, 3, Eigen::AffineCompact> EigenXformD;
-  typedef scheme::objective::hash::XformMap<EigenXformD, double,
-                                            XformHash_bt24_BCC6>
+  typedef rif::objective::hash::XformMap<EigenXformD, double,
+                                         XformHash_bt24_BCC6>
       XMapD;
   typedef Eigen::Transform<float, 3, Eigen::AffineCompact> EigenXformF;
-  typedef scheme::objective::hash::XformMap<EigenXformF, double,
-                                            XformHash_bt24_BCC6>
+  typedef rif::objective::hash::XformMap<EigenXformF, double,
+                                         XformHash_bt24_BCC6>
       XMapF;
 
   ASSERT_TRUE(false);

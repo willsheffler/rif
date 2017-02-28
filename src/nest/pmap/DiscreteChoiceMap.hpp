@@ -1,5 +1,5 @@
-#ifndef INCLUDED_scheme_nest_maps_DiscreteChoiceMap_HH
-#define INCLUDED_scheme_nest_maps_DiscreteChoiceMap_HH
+#ifndef INCLUDED_nest_maps_DiscreteChoiceMap_HH
+#define INCLUDED_nest_maps_DiscreteChoiceMap_HH
 
 #include <boost/bind.hpp>
 #include <boost/static_assert.hpp>
@@ -7,7 +7,7 @@
 #include <vector>
 #include "util/template_loop.hpp"
 
-namespace scheme {
+namespace rif {
 namespace nest {
 namespace pmap {
 

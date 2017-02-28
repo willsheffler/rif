@@ -21,7 +21,7 @@
 // #include <boost/type_traits/remove_const.hpp>
 #include <boost/tuple/tuple.hpp>
 
-namespace scheme {
+namespace rif {
 namespace util {
 namespace meta {
 
@@ -74,7 +74,7 @@ struct recursive_remove_refwrap<boost::tuple<A, B, C, D>> {
 };
 
 // struct recursive_remove_refwrap_MFC {
-// 	template<class T> struct apply { typedef typename
+//  template<class T> struct apply { typedef typename
 // recursive_remove_refwrap<T>::type type; }; };
 }
 }

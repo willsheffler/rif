@@ -5,7 +5,7 @@
 
 #include <iostream>
 
-namespace scheme {
+namespace rif {
 namespace chemical {
 
 struct AtomData {

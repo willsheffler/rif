@@ -7,7 +7,7 @@
 
 #include <stdint.h>
 
-namespace scheme {
+namespace rif {
 namespace util {
 
 template <int X, int Y>

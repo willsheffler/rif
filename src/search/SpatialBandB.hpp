@@ -3,7 +3,7 @@
 
 #include <list>
 
-namespace scheme {
+namespace rif {
 namespace search {
 
 template <class Xform, class Index>
@@ -44,12 +44,11 @@ struct SpatialBandB {
   typedef _BigIndex BigIndex;
   typedef _Index Index;
   typedef kinematics::SceneBase<Xform, Index> Scene;
-  typedef scheme::shared_ptr<Scene> SceneP;
-  typedef scheme::shared_ptr<BoundingFunction<Xform, Index>> BoundP;
-  typedef scheme::shared_ptr<kinematics::Director<Xform, Index, Index>>
-      DirectorP;
+  typedef rif::shared_ptr<Scene> SceneP;
+  typedef rif::shared_ptr<BoundingFunction<Xform, Index>> BoundP;
+  typedef rif::shared_ptr<kinematics::Director<Xform, Index, Index>> DirectorP;
   typedef SpatialBandBResult<BigIndex, float> Result;
-  typedef scheme::shared_ptr<Result> ResultP;
+  typedef rif::shared_ptr<Result> ResultP;
 
   BoundP bounding_func_;
   SceneP scene_;

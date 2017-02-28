@@ -15,7 +15,7 @@
 #include <map>
 #include <unordered_map>
 
-namespace scheme {
+namespace rif {
 namespace util {
 namespace test_hash {
 
@@ -141,28 +141,28 @@ struct GoogleDense {
 };
 
 // TEST(test_hash, sparse_vs_dense){
-// 	// SegmentedMap<uint64_t,util::SimpleArray<8,double> ,GoogleDense,2> m;
+//  // SegmentedMap<uint64_t,util::SimpleArray<8,double> ,GoogleDense,2> m;
 
-// 	google::dense_hash_map<uint64_t,util::SimpleArray<8,double> > d;
-// 	d.set_empty_key(std::numeric_limits<uint64_t>::max());
+//  google::dense_hash_map<uint64_t,util::SimpleArray<8,double> > d;
+//  d.set_empty_key(std::numeric_limits<uint64_t>::max());
 
-// 	// google::sparse_hash_map<uint64_t,util::SimpleArray<8,double> > s;
+//  // google::sparse_hash_map<uint64_t,util::SimpleArray<8,double> > s;
 
-// 	// fill_and_test_map(n,"google_dense",m,"segment_gdh ");
-// 	cout << "====================== DENSE ======================" << endl;
+//  // fill_and_test_map(n,"google_dense",m,"segment_gdh ");
+//  cout << "====================== DENSE ======================" << endl;
 
-// 	int64_t MAXIDX = 3000ll*1000ll*1000ll;
-// 	int64_t NSAMP = 10ll*1000ll*1000ll;
-// 	fill_map( d, MAXIDX, 100 );
-// 	test_map( &d, MAXIDX, NSAMP );
-// 	d.clear();
+//  int64_t MAXIDX = 3000ll*1000ll*1000ll;
+//  int64_t NSAMP = 10ll*1000ll*1000ll;
+//  fill_map( d, MAXIDX, 100 );
+//  test_map( &d, MAXIDX, NSAMP );
+//  d.clear();
 
-// 	fill_and_test_map(&d);
-// 	d.clear();
+//  fill_and_test_map(&d);
+//  d.clear();
 
-// 	// cout << "====================== SPARSE =====================" <<
+//  // cout << "====================== SPARSE =====================" <<
 // endl;
-// 	// fill_and_test_map(s); s.clear();
+//  // fill_and_test_map(s); s.clear();
 
 // }
 
@@ -209,18 +209,18 @@ void test_2map(MAP1 &m, std::string lm, MAP2 &n, std::string ln) {
 }
 
 // TEST(test_hash,std_unordered_map){
-// 	std::unordered_map<int64_t,int64_t> h;
-// 	fill_and_test_map(h);
+//  std::unordered_map<int64_t,int64_t> h;
+//  fill_and_test_map(h);
 // }
 
 // TEST(test_hash,boost_unordered_map){
-// 	boost::unordered_map<int64_t,int64_t> h;
-// 	fill_and_test_map(h);
+//  boost::unordered_map<int64_t,int64_t> h;
+//  fill_and_test_map(h);
 // }
 
 // TEST(test_hash,std_map){
-// 	std::map<int64_t,int64_t> h;
-// 	fill_and_test_map(h);
+//  std::map<int64_t,int64_t> h;
+//  fill_and_test_map(h);
 // }
 }
 }

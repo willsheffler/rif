@@ -1,5 +1,5 @@
-#ifndef INCLUDED_scheme_nest_NEST_HH
-#define INCLUDED_scheme_nest_NEST_HH
+#ifndef INCLUDED_nest_NEST_HH
+#define INCLUDED_nest_NEST_HH
 
 #include "nest/pmap/UnitMap.hpp"
 #include "util/SimpleArray.hpp"
@@ -16,7 +16,7 @@
 #include <boost/type_traits/make_signed.hpp>
 #include <vector>
 
-namespace scheme {
+namespace rif {
 namespace nest {
 
 using util::StoreValue;
@@ -543,7 +543,7 @@ struct NEST<0, _Value, ParamMap, StoragePolicy, _Index, Float, is_virtual>
 
   ///@brief virtual virtual function to set the state of this nest
   ///@details will consume no indices from hindices vector, using only
-  ///cell_index
+  /// cell_index
   ///        for use in composite data structures containing NestBases
   virtual bool virtual_get_state(std::vector<Index> const & /*hindices*/,
                                  Index cell_index, size_t & /*iindex*/,

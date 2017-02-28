@@ -7,7 +7,7 @@
 #include <cstdlib>
 #include <iostream>
 
-namespace scheme {
+namespace rif {
 namespace rosetta {
 namespace score {
 

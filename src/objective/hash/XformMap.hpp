@@ -15,7 +15,7 @@
 #include <omp.h>
 #endif
 
-namespace scheme {
+namespace rif {
 namespace objective {
 namespace hash {
 
@@ -99,7 +99,7 @@ struct XformMap {
     // Key k1 = k & (((Key)1<<ArrayBits)-1);
     // typename Map::iterator iter = map_.find(k0);
     // if( iter == map_.end() ){
-    // 	ValArray aval(0.0);
+    //  ValArray aval(0.0);
     //           std::pair< typename Map::iterator, bool > result = map_.insert(
     //           std::make_pair(k0,aval) ); // TODO: should check for failuer
     //           here
@@ -196,9 +196,9 @@ struct XformMap {
   size_t count(Value val) const {
     // int count = 0;
     // for(typename Map::const_iterator i = map_.begin(); i != map_.end(); ++i){
-    // 	for(int j = 0; j < (1<<ArrayBits); ++j){
-    // 		if( i->second[j] == val ) ++count;
-    // 	}
+    //  for(int j = 0; j < (1<<ArrayBits); ++j){
+    //    if( i->second[j] == val ) ++count;
+    //  }
     // }
     // retrn count;
 
@@ -219,8 +219,8 @@ struct XformMap {
   bool save(std::ostream &out, std::string const &description) {
     // no way to check if the stream was opened binary!
     // if( ! (out.flags() & std::ios::binary) ){
-    // 	std::cerr << "XformMap::save must be binary ostream" << std::endl;
-    // 	return false;
+    //  std::cerr << "XformMap::save must be binary ostream" << std::endl;
+    //  return false;
     // }
     if (cart_resl_ == -1 || ang_resl_ == -1 || cart_bound_ == -1) {
       std::cerr << "XformMap::save: bad cart_resl_, ang_resl_, or cart_bound_ "
@@ -261,8 +261,8 @@ struct XformMap {
   bool load(std::istream &in, std::string &description) {
     // no way to check if the stream was opened binary!
     // if( ! (in.flags() & std::ios::binary) ){
-    // 	std::cerr << "XformMap::save must be binary ostream" << std::endl;
-    // 	return false;
+    //  std::cerr << "XformMap::save must be binary ostream" << std::endl;
+    //  return false;
     // }
     size_t s;
     in.read((char *)&s, sizeof(size_t));
@@ -285,9 +285,9 @@ struct XformMap {
     // int tmparraybits;
     // in.read( (char*)&tmparraybits, sizeof(int) );
     // if( ArrayBits != tmparraybits ){
-    // 	std::cerr << "XformMap::load, ArrayBits, expected " << ArrayBits << "
+    //  std::cerr << "XformMap::load, ArrayBits, expected " << ArrayBits << "
     // got "  << tmparraybits << std::endl;
-    // 	return false;
+    //  return false;
     // }
 
     Float cart_resl, ang_resl, cart_bound;

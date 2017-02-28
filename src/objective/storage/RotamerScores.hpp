@@ -7,7 +7,7 @@
 
 #include <vector>
 
-namespace scheme {
+namespace rif {
 namespace objective {
 namespace storage {
 
@@ -209,7 +209,7 @@ struct RotamerScoreSat : public RotamerScore<_Data, _RotamerBits, _Divisor> {
     return nsat > onsat;
   }  // reverse so low score is low
 
-} __attribute__((packed));
+} /* todo does this work? __attribute__((packed)) */;
 template <class Data, int RBits, int Div, class Sat, int N>
 int const RotamerScoreSat<Data, RBits, Div, Sat, N>::RotamerBits;
 template <class Data, int RBits, int Div, class Sat, int N>

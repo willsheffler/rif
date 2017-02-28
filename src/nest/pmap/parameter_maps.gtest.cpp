@@ -8,14 +8,14 @@
 #include "nest/pmap/ScaleMap.hpp"
 #include "nest/pmap/UnitMap.hpp"
 
-namespace scheme {
+namespace rif {
 namespace nest {
 namespace pmap {
 
 using std::cout;
 using std::endl;
 
-using scheme::nest::StorePointer;
+using rif::nest::StorePointer;
 
 TEST(NEST_ScaleMap, particular_values) {
   {

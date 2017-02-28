@@ -3,7 +3,7 @@
 
 #include "kinematics/SceneBase.hpp"
 
-namespace scheme {
+namespace rif {
 namespace objective {
 namespace integration {
 
@@ -14,7 +14,7 @@ template <class _Position, class _Index = uint64_t>
 struct SceneOjbective {
   typedef _Position Position;
   typedef _Index Index;
-  typedef ::scheme::kinematics::SceneBase<Position, Index> SceneBase;
+  typedef ::rif::kinematics::SceneBase<Position, Index> SceneBase;
   typedef shared_ptr<SceneBase> SceneP;
   virtual float score(SceneBase const &s) const = 0;
   virtual void score(SceneBase const &s, std::vector<float> &vec) const = 0;

@@ -8,7 +8,7 @@
 #include <boost/mpl/set.hpp>
 // #include <boost/mpl/inserter.hpp>
 
-namespace scheme {
+namespace rif {
 namespace util {
 namespace meta {
 

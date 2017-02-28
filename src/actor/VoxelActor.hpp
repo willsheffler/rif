@@ -3,7 +3,7 @@
 
 #include "objective/voxel/VoxelArray.hpp"
 
-namespace scheme {
+namespace rif {
 namespace actor {
 
 template <class _Position, class _Float>
@@ -27,16 +27,16 @@ struct VoxelActor {
   // VoxelActor( Position const & p, Voxels const * v ) :  voxels_(v) {}
 
   // VoxelActor(
-  // 	THIS const & actor0,
-  // 	Position const & moveby
+  //  THIS const & actor0,
+  //  Position const & moveby
   // ){
-  // 	voxels_ = actor0.voxels_; // better to use ptr? 3 words vs 1?
-  // 	set_position(moveby*actor0.position());
+  //  voxels_ = actor0.voxels_; // better to use ptr? 3 words vs 1?
+  //  set_position(moveby*actor0.position());
   // }
 
   // void
   // set_position(
-  // 	Position const & pos
+  //  Position const & pos
   // ){ position_ = pos; }
 
   // Position const &

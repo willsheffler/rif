@@ -1,12 +1,12 @@
-#ifndef INCLUDED_scheme_numeric_bcc_lattice_HH
-#define INCLUDED_scheme_numeric_bcc_lattice_HH
+#ifndef INCLUDED_numeric_bcc_lattice_HH
+#define INCLUDED_numeric_bcc_lattice_HH
 
 #include "util/SimpleArray.hpp"
 #include "util/template_loop.hpp"
 
 #include <iostream>
 
-namespace scheme {
+namespace rif {
 namespace numeric {
 
 template <int DIM, class Float = double, class Index = uint64_t>

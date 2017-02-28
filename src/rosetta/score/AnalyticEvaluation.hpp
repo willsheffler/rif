@@ -32,8 +32,8 @@
 ///
 /////////////////////////////////////////////////////////////////////////
 
-#ifndef INCLUDED_scheme_rosetta_objective_AnalyticEvaluation_hh
-#define INCLUDED_scheme_rosetta_objective_AnalyticEvaluation_hh
+#ifndef INCLUDED_rosetta_objective_AnalyticEvaluation_hh
+#define INCLUDED_rosetta_objective_AnalyticEvaluation_hh
 
 #include <cmath>
 
@@ -43,7 +43,7 @@
 
 #include "rosetta/score/CubicPolynomial.hpp"
 
-namespace scheme {
+namespace rif {
 namespace rosetta {
 namespace score {
 

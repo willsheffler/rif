@@ -2,7 +2,7 @@
 
 #include "dump_pdb_atom.hpp"
 
-namespace scheme {
+namespace rif {
 namespace io {
 namespace test {
 

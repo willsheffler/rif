@@ -4,7 +4,7 @@
 #include <cmath>
 #include <iostream>
 
-namespace scheme {
+namespace rif {
 namespace numeric {
 
 ///@brief Simple linear "Xform" class for testing

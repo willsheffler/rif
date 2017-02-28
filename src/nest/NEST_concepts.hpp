@@ -1,11 +1,11 @@
-#ifndef INCLUDED_scheme_nest_NEST_concepts_HH
-#define INCLUDED_scheme_nest_NEST_concepts_HH
+#ifndef INCLUDED_nest_NEST_concepts_HH
+#define INCLUDED_nest_NEST_concepts_HH
 
 #include <assert.h>
 #include <cstddef>
 #include "util/SimpleArray.hpp"
 
-namespace scheme {
+namespace rif {
 namespace nest {
 namespace concept {
 

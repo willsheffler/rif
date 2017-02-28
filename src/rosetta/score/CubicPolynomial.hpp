@@ -24,10 +24,10 @@
 ///
 /////////////////////////////////////////////////////////////////////////
 
-#ifndef INCLUDED_scheme_rosetta_objective_CubicPolynomial_hh
-#define INCLUDED_scheme_rosetta_objective_CubicPolynomial_hh
+#ifndef INCLUDED_rosetta_objective_CubicPolynomial_hh
+#define INCLUDED_rosetta_objective_CubicPolynomial_hh
 
-namespace scheme {
+namespace rif {
 namespace rosetta {
 namespace score {
 

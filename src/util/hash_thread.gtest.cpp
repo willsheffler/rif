@@ -20,7 +20,7 @@
 #include <mutex>
 #include <thread>
 
-namespace scheme {
+namespace rif {
 namespace util {
 namespace test_hash_thread {
 
@@ -201,7 +201,7 @@ void test_array(float const *const h, double *runtime, size_t N, int64_t NITER,
   m.unlock();
 }
 
-// real	8m41.960s
+// real 8m41.960s
 // 6m22.756s
 
 TEST(test_hash_thread, simple_array_thread) {
@@ -267,7 +267,7 @@ void test_multiarray(boost::multi_array<float, 1> const *hp, double *runtime,
   m.unlock();
 }
 
-// real	8m41.960s
+// real 8m41.960s
 // 6m22.756s
 
 #ifdef SCHEME_BENCHMARK
@@ -332,9 +332,9 @@ TEST(test_hash_thread, multi_array_thread) {
 // nthread:     8,  31.232ns / lookup,   3.123s runtime,  32.018M lookup/sec,
 // 4.002M lookup/sec/thread
 
-// 	// cout << "====================== SPARSE =====================" <<
+//  // cout << "====================== SPARSE =====================" <<
 // endl;
-// 	// test_map(s); s.clear();
+//  // test_map(s); s.clear();
 // }
 
 // ====================== dense_hash_map ======================
@@ -467,18 +467,18 @@ TEST(test_hash_thread, multi_array_thread) {
 // runtime     7  47.826
 // runtime     8  45.008
 // TEST(test_hash,std_unordered_map){
-// 	std::unordered_map<int64_t,int64_t> h;
-// 	test_map(h);
+//  std::unordered_map<int64_t,int64_t> h;
+//  test_map(h);
 // }
 
 // TEST(test_hash,boost_unordered_map){
-// 	boost::unordered_map<int64_t,int64_t> h;
-// 	test_map(h);
+//  boost::unordered_map<int64_t,int64_t> h;
+//  test_map(h);
 // }
 
 // TEST(test_hash,std_map){
-// 	std::map<int64_t,int64_t> h;
-// 	test_map(h);
+//  std::map<int64_t,int64_t> h;
+//  test_map(h);
 // }
 }
 }

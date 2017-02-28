@@ -15,7 +15,7 @@
 #include <stdexcept>
 #endif
 
-namespace scheme {
+namespace rif {
 namespace util {
 
 namespace impl {

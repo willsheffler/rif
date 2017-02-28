@@ -4,7 +4,7 @@
 
 #include "numeric/cube_to_sphere.hpp"
 
-namespace scheme {
+namespace rif {
 namespace numeric {
 namespace cube_to_sphere_test {
 
