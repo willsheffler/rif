@@ -18,12 +18,15 @@
 
 NAMESPACE_BEGIN(pybind11)
 NAMESPACE_BEGIN(detail)
+inline PyTypeObject *make_static_property_type();
+inline PyTypeObject *make_default_metaclass();
 
 /// Additional type information which does not fit into the PyTypeObject
 struct type_info {
     PyTypeObject *type;
     size_t type_size;
     void (*init_holder)(PyObject *, const void *);
+    void (*dealloc)(PyObject *);
     std::vector<PyObject *(*)(PyObject *, PyTypeObject *)> implicit_conversions;
     std::vector<std::pair<const std::type_info *, void *(*)(void *)>> implicit_casts;
     std::vector<bool (*)(PyObject *, void *&)> *direct_conversions;
@@ -73,6 +76,8 @@ PYBIND11_NOINLINE inline internals &get_internals() {
                 }
             }
         );
+        internals_ptr->static_property_type = make_static_property_type();
+        internals_ptr->default_metaclass = make_default_metaclass();
     }
     return *internals_ptr;
 }
@@ -652,6 +657,8 @@ struct type_caster<std::basic_string<CharT, Traits, Allocator>, enable_if_t<is_s
             return false;
             // The below is a guaranteed failure in Python 3 when PyUnicode_Check returns false
 #else
+            if (!PYBIND11_BYTES_CHECK(load_src.ptr()))
+                return false;
             temp = reinterpret_steal<object>(PyUnicode_FromObject(load_src.ptr()));
             if (!temp) { PyErr_Clear(); return false; }
             load_src = temp;
@@ -1089,6 +1096,17 @@ template <typename type> using cast_is_temporary_value_reference = bool_constant
     (std::is_reference<type>::value || std::is_pointer<type>::value) &&
     !std::is_base_of<type_caster_generic, make_caster<type>>::value
 >;
+
+// When a value returned from a C++ function is being cast back to Python, we almost always want to
+// force `policy = move`, regardless of the return value policy the function/method was declared
+// with.  Some classes (most notably Eigen::Ref and related) need to avoid this, and so can do so by
+// specializing this struct.
+template <typename Return, typename SFINAE = void> struct return_value_policy_override {
+    static return_value_policy policy(return_value_policy p) {
+        return !std::is_lvalue_reference<Return>::value && !std::is_pointer<Return>::value
+            ? return_value_policy::move : p;
+    }
+};
 
 // Basic python -> C++ casting; throws if casting fails
 template <typename T, typename SFINAE> type_caster<T, SFINAE> &load_type(type_caster<T, SFINAE> &conv, const handle &handle) {

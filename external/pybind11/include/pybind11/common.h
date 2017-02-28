@@ -58,7 +58,9 @@
 
 /// Include Python header, disable linking to pythonX_d.lib on Windows in debug mode
 #if defined(_MSC_VER)
-#  define HAVE_ROUND
+#  if (PY_MAJOR_VERSION == 3 && PY_MINOR_VERSION < 4)
+#    define HAVE_ROUND 1
+#  endif
 #  pragma warning(push)
 #  pragma warning(disable: 4510 4610 4512 4005)
 #  if defined(_DEBUG)
@@ -120,7 +122,6 @@
 #define PYBIND11_SLICE_OBJECT PyObject
 #define PYBIND11_FROM_STRING PyUnicode_FromString
 #define PYBIND11_STR_TYPE ::pybind11::str
-#define PYBIND11_OB_TYPE(ht_type) (ht_type).ob_base.ob_base.ob_type
 #define PYBIND11_PLUGIN_IMPL(name) \
     extern "C" PYBIND11_EXPORT PyObject *PyInit_##name()
 #else
@@ -139,7 +140,6 @@
 #define PYBIND11_SLICE_OBJECT PySliceObject
 #define PYBIND11_FROM_STRING PyString_FromString
 #define PYBIND11_STR_TYPE ::pybind11::bytes
-#define PYBIND11_OB_TYPE(ht_type) (ht_type).ob_type
 #define PYBIND11_PLUGIN_IMPL(name) \
     static PyObject *pybind11_init_wrapper();               \
     extern "C" PYBIND11_EXPORT void init##name() {          \
@@ -350,7 +350,7 @@ struct overload_hash {
     }
 };
 
-/// Internal data struture used to track registered instances and types
+/// Internal data structure used to track registered instances and types
 struct internals {
     std::unordered_map<std::type_index, void*> registered_types_cpp;   // std::type_index -> type_info
     std::unordered_map<const void *, void*> registered_types_py;       // PyTypeObject* -> type_info
@@ -359,10 +359,16 @@ struct internals {
     std::unordered_map<std::type_index, std::vector<bool (*)(PyObject *, void *&)>> direct_conversions;
     std::forward_list<void (*) (std::exception_ptr)> registered_exception_translators;
     std::unordered_map<std::string, void *> shared_data; // Custom data to be shared across extensions
+    PyTypeObject *static_property_type;
+    PyTypeObject *default_metaclass;
+    std::unordered_map<size_t, PyObject *> bases; // one base type per `instance_size` (very few)
 #if defined(WITH_THREAD)
     decltype(PyThread_create_key()) tstate = 0; // Usually an int but a long on Cygwin64 with Python 3.x
     PyInterpreterState *istate = nullptr;
 #endif
+
+    /// Return the appropriate base type for the given instance size
+    PyObject *get_base(size_t instance_size);
 };
 
 /// Return a reference to the current 'internals' information
@@ -372,9 +378,11 @@ inline internals &get_internals();
 #ifdef PYBIND11_CPP14
 using std::enable_if_t;
 using std::conditional_t;
+using std::remove_cv_t;
 #else
 template <bool B, typename T = void> using enable_if_t = typename std::enable_if<B, T>::type;
 template <bool B, typename T, typename F> using conditional_t = typename std::conditional<B, T, F>::type;
+template <typename T> using remove_cv_t = typename std::remove_cv<T>::type;
 #endif
 
 /// Index sequences
@@ -493,9 +501,9 @@ struct is_template_base_of_impl {
 /// `is_template_base_of<Base, T>` is true if `struct T : Base<U> {}` where U can be anything
 template <template<typename...> class Base, typename T>
 #if !defined(_MSC_VER)
-using is_template_base_of = decltype(is_template_base_of_impl<Base>::check((T*)nullptr));
+using is_template_base_of = decltype(is_template_base_of_impl<Base>::check((remove_cv_t<T>*)nullptr));
 #else // MSVC2015 has trouble with decltype in template aliases
-struct is_template_base_of : decltype(is_template_base_of_impl<Base>::check((T*)nullptr)) { };
+struct is_template_base_of : decltype(is_template_base_of_impl<Base>::check((remove_cv_t<T>*)nullptr)) { };
 #endif
 
 /// Check if T is std::shared_ptr<U> where U can be anything
