@@ -1,6 +1,8 @@
 PROJECT_NAME           = rif
-INPUT                  = ../src
+
+INPUT                  = ../src/nest/NEST.hpp
 RECURSIVE              = YES
+EXCLUDE_PATTERNS = *.gtest.cpp
 
 GENERATE_HTML          = NO
 GENERATE_LATEX         = NO

@@ -36,4 +36,12 @@ the best scaffold placements (typically 1 million) to find internally consistent
 rotamer placements. The docking process is highly optimized and takes roughly
 one cpu hour per scaffold to generate thousands of possible binding modes.
 
-.. doxygenindex::
+
+
+.. toctree::
+   :maxdepth: 1
+
+   rif
+
+
+
