@@ -11,7 +11,7 @@ namespace util {
 ///////////////////////////////////////////////////////////////////////////////////////////////
 
 ///@brief Storage Policy Class, store by value
-///@detail this is a sortof DUMMY baseclass to define the StoragePolicy concept
+///@details this is a sortof DUMMY baseclass to define the StoragePolicy concept
 ///  also a placeholder for doxygen
 ///@tparam Value type of value that is stored
 template <class Value>

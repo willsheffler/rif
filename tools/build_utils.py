@@ -56,7 +56,14 @@ def get_ignored_dirs(cfg):
     d, tgt = os.path.split(get_cmake_dir('temp', cfg))
     path = get_build_dir(cfg)
     decoys = os.listdir(path)
+    # for x in decoys:
+    # print(x)
+    # print('tgt', tgt)
+    assert tgt in decoys
+    # print(len(decoys))
     decoys.remove(tgt)
+    # print(len(decoys))
+    assert not tgt in decoys
     return [d + '/' + x for x in decoys]
 
 
@@ -179,10 +186,11 @@ def build_and_run_pytest(redo_cmake=False):
         proj_root = bytes(proj_root, 'ascii')
     args = [x for x in sys.argv[1:] if x.endswith('.py') and
             os.path.basename(x).startswith('test')]
-    if not args:
+    if not args: 
         args = ['.', '-n4', '--ignore', 'build']
-    # else:
-        # args += ['--ignore', 'build_setup_py_Release']
+    else: # running one file, don't scan
+        args += ['--ignore', 'build_setup_py_Release']
     for decoy in get_ignored_dirs(cfg):
         args += ['--ignore', decoy]
+    print('pytest.main(', ' '.join(args), ')')
     pytest.main(args)

@@ -53,9 +53,9 @@ struct fusion_map_pairs {
 };
 
 ///@brief convenience function to make a boost::fusion::map
-///@detail fusion_map<Keys> will be same as tuple
-///@detail fusion_map<Keys,Values> will map Key to Value
-///@detail fusion_map<Keys,MetaFunc> will map Key to apply<MetaFunc,Key>::type
+///@details fusion_map<Keys> will be same as tuple
+///@details fusion_map<Keys,Values> will map Key to Value
+///@details fusion_map<Keys,MetaFunc> will map Key to apply<MetaFunc,Key>::type
 template <class Keys, class Arg2>
 struct fusion_map {
   typedef typename f::result_of::as_map<
@@ -95,7 +95,7 @@ struct EqualsVisitor {
 ///@tparam _Keys sequence of Key types
 ///@tparam Arg2 sequence of Value types OR metafunction class OR placeholder
 /// expression
-///@detail if Arg2 is a metafunction class, the values that func applied to the
+///@details if Arg2 is a metafunction class, the values that func applied to the
 ///_Keys
 template <typename _Keys, typename Arg2 = _Keys>
 struct InstanceMap : impl::fusion_map<_Keys, Arg2>::type {
@@ -278,13 +278,13 @@ struct NumericInstanceMap : InstanceMap<Keys, Arg2> {
       : BASE(a, b, c, d, e, f, g, h, i) {}
   NumericInstanceMap(F a, F b, F c, F d, F e, F f, F g, F h, F i, F j)
       : BASE(a, b, c, d, e, f, g, h, i, j) {}
-  ///@briew set value of all instances
+  ///@brief set value of all instances
   void setall(Float val) {
     impl::SETVAL<Float> set;
     set.val = val;
     f::for_each((FusionType &)*this, set);
   }
-  ///@briew sum of instance values
+  ///@brief sum of instance values
   Float sum() const {
     Float sum = 0;
     impl::SUM<Float> s(sum);

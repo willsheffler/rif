@@ -2,4 +2,4 @@ RIF Module Documentation
 **************************
 
 .. automodule:: rif
-.. automodule:: riflib
+.. automodule:: rif_cpp

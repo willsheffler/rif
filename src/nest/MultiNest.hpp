@@ -11,7 +11,7 @@ namespace nest {
 
 ///@brief Base class for NEST
 ///@tparam Index index type
-///@detail Base class for NEST, virtual NEST interface
+///@details Base class for NEST, virtual NEST interface
 template <class Index = uint64_t, class BigIndex = uint64_t>
 struct MultiNest : public NestBase<Index> {
   typedef NestBase<Index> Nest;
@@ -110,7 +110,7 @@ struct MultiNest : public NestBase<Index> {
   }
 
   ///@brief virtual virtual function to set the state of this nest
-  ///@detail will consume DIM indices from hindices vector, starting at iindex,
+  ///@details will consume DIM indices from hindices vector, starting at iindex,
   /// then will increment iindex
   ///        for use in composite data structures containing NestBases
   ///@returns false if invalid index
@@ -205,46 +205,46 @@ struct MultiNest : public NestBase<Index> {
 // static const uint64_t THREE(3);
 
 // void CompositeNest::set_position( NestIndex const & index, uint64_t resl ) {
-// 	uint64_t bindex0 = (index >> (dim_*resl)).touint64();
-// 	NestIndex hindex0 = index & (NestIndex(1<< (dim_*resl))-1);
-// 	vector<uint64_t> hindex;
-// 	expand_index(hindex0,dim_,hindex);
-// 	// cout << index << " B" << bindex0 << " H" << hindex0;
-// 	// BOOST_FOREACH(uint64_t i,hindex) cout << " " << i;
-// 	// cout << endl;
-// 	uint64_t nb0 = 1;
-// 	vector<uint64_t>::iterator ih = hindex.begin();
-// 	vector<uint64_t> atomicindex;
-// 	for(unsigned ibase = 0; ibase < nbase_.size(); ++ibase){
-// 		uint64_t const & nb = nbase_[ibase];
-// 		uint64_t const thisbindex = (( bindex0 / nb0 ) % nb);
-// 		// cout << "basei " << (( bindex0 / nb0 ) % nb) << endl;
-// 		if(is_dependent_[ibase]){
-// 			; // pass
-// 		} else if(is0dim_[ibase]){
-// 			atomicindex.push_back(thisbindex);
-// 		} else {
-// 			atomicindex.push_back( *ih + (thisbindex << resl) );
-// 			++ih;
-// 		}
-// 		nb0 *= nb;
-// 	}
-// 	// cout << " resulting indices from " << index << ": ";
-// 	// BOOST_FOREACH(uint64_t i,atomicindex) cout << " " << i;
-// 	// cout << endl;
-// 	int tmp=0;
-// 	BOOST_FOREACH(NestOP gop,nests_)
+//  uint64_t bindex0 = (index >> (dim_*resl)).touint64();
+//  NestIndex hindex0 = index & (NestIndex(1<< (dim_*resl))-1);
+//  vector<uint64_t> hindex;
+//  expand_index(hindex0,dim_,hindex);
+//  // cout << index << " B" << bindex0 << " H" << hindex0;
+//  // BOOST_FOREACH(uint64_t i,hindex) cout << " " << i;
+//  // cout << endl;
+//  uint64_t nb0 = 1;
+//  vector<uint64_t>::iterator ih = hindex.begin();
+//  vector<uint64_t> atomicindex;
+//  for(unsigned ibase = 0; ibase < nbase_.size(); ++ibase){
+//    uint64_t const & nb = nbase_[ibase];
+//    uint64_t const thisbindex = (( bindex0 / nb0 ) % nb);
+//    // cout << "basei " << (( bindex0 / nb0 ) % nb) << endl;
+//    if(is_dependent_[ibase]){
+//      ; // pass
+//    } else if(is0dim_[ibase]){
+//      atomicindex.push_back(thisbindex);
+//    } else {
+//      atomicindex.push_back( *ih + (thisbindex << resl) );
+//      ++ih;
+//    }
+//    nb0 *= nb;
+//  }
+//  // cout << " resulting indices from " << index << ": ";
+//  // BOOST_FOREACH(uint64_t i,atomicindex) cout << " " << i;
+//  // cout << endl;
+//  int tmp=0;
+//  BOOST_FOREACH(NestOP gop,nests_)
 // gop->set_position(atomicindex,tmp,resl);
 
-// 	runtime_assert(tmp==(int)atomicindex.size());
-// 	BOOST_FOREACH(Size2 ds,dependent_map_){
-// 		DependentNest * dNest =
+//  runtime_assert(tmp==(int)atomicindex.size());
+//  BOOST_FOREACH(Size2 ds,dependent_map_){
+//    DependentNest * dNest =
 // dynamic_cast<DependentNest*>(nests_[ds.first ]());
-// 		runtime_assert( dNest != 0 );
-// 		dNest->modify_xform();
-// 	}
-// 	// vector<NestOP>::const_iterator ig = nests_.begin();
-// 	// BOOST_FOREACH(Xform x,out) cout << x.t << " " << (*(ig++))->name() <<
+//    runtime_assert( dNest != 0 );
+//    dNest->modify_xform();
+//  }
+//  // vector<NestOP>::const_iterator ig = nests_.begin();
+//  // BOOST_FOREACH(Xform x,out) cout << x.t << " " << (*(ig++))->name() <<
 // endl;
 //  }
 }

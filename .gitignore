@@ -23,3 +23,7 @@ dist
 *.gen.cpp
 *.gen.hpp
 *.gen.py
+_build
+.build
+docs/html
+docs/latex

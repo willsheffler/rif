@@ -1,4 +1,4 @@
-/// @file   utility/zorder/template_math.hh
+/// @file   util/template_math.hpp
 /// @brief  a place for some template math to live
 /// @author will sheffler
 

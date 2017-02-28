@@ -19,7 +19,7 @@
 /// Analytic lj and lk-solvation functions used for analytic evaluation of
 /// fa_atr/fa_rep and fa_sol.
 ///
-/// @detailed
+/// @detailsed
 /// These functions are called by the Etable class when analytic evaluation is
 /// specified. The intention of these functions is to make available a modular
 /// implemenation of
@@ -52,25 +52,25 @@ namespace score {
 // template <typename Real>
 // struct LKParamsBase
 // {
-// 	Real lj_radius_1;
-// 	Real lj_radius_2;
+//  Real lj_radius_1;
+//  Real lj_radius_2;
 
-// 	Real fasol_cubic_poly_close_flat;
+//  Real fasol_cubic_poly_close_flat;
 
-// 	CubicPolynomialParamsBase<Real> fasol_cubic_poly_close;
-// 	Real fasol_cubic_poly_close_end;
-// 	Real fasol_cubic_poly_close_start;
+//  CubicPolynomialParamsBase<Real> fasol_cubic_poly_close;
+//  Real fasol_cubic_poly_close_end;
+//  Real fasol_cubic_poly_close_start;
 
-// 	Real lk_coeff1;
-// 	Real lk_coeff2;
-// 	Real lk_inv_lambda2_1;
-// 	Real lk_inv_lambda2_2;
+//  Real lk_coeff1;
+//  Real lk_coeff2;
+//  Real lk_inv_lambda2_1;
+//  Real lk_inv_lambda2_2;
 
-// 	CubicPolynomialParamsBase<Real> fasol_cubic_poly_far;
-// 	Real fasol_cubic_poly_far_end;
-// 	Real fasol_cubic_poly_far_start;
+//  CubicPolynomialParamsBase<Real> fasol_cubic_poly_far;
+//  Real fasol_cubic_poly_far_end;
+//  Real fasol_cubic_poly_far_start;
 
-// 	Real fasol_final_weight;
+//  Real fasol_final_weight;
 // };
 
 /// @brief Evaluate the mututal desolvation energy as atom 1 and atom 2
@@ -155,34 +155,34 @@ void lk_derivative(LKParams const &p, Real const dis, Real const inv_dis,
 // template <typename Real>
 // struct LJQuadraticRepulsion
 // {
-// 	Real xlo;
-// 	Real xhi;
-// 	Real slope;
-// 	Real extrapolated_slope;
-// 	Real ylo;
+//  Real xlo;
+//  Real xhi;
+//  Real slope;
+//  Real extrapolated_slope;
+//  Real ylo;
 // };
 
 // template <typename Real>
 // struct LJParamsBase
 // {
-// 	Real ljrep_linear_ramp_d2_cutoff;
-// 	Real lj_switch_intercept;
-// 	Real lj_switch_slope;
+//  Real ljrep_linear_ramp_d2_cutoff;
+//  Real lj_switch_intercept;
+//  Real lj_switch_slope;
 
-// 	Real lj_r12_coeff;
-// 	Real lj_r6_coeff;
+//  Real lj_r12_coeff;
+//  Real lj_r6_coeff;
 
-// 	Real ljatr_cubic_poly_xhi;
-// 	Real ljatr_cubic_poly_xlo;
-// 	CubicPolynomialParamsBase<Real> ljatr_cubic_poly_parameters;
+//  Real ljatr_cubic_poly_xhi;
+//  Real ljatr_cubic_poly_xlo;
+//  CubicPolynomialParamsBase<Real> ljatr_cubic_poly_parameters;
 
-// 	Real lj_minimum;
-// 	Real lj_val_at_minimum;
+//  Real lj_minimum;
+//  Real lj_val_at_minimum;
 
-// 	LJQuadraticRepulsion<Real> ljrep_extra_repulsion;
+//  LJQuadraticRepulsion<Real> ljrep_extra_repulsion;
 
-// 	bool ljrep_from_negcrossing;
-// 	Real ljatr_final_weight;
+//  bool ljrep_from_negcrossing;
+//  Real ljatr_final_weight;
 // };
 
 /// @details only to be called when the distance, dis, is less than the
@@ -191,12 +191,12 @@ void lk_derivative(LKParams const &p, Real const dis, Real const inv_dis,
 // template < typename Real, typename LJParams >
 // Real
 // ljrep_linearized(
-// 	Real const dis,
-// 	LJParams const & p
+//  Real const dis,
+//  LJParams const & p
 // )
 // {
-// 	assert( dis * dis < p.ljrep_linear_ramp_d2_cutoff );
-// 	return  dis*p.lj_switch_slope + p.lj_switch_intercept;
+//  assert( dis * dis < p.ljrep_linear_ramp_d2_cutoff );
+//  return  dis*p.lj_switch_slope + p.lj_switch_intercept;
 // }
 
 /// @details: evaluate the standard Lennard-Jones 6-12 functional form.

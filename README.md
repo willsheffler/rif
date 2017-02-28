@@ -15,8 +15,13 @@ I use sublime plugins EasyClangComplete, Git, C++11, GitGutter, SublimeLinter
 NOTES:
 iff you have pyrosetta4 on your path, functions using pyrosetta will be used/tested
 iff you have pymol on your path, functions using pymol will be used/tested
+ 
+-------------- docs --------------
+install doxygen (--with-libclang probably best...)
+pip3 install sphinx_rtd_theme breathe
 
 -------------- ubuntu 16.04 --------------
+\# better to use a virtualenv, no sudo
 \# this ppa is to install gcc-6
 sudo add-apt-repository ppa:ubuntu-toolchain-r/test # optional, for gcc6
 sudo apt update

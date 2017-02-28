@@ -1,14 +1,6 @@
 RIF Documentation
 ================================
 
-Contents:
-
-.. toctree::
-   :maxdepth: 2
-
-   rif
-
-
 Rotamer Interaction Field (RIF) Docking for small molecule binder de novo design
 works in two phases: RIF generation and scaffold docking. (Phase 1) First, a RIF
 tailored to the small molecule target is generated. The RIF contains billions of
@@ -43,3 +35,5 @@ combinatorial rotamer packing step is performed on a configurable fraction of
 the best scaffold placements (typically 1 million) to find internally consistent
 rotamer placements. The docking process is highly optimized and takes roughly
 one cpu hour per scaffold to generate thousands of possible binding modes.
+
+.. doxygenindex::

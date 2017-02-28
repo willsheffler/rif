@@ -25,7 +25,7 @@ struct ArrayValueArchitype {
 };
 
 ///@brief Parameter to Value Map Policy Class Concept
-///@detail JUST A DEFINITION OF THE CONCEPT AND PLACEHOLDER!
+///@details JUST A DEFINITION OF THE CONCEPT AND PLACEHOLDER!
 ///@tparam DIM the dimension number of the input parameter space
 ///@tparam Value the output value type, default SimpleArray
 ///@tparam Index index type, default size_t
@@ -57,7 +57,7 @@ struct ParamMapArchitype {
 };
 
 ///@brief Parameter to Value Map Policy Class Concept
-///@detail JUST A DEFINITION OF THE CONCEPT AND PLACEHOLDER!
+///@details JUST A DEFINITION OF THE CONCEPT AND PLACEHOLDER!
 ///@tparam DIM the dimension number of the input parameter space
 ///@tparam Value the output value type, default SimpleArray
 ///@tparam Index index type, default size_t
@@ -97,7 +97,7 @@ struct ParamMapInvertableArchitype {
 };
 
 ///@brief Parameter to Value Map Policy Class Concept
-///@detail JUST A DEFINITION OF THE CONCEPT AND PLACEHOLDER!
+///@details JUST A DEFINITION OF THE CONCEPT AND PLACEHOLDER!
 ///@tparam DIM the dimension number of the input parameter space
 ///@tparam Value the output value type, default SimpleArray
 ///@tparam Index index type, default size_t

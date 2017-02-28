@@ -119,7 +119,7 @@ void call_objective(Result &result, Objective const &objective,
 
 ///@brief helper functor to call objective for all Interaction instances in
 /// InteractionSource
-///@detail this one calls objective( interaction, config ) this is more general
+///@details this one calls objective( interaction, config ) this is more general
 /// than the split pair one because it can support
 /// onebody or more than twobody interactions, but can be less efficient for
 /// pair interactions
@@ -156,7 +156,7 @@ struct EvalObjective {
 
 ///@brief helper functor to call objective for all Interaction instances in
 /// InteractionSource
-//@detail this one calls objective( actor1, actor2, config )
+//@details this one calls objective( actor1, actor2, config )
 template <class Interaction, class Results, class Scratches, class Config>
 struct EvalObjectiveSplitPair {
   typename Interaction::first_type const &actor_1;
@@ -506,23 +506,24 @@ SCHEME_MEMBER_TYPE_DEFAULT_TEMPLATE(Result, double)
 // get_interaction_weight
 }
 
-///@brief Minimal Concept for Objective used in ObectiveFunction
-struct ObjectiveConcept {
-  ///@typedef required type of result this functor generates,
-  ///@note must be convertable to double but could have extra data
-  typedef double Result;
-  ///@typedef required type of input evaluatable data, could be a pair of tuple
-  typedef int Interaction;
-  ///@brief return name of Objective
-  static std::string name() { return "ObjectiveConcept"; }
-  ///@brief evaluate the Objective
-  ///@param Interaction main body or interaction to evaluate
-  ///@param Result result should be stored here
-  template <class Config>
-  Result operator()(Interaction const &a, Config const &) const {
-    return a;
-  }
-};
+// ///@brief Minimal Concept for Objective used in ObectiveFunction
+// struct ObjectiveConcept {
+//   ///@typedef required type of result this functor generates,
+//   ///@note must be convertable to double but could have extra data
+//   typedef double Result;
+//   ///@typedef required type of input evaluatable data, could be a pair of
+//   tuple
+//   typedef int Interaction;
+//   ///@brief return name of Objective
+//   static std::string name() { return "ObjectiveConcept"; }
+//   ///@brief evaluate the Objective
+//   ///@param Interaction main body or interaction to evaluate
+//   ///@param Result result should be stored here
+//   template <class Config>
+//   Result operator()(Interaction const &a, Config const &) const {
+//     return a;
+//   }
+// };
 
 ///@brief a generic objective function for interacting bodies
 ///@tparam Objectives sequence of types modeling the Objective concept

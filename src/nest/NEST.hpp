@@ -24,7 +24,7 @@ using util::StorePointer;
 
 ///@brief Base class for NEST
 ///@tparam Index index type
-///@detail Base class for NEST, virtual NEST interface
+///@details Base class for NEST, virtual NEST interface
 template <class Index = uint64_t>
 struct NestBase {
   ///@brief need virtual destructor
@@ -36,7 +36,7 @@ struct NestBase {
                                  boost::any &result) = 0;
 
   ///@brief virtual virtual function to set the state of this nest
-  ///@detail will consume DIM indices from hindices vector, starting at iindex,
+  ///@details will consume DIM indices from hindices vector, starting at iindex,
   /// then will increment iindex
   ///        for use in composite data structures containing NestBases
   ///@returns false if invalid index
@@ -72,20 +72,20 @@ namespace impl {
 SCHEME_HAS_CONST_MEMBER_FUNCTION_4(value_to_params)
 
 // bool value_to_params(
-// 	Value const & value,
-// 	Index resl,
-// 	Params & params,
-// 	Index & cell_index
+//  Value const & value,
+//  Index resl,
+//  Params & params,
+//  Index & cell_index
 // ) const {
 // #define SCHEME_HAS_CONST_MEMBER_FUNCTION_4(MEMBER)                         \
-		// template<typename T, class R, class A, class B, class C, class D>          \
-		// struct has_const_member_fun_ ## MEMBER  {                                  \
-		//     template<typename U, R (U::*)(A,B,C,D) const> struct SFINAE {};        \
-		//     template<typename U> static char Test(SFINAE<U, &U::MEMBER>*);         \
-		//     template<typename U> static int Test(...);                             \
-		//     static const bool value = sizeof(Test<T>(0)) == sizeof(char);          \
-		//     typedef boost::mpl::bool_<value> type;                                 \
-		// };
+    // template<typename T, class R, class A, class B, class C, class D>          \
+    // struct has_const_member_fun_ ## MEMBER  {                                  \
+    //     template<typename U, R (U::*)(A,B,C,D) const> struct SFINAE {};        \
+    //     template<typename U> static char Test(SFINAE<U, &U::MEMBER>*);         \
+    //     template<typename U> static int Test(...);                             \
+    //     static const bool value = sizeof(Test<T>(0)) == sizeof(char);          \
+    //     typedef boost::mpl::bool_<value> type;                                 \
+    // };
 
 template <class Nest>
 typename boost::enable_if_c<
@@ -313,7 +313,7 @@ struct NEST :  // policy-based design, see Modern C++ Design
   }
   ///@brief get the index vector of a value WRT a particular cell, may be out of
   /// the cell bounds!
-  ///@detail this is used mainly for neighbor lookups -- some neighbors may be
+  ///@details this is used mainly for neighbor lookups -- some neighbors may be
   /// within the cell even if the value isn't
   ///@returns nothing because the index vector isn't checked for validity
   void get_indicies_for_cell(Value const &v, Index resl, Index cell_index,
@@ -432,7 +432,7 @@ struct NEST :  // policy-based design, see Modern C++ Design
     return status;
   }
   ///@brief virtual virtual function to set the state of this nest
-  ///@detail will consume DIM indices from hindices vector, starting at iindex,
+  ///@details will consume DIM indices from hindices vector, starting at iindex,
   /// then will increment iindex
   ///        for use in composite data structures containing NestBases
   ///@return false iff invalid index
@@ -487,7 +487,7 @@ std::ostream &operator<<(std::ostream &out,
 
 ////////////////////////////////////////////////////////////////////////////////
 ///@brief specialization of NEST for zero dimensional grids (discrete choices)
-///@detail some logic has to be shortcurcited to work with 0-dimensional grids
+///@details some logic has to be shortcurcited to work with 0-dimensional grids
 ////////////////////////////////////////////////////////////////////////////////
 template <class _Value, template <int, class, class, class> class ParamMap,
           template <class> class StoragePolicy, class _Index, class Float,
@@ -542,7 +542,8 @@ struct NEST<0, _Value, ParamMap, StoragePolicy, _Index, Float, is_virtual>
   }
 
   ///@brief virtual virtual function to set the state of this nest
-  ///@detail will consume no indices from hindices vector, using only cell_index
+  ///@details will consume no indices from hindices vector, using only
+  ///cell_index
   ///        for use in composite data structures containing NestBases
   virtual bool virtual_get_state(std::vector<Index> const & /*hindices*/,
                                  Index cell_index, size_t & /*iindex*/,

@@ -49,7 +49,7 @@
 				"*.sublime-workspace",
 				".tags*",
 				"test.sxhn",
-				"test.sxm"
+				"test.sxm",
 			],
 			"folder_exclude_patterns":
 			[
@@ -58,7 +58,11 @@
 				".cache",
 				".idea",
 				"__pycache__",
-				"external"
+				".hypothesis",
+				".eggs",
+				".tox",
+				"external/googletest",
+				"external/include",
 			],
 			"path": ".."
 		}

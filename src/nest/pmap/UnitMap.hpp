@@ -14,7 +14,7 @@ namespace nest {
 namespace pmap {
 
 ///@brief Parameter to Value Map Policy Class
-///@detail just copies the [0.0,1.0] hypercube coords to Value
+///@details just copies the [0.0,1.0] hypercube coords to Value
 ///        the first dimension will incremented by cell_index
 ///@tparam DIM the dimension number of the input parameter space
 ///@tparam Value the output value type, default SimpleArray
