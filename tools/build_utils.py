@@ -17,6 +17,13 @@ def get_my_compiler():
     return my_compiler
 
 
+def get_my_python():
+    return sys.executable.replace('/', '')
+
+
+# todo: remove the above dups from setup.py
+
+
 def get_proj_root():
     """find rood dir of this project by looking for .git and external"""
     proj_root = os.path.abspath('.')
@@ -40,7 +47,7 @@ def get_cmake_dir(prefix, cfg):
     """get directory setup.py builds stuff in, prefix is lib or temp"""
     version = '{}.{}'.format(sys.version_info.major, sys.version_info.minor)
     path = get_build_dir(cfg) + '/' + prefix + '*' + \
-        version + '-' + get_my_compiler()
+        version + '-' + get_my_python() + '-' + get_my_compiler()
     libdir = (glob.glob(path))
     if len(libdir) > 1:
         print('ERROR get_cmake_dir', path)

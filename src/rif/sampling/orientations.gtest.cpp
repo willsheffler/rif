@@ -10,7 +10,7 @@ TEST(Orientation, read_karney_datasets) {
 
   // std::string s;
   // while(in >> s) std::cout << s << endl;
-  // assuming run from cmake tmp dir???
+  // todo: assuming run from project root dir
   auto tuple =
       read_karney_orientation_file("data/orientations/karney/c48u1.grid.gz");
   Eigen::MatrixXd quats = std::get<0>(tuple);

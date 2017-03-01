@@ -13,6 +13,20 @@ from setuptools import setup, Extension, find_packages
 from setuptools.command.build_ext import build_ext
 from distutils.version import LooseVersion
 
+# todo: have these utility functions in a module... but how to import them
+# into setup.py...
+
+
+def get_my_compiler():
+    my_compiler = os.getenv('CXX', '').replace('/', '')
+    if not my_compiler:
+        my_compiler = "DEFAULT_CXX"
+    return my_compiler
+
+
+def get_my_python():
+    return sys.executable.replace('/', '')
+
 
 def which(program):
     import os
@@ -34,6 +48,12 @@ def which(program):
     return None
 
 
+def infer_config_from_build_dirname(path):
+    path = path.split('/')[0]
+    if path.startswith('build_setup_py_'):
+        return path.replace('build_setup_py_', '')
+
+
 _rif_setup_opts = defaultdict(list)
 _remove_from_sys_argv = list()
 for arg in sys.argv:
@@ -48,19 +68,6 @@ for flag, val in _rif_setup_opts.items():
     print('    ', flag, '=', val)
 
 
-def get_my_compiler():
-    my_compiler = os.getenv('CXX', '').replace('/', '')
-    if not my_compiler:
-        my_compiler = "DEFAULT_CXX"
-    return my_compiler
-
-
-def infer_config_from_build_dirname(path):
-    path = path.split('/')[0]
-    if path.startswith('build_setup_py_'):
-        return path.replace('build_setup_py_', '')
-
-
 class CMakeExtension(Extension):
 
     def __init__(self, name, sourcedir=''):
@@ -70,10 +77,13 @@ class CMakeExtension(Extension):
 
 class CMakeBuild(build_ext):
 
+    def __init__(self, *args, **kwargs):
+        build_ext.__init__(self, *args, **kwargs)
+        self.my_tag = get_my_python() + '-' + get_my_compiler()
+
     def run(self):
-        my_compiler = get_my_compiler()
-        if my_compiler and not self.build_temp.endswith(my_compiler):
-            self.build_temp += '-' + my_compiler
+        if not self.build_temp.endswith(self.my_tag):
+            self.build_temp += '-' + self.my_tag
         try:
             out = subprocess.check_output(['cmake', '--version'])
         except OSError:
@@ -91,10 +101,8 @@ class CMakeBuild(build_ext):
             self.build_extension(ext)
 
     def get_ext_fullpath(self, ext_name):
-        my_compiler = get_my_compiler()
         defaultname = build_ext.get_ext_fullpath(self, ext_name)
-        extra = '-' + my_compiler if my_compiler else ''
-        path = os.path.dirname(defaultname) + extra + \
+        path = os.path.dirname(defaultname) + '-' + self.my_tag + \
             '/' + os.path.basename(defaultname)
         return path, defaultname
 
@@ -131,10 +139,10 @@ class CMakeBuild(build_ext):
             self.distribution.get_version())
         if not os.path.exists(self.build_temp):
             os.makedirs(self.build_temp)
-        subprocess.check_call(['cmake', ext.sourcedir] +
-                              cmake_args, cwd=self.build_temp, env=env)
-        subprocess.check_call(['cmake', '--build', '.'] +
-                              build_args, cwd=self.build_temp)
+        subprocess.check_call(
+            ['cmake', ext.sourcedir] + cmake_args, cwd=self.build_temp, env=env)
+        subprocess.check_call(
+            ['cmake', '--build', '.'] + build_args, cwd=self.build_temp)
         if os.path.exists(defaultextdir):
             os.remove(defaultextdir)
         os.symlink(extdir, defaultextdir)
