@@ -9,5 +9,6 @@ dependencies:
 - doxygen
 - pip
 - boost
+- cmake
 - pip:
   - breathe
