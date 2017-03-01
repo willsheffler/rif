@@ -25,7 +25,7 @@ import glob
 version = str(sys.version_info.major) + '.' + str(sys.version_info.minor)
 print('rebuilding rif module for py' + version)
 os.system('cd ..; python' + version +
-          ' setup.py build --build-base=build_setup_py_Release')
+          ' setup.py build --build-base=build_docs --rif_setup_opts_build_args=rif_cpp')
 rifpath = glob.glob('../build_setup_py_Release/lib.*' + version + '*')
 sys.path.insert(0, os.path.abspath(rifpath[0]))
 # todo is there a better way?

@@ -8,7 +8,6 @@
 .idea
 .eggs
 build/
-build_setup_py*
 .DS_Store
 _build/
 docs/_generate
@@ -16,7 +15,7 @@ docs/_generate
 *.sxhn
 *.sublime-workspace
 .clang_complete
-build_manual
+build_*/
 log/subl_build.log
 .tox
 dist

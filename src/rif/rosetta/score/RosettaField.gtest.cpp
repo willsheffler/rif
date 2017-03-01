@@ -108,7 +108,7 @@ TEST(RosettaField, test_faster_atombin_calc) {
   }
 }
 
-TEST(RosettaField, disabled_test_btn) {
+TEST(RosettaField, DISABLED_test_btn) {
   int NITER = 50;
 #ifdef SCHEME_BENCHMARK
   NITER *= 100;

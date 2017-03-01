@@ -7,6 +7,7 @@ import platform
 import subprocess
 import multiprocessing
 from glob import glob
+from collections import defaultdict
 
 from setuptools import setup, Extension, find_packages
 from setuptools.command.build_ext import build_ext
@@ -31,6 +32,20 @@ def which(program):
                 return exe_file
 
     return None
+
+
+_rif_setup_opts = defaultdict(list)
+_remove_from_sys_argv = list()
+for arg in sys.argv:
+    if arg.startswith('--rif_setup_opts_'):
+        flag, val = arg.split('=')
+        _rif_setup_opts[flag[17:]] = val.split(',')
+        _remove_from_sys_argv.append(arg)
+for arg in _remove_from_sys_argv:
+    sys.argv.remove(arg)
+print('setup.py rif args:')
+for flag, val in _rif_setup_opts.items():
+    print('    ', flag, '=', val)
 
 
 def get_my_compiler():
@@ -90,9 +105,9 @@ class CMakeBuild(build_ext):
         cmake_args = ['-DCMAKE_LIBRARY_OUTPUT_DIRECTORY=' + extdir,
                       '-DPYTHON_EXECUTABLE=' + sys.executable,
                       ]
+        ncpu = multiprocessing.cpu_count()
         if which('ninja'):
             cmake_args.append('-GNinja')
-
         cfg = infer_config_from_build_dirname(self.build_temp)
         if not cfg:
             cfg = 'Debug' if self.debug else 'Release'
@@ -103,14 +118,13 @@ class CMakeBuild(build_ext):
                 '-DCMAKE_LIBRARY_OUTPUT_DIRECTORY_{}={}'.format(cfg.upper(), extdir)]
             if sys.maxsize > 2**32:
                 cmake_args += ['-A', 'x64']
-            build_args += ['--', '/m']
+                build_args += ['--', '/m']
         else:
             cmake_args += ['-DCMAKE_BUILD_TYPE=' + cfg]
-            # build_args += ['--', '-j'+str(multiprocessing.cpu_count()),
-            # 'rif']
-            build_args += ['--', '-j' + str(multiprocessing.cpu_count())]
-        # probably best to build everything, uncomment to only build lib
-        # build_args.append('rif_cpp')
+            build_args += ['--', '-j' + str(ncpu)]
+        cmake_args += _rif_setup_opts['cmake_args']
+        build_args += _rif_setup_opts['build_args']
+
         env = os.environ.copy()
         env['CXXFLAGS'] = '{} -DVERSION_INFO=\\"{}\\"'.format(
             env.get('CXXFLAGS', ''),
