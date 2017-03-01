@@ -3,7 +3,7 @@
 #include <iostream>
 #include <map>
 
-namespace scheme {
+namespace rif {
 namespace rosetta {
 
 std::map<std::pair<std::string, std::string>, int> rosetta_atype_map;

@@ -1,12 +1,12 @@
-#ifndef INCLUDED_scheme_nest_MultiNest_HH
-#define INCLUDED_scheme_nest_MultiNest_HH
+#ifndef INCLUDED_nest_MultiNest_HH
+#define INCLUDED_nest_MultiNest_HH
 
 #include "nest/NEST.hpp"
 
 #include <math.h>
 #include <boost/assert.hpp>
 
-namespace scheme {
+namespace rif {
 namespace nest {
 
 ///@brief Base class for NEST

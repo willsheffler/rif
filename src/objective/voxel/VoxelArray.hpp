@@ -13,7 +13,7 @@
 //#include <boost/serialization/access.hpp>
 //#include <boost/serialization/split_member.hpp>
 
-namespace scheme {
+namespace rif {
 namespace objective {
 namespace voxel {
 
@@ -90,19 +90,19 @@ struct VoxelArray : boost::multi_array<_Float, _DIM> {
   }
 
   // void write(std::ostream & out) const {
-  // 	out.write( (char const*)&lb_, sizeof(Bounds) );
-  // 	out.write( (char const*)&ub_, sizeof(Bounds) );
-  // 	out.write( (char const*)&cs_, sizeof(Bounds) );
-  // 	for(size_t i = 0; i < DIM; ++i) out.write( (char
+  //  out.write( (char const*)&lb_, sizeof(Bounds) );
+  //  out.write( (char const*)&ub_, sizeof(Bounds) );
+  //  out.write( (char const*)&cs_, sizeof(Bounds) );
+  //  for(size_t i = 0; i < DIM; ++i) out.write( (char
   // const*)&(this->shape()[i]), sizeof() );
-  // 	out.write( (char const*)this->data(), this->num_elements()*sizeof(Float)
+  //  out.write( (char const*)this->data(), this->num_elements()*sizeof(Float)
   // );
   // }
   // void read(std::istream & in){
-  // 	in.read( (char*)&lb_, sizeof(Bounds) );
-  // 	in.read( (char*)&ub_, sizeof(Bounds) );
-  // 	in.read( (char*)&cs_, sizeof(Bounds) );
-  // 	in.read( (char*)this->data(), this->num_elements()*sizeof(Float) );
+  //  in.read( (char*)&lb_, sizeof(Bounds) );
+  //  in.read( (char*)&ub_, sizeof(Bounds) );
+  //  in.read( (char*)&cs_, sizeof(Bounds) );
+  //  in.read( (char*)this->data(), this->num_elements()*sizeof(Float) );
   // }
   bool operator==(THIS const &o) const {
     return lb_ == o.lb_ && ub_ == o.ub_ && cs_ == o.cs_ &&

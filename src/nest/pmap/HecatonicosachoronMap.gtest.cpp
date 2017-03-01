@@ -14,7 +14,7 @@
 #include <random>
 #include <vector>
 
-namespace scheme {
+namespace rif {
 namespace nest {
 namespace pmap {
 namespace hecat_test {
@@ -62,7 +62,7 @@ ostream &operator<<(ostream &out, Quaterniond const &q) {
 }
 
 // Matrix4d projmat( Quaterniond q ){
-// 	return Vector4d( q.w(), q.x(), q.y(), q.z() ) * RowVector4d( q.w(),
+//  return Vector4d( q.w(), q.x(), q.y(), q.z() ) * RowVector4d( q.w(),
 // q.x(), q.y(), q.z() );
 // }
 
@@ -109,9 +109,9 @@ void dumppoints(string fname, M const &pts) {
 }
 
 // double sign(double d){
-// 	if( d == 0) return 0;
-// 	if( d > 0 ) return 1.0;
-// 	else return -1.0;
+//  if( d == 0) return 0;
+//  if( d > 0 ) return 1.0;
+//  else return -1.0;
 // }
 
 template <class T>
@@ -130,86 +130,86 @@ double min_cube_side(T const &coords) {
 }
 
 // TEST(hecatonicosachoron, sample_dodec_inscribe_cube){
-// 	// dodecahedron
-// 	// (±1, ±1, ±1)
-// 	// (0, ±1/φ, ±φ)
-// 	// (±1/φ, ±φ, 0)
-// 	// (±φ, 0, ±1/φ)
-// 	Matrix<double,3,20> dodec0;
-// 	dodec0 << Vector3d(     +1,   +1,    +1    ).normalized(),
-// 	          Vector3d(     +1,   +1,    -1    ).normalized(),
-// 	          Vector3d(     +1,   -1,    +1    ).normalized(),
-// 	          Vector3d(     +1,   -1,    -1    ).normalized(),
-// 	          Vector3d(     -1,   +1,    +1    ).normalized(),
-// 	          Vector3d(     -1,   +1,    -1    ).normalized(),
-// 	          Vector3d(     -1,   -1,    +1    ).normalized(),
-// 	          Vector3d(     -1,   -1,    -1    ).normalized(),
-// 	          Vector3d(      0, +1.0/r,     +r ).normalized(),
-// 	          Vector3d(      0, +1.0/r,     -r ).normalized(),
-// 	          Vector3d(      0, -1.0/r,     +r ).normalized(),
-// 	          Vector3d(      0, -1.0/r,     -r ).normalized(),
-// 	          Vector3d( +1.0/r,     +r,    0   ).normalized(),
-// 	          Vector3d( +1.0/r,     -r,    0   ).normalized(),
-// 	          Vector3d( -1.0/r,     +r,    0   ).normalized(),
-// 	          Vector3d( -1.0/r,     -r,    0   ).normalized(),
-// 	          Vector3d(     +r,    0  , +1.0/r ).normalized(),
-// 	          Vector3d(     +r,    0  , -1.0/r ).normalized(),
-// 	          Vector3d(     -r,    0  , +1.0/r ).normalized(),
-// 	          Vector3d(     -r,    0  , -1.0/r ).normalized();
-// 	// dumppoints("dodec0.pdb",dodec0);
+//  // dodecahedron
+//  // (±1, ±1, ±1)
+//  // (0, ±1/φ, ±φ)
+//  // (±1/φ, ±φ, 0)
+//  // (±φ, 0, ±1/φ)
+//  Matrix<double,3,20> dodec0;
+//  dodec0 << Vector3d(     +1,   +1,    +1    ).normalized(),
+//            Vector3d(     +1,   +1,    -1    ).normalized(),
+//            Vector3d(     +1,   -1,    +1    ).normalized(),
+//            Vector3d(     +1,   -1,    -1    ).normalized(),
+//            Vector3d(     -1,   +1,    +1    ).normalized(),
+//            Vector3d(     -1,   +1,    -1    ).normalized(),
+//            Vector3d(     -1,   -1,    +1    ).normalized(),
+//            Vector3d(     -1,   -1,    -1    ).normalized(),
+//            Vector3d(      0, +1.0/r,     +r ).normalized(),
+//            Vector3d(      0, +1.0/r,     -r ).normalized(),
+//            Vector3d(      0, -1.0/r,     +r ).normalized(),
+//            Vector3d(      0, -1.0/r,     -r ).normalized(),
+//            Vector3d( +1.0/r,     +r,    0   ).normalized(),
+//            Vector3d( +1.0/r,     -r,    0   ).normalized(),
+//            Vector3d( -1.0/r,     +r,    0   ).normalized(),
+//            Vector3d( -1.0/r,     -r,    0   ).normalized(),
+//            Vector3d(     +r,    0  , +1.0/r ).normalized(),
+//            Vector3d(     +r,    0  , -1.0/r ).normalized(),
+//            Vector3d(     -r,    0  , +1.0/r ).normalized(),
+//            Vector3d(     -r,    0  , -1.0/r ).normalized();
+//  // dumppoints("dodec0.pdb",dodec0);
 
-// 	std::mt19937 mt((unsigned int)time(0));
-// 	std::normal_distribution<> rnorm;
+//  std::mt19937 mt((unsigned int)time(0));
+//  std::normal_distribution<> rnorm;
 
-// 	 // 0.90919
-// 	Quaterniond Q0(
-// 			-0.18683389537307968,
-// 			-0.94619545649322123,
-// 			0.1868233140277023,
-// 			-0.18682693324842686
-// 	);
-// 	double const rad = 0.001;
+//   // 0.90919
+//  Quaterniond Q0(
+//      -0.18683389537307968,
+//      -0.94619545649322123,
+//      0.1868233140277023,
+//      -0.18682693324842686
+//  );
+//  double const rad = 0.001;
 
-// 	Vector3d cen;
-// 	double const side0 = min_cube_side(dodec0,cen);
-// 	double const area0 = side0*side0*side0;
-// 	cout << "min cube side: " << side0 << endl;
-// 	BOOST_VERIFY( cen.isApprox(Vector3d(0,0,0)));
-// 	double minside = side0;
-// 	Matrix<double,3,20> bestdodec;
-// 	Quaterniond bestrot;
-// 	for(size_t i = 0; i < 100000; ++i){
-// 		// Quaterniond qrand = Quaterniond( rnorm(mt), rnorm(mt),
+//  Vector3d cen;
+//  double const side0 = min_cube_side(dodec0,cen);
+//  double const area0 = side0*side0*side0;
+//  cout << "min cube side: " << side0 << endl;
+//  BOOST_VERIFY( cen.isApprox(Vector3d(0,0,0)));
+//  double minside = side0;
+//  Matrix<double,3,20> bestdodec;
+//  Quaterniond bestrot;
+//  for(size_t i = 0; i < 100000; ++i){
+//    // Quaterniond qrand = Quaterniond( rnorm(mt), rnorm(mt),
 // rnorm(mt), rnorm(mt) );
-// 		Quaterniond qrand( Q0.w()+rnorm(mt)*rad, Q0.x()+rnorm(mt)*rad,
+//    Quaterniond qrand( Q0.w()+rnorm(mt)*rad, Q0.x()+rnorm(mt)*rad,
 // Q0.y()+rnorm(mt)*rad, Q0.z()+rnorm(mt)*rad );
-// 		qrand.normalize();
-// 		if(!i) qrand = Quaterniond(1,0,0,0);
-// 		Matrix<double,3,20> rotdodec = qrand.matrix() * dodec0;
-// 		double side = min_cube_side(rotdodec,cen);
-// 		assert( cen.isApprox(Vector3d(0,0,0)));
-// 		if( minside > side ){
-// 			minside = side;
-// 			bestrot = qrand;
-// 			bestdodec = rotdodec;
-// 			double const area = side*side*side;
-// 			cout << "min cube side: " << side << " vol: " << area <<
+//    qrand.normalize();
+//    if(!i) qrand = Quaterniond(1,0,0,0);
+//    Matrix<double,3,20> rotdodec = qrand.matrix() * dodec0;
+//    double side = min_cube_side(rotdodec,cen);
+//    assert( cen.isApprox(Vector3d(0,0,0)));
+//    if( minside > side ){
+//      minside = side;
+//      bestrot = qrand;
+//      bestdodec = rotdodec;
+//      double const area = side*side*side;
+//      cout << "min cube side: " << side << " vol: " << area <<
 // "
 // dodec vol frac: " << area / area0 << " " << i << endl;
-// 			cout << bestrot << endl;
-// 		}
-// 	}
-// 	cout << "BEST ROTATION OF DODEC: " << endl;
-// 	cout << std::setprecision(17) << "\t\t\t" << bestrot.w() << ",\n\t\t\t"
+//      cout << bestrot << endl;
+//    }
+//  }
+//  cout << "BEST ROTATION OF DODEC: " << endl;
+//  cout << std::setprecision(17) << "\t\t\t" << bestrot.w() << ",\n\t\t\t"
 // << bestrot.x() << ",\n\t\t\t" << bestrot.y() << ",\n\t\t\t" << bestrot.z() <<
 // endl;
-// 	// dodec volume as constructed 2.78516386312, from this:
-// 	// print Vec(1,1,1).normalized().distance( Vec(1/r, r, 0).normalized()
+//  // dodec volume as constructed 2.78516386312, from this:
+//  // print Vec(1,1,1).normalized().distance( Vec(1/r, r, 0).normalized()
 // )**3 * (15+7*sqrt(5)) /4.0
 
-// 	dumppoints("0_dodec_0.pdb",dodec0/dodec0.block(0,0,3,1).norm());
-// 	dumppoints("0_dodec_best.pdb",bestdodec/bestdodec.block(0,0,3,1).norm());
-// 	// std::exit(0);
+//  dumppoints("0_dodec_0.pdb",dodec0/dodec0.block(0,0,3,1).norm());
+//  dumppoints("0_dodec_best.pdb",bestdodec/bestdodec.block(0,0,3,1).norm());
+//  // std::exit(0);
 
 // }
 
@@ -329,124 +329,124 @@ Array<uint8_t, 60, 12> make_half120cell_neighbors(
     BOOST_VERIFY(nnbr == 12);
   }
   // for(size_t i = 0; i < 60; ++i){
-  // 	cout << "nbrs " << i;
-  // 	for(size_t j = 0; j < 12; ++j){
-  // 		cout << " " << (int)nbrs(i,j);
-  // 	}
-  // 	cout << endl;
+  //  cout << "nbrs " << i;
+  //  for(size_t j = 0; j < 12; ++j){
+  //    cout << " " << (int)nbrs(i,j);
+  //  }
+  //  cout << endl;
   // }
   return nbrs;
 }
 vector<Quaterniond> make_half120cell();
 
 // TEST(hecatonicosachoron, dump_static_data){
-// 	vector<Quaterniond> half120cell = make_half120cell();
-// 	Array<uint8_t,60,12> nbrs = make_half120cell_neighbors(half120cell);
+//  vector<Quaterniond> half120cell = make_half120cell();
+//  Array<uint8_t,60,12> nbrs = make_half120cell_neighbors(half120cell);
 
-// 	cout << "\t\tstatic T const h120[240] = {" << endl;
-// 	BOOST_FOREACH(Quaterniond q,half120cell){
-// 		cout << "\t\t\t" << setprecision(17)  << q.x() << "," << q.y()
+//  cout << "\t\tstatic T const h120[240] = {" << endl;
+//  BOOST_FOREACH(Quaterniond q,half120cell){
+//    cout << "\t\t\t" << setprecision(17)  << q.x() << "," << q.y()
 // <<
 // "," << q.z() << "," << q.w() << "," << endl;
-// 	}
-// 	cout << "\t\t}" << endl;
+//  }
+//  cout << "\t\t}" << endl;
 
-// 	cout << "\t\tstatic T const h120inv[240] = {" << endl;
-// 	BOOST_FOREACH(Quaterniond q,half120cell){
-// 		q = q.inverse();
-// 		cout << "\t\t\t" << setprecision(17)  << q.x() << "," << q.y()
+//  cout << "\t\tstatic T const h120inv[240] = {" << endl;
+//  BOOST_FOREACH(Quaterniond q,half120cell){
+//    q = q.inverse();
+//    cout << "\t\t\t" << setprecision(17)  << q.x() << "," << q.y()
 // <<
 // "," << q.z() << "," << q.w() << "," << endl;
-// 	}
-// 	cout << "\t\t}" << endl;
+//  }
+//  cout << "\t\t}" << endl;
 
-// 	cout << "\t\tstatic uint8_t const h120_nbrs[60,12] = {" << endl;
-// 	for(int i = 0; i < 60; ++i){
-// 		cout << "\t\t\t";
-// 		for(int j = 0; j < 12; ++j){
-// 			cout << static_cast<int>(nbrs(i,j)) << ",";
-// 		}
-// 		cout << endl;
-// 	}
-// 	cout << "\t\t}" << endl;
+//  cout << "\t\tstatic uint8_t const h120_nbrs[60,12] = {" << endl;
+//  for(int i = 0; i < 60; ++i){
+//    cout << "\t\t\t";
+//    for(int j = 0; j < 12; ++j){
+//      cout << static_cast<int>(nbrs(i,j)) << ",";
+//    }
+//    cout << endl;
+//  }
+//  cout << "\t\t}" << endl;
 
-// 	cout << "\t\tstatic T const cellfaces[36] = {" << endl;
-// 	for(int i = 0; i < 12; ++i){
-// 		Vector3d nbr0 = half120cell[nbrs(0,i)].coeffs().block(0,0,3,1);
-// 		nbr0 /= nbr0.norm();
-// 		cout << "\t\t\t" << setprecision(17)  << nbr0[0] << "," <<
+//  cout << "\t\tstatic T const cellfaces[36] = {" << endl;
+//  for(int i = 0; i < 12; ++i){
+//    Vector3d nbr0 = half120cell[nbrs(0,i)].coeffs().block(0,0,3,1);
+//    nbr0 /= nbr0.norm();
+//    cout << "\t\t\t" << setprecision(17)  << nbr0[0] << "," <<
 // nbr0[1]
 // << "," << nbr0[2] << "," << endl;
-// 	}
-// 	cout << "\t\t}" << endl;
+//  }
+//  cout << "\t\t}" << endl;
 
 // }
 
 // TEST(hecatonicosachoron, cell_alignment){
-// 	/////////////////////////////////////////////////////////////////////////////////////
-// 	/////////////////////////////////////////////////////////////////////////////////////
-// 	/////////////////////////////////////////////////////////////////////////////////////
-// 	///////////// this doesn't make sense, must use vertices not centers!
+//  /////////////////////////////////////////////////////////////////////////////////////
+//  /////////////////////////////////////////////////////////////////////////////////////
+//  /////////////////////////////////////////////////////////////////////////////////////
+//  ///////////// this doesn't make sense, must use vertices not centers!
 // ///////////////
-// 	/////////////////////////////////////////////////////////////////////////////////////
-// 	/////////////////////////////////////////////////////////////////////////////////////
-// 	vector<Quaterniond> half120cell = make_half120cell();
-// 	Array<uint8_t,60,12> nbrs = make_half120cell_neighbors(half120cell);
+//  /////////////////////////////////////////////////////////////////////////////////////
+//  /////////////////////////////////////////////////////////////////////////////////////
+//  vector<Quaterniond> half120cell = make_half120cell();
+//  Array<uint8_t,60,12> nbrs = make_half120cell_neighbors(half120cell);
 
-// 	std::mt19937 mt((unsigned int)time(0));
-// 	std::normal_distribution<> rnorm;
+//  std::mt19937 mt((unsigned int)time(0));
+//  std::normal_distribution<> rnorm;
 
-// 	Matrix<double,4,13> dodec0;
-// 	for(size_t inbr = 0; inbr < 12; ++inbr){
-// 		dodec0.col(inbr) = half120cell[ nbrs(0,inbr) ].coeffs();
-// 	}
-// 	dodec0.col(12) = Vector4d(0,0,0,1);
-// 	// cout << dodec0.block(0,0,3,1).norm() << endl;
-// 	//
+//  Matrix<double,4,13> dodec0;
+//  for(size_t inbr = 0; inbr < 12; ++inbr){
+//    dodec0.col(inbr) = half120cell[ nbrs(0,inbr) ].coeffs();
+//  }
+//  dodec0.col(12) = Vector4d(0,0,0,1);
+//  // cout << dodec0.block(0,0,3,1).norm() << endl;
+//  //
 // dumppoints("nbr_icos0.pdb",dodec0.block(0,0,3,13)/dodec0.block(0,0,3,1).norm());
 
-// 	return;
+//  return;
 
-// 	Vector3d cen;
-// 	double const side0 = min_cube_side(dodec0.block(0,0,3,12),cen);
-// 	BOOST_VERIFY( cen.isApprox(Vector3d(0,0,0)) );
-// 	double const area0 = side0*side0*side0;
-// 	cout << "min cube side: " << side0 << endl;
+//  Vector3d cen;
+//  double const side0 = min_cube_side(dodec0.block(0,0,3,12),cen);
+//  BOOST_VERIFY( cen.isApprox(Vector3d(0,0,0)) );
+//  double const area0 = side0*side0*side0;
+//  cout << "min cube side: " << side0 << endl;
 
-// 		// cout << dodec0.transpose() << endl;
-// 	double mincube = side0;
-// 	Matrix4d bestm4;
-// 	for(size_t i = 0; i < 1; ++i){
+//    // cout << dodec0.transpose() << endl;
+//  double mincube = side0;
+//  Matrix4d bestm4;
+//  for(size_t i = 0; i < 1; ++i){
 
-// 		Matrix4d randm4; {
-// 			randm4 <<   1, 5, 5, 0,
-// 			            2, 3, 8, 0,
-// 			            3, 4, 7, 0,
-// 		                0, 0, 0, 1;
-// 			HouseholderQR<Matrix4d> qr(randm4);
-// 			randm4 = qr.householderQ();
-// 			// cout << randm4 << endl << endl;
-// 			// cout << ( randm4 * Vector4d(0,0,0,1) ).transpose() <<
+//    Matrix4d randm4; {
+//      randm4 <<   1, 5, 5, 0,
+//                  2, 3, 8, 0,
+//                  3, 4, 7, 0,
+//                    0, 0, 0, 1;
+//      HouseholderQR<Matrix4d> qr(randm4);
+//      randm4 = qr.householderQ();
+//      // cout << randm4 << endl << endl;
+//      // cout << ( randm4 * Vector4d(0,0,0,1) ).transpose() <<
 // endl;
-// 			BOOST_VERIFY(
+//      BOOST_VERIFY(
 // Vector4d(0,0,0,1).isApprox(randm4*Vector4d(0,0,0,1)) );
-// 		}
+//    }
 
-// 		Matrix<double,4,13>dodec = randm4 * dodec0;
-// 		// cout << dodec.transpose() << endl;
-// 		// dumppoints("test.pdb",dodec);
+//    Matrix<double,4,13>dodec = randm4 * dodec0;
+//    // cout << dodec.transpose() << endl;
+//    // dumppoints("test.pdb",dodec);
 
-// 		double const side = min_cube_side(dodec.block(0,0,3,12),cen);
-// 		BOOST_VERIFY( cen.isApprox(Vector3d(0,0,0)) );
-// 		if( mincube > side ){
-// 			mincube = side;
-// 			bestm4 = randm4;
-// 			double const area = side*side*side;
-// 			cout << "min cube side: " << side << " vol: " << area <<
+//    double const side = min_cube_side(dodec.block(0,0,3,12),cen);
+//    BOOST_VERIFY( cen.isApprox(Vector3d(0,0,0)) );
+//    if( mincube > side ){
+//      mincube = side;
+//      bestm4 = randm4;
+//      double const area = side*side*side;
+//      cout << "min cube side: " << side << " vol: " << area <<
 // "
 // dodec vol frac: " << area / area0 << endl;
-// 		}
-// 	}
+//    }
+//  }
 
 // }
 
@@ -582,14 +582,14 @@ TEST(hecatonicosachoron, cell_lookup) {
   // HecatonicosachoronMap<> map;
   // HecatonicosachoronMap<>::Params p;
   // for( size_t i = 0; i < 60; ++i){
-  // 	size_t cell_index = 999;
-  // 	map.value_to_params( h120_cellcen<double>(i).matrix(), 0, p, cell_index
+  //  size_t cell_index = 999;
+  //  map.value_to_params( h120_cellcen<double>(i).matrix(), 0, p, cell_index
   // );
-  // 	// cout << p << endl;
-  // 	ASSERT_EQ( i, cell_index );
-  // 	ASSERT_NEAR( p[0], 0.5, 0.0000001 );
-  // 	ASSERT_NEAR( p[1], 0.5, 0.0000001 );
-  // 	ASSERT_NEAR( p[2], 0.5, 0.0000001 );
+  //  // cout << p << endl;
+  //  ASSERT_EQ( i, cell_index );
+  //  ASSERT_NEAR( p[0], 0.5, 0.0000001 );
+  //  ASSERT_NEAR( p[1], 0.5, 0.0000001 );
+  //  ASSERT_NEAR( p[2], 0.5, 0.0000001 );
   // }
 
   NEST<3, Matrix3d, HecatonicosachoronMap> nest;
@@ -655,59 +655,59 @@ TEST(hecatonicosachoron, covering) {
 
 // TEST( hecatonicosachoron, visualize ){
 
-// 	std::mt19937 rng((unsigned int)time(0));
-// 	std::normal_distribution<> gauss;
-// 	std::uniform_real_distribution<> uniform;
+//  std::mt19937 rng((unsigned int)time(0));
+//  std::normal_distribution<> gauss;
+//  std::uniform_real_distribution<> uniform;
 
-// 	// Quaterniond qrand( gauss(rng), gauss(rng), gauss(rng), gauss(rng) );
-// 	Quaterniond qrand( 1,0,0,0 );
-// 	qrand.normalize();
-// 	Vector3d X = qrand*Vector3d(1,0  ,0  );
-// 	Vector3d Y = qrand*Vector3d(0,1.2,0  );
-// 	Vector3d Z = qrand*Vector3d(0,0  ,1.4);
+//  // Quaterniond qrand( gauss(rng), gauss(rng), gauss(rng), gauss(rng) );
+//  Quaterniond qrand( 1,0,0,0 );
+//  qrand.normalize();
+//  Vector3d X = qrand*Vector3d(1,0  ,0  );
+//  Vector3d Y = qrand*Vector3d(0,1.2,0  );
+//  Vector3d Z = qrand*Vector3d(0,0  ,1.4);
 
-// 	NEST<3,Matrix3d,HecatonicosachoronMap> nest;
-// 	// size_t beg = 0;
-// 	// while(!nest.set_state(beg,10)) beg =
+//  NEST<3,Matrix3d,HecatonicosachoronMap> nest;
+//  // size_t beg = 0;
+//  // while(!nest.set_state(beg,10)) beg =
 // std::max<size_t>(uniform(rng)*(nest.size(10)-1000),0);
-// 	for(size_t r = 0; r <= 4; ++r){
-// 		int N = 2 * std::pow(8,r);
-// 		int beg = std::max( 0, (int)nest.size(r)/12 - N/2 );
-// 		std::ofstream
+//  for(size_t r = 0; r <= 4; ++r){
+//    int N = 2 * std::pow(8,r);
+//    int beg = std::max( 0, (int)nest.size(r)/12 - N/2 );
+//    std::ofstream
 // out(("h120_"+boost::lexical_cast<std::string>(r)+".pdb").c_str());
-// 		size_t count1 = 0, count2 = 0;
-// 		// cout << r << " " << nest.size(r) << " " << (beg>>(4*(10-r)))
+//    size_t count1 = 0, count2 = 0;
+//    // cout << r << " " << nest.size(r) << " " << (beg>>(4*(10-r)))
 // <<
 // endl;
-// 		// continue;
-// 		// for(size_t i = beg>>(4*(10-r)); i < nest.size(r); ++i){
-// 		for(size_t i = beg; i < nest.size(r); ++i){
-// 			++count1;
-// 			if( nest.set_state(i,r) ){
-// 				++count2;
-// 				if( count1 > N) break;
-// 				Matrix3d m = nest.value();
-// 				// cout << r << " " << i << " " <<
+//    // continue;
+//    // for(size_t i = beg>>(4*(10-r)); i < nest.size(r); ++i){
+//    for(size_t i = beg; i < nest.size(r); ++i){
+//      ++count1;
+//      if( nest.set_state(i,r) ){
+//        ++count2;
+//        if( count1 > N) break;
+//        Matrix3d m = nest.value();
+//        // cout << r << " " << i << " " <<
 // q.coeffs().transpose()
 // << endl;
-// 				 Vector3d ximg = m * X;
-// 				 Vector3d yimg = m * Y;
-// 				 Vector3d zimg = m * Z;;
-// 				 // cout << r << " " << nest.cell_index(i,r) <<
+//         Vector3d ximg = m * X;
+//         Vector3d yimg = m * Y;
+//         Vector3d zimg = m * Z;;
+//         // cout << r << " " << nest.cell_index(i,r) <<
 // endl;
-// 				 io::dump_pdb_atom(out,
+//         io::dump_pdb_atom(out,
 // nest.cell_index(i,r)<5?"H":"O"
 // ,60*ximg);
-// 				 io::dump_pdb_atom(out,
+//         io::dump_pdb_atom(out,
 // nest.cell_index(i,r)<5?"H":"NI",60*yimg);
-// 				 io::dump_pdb_atom(out,
+//         io::dump_pdb_atom(out,
 // nest.cell_index(i,r)<5?"H":"N"
 // ,60*zimg);
-// 			}
-// 		}
-// 		out.close();
-// 		cout << r << " " << count2 / (double)count1 << endl;
-// 	}
+//      }
+//    }
+//    out.close();
+//    cout << r << " " << count2 / (double)count1 << endl;
+//  }
 
 // }
 }

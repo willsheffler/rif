@@ -14,7 +14,7 @@
 #include <boost/fusion/include/for_each.hpp>
 #include <boost/fusion/include/io.hpp>
 
-namespace scheme {
+namespace rif {
 namespace objective {
 namespace test {
 
@@ -376,9 +376,9 @@ struct ScoreIntRefDoubleRef : ScoreIntDouble {
       Interaction;
   // template<class Config>
   // Result operator()(Interaction const & p, Config const& c) const {
-  // 	int i = p.first;
-  // 	double d = p.second;
-  // 	this->template operator()<Config>(i,d,result,c);
+  //  int i = p.first;
+  //  double d = p.second;
+  //  this->template operator()<Config>(i,d,result,c);
   // }
 };
 

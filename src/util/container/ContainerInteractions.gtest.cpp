@@ -3,7 +3,7 @@
 #include <stdint.h>
 #include "util/container/ContainerInteractions.hpp"
 
-namespace scheme {
+namespace rif {
 namespace util {
 namespace container {
 
@@ -71,7 +71,7 @@ TEST(util_container_ContainerInteractions, default_on_vector) {
 }
 }
 }
-namespace scheme {
+namespace rif {
 namespace util {
 namespace container {
 
@@ -95,7 +95,7 @@ struct ContainerInteractions<Xform, myvector<A>, Container2, Index> {
 }
 }
 
-namespace scheme {
+namespace rif {
 namespace util {
 namespace container {
 

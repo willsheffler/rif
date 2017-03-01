@@ -18,7 +18,7 @@
 
 #endif
 
-namespace scheme {
+namespace rif {
 namespace io {
 
 template <class T>

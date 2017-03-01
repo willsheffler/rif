@@ -3,7 +3,7 @@
 #include <boost/foreach.hpp>
 #include <random>
 
-namespace scheme {
+namespace rif {
 namespace search {
 
 template <typename Float>
@@ -64,12 +64,12 @@ struct HackPack {
   std::vector<int32_t> current_rots_, trial_best_rots_,
       global_best_rots_;  // current rotamer in local numbering
   std::mt19937 rng;
-  ::scheme::objective::storage::TwoBodyTable<float> const
+  ::rif::objective::storage::TwoBodyTable<float> const
       &twob_;  // dangerous, but faster than ptr / shared_ptr
   float score_, trial_best_score_, global_best_score_;
   HackPackOpts opts_;
   int32_t default_rot_num_;
-  HackPack(::scheme::objective::storage::TwoBodyTable<float> const &twob,
+  HackPack(::rif::objective::storage::TwoBodyTable<float> const &twob,
            HackPackOpts const &opts, int32_t default_rot_num,
            int seed_offset = 0  // mainly for threads
            )
@@ -105,9 +105,9 @@ struct HackPack {
                    float const &onebody_e) {
     // #pragma omp critical
     // {
-    // 	std::cout << "================= add_tmp_rot " << ires << " " <<
+    //  std::cout << "================= add_tmp_rot " << ires << " " <<
     // irotglobal << " " << onebody_e << std::endl;
-    // 	print_rot_info();
+    //  print_rot_info();
     // }
     if (onebody_e > 10.0) {
       return;
@@ -134,17 +134,17 @@ struct HackPack {
     } else {
       // static bool missingrotwarn = true;
       // if( missingrotwarn ){
-      // 	#ifdef USE_OPENMP
-      // 	#pragma omp critical
-      // 	#endif
-      // 	{
-      // 		std::cout << "WARNING: requested rotamer not in
+      //  #ifdef USE_OPENMP
+      //  #pragma omp critical
+      //  #endif
+      //  {
+      //    std::cout << "WARNING: requested rotamer not in
       // TwoBodyTable, probably has bad 1BE, subsequent warnings will be
       // skipped: "
-      // 		          << " irotglobal: " << irotglobal << std::endl;
-      // 		missingrotwarn = false;
-      // 		// std::exit(-1);
-      // 	}
+      //              << " irotglobal: " << irotglobal << std::endl;
+      //    missingrotwarn = false;
+      //    // std::exit(-1);
+      //  }
       // }
     }
   }
@@ -152,14 +152,14 @@ struct HackPack {
   float compute_energy_full(std::vector<int32_t> const &rots) const {
     // using namespace ObjexxFCL::format;
     // for( int i = 1; i < nres_; ++i ){
-    // 		int   const iresglobal = res_rots_[i].first;
-    // 		int   const irottwob   = res_rots_[i].second[ rots[i] ].first;
-    // 		float const ionebody   = res_rots_[i].second[ rots[i] ].second;
-    // 		int irotglobal = twob_.sel2all_[ iresglobal ][ irottwob ];
-    // 		std::cout << "ONEBODY " << iresglobal << " " <<
+    //    int   const iresglobal = res_rots_[i].first;
+    //    int   const irottwob   = res_rots_[i].second[ rots[i] ].first;
+    //    float const ionebody   = res_rots_[i].second[ rots[i] ].second;
+    //    int irotglobal = twob_.sel2all_[ iresglobal ][ irottwob ];
+    //    std::cout << "ONEBODY " << iresglobal << " " <<
     // rot_index_.resname(irotglobal) << irotglobal << " " << ionebody <<
     // std::endl;
-    // 	}
+    //  }
     float score = 0.0;
     for (int ires = 0; ires < nres_; ++ires) {
       assert(0 <= ires && ires < rots.size());
@@ -294,32 +294,32 @@ struct HackPack {
 
     float delta = compute_energy_delta(current_rots_, ires, irot);
     // {
-    // 	// std::cout << "SUB: " << ires << " " << irot << " " <<
+    //  // std::cout << "SUB: " << ires << " " << irot << " " <<
     // res_rots_[ires].first << std::endl;
-    // 	// std::cout << "==================================== old
+    //  // std::cout << "==================================== old
     // ==========================================" << std::endl;
-    // 	// for( int k = 0; k < current_rots_.size(); ++k ) std::cout << "currot
+    //  // for( int k = 0; k < current_rots_.size(); ++k ) std::cout << "currot
     // " << k << " " << current_rots_[k] << std::endl;
-    // 	float curfull = compute_energy_full( current_rots_ );
-    // 	int32_t tmp = current_rots_[ires];
-    // 	current_rots_[ires] = irot;
-    // 	// std::cout << "==================================== new
+    //  float curfull = compute_energy_full( current_rots_ );
+    //  int32_t tmp = current_rots_[ires];
+    //  current_rots_[ires] = irot;
+    //  // std::cout << "==================================== new
     // ==========================================" << std::endl;
-    // 	// for( int k = 0; k < current_rots_.size(); ++k ) std::cout << "currot
+    //  // for( int k = 0; k < current_rots_.size(); ++k ) std::cout << "currot
     // " << k << " " << current_rots_[k] << std::endl;
-    // 	float newfull = compute_energy_full( current_rots_ );
-    // 	current_rots_[ires] = tmp;
-    // 	float test_delta = newfull-curfull;
-    // 	// std::cout << delta << " " << test_delta << " " << curfull << " " <<
+    //  float newfull = compute_energy_full( current_rots_ );
+    //  current_rots_[ires] = tmp;
+    //  float test_delta = newfull-curfull;
+    //  // std::cout << delta << " " << test_delta << " " << curfull << " " <<
     // newfull << std::endl;
-    // 	if( fabs(delta-test_delta) > 0.01 ){
-    // 		#pragma omp critical
-    // 		std::cout << "fabs(delta-test_delta) " << fabs(delta-test_delta)
+    //  if( fabs(delta-test_delta) > 0.01 ){
+    //    #pragma omp critical
+    //    std::cout << "fabs(delta-test_delta) " << fabs(delta-test_delta)
     // <<
     // "
     // "
     // << delta << " " << test_delta << std::endl;
-    // 	}
+    //  }
     // }
 
     if (pass_metropolis(temperature, delta, runif(rng))) {
@@ -479,4 +479,4 @@ struct HackPack {
 };
 
 }  // namespace search
-}  // namespace scheme
+}  // namespace rif

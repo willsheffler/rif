@@ -13,7 +13,7 @@
 
 #include <stdint.h>
 
-namespace scheme {
+namespace rif {
 namespace kinematics {
 namespace objective_test {
 
@@ -269,23 +269,23 @@ TEST(SceneObjective, big_scene_performance) {
     // Scene::Index const NBOD = scene.bodies_.size();
     // Scene::Index const NSYM = scene.symframes_.size()+1;
     // for(Scene::Index i1 = 0; i1 < NBOD*NSYM; ++i1){
-    // 	Conformation const & c1 = scene.conformation(i1);
-    // 	Position     const & p1 =     scene.position(i1);
-    // 	Scene::Index const NACT1 = c1.get<Actor1>().size();
-    // 	for(Scene::Index i2 = 0; i2 < NBOD*NSYM; ++i2){
-    // 		if( i1 >= NBOD && i2 >= NBOD ) continue;
-    // 		if( i2 <= i1 ) continue;
-    // 		Conformation const & c2 = scene.conformation(i2);
-    // 		Position     const & p2 =     scene.position(i2);
-    // 		Scene::Index const NACT2 = c2.get<Actor2>().size();
-    // 		for(Scene::Index j1 = 0; j1 < NACT1; ++j1){
-    // 			Actor1 a1( c1.get<Actor1>()[j1], p1 );
-    // 			for(Scene::Index j2 = 0; j2 < NACT2; ++j2){
-    // 				Actor2 a2( c2.get<Actor2>()[j2], p2 );
-    // 				visitor( a1, a2, i1<NBOD&&i2<NBOD?1.0:0.5 );
-    // 			}
-    // 		}
-    // 	}
+    //  Conformation const & c1 = scene.conformation(i1);
+    //  Position     const & p1 =     scene.position(i1);
+    //  Scene::Index const NACT1 = c1.get<Actor1>().size();
+    //  for(Scene::Index i2 = 0; i2 < NBOD*NSYM; ++i2){
+    //    if( i1 >= NBOD && i2 >= NBOD ) continue;
+    //    if( i2 <= i1 ) continue;
+    //    Conformation const & c2 = scene.conformation(i2);
+    //    Position     const & p2 =     scene.position(i2);
+    //    Scene::Index const NACT2 = c2.get<Actor2>().size();
+    //    for(Scene::Index j1 = 0; j1 < NACT1; ++j1){
+    //      Actor1 a1( c1.get<Actor1>()[j1], p1 );
+    //      for(Scene::Index j2 = 0; j2 < NACT2; ++j2){
+    //        Actor2 a2( c2.get<Actor2>()[j2], p2 );
+    //        visitor( a1, a2, i1<NBOD&&i2<NBOD?1.0:0.5 );
+    //      }
+    //    }
+    //  }
     // }
     // cout << visitor.result_ << " " << (double)ScoreADIADI::ncalls/1000000.0
     // << endl;

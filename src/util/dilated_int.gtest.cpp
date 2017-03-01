@@ -7,7 +7,7 @@
 #include "util/dilated_int.hpp"
 #include <gtest/gtest.h>
 
-namespace scheme {
+namespace rif {
 namespace util {
 
 template <uint64_t D>

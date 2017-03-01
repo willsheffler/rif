@@ -3,7 +3,7 @@
 
 #include <limits>
 
-namespace scheme {
+namespace rif {
 namespace numeric {
 
 template <int Divisor, class Data = unsigned char>

@@ -1,10 +1,10 @@
-#ifndef INCLUDED_scheme_numeric_euler_angles_HH
-#define INCLUDED_scheme_numeric_euler_angles_HH
+#ifndef INCLUDED_numeric_euler_angles_HH
+#define INCLUDED_numeric_euler_angles_HH
 
 #include <boost/math/constants/constants.hpp>
 #include <cmath>
 
-namespace scheme {
+namespace rif {
 namespace numeric {
 
 template <class M>

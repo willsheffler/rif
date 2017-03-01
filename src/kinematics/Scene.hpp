@@ -29,7 +29,7 @@
 
 #include <vector>
 
-namespace scheme {
+namespace rif {
 namespace kinematics {
 
 namespace m = boost::mpl;

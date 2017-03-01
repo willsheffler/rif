@@ -7,7 +7,7 @@
 
 #include <sstream>
 
-namespace scheme {
+namespace rif {
 namespace objective {
 namespace voxel {
 namespace fctest {

@@ -1,9 +1,9 @@
-#ifndef INCLUDED_scheme_util_StoragePolicy_HH
-#define INCLUDED_scheme_util_StoragePolicy_HH
+#ifndef INCLUDED_util_StoragePolicy_HH
+#define INCLUDED_util_StoragePolicy_HH
 
 #include "types.hpp"
 
-namespace scheme {
+namespace rif {
 namespace util {
 
 ///////////////////////////////////////////////////////////////////////////////////////////////

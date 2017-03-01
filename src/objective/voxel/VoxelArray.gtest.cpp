@@ -6,7 +6,7 @@
 #include <boost/foreach.hpp>
 #include <random>
 
-namespace scheme {
+namespace rif {
 namespace objective {
 namespace voxel {
 namespace test {

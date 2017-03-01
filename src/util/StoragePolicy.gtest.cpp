@@ -2,7 +2,7 @@
 #include <gtest/gtest.h>
 #include "types.hpp"
 
-namespace scheme {
+namespace rif {
 namespace util {
 
 // struct FOO : public enable_shared_from_this<FOO> {};

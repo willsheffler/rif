@@ -1,10 +1,10 @@
-#ifndef INCLUDED_scheme_nest_NEST_test_util_HH
-#define INCLUDED_scheme_nest_NEST_test_util_HH
+#ifndef INCLUDED_nest_NEST_test_util_HH
+#define INCLUDED_nest_NEST_test_util_HH
 
 #include <gtest/gtest.h>
 #include "nest/NEST.hpp"
 
-namespace scheme {
+namespace rif {
 namespace nest {
 
 template <typename Nest>

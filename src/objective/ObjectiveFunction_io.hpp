@@ -5,7 +5,7 @@
 
 // #define DEBUG_IO
 
-namespace scheme {
+namespace rif {
 namespace objective {
 
 namespace m = boost::mpl;

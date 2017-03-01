@@ -3,7 +3,7 @@
 
 #include <string>
 
-namespace scheme {
+namespace rif {
 namespace rosetta {
 
 int rosetta_atom_type(std::string const &resname, std::string const &atomname);

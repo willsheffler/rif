@@ -1,5 +1,5 @@
-#ifndef INCLUDED_scheme_util_SimpleArray_HH
-#define INCLUDED_scheme_util_SimpleArray_HH
+#ifndef INCLUDED_util_SimpleArray_HH
+#define INCLUDED_util_SimpleArray_HH
 
 #include <algorithm>
 #include <boost/assert.hpp>
@@ -16,7 +16,7 @@
 #include <cereal/access.hpp>
 #endif
 
-namespace scheme {
+namespace rif {
 namespace util {
 
 // TODO: finish this and replace Eigen dependency in NEST

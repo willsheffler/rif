@@ -1,5 +1,5 @@
-#ifndef INCLUDED_scheme_nest_maps_QuaternionMap_HH
-#define INCLUDED_scheme_nest_maps_QuaternionMap_HH
+#ifndef INCLUDED_nest_maps_QuaternionMap_HH
+#define INCLUDED_nest_maps_QuaternionMap_HH
 
 #include "nest/pmap/util/get_quaternion_component.hpp"
 #include "util/SimpleArray.hpp"
@@ -10,7 +10,7 @@
 #include <iostream>
 #include <vector>
 
-namespace scheme {
+namespace rif {
 namespace nest {
 namespace pmap {
 

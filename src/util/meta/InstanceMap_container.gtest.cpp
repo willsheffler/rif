@@ -12,7 +12,7 @@
 
 #include <set>
 
-namespace scheme {
+namespace rif {
 namespace util {
 namespace meta {
 

@@ -8,7 +8,7 @@
 #include "rosetta/score/EtableParams.hpp"
 #include "types.hpp"
 
-namespace scheme {
+namespace rif {
 namespace rosetta {
 namespace score {
 
@@ -90,8 +90,8 @@ struct RosettaField {
       // so hacky!!! in rif apo hsearch, this is the minimal setting that'll
       // prevent
       // anything occulding the hydrophobic fake-biotin tail
-      rep0 = std::max(rep0,
-                      ::scheme::numeric::sigmoidish(dis2, 3.0f, 4.6f) * 1.0f);
+      rep0 =
+          std::max(rep0, ::rif::numeric::sigmoidish(dis2, 3.0f, 4.6f) * 1.0f);
     }
     return 0.8 * atr0 + 0.44 * rep0 + 0.75 * sol0;
   }

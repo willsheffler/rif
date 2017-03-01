@@ -2,7 +2,7 @@
 
 #include "objective/storage/TwoBodyTable.hpp"
 
-namespace scheme {
+namespace rif {
 namespace objective {
 namespace storage {
 namespace ritest {

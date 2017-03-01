@@ -1,11 +1,11 @@
-#ifndef INCLUDED_scheme_numeric_geom_4d_HH
-#define INCLUDED_scheme_numeric_geom_4d_HH
+#ifndef INCLUDED_numeric_geom_4d_HH
+#define INCLUDED_numeric_geom_4d_HH
 
 #include <cmath>
 #include "numeric/util.hpp"
 #include "util/SimpleArray.hpp"
 
-namespace scheme {
+namespace rif {
 namespace numeric {
 
 static bool is_not_0(double a) { return fabs(a) > 0.00000001; }

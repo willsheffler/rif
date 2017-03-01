@@ -8,7 +8,7 @@
 #include <boost/static_assert.hpp>
 #include <cstddef>
 
-namespace scheme {
+namespace rif {
 namespace util {
 
 template <int DIM>

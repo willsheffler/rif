@@ -1,10 +1,10 @@
-#ifndef INCLUDED_scheme_nest_maps_util_get_quaternion_component_HH
-#define INCLUDED_scheme_nest_maps_util_get_quaternion_component_HH
+#ifndef INCLUDED_nest_maps_util_get_quaternion_component_HH
+#define INCLUDED_nest_maps_util_get_quaternion_component_HH
 
 #include <boost/utility/enable_if.hpp>
 #include "util/meta/util.hpp"
 
-namespace scheme {
+namespace rif {
 namespace nest {
 namespace pmap {
 

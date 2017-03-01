@@ -6,7 +6,7 @@
 #include "nest/pmap/OriTransMap.hpp"
 #include "objective/hash/XformMap.hpp"
 
-namespace scheme {
+namespace rif {
 namespace objective {
 namespace hash {
 namespace test_XHFN {
@@ -14,7 +14,7 @@ namespace test_XHFN {
 TEST(XformHashFromNest, static_checks) {
   typedef Eigen::Transform<float, 3, Eigen::AffineCompact> Xform;
   typedef Eigen::Transform<double, 3, Eigen::AffineCompact> Xform2;
-  typedef ::scheme::nest::NEST<6, Xform, nest::pmap::OriTransMap> Nest;
+  typedef ::rif::nest::NEST<6, Xform, nest::pmap::OriTransMap> Nest;
 
   // this must fail to compile because Xform2 != Xform
   // typedef XformMap< Xform2, float, XformHashFromNest< Nest >::apply > XMap;
@@ -26,7 +26,7 @@ TEST(XformHashFromNest, static_checks) {
 
 TEST(XformHashFromNest, construction) {
   typedef Eigen::Transform<float, 3, Eigen::AffineCompact> Xform;
-  typedef ::scheme::nest::NEST<6, Xform, nest::pmap::OriTransMap> Nest;
+  typedef ::rif::nest::NEST<6, Xform, nest::pmap::OriTransMap> Nest;
   typedef XformMap<Xform, float, XformHashFromNest<Nest>::apply> XMap;
 
   XMap xmap(1.0, 10.0);
@@ -34,7 +34,7 @@ TEST(XformHashFromNest, construction) {
 
 TEST(XformHashFromNest, basic_operation) {
   typedef Eigen::Transform<float, 3, Eigen::AffineCompact> Xform;
-  typedef ::scheme::nest::NEST<6, Xform, nest::pmap::OriTransMap> Nest;
+  typedef ::rif::nest::NEST<6, Xform, nest::pmap::OriTransMap> Nest;
   typedef XformMap<Xform, float, XformHashFromNest<Nest>::apply> XMap;
 
   XMap xmap(1.0, 10.0, 100.0);

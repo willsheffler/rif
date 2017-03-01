@@ -5,7 +5,7 @@
 #include "numeric/rand_xform.hpp"
 #include "numeric/util.hpp"
 
-namespace scheme {
+namespace rif {
 namespace numeric {
 namespace rand_xfrom_test {
 

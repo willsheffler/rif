@@ -7,7 +7,7 @@
 
 #include "util/Timer.hpp"
 
-namespace scheme {
+namespace rif {
 namespace kinematics {
 namespace test_director {
 
@@ -37,7 +37,7 @@ std::ostream &operator<<(std::ostream &out, TestScene const &s) {
 }
 
 TEST(Director, test_NestDirector) {
-  typedef scheme::nest::NEST<1, X1dim> Nest1D;
+  typedef rif::nest::NEST<1, X1dim> Nest1D;
 
   TestScene scene;
   scene.add_position(0);
@@ -69,10 +69,10 @@ TEST(Director, test_TreeDirector) {
   scene.add_position(0);
   // cout << scene << endl;
 
-  shared_ptr<scheme::nest::NestBase<>> x1nest =
-      make_shared<scheme::nest::NEST<1, X1dim>>(1);
-  shared_ptr<scheme::nest::NestBase<>> x1nest2 =
-      make_shared<scheme::nest::NEST<1, X1dim>>(2);
+  shared_ptr<rif::nest::NestBase<>> x1nest =
+      make_shared<rif::nest::NEST<1, X1dim>>(1);
+  shared_ptr<rif::nest::NestBase<>> x1nest2 =
+      make_shared<rif::nest::NEST<1, X1dim>>(2);
 
   shared_ptr<SceneTree<X1dim>> child = make_shared<SceneTree<X1dim>>(10);
   child->add_body(1);

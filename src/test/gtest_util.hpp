@@ -1,5 +1,5 @@
-#ifndef INCLUDED_scheme_main_gtest_util_HH
-#define INCLUDED_scheme_main_gtest_util_HH
+#ifndef INCLUDED_main_gtest_util_HH
+#define INCLUDED_main_gtest_util_HH
 
 #include <gtest/gtest.h>
 #include <iostream>

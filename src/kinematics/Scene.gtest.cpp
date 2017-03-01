@@ -15,7 +15,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-namespace scheme {
+namespace rif {
 namespace kinematics {
 namespace test {
 

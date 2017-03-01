@@ -10,7 +10,7 @@
 
 #include "util/Timer.hpp"
 
-namespace scheme {
+namespace rif {
 namespace numeric {
 namespace test {
 

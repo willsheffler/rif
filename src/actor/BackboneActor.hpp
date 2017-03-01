@@ -4,7 +4,7 @@
 #include <Eigen/Dense>
 #include "io/dump_pdb_atom.hpp"
 
-namespace scheme {
+namespace rif {
 namespace actor {
 
 template <class _Position>
@@ -76,7 +76,7 @@ struct BackboneActor {
     position_.translation()[2] = t[2];
 
     // from_four_points(c,u,v,w)
-    // 	Vector e1( u - v);
+    //  Vector e1( u - v);
     // e1.normalize();
     // Vector e3( cross( e1, w - v ) );
     // e3.normalize();
@@ -150,15 +150,15 @@ void write_pdb(std::ostream &out, BackboneActor<P> const &a,
   io::dump_pdb_atom(out, c, cdata);
 
   // AtomData(
-  // 	std::string const & _atomname = AtomData::default_atomname(),
-  // 	std::string const & _resname  = AtomData::default_resname(),
-  // 	char                _chain    = AtomData::default_chain(),
-  // 	int                 _resnum   = AtomData::default_resnum(),
-  // 	int                 _atomnum  = AtomData::default_atomnum(),
-  // 	std::string const & _elem     = AtomData::default_elem(),
-  // 	bool                _ishet    = AtomData::default_ishet(),
-  // 	float               _occ      = AtomData::default_occ(),
-  // 	float               _bfac     = AtomData::default_bfac()
+  //  std::string const & _atomname = AtomData::default_atomname(),
+  //  std::string const & _resname  = AtomData::default_resname(),
+  //  char                _chain    = AtomData::default_chain(),
+  //  int                 _resnum   = AtomData::default_resnum(),
+  //  int                 _atomnum  = AtomData::default_atomnum(),
+  //  std::string const & _elem     = AtomData::default_elem(),
+  //  bool                _ishet    = AtomData::default_ishet(),
+  //  float               _occ      = AtomData::default_occ(),
+  //  float               _bfac     = AtomData::default_bfac()
   // );
 }
 

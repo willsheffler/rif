@@ -12,7 +12,7 @@
 
 #include <fstream>
 
-namespace scheme {
+namespace rif {
 
 using std::cout;
 using std::endl;

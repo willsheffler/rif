@@ -7,7 +7,7 @@
 
 #include <boost/foreach.hpp>
 
-namespace scheme {
+namespace rif {
 namespace kinematics {
 
 namespace m = boost::mpl;

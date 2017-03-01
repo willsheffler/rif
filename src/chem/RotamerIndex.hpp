@@ -16,7 +16,7 @@
 #include <map>
 #include <string>
 
-namespace scheme {
+namespace rif {
 namespace chemical {
 
 struct HBondRay {
@@ -633,7 +633,7 @@ struct RotamerIndex {
     auto p0 = rotamers_.at(irot).atoms_.at(n - 1).position();
     auto p1 = rotamers_.at(irot).atoms_.at(n - 2).position();
     auto p2 = rotamers_.at(irot).atoms_.at(n - 3).position();
-    return ::scheme::chemical::make_stub<Xform>(p0, p1, p2);
+    return ::rif::chemical::make_stub<Xform>(p0, p1, p2);
   }
 
   // bool is_primary( int irot ) const { return parent_rotamer_.at(irot)==irot;
@@ -653,7 +653,7 @@ struct RotamerIndex {
     for (auto const &a : rotamers_.at(irot).atoms_) {
       auto a2 = a;
       a2.set_position(x * a2.position());
-      std::string s = scheme::io::dump_pdb_atom(a2);
+      std::string s = rif::io::dump_pdb_atom(a2);
       if (s.size() > 0 && s.size() < 999) out << s << std::endl;
     }
     // out << "ENDMDL" << irot << std::endl;
@@ -664,16 +664,16 @@ struct RotamerIndex {
     //  out << rif::io::dump_pdb_atom(h.second) << std::endl;
     // }
     for (auto const &hr : rotamers_.at(irot).donors_) {
-      scheme::io::dump_pdb_atom_resname_atomname(out, "DON", "CDON",
-                                                 x * (hr.horb_cen));
-      scheme::io::dump_pdb_atom_resname_atomname(
-          out, "DON", "DDON", x * (hr.horb_cen + hr.direction));
+      rif::io::dump_pdb_atom_resname_atomname(out, "DON", "CDON",
+                                              x * (hr.horb_cen));
+      rif::io::dump_pdb_atom_resname_atomname(out, "DON", "DDON",
+                                              x * (hr.horb_cen + hr.direction));
     }
     for (auto const &hr : rotamers_.at(irot).acceptors_) {
-      scheme::io::dump_pdb_atom_resname_atomname(out, "ACC", "CACC",
-                                                 x * (hr.horb_cen));
-      scheme::io::dump_pdb_atom_resname_atomname(
-          out, "ACC", "DACC", x * (hr.horb_cen + hr.direction));
+      rif::io::dump_pdb_atom_resname_atomname(out, "ACC", "CACC",
+                                              x * (hr.horb_cen));
+      rif::io::dump_pdb_atom_resname_atomname(out, "ACC", "DACC",
+                                              x * (hr.horb_cen + hr.direction));
     }
     out << "ENDMDL" << std::endl;
   }

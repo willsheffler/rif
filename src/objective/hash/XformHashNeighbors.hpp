@@ -16,7 +16,7 @@
 #include <sparsehash/dense_hash_map>
 #include <sparsehash/dense_hash_set>
 
-namespace scheme {
+namespace rif {
 namespace objective {
 namespace hash {
 
@@ -77,12 +77,12 @@ struct XformHashNeighborCrappyIterator
     Key k = xh->cart_shift_key(ori_key, (*shifts_)[i2][0], (*shifts_)[i2][1],
                                (*shifts_)[i2][2], i3);
     // if( UNIQUE ){
-    // 	if( seenit_.find(k) != seenit_.end() ){
-    // 		const_cast<THIS*>(this)->increment();
-    // 		return dereference();
-    // 	} else {
-    // 		const_cast<THIS*>(this)->seenit_.insert(k);
-    // 	}
+    //  if( seenit_.find(k) != seenit_.end() ){
+    //    const_cast<THIS*>(this)->increment();
+    //    return dereference();
+    //  } else {
+    //    const_cast<THIS*>(this)->seenit_.insert(k);
+    //  }
     // }
     return k;
   }
@@ -223,9 +223,9 @@ struct XformHashNeighbors {
 
         // std::ofstream out("nbrs_asym.pdb");
         // for(int i = 0; i < ori_cache_[ori_key].size(); ++i){
-        // 	Xform x = hasher_.get_center( ori_cache_[ori_key][i] );
-        // 	Eigen::Quaterniond q(x.rotation());
-        // 	io::dump_pdb_atom( out, "C" ,i, 50*q.coeffs() );
+        //  Xform x = hasher_.get_center( ori_cache_[ori_key][i] );
+        //  Eigen::Quaterniond q(x.rotation());
+        //  io::dump_pdb_atom( out, "C" ,i, 50*q.coeffs() );
         // }
         // out.close();
 
@@ -262,7 +262,7 @@ struct XformHashNeighbors {
         out.close();
       }
       // for(int i = 0; i < ori_cache_[ori_key].size(); ++i){
-      // 	std::cout << ori_cache_[ori_key][i] << std::endl;
+      //  std::cout << ori_cache_[ori_key][i] << std::endl;
       // }
       // std::cout << "added ori_cahce_ " << ori_key << " " <<
       // (float)nsamp_/keys.size() << std::endl;
@@ -288,8 +288,8 @@ struct XformHashNeighbors {
   bool save(std::ostream &out) {
     // no way to check if the stream was opened binary!
     // if( ! (out.flags() & std::ios::binary) ){
-    // 	std::cerr << "XformMap::save must be binary ostream" << std::endl;
-    // 	return false;
+    //  std::cerr << "XformMap::save must be binary ostream" << std::endl;
+    //  return false;
     // }
     std::ostringstream oss;
     oss << std::endl;
@@ -337,8 +337,8 @@ struct XformHashNeighbors {
   bool load(std::istream &in) {
     // no way to check if the stream was opened binary!
     // if( ! (in.flags() & std::ios::binary) ){
-    // 	std::cerr << "XformMap::save must be binary ostream" << std::endl;
-    // 	return false;
+    //  std::cerr << "XformMap::save must be binary ostream" << std::endl;
+    //  return false;
     // }
     size_t s;
     in.read((char *)&s, sizeof(size_t));

@@ -1,6 +1,6 @@
 #include <math.h>
 
-namespace scheme {
+namespace rif {
 namespace numeric {
 
 // assumes we are on the +Z face!!!!!  order Z,X,-Y,-X,Y,-Z

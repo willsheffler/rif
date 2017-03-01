@@ -9,7 +9,7 @@
 #include <random>
 #include "util/Timer.hpp"
 
-namespace scheme {
+namespace rif {
 namespace numeric {
 namespace pref_test {
 

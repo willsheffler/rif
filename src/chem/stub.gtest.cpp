@@ -4,7 +4,7 @@
 
 #include <iostream>
 
-namespace scheme {
+namespace rif {
 namespace chemical {
 namespace test234 {
 

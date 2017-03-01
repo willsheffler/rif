@@ -8,7 +8,7 @@
 #include "rosetta/score/RosettaField.hpp"
 // #include <Eigen/core>
 
-namespace scheme {
+namespace rif {
 namespace rosetta {
 namespace score {
 namespace test {
@@ -158,15 +158,15 @@ TEST(RosettaField, test_btn) {
     }
   }
 
-  //	int atype = 1;
+  //  int atype = 1;
   RosettaFieldAtype<Atom, EtableParamsInit> rfa(rf, 1);
   objective::voxel::FieldCache3D<float> rc(rfa, lb - 6.0f, ub + 6.0f, 0.25);
   objective::voxel::BoundingFieldCache3D<float> brc(rc, 1.0, 0.25);
 
   // size_t nbz=0, naz=0;
   // for(size_t i = 0; i < rc.num_elements(); ++i){
-  // 	if(rc.data()[i]>0) ++naz;
-  // 	if(rc.data()[i]<0) ++nbz;
+  //  if(rc.data()[i]>0) ++naz;
+  //  if(rc.data()[i]<0) ++nbz;
   // }
   // cout << rc.num_elements() << " " << (float)naz/rc.num_elements() << " " <<
   // (float)nbz/rc.num_elements() << endl;

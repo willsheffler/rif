@@ -4,7 +4,7 @@
 
 #include "rosetta/score/EtableParams_init.hpp"
 
-namespace scheme {
+namespace rif {
 namespace rosetta {
 namespace score {
 namespace test {

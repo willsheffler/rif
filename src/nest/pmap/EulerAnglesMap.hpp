@@ -1,5 +1,5 @@
-#ifndef INCLUDED_scheme_nest_maps_EulerAnglesMap_HH
-#define INCLUDED_scheme_nest_maps_EulerAnglesMap_HH
+#ifndef INCLUDED_nest_maps_EulerAnglesMap_HH
+#define INCLUDED_nest_maps_EulerAnglesMap_HH
 
 #include "numeric/euler_angles.hpp"
 #include "util/SimpleArray.hpp"
@@ -8,7 +8,7 @@
 // #include <iostream>
 #include <vector>
 
-namespace scheme {
+namespace rif {
 namespace nest {
 namespace pmap {
 

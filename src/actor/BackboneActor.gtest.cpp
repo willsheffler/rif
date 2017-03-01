@@ -17,7 +17,7 @@
 
 #include <Eigen/Geometry>
 
-namespace scheme {
+namespace rif {
 namespace actor {
 namespace test_bbactor {
 

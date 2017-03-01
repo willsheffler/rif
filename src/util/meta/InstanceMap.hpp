@@ -19,7 +19,7 @@
 #include <cereal/access.hpp>
 #endif
 
-namespace scheme {
+namespace rif {
 namespace util {
 namespace meta {
 

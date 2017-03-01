@@ -8,7 +8,7 @@
 #include <random>
 #include <sparsehash/dense_hash_set>
 
-namespace scheme {
+namespace rif {
 namespace objective {
 namespace hash {
 namespace xhnbtest {
@@ -140,20 +140,20 @@ TEST(XformHashNeighbors,
       }
 
       // if( iter1+iter2 == 0 ){
-      // 	for(int j=0; j<8; ++j){
-      // 		Xform xf = Xform( numeric::to_half_cell(
+      //  for(int j=0; j<8; ++j){
+      //    Xform xf = Xform( numeric::to_half_cell(
       // Quaternion<Float>(f[j][3],f[j][4],f[j][5],f[j][6]) ).matrix());
-      // 		for(int k=0;k<3;++k) xf.translation()[k] = f[j][k];
-      // 		Key k = xh.get_key( xf );
-      // 		Key o = k & 1;
-      // 		Key w =  util::undilate<7>( k>>4 ) & 63;
-      // 		Key x =  util::undilate<7>( k>>5 ) & 63;
-      // 		Key y =  util::undilate<7>( k>>6 ) & 63;
-      // 		Key z =  util::undilate<7>( k>>7 ) & 63;
-      // 		std::cout << xh.grid_.nside_[3]-o <<" " << o << "    "
+      //    for(int k=0;k<3;++k) xf.translation()[k] = f[j][k];
+      //    Key k = xh.get_key( xf );
+      //    Key o = k & 1;
+      //    Key w =  util::undilate<7>( k>>4 ) & 63;
+      //    Key x =  util::undilate<7>( k>>5 ) & 63;
+      //    Key y =  util::undilate<7>( k>>6 ) & 63;
+      //    Key z =  util::undilate<7>( k>>7 ) & 63;
+      //    std::cout << xh.grid_.nside_[3]-o <<" " << o << "    "
       // <<
       // w << "\t" << x << "\t" << y << "\t" << z << std::endl;
-      // 	}
+      //  }
       // }
     }
   }
@@ -196,30 +196,30 @@ TEST(XformHashNeighbors, Quat_BCC7_Zorder_key_symmetry) {
       // cout << "TEST FX " << fx << endl;
       // cout << "TEST FY " << fy << endl;
       // cout << "TEST FZ " << fz << endl;
-      // 	{
-      // 		Key k = key;
-      // 		Key o = k & 1;
-      // 		Key w =  util::undilate<7>( k>>4 ) & 63;
-      // 		Key x =  util::undilate<7>( k>>5 ) & 63;
-      // 		Key y =  util::undilate<7>( k>>6 ) & 63;
-      // 		Key z =  util::undilate<7>( k>>7 ) & 63;
-      // 		std::cout << "KEY  " << ksym << "\t" <<
+      //  {
+      //    Key k = key;
+      //    Key o = k & 1;
+      //    Key w =  util::undilate<7>( k>>4 ) & 63;
+      //    Key x =  util::undilate<7>( k>>5 ) & 63;
+      //    Key y =  util::undilate<7>( k>>6 ) & 63;
+      //    Key z =  util::undilate<7>( k>>7 ) & 63;
+      //    std::cout << "KEY  " << ksym << "\t" <<
       // xh.grid_.nside_[3]-o <<"\t" << o << "    "
-      // 		<< w << "\t" << x << "\t" << y << "\t" << z <<
+      //    << w << "\t" << x << "\t" << y << "\t" << z <<
       // std::endl;
-      // 	}
-      // 	{
-      // 		Key k = akey;
-      // 		Key o = k & 1;
-      // 		Key w =  util::undilate<7>( k>>4 ) & 63;
-      // 		Key x =  util::undilate<7>( k>>5 ) & 63;
-      // 		Key y =  util::undilate<7>( k>>6 ) & 63;
-      // 		Key z =  util::undilate<7>( k>>7 ) & 63;
-      // 		std::cout << "ASYM " << ksym << "\t" <<
+      //  }
+      //  {
+      //    Key k = akey;
+      //    Key o = k & 1;
+      //    Key w =  util::undilate<7>( k>>4 ) & 63;
+      //    Key x =  util::undilate<7>( k>>5 ) & 63;
+      //    Key y =  util::undilate<7>( k>>6 ) & 63;
+      //    Key z =  util::undilate<7>( k>>7 ) & 63;
+      //    std::cout << "ASYM " << ksym << "\t" <<
       // xh.grid_.nside_[3]-o <<"\t" << o << "    "
-      // 		<< w << "\t" << x << "\t" << y << "\t" << z <<
+      //    << w << "\t" << x << "\t" << y << "\t" << z <<
       // std::endl;
-      // 	}
+      //  }
 
       ASSERT_LT(ksym, xh.num_key_symmetries());
       ASSERT_EQ(key, xh.sym_key(akey, ksym));
@@ -254,173 +254,173 @@ TEST(XformHashNeighbors, Quat_BCC7_Zorder_key_symmetry) {
 // // this test is fucked.... can't get 0-registration correct...
 // // thinking ori + cart_shift should still work correctly.. will test that
 // TEST( XformHashNeighbors, Quat_BCC7_Zorder_check_cart_neighbors ){
-// 	typedef uint64_t Key;
-// 	int NSAMP = 5;
-// 	double THRESH = 0.01;
-// 	#ifdef SCHEME_BENCHMARK
-// 	NSAMP = 20;
-// 	THRESH = 0.001;
-// 	#endif
-// 	std::mt19937 rng((unsigned int)time(0) + 4564631);
-// 	std::uniform_real_distribution<> runif;
+//  typedef uint64_t Key;
+//  int NSAMP = 5;
+//  double THRESH = 0.01;
+//  #ifdef SCHEME_BENCHMARK
+//  NSAMP = 20;
+//  THRESH = 0.001;
+//  #endif
+//  std::mt19937 rng((unsigned int)time(0) + 4564631);
+//  std::uniform_real_distribution<> runif;
 
-// 	// double cart_bound=1.0+runif(rng)*4.0, ang_bound=20.0;
-// 	double cart_bound=2.0, ang_bound=20.0;
+//  // double cart_bound=1.0+runif(rng)*4.0, ang_bound=20.0;
+//  double cart_bound=2.0, ang_bound=20.0;
 
-// 	for(int iter1 = 0; iter1 < NSAMP; ++iter1){
-// 		// XformHash_Quat_BCC7_Zorder<Xform> xh( 1.0,
+//  for(int iter1 = 0; iter1 < NSAMP; ++iter1){
+//    // XformHash_Quat_BCC7_Zorder<Xform> xh( 1.0,
 // 5.0+runif(rng)*10.0,
 // 10+runif(rng)*200.0 );
-// 		XformHash_Quat_BCC7_Zorder<Xform> xh( 1.0, 10.0 );
-// 		XformHashNeighbors< XformHash_Quat_BCC7_Zorder<Xform> > nb(
+//    XformHash_Quat_BCC7_Zorder<Xform> xh( 1.0, 10.0 );
+//    XformHashNeighbors< XformHash_Quat_BCC7_Zorder<Xform> > nb(
 // cart_bound, ang_bound, xh, 0 );
 
-// 		for(int i = 0; i < NSAMP; ++i){
-// 			// cout << "TEST ITER " << i << endl;
-// 			Xform x0; numeric::rand_xform(rng,x0,10.0);
-// 			Key key0 = xh.get_key(x0);
-// 			Xform cen0 = xh.get_center(key0);
-// 			ASSERT_EQ( xh.get_key(cen0), key0 );
-// 			Xform x1(cen0);
-// 			if( key0%2 ){
-// 				x1.translation()[0] -= xh.cart_width()/2.0;
-// 				x1.translation()[1] -= xh.cart_width()/2.0;
-// 				x1.translation()[2] -= xh.cart_width()/2.0;
-// 			} else {
-// 				x1.translation()[0] += xh.cart_width()/2.0;
-// 				x1.translation()[1] += xh.cart_width()/2.0;
-// 				x1.translation()[2] += xh.cart_width()/2.0;
-// 			}
-// 			Key key1 = xh.get_key(x1);
-// 			cout << x0.translation().transpose() << endl;
-// 			cout << x1.translation().transpose() << endl;
-// 			xh.print_key(key0);
-// 			xh.print_key(key1);
-// 			ASSERT_NE( key0%2, key1%2 );
-// 			Xform cen1 = xh.get_center(key1);
+//    for(int i = 0; i < NSAMP; ++i){
+//      // cout << "TEST ITER " << i << endl;
+//      Xform x0; numeric::rand_xform(rng,x0,10.0);
+//      Key key0 = xh.get_key(x0);
+//      Xform cen0 = xh.get_center(key0);
+//      ASSERT_EQ( xh.get_key(cen0), key0 );
+//      Xform x1(cen0);
+//      if( key0%2 ){
+//        x1.translation()[0] -= xh.cart_width()/2.0;
+//        x1.translation()[1] -= xh.cart_width()/2.0;
+//        x1.translation()[2] -= xh.cart_width()/2.0;
+//      } else {
+//        x1.translation()[0] += xh.cart_width()/2.0;
+//        x1.translation()[1] += xh.cart_width()/2.0;
+//        x1.translation()[2] += xh.cart_width()/2.0;
+//      }
+//      Key key1 = xh.get_key(x1);
+//      cout << x0.translation().transpose() << endl;
+//      cout << x1.translation().transpose() << endl;
+//      xh.print_key(key0);
+//      xh.print_key(key1);
+//      ASSERT_NE( key0%2, key1%2 );
+//      Xform cen1 = xh.get_center(key1);
 
-// 			std::vector<Eigen::Vector3d> vnbrs,vsamp;
-// 			std::set<Key> nbrs_set, nbrs_set_ori, nbrs_set_cart;
-// 			Eigen::Vector3d nbrcen(0,0,0);
-// 			std::vector< util::SimpleArray<3,int16_t> > shifts =
+//      std::vector<Eigen::Vector3d> vnbrs,vsamp;
+//      std::set<Key> nbrs_set, nbrs_set_ori, nbrs_set_cart;
+//      Eigen::Vector3d nbrcen(0,0,0);
+//      std::vector< util::SimpleArray<3,int16_t> > shifts =
 // nb.get_cart_shifts();
-// 			for(int j =0; j < shifts.size(); ++j){
-// 				Key nbkey0 = xh.cart_shift_key( key0,
+//      for(int j =0; j < shifts.size(); ++j){
+//        Key nbkey0 = xh.cart_shift_key( key0,
 // shifts[j][0],
 // shifts[j][1], shifts[j][2], 0 );
-// 				Key nbkey1 = xh.cart_shift_key( key1,
+//        Key nbkey1 = xh.cart_shift_key( key1,
 // shifts[j][0],
 // shifts[j][1], shifts[j][2], 1 );
-// 				nbrs_set.insert( nbkey0 );
-// 				nbrs_set.insert( nbkey1 );
-// 				vnbrs.push_back(
+//        nbrs_set.insert( nbkey0 );
+//        nbrs_set.insert( nbkey1 );
+//        vnbrs.push_back(
 // xh.get_center(nbkey0).translation()
 // );
-// 				vnbrs.push_back(
+//        vnbrs.push_back(
 // xh.get_center(nbkey1).translation()
 // );
-// 				nbrcen += xh.get_center(nbkey0).translation();
-// 				nbrcen += xh.get_center(nbkey1).translation();
+//        nbrcen += xh.get_center(nbkey0).translation();
+//        nbrcen += xh.get_center(nbkey1).translation();
 
-// 				nbrs_set_cart.insert( nbkey0 & xh.CART_MASK_NO0
+//        nbrs_set_cart.insert( nbkey0 & xh.CART_MASK_NO0
 // );
-// 				nbrs_set_cart.insert( nbkey1 & xh.CART_MASK_NO0
+//        nbrs_set_cart.insert( nbkey1 & xh.CART_MASK_NO0
 // );
-// 				nbrs_set_ori.insert( nbkey0 & xh.ORI_MASK_NO0 );
-// 				nbrs_set_ori.insert( nbkey1 & xh.ORI_MASK_NO0 );
-// 				// cout << nbkey%2 << " " <<  nbrs[j]%2 << endl;
-// 			}
+//        nbrs_set_ori.insert( nbkey0 & xh.ORI_MASK_NO0 );
+//        nbrs_set_ori.insert( nbkey1 & xh.ORI_MASK_NO0 );
+//        // cout << nbkey%2 << " " <<  nbrs[j]%2 << endl;
+//      }
 
-// 			cout << "NBRS SET ORI: " << endl;
-// 			for(std::set<Key>::const_iterator i =
+//      cout << "NBRS SET ORI: " << endl;
+//      for(std::set<Key>::const_iterator i =
 // nbrs_set_ori.begin();
 // i
 // != nbrs_set_ori.end(); ++i){
-// 				cout << "       ";
-// 				cout << ( util::undilate<7>( (*i)>>4 ) & 63 ) <<
+//        cout << "       ";
+//        cout << ( util::undilate<7>( (*i)>>4 ) & 63 ) <<
 // "
 // ";
-// 				cout << ( util::undilate<7>( (*i)>>5 ) & 63 ) <<
+//        cout << ( util::undilate<7>( (*i)>>5 ) & 63 ) <<
 // "
 // ";
-// 				cout << ( util::undilate<7>( (*i)>>6 ) & 63 ) <<
+//        cout << ( util::undilate<7>( (*i)>>6 ) & 63 ) <<
 // "
 // ";
-// 				cout << ( util::undilate<7>( (*i)>>7 ) & 63 ) <<
+//        cout << ( util::undilate<7>( (*i)>>7 ) & 63 ) <<
 // "
 // ";
-// 				cout << (*i)%2;
-// 				cout << endl;
-// 			}
-// 			nbrcen /= shifts.size()*2;
+//        cout << (*i)%2;
+//        cout << endl;
+//      }
+//      nbrcen /= shifts.size()*2;
 
-// 			int nfail=0;
-// 			for(int j = 0; j < 1000*NSAMP; ++j){
-// 				Xform p;
+//      int nfail=0;
+//      for(int j = 0; j < 1000*NSAMP; ++j){
+//        Xform p;
 // numeric::rand_xform_quat(rng,p,cart_bound,0.0);
-// 				Key nk = xh.get_key( p*cen0 );
-// 				vsamp.push_back( xh.get_center(nk).translation()
+//        Key nk = xh.get_key( p*cen0 );
+//        vsamp.push_back( xh.get_center(nk).translation()
 // );
-// 				bool fail = nbrs_set.find(nk) == nbrs_set.end();
-// 				nfail += fail;
-// 				// if( fail ) cout << nk%2 << endl;
-// 				ASSERT_TRUE( nbrs_set_cart.find( nk &
+//        bool fail = nbrs_set.find(nk) == nbrs_set.end();
+//        nfail += fail;
+//        // if( fail ) cout << nk%2 << endl;
+//        ASSERT_TRUE( nbrs_set_cart.find( nk &
 // xh.CART_MASK_NO0)
 // != nbrs_set_cart.end() );
-// 				if( fail ){
-// 					cout << ( util::undilate<7>( nk>>4 ) &
+//        if( fail ){
+//          cout << ( util::undilate<7>( nk>>4 ) &
 // 63
 // )
 // <<
 // "
 // ";
-// 					cout << ( util::undilate<7>( nk>>5 ) &
+//          cout << ( util::undilate<7>( nk>>5 ) &
 // 63
 // )
 // <<
 // "
 // ";
-// 					cout << ( util::undilate<7>( nk>>6 ) &
+//          cout << ( util::undilate<7>( nk>>6 ) &
 // 63
 // )
 // <<
 // "
 // ";
-// 					cout << ( util::undilate<7>( nk>>7 ) &
+//          cout << ( util::undilate<7>( nk>>7 ) &
 // 63
 // )
 // <<
 // "
 // ";
-// 					cout << nk%2;
-// 					cout << endl;
+//          cout << nk%2;
+//          cout << endl;
 
-// 					// ASSERT_TRUE( nbrs_set_ori.find( nk &
+//          // ASSERT_TRUE( nbrs_set_ori.find( nk &
 // xh.ORI_MASK_NO0) == nbrs_set_ori.end() );
-// 				}
-// 			}
+//        }
+//      }
 
-// 			std::ofstream out1("test_nbrs.pdb");
-// 			for(int i = 0; i < vnbrs.size(); ++i) io::dump_pdb_atom(
+//      std::ofstream out1("test_nbrs.pdb");
+//      for(int i = 0; i < vnbrs.size(); ++i) io::dump_pdb_atom(
 // out1,
 // "C" ,i, 10.0*vnbrs[i] );
-// 			out1.close();
-// 			std::ofstream out2("test_samp.pdb");
-// 			for(int i = 0; i < vnbrs.size(); ++i) io::dump_pdb_atom(
+//      out1.close();
+//      std::ofstream out2("test_samp.pdb");
+//      for(int i = 0; i < vnbrs.size(); ++i) io::dump_pdb_atom(
 // out2,
 // "C" ,i, 10.0*vsamp[i] );
-// 			out2.close();
-// 			std::ofstream out3("test_cen.pdb");
-// 			io::dump_pdb_atom( out3, "C" ,i, 10.0*cen0.translation()
+//      out2.close();
+//      std::ofstream out3("test_cen.pdb");
+//      io::dump_pdb_atom( out3, "C" ,i, 10.0*cen0.translation()
 // );
-// 			io::dump_pdb_atom( out3, "C" ,i, 10.0*cen1.translation()
+//      io::dump_pdb_atom( out3, "C" ,i, 10.0*cen1.translation()
 // );
-// 			out3.close();
+//      out3.close();
 
-// 			ASSERT_LE( nfail/1000.0/NSAMP, THRESH );
-// 			return ;
-// 		}
-// 	}
+//      ASSERT_LE( nfail/1000.0/NSAMP, THRESH );
+//      return ;
+//    }
+//  }
 // }
 
 TEST(XformHashNeighbors, Quat_BCC7_Zorder_check_ori_neighbors) {
@@ -492,16 +492,16 @@ TEST(XformHashNeighbors, Quat_BCC7_Zorder_check_ori_neighbors) {
       // cout << fails.size() << " " << passes.size() << endl;
       // std::ofstream out("nbrs_sym_fails.pdb");
       // for(int i = 0; i < fails.size(); ++i){
-      // 	Xform x = xh.get_center( fails[i] );
-      // 	Eigen::Quaternion<Float> q(x.rotation());
-      // 	io::dump_pdb_atom( out, "C" ,i, 50*q.coeffs() );
+      //  Xform x = xh.get_center( fails[i] );
+      //  Eigen::Quaternion<Float> q(x.rotation());
+      //  io::dump_pdb_atom( out, "C" ,i, 50*q.coeffs() );
       // }
       // out.close();
       // std::ofstream out2("nbrs_sym_passes.pdb");
       // for(int i = 0; i < passes.size(); ++i){
-      // 	Xform x = xh.get_center( passes[i] );
-      // 	Eigen::Quaternion<Float> q(x.rotation());
-      // 	io::dump_pdb_atom( out2, "C" ,i, 50*q.coeffs() );
+      //  Xform x = xh.get_center( passes[i] );
+      //  Eigen::Quaternion<Float> q(x.rotation());
+      //  io::dump_pdb_atom( out2, "C" ,i, 50*q.coeffs() );
       // }
       // out2.close();
 
@@ -565,17 +565,17 @@ TEST(XformHashNeighbors, Quat_BCC7_Zorder_check_general_neighbors) {
         // std::vector< util::SimpleArray<3,int16_t> > shifts =
         // nb.get_cart_shifts();
         // for(int j =0; j < ori_nbrs.size(); ++j){
-        // 	Key ori_key = ori_nbrs[j];
-        // 	ori_key = xh.cart_shift_key( ori_key, ix, iy, iz );
-        // 	// xh.print_key( ori_key );
-        // 	for(int k=0; k < shifts.size(); ++k){
-        // 		Key nbkey0 = xh.cart_shift_key( ori_key, shifts[k][0],
+        //  Key ori_key = ori_nbrs[j];
+        //  ori_key = xh.cart_shift_key( ori_key, ix, iy, iz );
+        //  // xh.print_key( ori_key );
+        //  for(int k=0; k < shifts.size(); ++k){
+        //    Key nbkey0 = xh.cart_shift_key( ori_key, shifts[k][0],
         // shifts[k][1], shifts[k][2], 0 );
-        // 		Key nbkey1 = xh.cart_shift_key( ori_key, shifts[k][0],
+        //    Key nbkey1 = xh.cart_shift_key( ori_key, shifts[k][0],
         // shifts[k][1], shifts[k][2], 1 );
-        // 		nbrs_set.insert( nbkey0 );
-        // 		nbrs_set.insert( nbkey1 );
-        // 	}
+        //    nbrs_set.insert( nbkey0 );
+        //    nbrs_set.insert( nbkey1 );
+        //  }
         // }
         // cout << nbrs_set.size() << " " << ori_nbrs.size() << " " <<
         // shifts.size() << endl;
@@ -590,9 +590,9 @@ TEST(XformHashNeighbors, Quat_BCC7_Zorder_check_general_neighbors) {
         bool fail = nbrs_set.find(nk) == nbrs_set.end();
         nfail += fail;
         // if( fail ){
-        // 	xh.print_key(key);
-        // 	xh.print_key(nk);
-        // 	cout << endl;
+        //  xh.print_key(key);
+        //  xh.print_key(nk);
+        //  cout << endl;
         // }
       }
       double failfrac = nfail / 300.0 / NSAMP;

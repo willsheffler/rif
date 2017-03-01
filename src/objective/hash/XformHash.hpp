@@ -9,7 +9,7 @@
 
 #include <boost/utility/binary.hpp>
 
-namespace scheme {
+namespace rif {
 namespace objective {
 namespace hash {
 
@@ -25,10 +25,10 @@ struct XformHash_Quat_BCC7_Zorder {
   typedef uint64_t Key;
   typedef _Xform Xform;
   typedef typename Xform::Scalar Float;
-  typedef scheme::nest::pmap::TetracontoctachoronMap<> OriMap;
-  typedef scheme::numeric::BCC<7, Float, uint64_t> Grid;
-  typedef scheme::util::SimpleArray<7, Float> F7;
-  typedef scheme::util::SimpleArray<7, uint64_t> I7;
+  typedef rif::nest::pmap::TetracontoctachoronMap<> OriMap;
+  typedef rif::numeric::BCC<7, Float, uint64_t> Grid;
+  typedef rif::util::SimpleArray<7, Float> F7;
+  typedef rif::util::SimpleArray<7, uint64_t> I7;
 
   static Key const ORI_MASK = ~BOOST_BINARY(
       11111111 11111111 11111000 01110000 11100001 11000011 10000111 00001110);
@@ -300,10 +300,10 @@ struct XformHash_Quat_BCC7 {
   typedef uint64_t Key;
   typedef _Xform Xform;
   typedef typename Xform::Scalar Float;
-  typedef scheme::nest::pmap::TetracontoctachoronMap<> OriMap;
-  typedef scheme::numeric::BCC<7, Float, uint64_t> Grid;
-  typedef scheme::util::SimpleArray<7, Float> F7;
-  typedef scheme::util::SimpleArray<7, uint64_t> I7;
+  typedef rif::nest::pmap::TetracontoctachoronMap<> OriMap;
+  typedef rif::numeric::BCC<7, Float, uint64_t> Grid;
+  typedef rif::util::SimpleArray<7, Float> F7;
+  typedef rif::util::SimpleArray<7, uint64_t> I7;
 
   Float grid_size_;
   Float grid_spacing_;
@@ -403,10 +403,10 @@ template <class Xform>
 struct XformHash_bt24_BCC3_Zorder {
   typedef uint64_t Key;
   typedef typename Xform::Scalar Float;
-  typedef scheme::nest::pmap::TetracontoctachoronMap<> OriMap;
-  typedef scheme::numeric::BCC<3, Float, uint64_t> Grid;
-  typedef scheme::util::SimpleArray<3, Float> F3;
-  typedef scheme::util::SimpleArray<3, uint64_t> I3;
+  typedef rif::nest::pmap::TetracontoctachoronMap<> OriMap;
+  typedef rif::numeric::BCC<3, Float, uint64_t> Grid;
+  typedef rif::util::SimpleArray<3, Float> F3;
+  typedef rif::util::SimpleArray<3, uint64_t> I3;
 
   Float grid_size_;
   Float grid_spacing_;
@@ -558,10 +558,10 @@ template <class Xform>
 struct XformHash_bt24_BCC3 {
   typedef uint64_t Key;
   typedef typename Xform::Scalar Float;
-  typedef scheme::nest::pmap::TetracontoctachoronMap<> OriMap;
-  typedef scheme::numeric::BCC<3, Float, uint64_t> Grid;
-  typedef scheme::util::SimpleArray<3, Float> F3;
-  typedef scheme::util::SimpleArray<3, uint64_t> I3;
+  typedef rif::nest::pmap::TetracontoctachoronMap<> OriMap;
+  typedef rif::numeric::BCC<3, Float, uint64_t> Grid;
+  typedef rif::util::SimpleArray<3, Float> F3;
+  typedef rif::util::SimpleArray<3, uint64_t> I3;
 
   Float grid_size_;
   Float grid_spacing_;
@@ -666,12 +666,12 @@ template <class Xform>
 struct XformHash_bt24_BCC6 {
   typedef uint64_t Key;
   typedef typename Xform::Scalar Float;
-  typedef scheme::nest::pmap::TetracontoctachoronMap<> OriMap;
-  typedef scheme::numeric::BCC<6, Float, uint64_t> Grid;
-  typedef scheme::util::SimpleArray<3, Float> F3;
-  typedef scheme::util::SimpleArray<3, uint64_t> I3;
-  typedef scheme::util::SimpleArray<6, Float> F6;
-  typedef scheme::util::SimpleArray<6, uint64_t> I6;
+  typedef rif::nest::pmap::TetracontoctachoronMap<> OriMap;
+  typedef rif::numeric::BCC<6, Float, uint64_t> Grid;
+  typedef rif::util::SimpleArray<3, Float> F3;
+  typedef rif::util::SimpleArray<3, uint64_t> I3;
+  typedef rif::util::SimpleArray<6, Float> F6;
+  typedef rif::util::SimpleArray<6, uint64_t> I6;
 
   Float grid_size_;
   Float grid_spacing_;
@@ -840,10 +840,10 @@ template <class Xform>
 struct XformHash_bt24_Cubic_Zorder {
   typedef uint64_t Key;
   typedef typename Xform::Scalar Float;
-  typedef scheme::nest::pmap::TetracontoctachoronMap<> OriMap;
-  typedef scheme::numeric::Cubic<3, Float, uint64_t> Grid;
-  typedef scheme::util::SimpleArray<3, Float> F3;
-  typedef scheme::util::SimpleArray<3, uint64_t> I3;
+  typedef rif::nest::pmap::TetracontoctachoronMap<> OriMap;
+  typedef rif::numeric::Cubic<3, Float, uint64_t> Grid;
+  typedef rif::util::SimpleArray<3, Float> F3;
+  typedef rif::util::SimpleArray<3, uint64_t> I3;
 
   Float grid_size_;
   Float grid_spacing_;
@@ -969,10 +969,10 @@ template <class Xform>
 struct XformHash_Quatgrid_Cubic {
   typedef uint64_t Key;
   typedef typename Xform::Scalar Float;
-  typedef scheme::nest::pmap::TetracontoctachoronMap<> OriMap;
-  typedef scheme::numeric::Cubic<3, Float, uint64_t> Grid;
-  typedef scheme::util::SimpleArray<3, Float> F3;
-  typedef scheme::util::SimpleArray<3, uint64_t> I3;
+  typedef rif::nest::pmap::TetracontoctachoronMap<> OriMap;
+  typedef rif::numeric::Cubic<3, Float, uint64_t> Grid;
+  typedef rif::util::SimpleArray<3, Float> F3;
+  typedef rif::util::SimpleArray<3, uint64_t> I3;
 
   Float grid_size_;
   Float grid_spacing_;

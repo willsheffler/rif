@@ -4,7 +4,7 @@
 #include <iostream>
 #include "actor/ActorConcept.hpp"
 
-namespace scheme {
+namespace rif {
 namespace actor {
 
 template <class P, class D>
@@ -14,13 +14,13 @@ std::ostream &operator<<(std::ostream &out, ActorConcept<P, D> const &a) {
 
 // template< class P >
 // std::ostream & operator<<(std::ostream & out, ActorConcept<P,int> const & a){
-// 	return out << "ADI( " << a.position_ << ", " << a.data_ << " )";
+//  return out << "ADI( " << a.position_ << ", " << a.data_ << " )";
 // }
 
 // template< class P >
 // std::ostream & operator<<(std::ostream & out, ActorConcept<P,char> const &
 // a){
-// 	return out << "ADC( " << a.position_ << ", " << a.data_ << " )";
+//  return out << "ADC( " << a.position_ << ", " << a.data_ << " )";
 // }
 }
 }

@@ -2,7 +2,7 @@
 
 #include <iterator>
 
-namespace scheme {
+namespace rif {
 namespace chemical {
 
 struct AtomIncludeCheck {

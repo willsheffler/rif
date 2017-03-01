@@ -6,7 +6,7 @@
 #include "nest/NEST_concepts.hpp"
 #include "nest/NEST_test_util.hpp"
 
-namespace scheme {
+namespace rif {
 namespace nest {
 namespace pmap {
 

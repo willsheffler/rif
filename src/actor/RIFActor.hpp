@@ -3,7 +3,7 @@
 
 #include "objective/hash/XformMap.hpp"
 
-namespace scheme {
+namespace rif {
 namespace actor {
 
 template <class _Position, class _XformMap>
@@ -14,7 +14,7 @@ struct RIFActor {
   typedef RIFActor<Position, XformMap> THIS;
 
   Position position_;
-  scheme::shared_ptr<XformMap> xform_map_;
+  rif::shared_ptr<XformMap> xform_map_;
 
   RIFActor() : position_(), xform_map_() {}
 

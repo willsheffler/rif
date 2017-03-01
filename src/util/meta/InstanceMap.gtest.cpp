@@ -10,7 +10,7 @@
 #include "io/cache.hpp"
 #include "util/SimpleArray.hpp"
 
-namespace scheme {
+namespace rif {
 namespace util {
 namespace meta {
 
@@ -177,7 +177,7 @@ TEST(InstanceMap, subtyping) {
     ASSERT_EQ(imap.get<float>(), 1.2345f);
     // bf::for_each((TEST::Base&)imap,PrintInstanceType());
 
-    //		typename TEST::Base & test1 = static_cast< typename TEST::Base &
+    //    typename TEST::Base & test1 = static_cast< typename TEST::Base &
     //>(
     // imap );
 

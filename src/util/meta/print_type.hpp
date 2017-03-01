@@ -23,7 +23,7 @@
 // #include <boost/type_traits/remove_const.hpp>
 // #include <boost/tuple/tuple.hpp>
 
-namespace scheme {
+namespace rif {
 namespace util {
 namespace meta {
 
@@ -101,10 +101,10 @@ struct PrintType {
 
   // template <typename A,typename B>
   // void operator()(m::vector<A,B> const &) const {
-  // 	PrintType p(out,indent,false);
-  // 	out << indent << "mpl::vector< ";
-  // 	p(A()); out << ", "; p(B()); out << " >";
-  // 	if(newline) out << std::endl;
+  //  PrintType p(out,indent,false);
+  //  out << indent << "mpl::vector< ";
+  //  p(A()); out << ", "; p(B()); out << " >";
+  //  if(newline) out << std::endl;
   // }
 };
 

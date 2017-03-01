@@ -2,7 +2,7 @@
 
 #include "numeric/FixedPoint.hpp"
 
-namespace scheme {
+namespace rif {
 namespace numeric {
 namespace test {
 

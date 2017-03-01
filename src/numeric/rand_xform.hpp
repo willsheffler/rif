@@ -5,7 +5,7 @@
 #include <random>
 #include "numeric/util.hpp"
 
-namespace scheme {
+namespace rif {
 namespace numeric {
 
 template <class T>
