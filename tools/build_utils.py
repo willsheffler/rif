@@ -49,6 +49,7 @@ def get_cmake_dir(prefix, cfg):
     if libdir:
         return libdir[0]
     else:
+        print('cant find libdir', path)
         raise IOError
 
 
@@ -186,9 +187,9 @@ def build_and_run_pytest(redo_cmake=False):
         proj_root = bytes(proj_root, 'ascii')
     args = [x for x in sys.argv[1:] if x.endswith('.py') and
             os.path.basename(x).startswith('test')]
-    if not args: 
+    if not args:
         args = ['.', '-n4', '--ignore', 'build']
-    else: # running one file, don't scan
+    else:  # running one file, don't scan
         args += ['--ignore', 'build_setup_py_Release']
     for decoy in get_ignored_dirs(cfg):
         args += ['--ignore', decoy]

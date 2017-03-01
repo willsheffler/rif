@@ -32,7 +32,7 @@ def get_pybind_modules(srcpath):
             for line in grepped.splitlines():
                 line = str(line)
                 match = re.match(
-                    r".*src/(.+).pybind.cpp\:.* RIFLIB_PYBIND_(\w+)", line)
+                    r".*src/rif/(.+).pybind.cpp\:.* RIFLIB_PYBIND_(\w+)", line)
                 # print 'line:', line
                 # print match
                 # assert len(match.groups()) is 2

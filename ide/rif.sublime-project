@@ -27,11 +27,9 @@
 			"shell_cmd": "cd $folder && python tools/build_and_run_gtest_wip.py 2>&1 | tee log/subl_build.log"
 		},
 		{
-			"file_regex": "^[ ]*File \"(...*?)\", line ([0-9]*)",
-			"name": "Anaconda Python Builder",
-			"selector": "source.python",
-			"shell_cmd": "\"/usr/bin/python\" -u \"$file\""
-		}
+			"name": "build_docs",
+			"shell_cmd": "cd $folder/docs && make html 2>&1 | tee ../log/subl_build.log && google-chrome _build/html/rif.html &> /dev/null"
+		},
 	],
 	"folders":
 	[

@@ -20,9 +20,6 @@ build_manual
 log/subl_build.log
 .tox
 dist
-*.gen.cpp
-*.gen.hpp
-*.gen.py
 _build
 .build
 docs/html

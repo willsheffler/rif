@@ -517,7 +517,7 @@ TEST(XformHashNeighbors, Quat_BCC7_Zorder_check_ori_neighbors) {
 TEST(XformHashNeighbors, Quat_BCC7_Zorder_check_general_neighbors) {
   typedef uint64_t Key;
   int NSAMP = 1;
-  double THRESH = 0.005;
+  double THRESH = 0.01;
 #ifdef SCHEME_BENCHMARK
   NSAMP = 8;
   THRESH = 0.002;

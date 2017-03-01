@@ -109,7 +109,7 @@ class CMakeBuild(build_ext):
             # build_args += ['--', '-j'+str(multiprocessing.cpu_count()),
             # 'rif']
             build_args += ['--', '-j' + str(multiprocessing.cpu_count())]
-        # probably best to build everythong
+        # probably best to build everything, uncomment to only build lib
         # build_args.append('rif_cpp')
         env = os.environ.copy()
         env['CXXFLAGS'] = '{} -DVERSION_INFO=\\"{}\\"'.format(
@@ -121,8 +121,9 @@ class CMakeBuild(build_ext):
                               cmake_args, cwd=self.build_temp, env=env)
         subprocess.check_call(['cmake', '--build', '.'] +
                               build_args, cwd=self.build_temp)
-        if not os.path.exists(defaultextdir):
-            os.symlink(extdir, defaultextdir)
+        if os.path.exists(defaultextdir):
+            os.remove(defaultextdir)
+        os.symlink(extdir, defaultextdir)
 
 
 setup(

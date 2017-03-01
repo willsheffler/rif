@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python2
 # -*- coding: utf-8 -*-
 #
 # rif documentation build configuration file, created by
@@ -13,15 +13,24 @@
 # All configuration values have a default; values that are commented out
 # serve to show the default.
 
+from __future__ import print_function
 import sys
 import os
 import subprocess
+import glob
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
-sys.path.insert(0, os.path.abspath(
-    '../build_setup_py_Release/lib.linux-x86_64-3.5'))
+version = str(sys.version_info.major) + '.' + str(sys.version_info.minor)
+print('rebuilding rif module for py' + version)
+os.system('cd ..; python' + version +
+          ' setup.py build --build-base=build_setup_py_Release')
+rifpath = glob.glob('../build_setup_py_Release/lib.*' + version + '*')
+sys.path.insert(0, os.path.abspath(rifpath[0]))
+# todo is there a better way?
+# readthedocs can't build rif_cpp. or can it?
+
 
 # -- General configuration ------------------------------------------------
 
@@ -44,7 +53,7 @@ breathe_projects = {
     'rif_cpp': '.build/doxygenxml'
 }
 breathe_default_project = 'rif_cpp'
-breathe_domain_by_extension = {'h': 'cpp', 'hpp':'cpp', 'cpp':'cpp'}
+breathe_domain_by_extension = {'h': 'cpp', 'hpp': 'cpp', 'cpp': 'cpp'}
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['.templates']
@@ -317,9 +326,6 @@ texinfo_documents = [
 
 # If true, do not generate a @detailsmenu in the "Top" node's menu.
 #texinfo_no_detailmenu = False
-
-primary_domain = 'cpp'
-highlight_language = 'cpp'
 
 
 def generate_doxygen_xml(app):
