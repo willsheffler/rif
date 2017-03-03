@@ -37,15 +37,21 @@ def build_rif_and_add_path():
         extra = 'CXXFLAGS=-I' + condadir + '/include\\ -L' + condadir + '/lib'
         print('sphinx conf.py: for conda:', extra)
     print('=' * 40, 'sphinx conf.py BUILDING RIF', '=' * 40)
-    os.system('cd ..; ' + extra + ' python' + version +
-              ' setup.py build --build-base=build_docs ' +
-              '--rif_setup_opts_build_args=rif_cpp')
-    print('=' * 40, 'sphinx conf.py DONE BUILDING RIF', '=' * 40)
-    rifpath = glob.glob('../build_docs/lib.*' + version + '*')
-    print('sphinx conf.py adding to sys.path:', os.path.abspath(rifpath[0]))
-    sys.path.insert(0, os.path.abspath(rifpath[0]))
-    import rif
-    print("sphinx conf.py imported rif successfully")
+    for itry in range(5):
+        try:
+            os.system('cd ..; ' + extra + ' python' + version +
+                      ' setup.py build --build-base=build_docs ' +
+                      '--rif_setup_opts_build_args=rif_cpp')
+            print('=' * 40, 'sphinx conf.py DONE BUILDING RIF', '=' * 40)
+            rifpath = glob.glob('../build_docs/lib.*' + version + '*')
+            print('sphinx conf.py adding to sys.path:',
+                  os.path.abspath(rifpath[0]))
+            sys.path.insert(0, os.path.abspath(rifpath[0]))
+            import rif
+            print("sphinx conf.py imported rif successfully")
+            break
+        except:
+            print('sphinx conf.py FAILED TO BUILD RIF, try', itry + 1)
 
 
 build_rif_and_add_path()
