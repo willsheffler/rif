@@ -32,26 +32,37 @@ def build_rif_and_add_path():
     if os.path.exists('../build_docs'):
         shutil.rmtree('../build_docs')
     extra = ''
-    if 'conda' in sys.executable:
+    using_conda = 'conda' in sys.executable
+    if using_conda:
+        print('sphinx conf.py USING CONDA')
         condadir = os.path.dirname(sys.executable)[:-4]
         extra = 'CXXFLAGS=-I' + condadir + '/include\\ -L' + condadir + '/lib'
         print('sphinx conf.py: for conda:', extra)
     print('=' * 40, 'sphinx conf.py BUILDING RIF', '=' * 40)
+    sys.stdout.flush()
     for itry in range(5):
-        try:
-            os.system('cd ..; ' + extra + ' python' + version +
-                      ' setup.py build --build-base=build_docs ' +
-                      '--rif_setup_opts_build_args=rif_cpp')
-            print('=' * 40, 'sphinx conf.py DONE BUILDING RIF', '=' * 40)
-            rifpath = glob.glob('../build_docs/lib.*' + version + '*')
-            print('sphinx conf.py adding to sys.path:',
-                  os.path.abspath(rifpath[0]))
-            sys.path.insert(0, os.path.abspath(rifpath[0]))
-            import rif
-            print("sphinx conf.py imported rif successfully")
-            break
-        except:
-            print('sphinx conf.py FAILED TO BUILD RIF, try', itry + 1)
+        # try:
+        os.system('cd ..; ' + extra + ' python' + version +
+                  ' setup.py build --build-base=build_docs ' +
+                  '--rif_setup_opts_build_args=rif_cpp ')
+        rifpath = os.path.abspath(
+            glob.glob('../build_docs/lib.*' + version + '*')[0])
+        if using_conda:
+            pthfile = condadir + '/lib/python' + version + '/site-packages/rif.pth'
+            print('sphinx conf.py writing pth file', pthfile)
+            with open(pthfile, 'w') as out:
+                out.write(rifpath + '\n')
+        print('sphinx conf.py adding to sys.path:',
+              os.path.abspath(rifpath))
+        sys.path.insert(0, rifpath)
+        import rif
+        print("sphinx conf.py imported rif successfully")
+
+        break
+        # except:
+        # print('sphinx conf.py FAILED TO BUILD RIF, try', itry + 1)
+        # break
+    print('=' * 40, 'sphinx conf.py DONE BUILDING RIF', '=' * 40)
 
 
 build_rif_and_add_path()
