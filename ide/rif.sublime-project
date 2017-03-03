@@ -77,6 +77,22 @@
 	"settings":
 	{
 		"tab_size": 4,
-		"translate_tabs_to_spaces": true
-	}
+		"translate_tabs_to_spaces": true,
+	    "env":
+	    {
+			"Windows":
+			{
+			},
+			"Darwin":
+			{
+			},
+			"Linux":
+			{
+				"CC" : "clang-3.8",
+				"CXX" : "clang++-3.8",
+				// "CXXFLAGS": "-stdlib=libc++ -I/usr/include/libcxxabi",
+
+			}
+	    },
+	},
 }

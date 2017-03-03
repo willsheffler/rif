@@ -8,3 +8,6 @@ hypothesis
 colorama
 numpy
 pandas
+sphinx_rtd_theme
+breathe
+

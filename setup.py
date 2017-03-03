@@ -28,6 +28,13 @@ def get_my_python():
     return sys.executable.replace('/', '')
 
 
+def my_getenv(name):
+    if name in os.environ:
+        return os.environ[name]
+    else:
+        return "DEFAULT_" + name
+
+
 def which(program):
     import os
 
@@ -63,9 +70,14 @@ for arg in sys.argv:
         _remove_from_sys_argv.append(arg)
 for arg in _remove_from_sys_argv:
     sys.argv.remove(arg)
-print('setup.py rif args:')
+print('setup.py: rif args:')
 for flag, val in _rif_setup_opts.items():
     print('    ', flag, '=', val)
+
+print('setup.py: compiler:', get_my_compiler())
+print('setup.py: python:', get_my_python())
+for evar in "CC CXX CXXFLAGS".split():
+    print('sepup.py: env:', evar, my_getenv(evar))
 
 
 class CMakeExtension(Extension):
@@ -102,8 +114,9 @@ class CMakeBuild(build_ext):
 
     def get_ext_fullpath(self, ext_name):
         defaultname = build_ext.get_ext_fullpath(self, ext_name)
-        path = os.path.dirname(defaultname) + '-' + self.my_tag + \
-            '/' + os.path.basename(defaultname)
+        path = os.path.dirname(defaultname)
+        path += '-' + self.my_tag + '/'
+        path += os.path.basename(defaultname)
         return path, defaultname
 
     def build_extension(self, ext):
@@ -135,8 +148,7 @@ class CMakeBuild(build_ext):
 
         env = os.environ.copy()
         env['CXXFLAGS'] = '{} -DVERSION_INFO=\\"{}\\"'.format(
-            env.get('CXXFLAGS', ''),
-            self.distribution.get_version())
+            env.get('CXXFLAGS', ''), self.distribution.get_version())
         if not os.path.exists(self.build_temp):
             os.makedirs(self.build_temp)
         subprocess.check_call(

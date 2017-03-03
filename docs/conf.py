@@ -22,11 +22,17 @@ import glob
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
+print('python', sys.executable)
 version = str(sys.version_info.major) + '.' + str(sys.version_info.minor)
 print('rebuilding rif module for py' + version)
-os.system('cd ..; python' + version +
+extra = ''
+if 'conda' in sys.executable:
+    conda_env_inc = os.path.dirname(sys.executable)[:-4] + '/include'
+    extra = 'CXXFLAGS=-I' + conda_env_inc
+    print('conf.py: for conda:', extra)
+os.system('cd ..; ' + extra + ' python' + version +
           ' setup.py build --build-base=build_docs --rif_setup_opts_build_args=rif_cpp')
-rifpath = glob.glob('../build_setup_py_Release/lib.*' + version + '*')
+rifpath = glob.glob('../build_docs/lib.*' + version + '*')
 sys.path.insert(0, os.path.abspath(rifpath[0]))
 # todo is there a better way?
 # readthedocs can't build rif_cpp. or can it?
