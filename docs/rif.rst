@@ -1,7 +1,7 @@
 RIF Module Documentation
 **************************
 
-moduele rif:
+module rif:
 ------------
 .. automodule:: rif
 
