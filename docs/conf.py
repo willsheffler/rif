@@ -27,8 +27,8 @@ version = str(sys.version_info.major) + '.' + str(sys.version_info.minor)
 print('rebuilding rif module for py' + version)
 extra = ''
 if 'conda' in sys.executable:
-    conda_env_inc = os.path.dirname(sys.executable)[:-4] + '/include'
-    extra = 'CXXFLAGS=-I' + conda_env_inc
+    condadir = os.path.dirname(sys.executable)[:-4]
+    extra = 'CXXFLAGS=-I' + condadir + '/include\\ -L' + condadir + '/lib'
     print('conf.py: for conda:', extra)
 os.system('cd ..; ' + extra + ' python' + version +
           ' setup.py build --build-base=build_docs --rif_setup_opts_build_args=rif_cpp')
