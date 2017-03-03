@@ -29,8 +29,8 @@ version = str(sys.version_info.major) + '.' + str(sys.version_info.minor)
 def build_rif_and_add_path():
     print('sphinx conf.py: python', sys.executable)
     print('sphinx conf.py: rebuilding rif module for py' + version)
-    if os.path.exists('../build_docs'):
-        shutil.rmtree('../build_docs')
+    # if os.path.exists('../build_docs'):
+        # shutil.rmtree('../build_docs')
     extra = ''
     using_conda = 'conda' in sys.executable
     if using_conda:
