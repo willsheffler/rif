@@ -18,6 +18,7 @@ import sys
 import os
 import subprocess
 import glob
+import shutil
 
 version = str(sys.version_info.major) + '.' + str(sys.version_info.minor)
 # If extensions (or modules to document with autodoc) are in another directory,
@@ -28,6 +29,8 @@ version = str(sys.version_info.major) + '.' + str(sys.version_info.minor)
 def build_rif_and_add_path():
     print('sphinx conf.py: python', sys.executable)
     print('sphinx conf.py: rebuilding rif module for py' + version)
+    if os.path.exists('../build_docs'):
+        shutil.rmtree('../build_docs')
     extra = ''
     if 'conda' in sys.executable:
         condadir = os.path.dirname(sys.executable)[:-4]
@@ -41,6 +44,8 @@ def build_rif_and_add_path():
     rifpath = glob.glob('../build_docs/lib.*' + version + '*')
     print('sphinx conf.py adding to sys.path:', os.path.abspath(rifpath[0]))
     sys.path.insert(0, os.path.abspath(rifpath[0]))
+    import rif
+    print("sphinx conf.py imported rif successfully")
 
 
 build_rif_and_add_path()
