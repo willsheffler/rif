@@ -14,13 +14,10 @@ env:
 addons:
   apt:
     packages:
-      - valgrind
       - g++-6
       - cmake
       - cmake-data
       # - python3.5-dev
-      - libboost-system-dev
-      - libboost-iostreams-dev
       - python-pip
       - python-numpy
       - python-pandas
@@ -258,8 +255,7 @@ install:
   - if [[ "${CHECK_FORMATTING}" == "true" ]]; then brew install pcre vera++; fi
 
   - |
-    echo ${TRAVIS_BUILD_DIR}
-    cd ${TRAVIS_BUILD_DIR}/rif
+    cd ${TRAVIS_BUILD_DIR}
     pip install future jinja2 pytest pytest-xdist hypothesis enum34
     git clone https://github.com/moble/quaternion.git
     cd quaternion
@@ -267,10 +263,9 @@ install:
     cd ..
     cd external/hacked_packages/pytest-cpp-0.4
     pip install .
-    cd ../../../
 
-# before_script:
-  # - cd ${TRAVIS_BUILD_DIR}
+before_script:
+  - cd ${TRAVIS_BUILD_DIR}
 
 
 script:
@@ -290,6 +285,8 @@ script:
       # L002: Don't use tab characters
       find include -name \*\.hpp | vera++ --rule F001 --rule L001 --rule L002 --error
     elif [[ "${UNIT_TESTS}" == "true" ]]; then
+      pwd
+      ls tools
       python tools/cmake_build_and_run_pytest.py
     elif [[ "${DOCUMENTATION}" == "true" ]]; then
       cd docs
