@@ -1,95 +1,317 @@
-language: cpp
+# Copyright Louis Dionne 2013-2017
+# Distributed under the Boost Software License, Version 1.0.
+# (See accompanying file LICENSE.md or copy at http://boost.org/LICENSE_1_0.txt)
+
+language: c++
 sudo: false
-matrix:
-  include:
-  - os: linux
-    env: PYTHON=2.7 CPP=14 GCC=6
-    addons:
-      apt:
-        sources:
-        - ubuntu-toolchain-r-test
-        - kubuntu-backports
-        - george-edison55-precise-backports # cmake 3.2.3 / doxygen 1.8.3
-        packages: [g++-6, cmake, cmake-data, libboost-system-dev, libboost-iostreams-dev]
-  - os: linux
-    env: PYTHON=3.5 CPP=14 GCC=6
-    addons:
-      apt:
-        sources: [ubuntu-toolchain-r-test, kubuntu-backports, deadsnakes]
-        packages: [g++-6, cmake, cmake-data, python3.5-dev, libboost-system-dev, libboost-iostreams-dev]
-  # - sudo: true
-    # services: docker
-    # env: PYTHON=2.7 CPP=14 GCC=6
-  # - sudo: true
-    # services: docker
-    # env: PYTHON=3.5 CPP=14 GCC=6 DEBUG=1
-  # - sudo: true
-    # services: docker
-    # env: PYTHON=3.5 CPP=17 GCC=7
-  - os: osx
-    osx_image: xcode7.3
-    env: PYTHON=2.7 CPP=14 CLANG
-  - os: osx
-    osx_image: xcode7.3
-    env: PYTHON=3.6 CPP=14 CLANG
-  # Documentation build:
-  - os: linux
-    language: docs
-    env: DOCS STYLE LINT CPP=14 GCC=6 PYTHON=2.7
-    install:
-    - pip install --upgrade sphinx sphinx_rtd_theme flake8 pep8-naming
-    - |
-      curl -fsSL ftp://ftp.stack.nl/pub/users/dimitri/doxygen-1.8.12.linux.bin.tar.gz | tar xz
-      export PATH="$PWD/doxygen-1.8.12/bin:$PATH"
-      pip install https://github.com/michaeljones/breathe/archive/master.zip
-    script:
-    - cd docs
-    - make html
-  allow_failures:
-    - env: PYTHON=3.5 CPP=17 GCC=7
+
+
+env:
+  matrix:
+    - TRAVIS_EMPTY_JOB_WORKAROUND=true
+
+
+addons:
+  apt:
+    packages:
+      - valgrind
+      - g++-6
+      - cmake
+      - cmake-data
+      - python3.5-dev
+      - libboost-system-dev
+      - libboost-iostreams-dev
+    sources: &sources
+      - ubuntu-toolchain-r-test
+      - kubuntu-backports
+      - george-edison55-precise-backports # cmake 3.2.3 / doxygen 1.8.3
+
+
 cache:
   directories:
-  - $HOME/.cache/pip
-  - $HOME/Library/Caches/pip
-before_install:
-- |
-  # Configure build variables
-  if [ "$TRAVIS_OS_NAME" = "linux" ]; then
-    if [ -n "$CLANG" ]; then
-      export CXX=clang++-$CLANG CC=clang-$CLANG COMPILER_PACKAGES="clang-$CLANG llvm-$CLANG-dev"
-    else
-      if [ -z "$GCC" ]; then export GCC=5
-      else export COMPILER_PACKAGES=g++-$GCC
-      fi
-      export CXX=g++-$GCC CC=gcc-$GCC
-    fi
-    if [ "$GCC" = "6" ] || [ -n "$CLANG" ]; then export DOCKER=${ARCH:+$ARCH/}debian:testing
-    elif [ "$GCC" = "7" ]; then export DOCKER=debian:experimental APT_GET_EXTRA="-t experimental"
-    fi
-  elif [ "$TRAVIS_OS_NAME" = "osx" ]; then
-    export CXX=clang++ CC=clang;
-  fi
-  if [ -n "$CPP" ]; then export CPP=-std=c++$CPP; fi
-  if [ "${PYTHON:0:1}" = "3" ]; then export PY=3; fi
-  if [ -n "$DEBUG" ]; then export CMAKE_EXTRA_ARGS="-DCMAKE_BUILD_TYPE=Debug"; fi
-- |
-  # Initialize environment
-    if [ "$TRAVIS_OS_NAME" = "linux" ]; then
-      pip install --user --upgrade pip virtualenv
-      virtualenv -p python$PYTHON venv
-    elif [ "$TRAVIS_OS_NAME" = "osx" ]; then
-      if [ "$PY" = "3" ]; then
-        brew update; brew install python$PY;
-      else
-        curl -fsSL -O https://bootstrap.pypa.io/get-pip.py
-        sudo -H python get-pip.py
-      fi
-      pip$PY install --user --upgrade pip virtualenv
-      python$PY -m virtualenv venv
-    fi
-    source venv/bin/activate
+    - ${TRAVIS_BUILD_DIR}/deps/llvm-3.6.2
+    - ${TRAVIS_BUILD_DIR}/deps/llvm-3.7.1
+    - ${TRAVIS_BUILD_DIR}/deps/llvm-3.8.0
+    - ${TRAVIS_BUILD_DIR}/deps/llvm-3.9.0
+    - ${TRAVIS_BUILD_DIR}/deps/boost-1.59.0
+    - ${TRAVIS_BUILD_DIR}/deps/boost-1.60.0
+    - ${TRAVIS_BUILD_DIR}/deps/boost-1.61.0
+    - ${TRAVIS_BUILD_DIR}/deps/boost-1.62.0
+    - ${TRAVIS_BUILD_DIR}/deps/boost-1.63.0
+
+
+matrix:
+  exclude:
+    - env: TRAVIS_EMPTY_JOB_WORKAROUND=true
+
+  include:
+    ##########################################################################
+    # Check for code formatting errors
+    ##########################################################################
+    - os: osx
+      env: CHECK_FORMATTING=true
+      osx_image: xcode8
+
+    ##########################################################################
+    # Build with the main configuration on all the supported compilers
+    #
+    # Note that we only use the memory checker on the main configuration to
+    # speed up Travis builds.
+    ##########################################################################
+    # Clang 3.5
+    # TODO: Find out why this fails to compile the test suite.
+    # - env: UNIT_TESTS=true LLVM_VERSION=3.5.2 BOOST_VERSION=default ENABLE_MEMCHECK=true
+
+    # Clang 3.6
+    - os: linux
+      env: UNIT_TESTS=true LLVM_VERSION=3.6.2 BOOST_VERSION=default ENABLE_MEMCHECK=true
+      compiler: clang
+
+    # Clang 3.7
+    - os: linux
+      env: UNIT_TESTS=true LLVM_VERSION=3.7.1 BOOST_VERSION=default ENABLE_MEMCHECK=true
+      compiler: clang
+
+    # Clang 3.8
+    - os: linux
+      env: UNIT_TESTS=true LLVM_VERSION=3.8.0 BOOST_VERSION=default ENABLE_MEMCHECK=true
+      compiler: clang
+
+    # Clang 3.9
+    - os: linux
+      env: UNIT_TESTS=true LLVM_VERSION=3.9.0 BOOST_VERSION=default ENABLE_MEMCHECK=true
+      compiler: clang
+
+    # GCC 6
+    - os: linux
+      env: UNIT_TESTS=true COMPILER=g++-6     BOOST_VERSION=default ENABLE_MEMCHECK=true
+      compiler: gcc
+
+    # Xcode 6.4
+    - os: osx
+      env: UNIT_TESTS=true BOOST_VERSION=default
+      osx_image: xcode6.4
+
+    # Xcode 7.3
+    - os: osx
+      env: UNIT_TESTS=true BOOST_VERSION=default
+      osx_image: xcode7.3
+
+    # Xcode 8
+    - os: osx
+      env: UNIT_TESTS=true BOOST_VERSION=default
+      osx_image: xcode8
+
+    ##########################################################################
+    # Build with variations in the configuration
+    ##########################################################################
+    # Without concept checks
+    - os: linux
+      env: UNIT_TESTS=true LLVM_VERSION=default BOOST_VERSION=default CMAKE_OPTIONS="-DBOOST_HANA_ENABLE_CONCEPT_CHECKS=OFF"
+      compiler: clang
+
+    # With debug mode
+    - os: linux
+      env: UNIT_TESTS=true LLVM_VERSION=default BOOST_VERSION=default CMAKE_OPTIONS="-DBOOST_HANA_ENABLE_DEBUG_MODE=ON"
+      compiler: clang
+
+    # Without exceptions
+    - os: linux
+      env: UNIT_TESTS=true LLVM_VERSION=default BOOST_VERSION=default CMAKE_OPTIONS="-DBOOST_HANA_ENABLE_EXCEPTIONS=OFF"
+      compiler: clang
+
+    # Without exceptions on OS X
+    - os: osx
+      env: UNIT_TESTS=true BOOST_VERSION=default CMAKE_OPTIONS="-DBOOST_HANA_ENABLE_EXCEPTIONS=OFF"
+      osx_image: xcode8
+
+    # With Boost 1.59
+    - os: linux
+      env: UNIT_TESTS=true LLVM_VERSION=default BOOST_VERSION=1.59.0
+      compiler: clang
+
+    # With Boost 1.60
+    - os: linux
+      env: UNIT_TESTS=true LLVM_VERSION=default BOOST_VERSION=1.60.0
+      compiler: clang
+
+    # With Boost 1.61
+    - os: linux
+      env: UNIT_TESTS=true LLVM_VERSION=default BOOST_VERSION=1.61.0
+      compiler: clang
+
+    # With Boost 1.62
+    - os: linux
+      env: UNIT_TESTS=true LLVM_VERSION=default BOOST_VERSION=1.62.0
+      compiler: clang
+
+    # Without Boost (make sure we don't depend on it)
+    - os: linux
+      env: UNIT_TESTS=true LLVM_VERSION=default
+      compiler: clang
+
+    # With Boost.Build instead of CMake (on Linux)
+    - os: linux
+      env: UNIT_TESTS=true LLVM_VERSION=default BOOST_VERSION=default BOOST_BUILD=true
+      compiler: clang
+
+    # With Boost.Build instead of CMake (on OS X)
+    - os: osx
+      env: UNIT_TESTS=true BOOST_VERSION=default BOOST_BUILD=true
+      osx_image: xcode8
+
+
+    ##########################################################################
+    # Generate the documentation
+    ##########################################################################
+    - os: linux
+      env: DOCUMENTATION=true LLVM_VERSION=default BOOST_VERSION=default
+      compiler: clang
+    - os: linux
+      env: DOCUMENTATION=true LLVM_VERSION=default BOOST_VERSION=default BOOST_BUILD=true
+      compiler: clang
+
+
+    ##########################################################################
+    # Benchmarks
+    ##########################################################################
+    - os: linux
+      env: BENCHMARKS=true LLVM_VERSION=3.8.0 BOOST_VERSION=default CMAKE_OPTIONS="-DCMAKE_BUILD_TYPE=Release"
+      compiler: clang
+
+
+    ##########################################################################
+    # Jobs that are allowed to fail
+    ##########################################################################
+    # Clang trunk
+    # TODO: Find a way to download pre-built Clang trunk and enable this
+    # - os: linux
+    #   env: UNIT_TESTS=true LLVM_VERSION=trunk BOOST_VERSION=default
+    #   compiler: clang
+
+    # Boost trunk
+    - os: linux
+      env: UNIT_TESTS=true LLVM_VERSION=default BOOST_VERSION=trunk
+      compiler: clang
+
+
+  allow_failures:
+    # - env: UNIT_TESTS=true LLVM_VERSION=trunk BOOST_VERSION=default
+    - env: UNIT_TESTS=true LLVM_VERSION=default BOOST_VERSION=trunk
+
+
 install:
-- |
+  ############################################################################
+  # All the dependencies are installed in ${TRAVIS_BUILD_DIR}/deps/
+  ############################################################################
+  - DEPS_DIR="${TRAVIS_BUILD_DIR}/deps"
+  - mkdir -p ${DEPS_DIR} && cd ${DEPS_DIR}
+
+  ############################################################################
+  # Setup default versions and override compiler if needed
+  ############################################################################
+  - if [[ "${LLVM_VERSION}" == "default" ]]; then LLVM_VERSION=3.9.0; fi
+  - if [[ "${BOOST_VERSION}" == "default" ]]; then BOOST_VERSION=1.63.0; fi
+
+  - if [[ "${COMPILER}" != "" ]]; then export CXX=${COMPILER}; fi
+
+  ############################################################################
+  # Install Boost headers
+  ############################################################################
+  - |
+    if [[ "${BOOST_VERSION}" != "" ]]; then
+      BOOST_DIR=${DEPS_DIR}/boost-${BOOST_VERSION}
+      if [[ -z "$(ls -A ${BOOST_DIR})" ]]; then
+        if [[ "${BOOST_VERSION}" == "trunk" ]]; then
+          BOOST_URL="http://github.com/boostorg/boost.git"
+          travis_retry git clone --depth 1 --recursive --quiet ${BOOST_URL} ${BOOST_DIR} || exit 1
+          (cd ${BOOST_DIR} && ./bootstrap.sh && ./b2 headers)
+        else
+          BOOST_URL="http://sourceforge.net/projects/boost/files/boost/${BOOST_VERSION}/boost_${BOOST_VERSION//\./_}.tar.gz"
+          mkdir -p ${BOOST_DIR}
+          { travis_retry wget --quiet -O - ${BOOST_URL} | tar --strip-components=1 -xz -C ${BOOST_DIR}; } || exit 1
+        fi
+        # Make sure we don't conflict with the Hana shipped with Boost
+        rm -rf ${BOOST_ROOT}/include/boost/{hana,hana.hpp}
+      fi
+      CMAKE_OPTIONS+=" -DBOOST_ROOT=${BOOST_DIR}"
+    fi
+
+  ############################################################################
+  # Install a recent CMake
+  ############################################################################
+  - |
+    if [[ "${TRAVIS_OS_NAME}" == "linux" ]]; then
+      CMAKE_URL="https://cmake.org/files/v3.7/cmake-3.7.2-Linux-x86_64.tar.gz"
+      mkdir cmake && travis_retry wget --no-check-certificate --quiet -O - ${CMAKE_URL} | tar --strip-components=1 -xz -C cmake
+      export PATH=${DEPS_DIR}/cmake/bin:${PATH}
+    else
+      brew install cmake
+      brew upgrade cmake
+    fi
+  - cmake --version
+
+  ############################################################################
+  # Install Boost.Build
+  ############################################################################
+  - |
+    if [[ "${BOOST_BUILD}" == "true" ]]; then
+      (cd ${BOOST_DIR}/tools/build && ./bootstrap.sh && ./b2 install --prefix=${DEPS_DIR}/b2)
+      export PATH=${DEPS_DIR}/b2/bin:${PATH}
+    fi
+
+  ############################################################################
+  # Install Clang, libc++ and libc++abi
+  ############################################################################
+  - |
+    if [[ "${LLVM_VERSION}" != "" ]]; then
+      LLVM_DIR=${DEPS_DIR}/llvm-${LLVM_VERSION}
+      if [[ -z "$(ls -A ${LLVM_DIR})" ]]; then
+        LLVM_URL="http://llvm.org/releases/${LLVM_VERSION}/llvm-${LLVM_VERSION}.src.tar.xz"
+        LIBCXX_URL="http://llvm.org/releases/${LLVM_VERSION}/libcxx-${LLVM_VERSION}.src.tar.xz"
+        LIBCXXABI_URL="http://llvm.org/releases/${LLVM_VERSION}/libcxxabi-${LLVM_VERSION}.src.tar.xz"
+        CLANG_URL="http://llvm.org/releases/${LLVM_VERSION}/clang+llvm-${LLVM_VERSION}-x86_64-linux-gnu-ubuntu-14.04.tar.xz"
+
+        mkdir -p ${LLVM_DIR} ${LLVM_DIR}/build ${LLVM_DIR}/projects/libcxx ${LLVM_DIR}/projects/libcxxabi ${LLVM_DIR}/clang
+        travis_retry wget --quiet -O - ${LLVM_URL}      | tar --strip-components=1 -xJ -C ${LLVM_DIR}
+        travis_retry wget --quiet -O - ${LIBCXX_URL}    | tar --strip-components=1 -xJ -C ${LLVM_DIR}/projects/libcxx
+        travis_retry wget --quiet -O - ${LIBCXXABI_URL} | tar --strip-components=1 -xJ -C ${LLVM_DIR}/projects/libcxxabi
+        travis_retry wget --quiet -O - ${CLANG_URL}     | tar --strip-components=1 -xJ -C ${LLVM_DIR}/clang
+        (cd ${LLVM_DIR}/build && cmake .. -DCMAKE_INSTALL_PREFIX=${LLVM_DIR}/install -DCMAKE_CXX_COMPILER=clang++)
+        (cd ${LLVM_DIR}/build/projects/libcxx && make install -j2)
+        (cd ${LLVM_DIR}/build/projects/libcxxabi && make install -j2)
+      fi
+
+      export CXXFLAGS="-nostdinc++ -isystem ${LLVM_DIR}/install/include/c++/v1"
+      export LDFLAGS="-L ${LLVM_DIR}/install/lib -l c++ -l c++abi"
+      export LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:${LLVM_DIR}/install/lib"
+      export PATH="${LLVM_DIR}/clang/bin:${PATH}"
+    fi
+  - ${CXX} --version
+
+  ############################################################################
+  # Install a recent Doxygen
+  ############################################################################
+  - |
+    if [[ "${DOCUMENTATION}" == "true" ]]; then
+      DOXYGEN_URL="http://ftp.stack.nl/pub/users/dimitri/doxygen-1.8.11.linux.bin.tar.gz"
+      mkdir doxygen && travis_retry wget --quiet -O - ${DOXYGEN_URL} | tar --strip-components=1 -xz -C doxygen
+      export PATH=${DEPS_DIR}/doxygen/bin:${PATH}
+      doxygen --version
+    fi
+
+  ############################################################################
+  # Install and use a more recent Ruby and install the gems for the benchmarks
+  ############################################################################
+  - rvm use 2.1 --install --binary --fuzzy
+  - gem install ruby-progressbar tilt
+
+  ############################################################################
+  # Install tools to check for code formatting errors (run on OS X only)
+  ############################################################################
+  - if [[ "${CHECK_FORMATTING}" == "true" ]]; then brew install pcre vera++; fi
+
+  - |
     pip install numpy scipy pytest pandas future jinja2 pytest-xdist hypothesis enum34
     git clone https://github.com/moble/quaternion.git
     cd quaternion
@@ -98,12 +320,22 @@ install:
     cd external/hacked_packages/pytest-cpp-0.4
     pip install .
     cd ../../../
-    # wget -q -O eigen.tar.gz https://bitbucket.org/eigen/eigen/get/3.3.0.tar.gz
-    # tar xzf eigen.tar.gz
-    export CMAKE_EXTRA_ARGS="${CMAKE_EXTRA_ARGS} -DCMAKE_INCLUDE_PATH=$PWD/eigen-eigen-26667be4f70b"
+
+before_script:
+  ############################################################################
+  # Set the git identity (for pushing the documentation and the benchmarks)
+  ############################################################################
+  - git config --global user.name "Travis bot"
+  - git config --global user.email "<>"
+
+  ############################################################################
+  # Go back to the root of the project and setup the build directory
+  ############################################################################
+  - cd ${TRAVIS_BUILD_DIR}
+  - (mkdir build && cd build && cmake .. ${CMAKE_OPTIONS})
+
 
 script:
-- $SCRIPT_RUN_PREFIX python tools/cmake_build_and_run_pytest.py
-after_failure: cat tests/test_cmake_build/*.log
-after_script:
-# - if [ -n "$DOCKER" ]; then docker stop "$containerid"; docker rm "$containerid"; fi
+  - python tools/cmake_build_and_run_pytest.py
+
+

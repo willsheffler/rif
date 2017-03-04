@@ -195,13 +195,16 @@ def build_and_run_pytest(redo_cmake=False):
         proj_root = bytes(proj_root, 'ascii')
     args = [x for x in sys.argv[1:] if x.endswith('.py') and
             os.path.basename(x).startswith('test')]
-    ncpu = int(multiprocessing.cpu_count() / 2)
-    print('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
-    print(os.getcwd())
-    for f in os.listdir('.'):
-        print(f)
-    print('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
-
+    ncpu = multiprocessing.cpu_count()
+    if ncpu > 2:
+        ncpu /= 2
+    if 'CI' in os.environ:
+        print('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
+        print(os.getcwd())
+        for f in os.listdir('.'):
+            print(f)
+        os.system('find . -name numpy_quaternion.so')
+        print('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
     if not args:
         args = ('. --ignore build -n%s' % (ncpu)).split()
     else:  # running one file, don't scan
@@ -209,4 +212,4 @@ def build_and_run_pytest(redo_cmake=False):
     for decoy in get_ignored_dirs(cfg):
         args += ['--ignore', decoy]
     print('pytest.main(', ' '.join(args), ')')
-    pytest.main(args)
+    return pytest.main(args)
