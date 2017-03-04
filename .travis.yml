@@ -256,13 +256,13 @@ install:
 
   - |
     cd ${TRAVIS_BUILD_DIR}
-    pip install future jinja2 pytest pytest-xdist hypothesis enum34
+    pip install --user future jinja2 pytest pytest-xdist hypothesis enum34
     git clone https://github.com/moble/quaternion.git
     cd quaternion
-    pip install .
+    pip install --user .
     cd ..
     cd external/hacked_packages/pytest-cpp-0.4
-    pip install .
+    pip install --user .
 
 before_script:
   - cd ${TRAVIS_BUILD_DIR}
