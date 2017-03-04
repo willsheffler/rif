@@ -105,16 +105,17 @@ before_install:
 install:
 - |
   if [ ]; then
-  # Install dependencies
-  # if [ -n "$DOCKER" ]; then
-    # if [ -n "$DEBUG" ]; then
-      # PY_DEBUG="python$PY-dbg python$PY-scipy-dbg"
-      # export CMAKE_EXTRA_ARGS="${CMAKE_EXTRA_ARGS} -DPYTHON_EXECUTABLE=/usr/bin/python${PYTHON}dm"
-    # fi
-    # docker exec --tty "$containerid" sh -c "for s in 0 15; do sleep \$s; \
-      # apt-get -qy --no-install-recommends $APT_GET_EXTRA install \
-        # $PY_DEBUG python$PY-dev python$PY-pytest python$PY-scipy python$PY-pandas \
-        # libeigen3-dev cmake make ${COMPILER_PACKAGES} && break; done"
+    echo docker: $DOCKER
+    # Install dependencies
+    # if [ -n "$DOCKER" ]; then
+      # if [ -n "$DEBUG" ]; then
+        # PY_DEBUG="python$PY-dbg python$PY-scipy-dbg"
+        # export CMAKE_EXTRA_ARGS="${CMAKE_EXTRA_ARGS} -DPYTHON_EXECUTABLE=/usr/bin/python${PYTHON}dm"
+      # fi
+      # docker exec --tty "$containerid" sh -c "for s in 0 15; do sleep \$s; \
+        # apt-get -qy --no-install-recommends $APT_GET_EXTRA install \
+          # $PY_DEBUG python$PY-dev python$PY-pytest python$PY-scipy python$PY-pandas \
+          # libeigen3-dev cmake make ${COMPILER_PACKAGES} && break; done"
   else
     pip install numpy scipy pytest pandas future jinja2 pytest-xdist hypothesis enum34
     git clone https://github.com/moble/quaternion.git
