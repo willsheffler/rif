@@ -313,6 +313,7 @@ install:
   - if [[ "${CHECK_FORMATTING}" == "true" ]]; then brew install pcre vera++; fi
 
   - |
+    pip install --upgrade pip
     pip install numpy scipy pytest pandas future jinja2 pytest-xdist hypothesis enum34
     git clone https://github.com/moble/quaternion.git
     cd quaternion
