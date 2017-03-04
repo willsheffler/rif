@@ -258,6 +258,7 @@ install:
   - if [[ "${CHECK_FORMATTING}" == "true" ]]; then brew install pcre vera++; fi
 
   - |
+  - cd ${TRAVIS_BUILD_DIR}
     pip install future jinja2 pytest pytest-xdist hypothesis enum34
     git clone https://github.com/moble/quaternion.git
     cd quaternion
