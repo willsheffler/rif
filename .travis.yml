@@ -104,7 +104,7 @@ before_install:
   fi
 install:
 - |
-if [ ]; then
+  if [ ]; then
   # Install dependencies
   # if [ -n "$DOCKER" ]; then
     # if [ -n "$DEBUG" ]; then
