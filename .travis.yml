@@ -21,6 +21,7 @@ addons:
       # - python3.5-dev
       - libboost-system-dev
       - libboost-iostreams-dev
+      - python-pip
       - python-numpy
       - python-pandas
     sources: &sources
@@ -105,29 +106,6 @@ matrix:
       env: UNIT_TESTS=true BOOST_VERSION=default
       osx_image: xcode8
 
-    ##########################################################################
-    # Build with variations in the configuration
-    ##########################################################################
-    # Without concept checks
-    - os: linux
-      env: UNIT_TESTS=true LLVM_VERSION=default BOOST_VERSION=default CMAKE_OPTIONS="-DBOOST_HANA_ENABLE_CONCEPT_CHECKS=OFF"
-      compiler: clang
-
-    # With debug mode
-    - os: linux
-      env: UNIT_TESTS=true LLVM_VERSION=default BOOST_VERSION=default CMAKE_OPTIONS="-DBOOST_HANA_ENABLE_DEBUG_MODE=ON"
-      compiler: clang
-
-    # Without exceptions
-    - os: linux
-      env: UNIT_TESTS=true LLVM_VERSION=default BOOST_VERSION=default CMAKE_OPTIONS="-DBOOST_HANA_ENABLE_EXCEPTIONS=OFF"
-      compiler: clang
-
-    # Without exceptions on OS X
-    - os: osx
-      env: UNIT_TESTS=true BOOST_VERSION=default CMAKE_OPTIONS="-DBOOST_HANA_ENABLE_EXCEPTIONS=OFF"
-      osx_image: xcode8
-
     # With Boost 1.59
     - os: linux
       env: UNIT_TESTS=true LLVM_VERSION=default BOOST_VERSION=1.59.0
@@ -148,21 +126,6 @@ matrix:
       env: UNIT_TESTS=true LLVM_VERSION=default BOOST_VERSION=1.62.0
       compiler: clang
 
-    # Without Boost (make sure we don't depend on it)
-    - os: linux
-      env: UNIT_TESTS=true LLVM_VERSION=default
-      compiler: clang
-
-    # With Boost.Build instead of CMake (on Linux)
-    - os: linux
-      env: UNIT_TESTS=true LLVM_VERSION=default BOOST_VERSION=default BOOST_BUILD=true
-      compiler: clang
-
-    # With Boost.Build instead of CMake (on OS X)
-    - os: osx
-      env: UNIT_TESTS=true BOOST_VERSION=default BOOST_BUILD=true
-      osx_image: xcode8
-
 
     ##########################################################################
     # Generate the documentation
@@ -170,32 +133,12 @@ matrix:
     - os: linux
       env: DOCUMENTATION=true LLVM_VERSION=default BOOST_VERSION=default
       compiler: clang
-    - os: linux
-      env: DOCUMENTATION=true LLVM_VERSION=default BOOST_VERSION=default BOOST_BUILD=true
+    - os: osx
+      env: DOCUMENTATION=true LLVM_VERSION=default BOOST_VERSION=default
       compiler: clang
 
 
-    ##########################################################################
-    # Benchmarks
-    ##########################################################################
-    - os: linux
-      env: BENCHMARKS=true LLVM_VERSION=3.8.0 BOOST_VERSION=default CMAKE_OPTIONS="-DCMAKE_BUILD_TYPE=Release"
-      compiler: clang
 
-
-    ##########################################################################
-    # Jobs that are allowed to fail
-    ##########################################################################
-    # Clang trunk
-    # TODO: Find a way to download pre-built Clang trunk and enable this
-    # - os: linux
-    #   env: UNIT_TESTS=true LLVM_VERSION=trunk BOOST_VERSION=default
-    #   compiler: clang
-
-    # Boost trunk
-    - os: linux
-      env: UNIT_TESTS=true LLVM_VERSION=default BOOST_VERSION=trunk
-      compiler: clang
 
 
   allow_failures:
@@ -315,7 +258,6 @@ install:
   - if [[ "${CHECK_FORMATTING}" == "true" ]]; then brew install pcre vera++; fi
 
   - |
-    pip install --upgrade pip --user
     pip install future jinja2 pytest pytest-xdist hypothesis enum34
     git clone https://github.com/moble/quaternion.git
     cd quaternion
@@ -325,21 +267,16 @@ install:
     pip install .
     cd ../../../
 
-before_script:
-  ############################################################################
-  # Set the git identity (for pushing the documentation and the benchmarks)
-  ############################################################################
-  - git config --global user.name "Travis bot"
-  - git config --global user.email "<>"
-
-  ############################################################################
-  # Go back to the root of the project and setup the build directory
-  ############################################################################
-  - cd ${TRAVIS_BUILD_DIR}
-  - (mkdir build && cd build && cmake .. ${CMAKE_OPTIONS})
+# before_script:
 
 
 script:
-  - python tools/cmake_build_and_run_pytest.py
+  - |
+    if [[ "${UNIT_TESTS}" == "true" ]]; then
+      python tools/cmake_build_and_run_pytest.py
+    elif [[ "${DOCUMENTATION}" == "true" ]]; then
+      cd docs
+      make html
+    fi
 
 
