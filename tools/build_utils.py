@@ -196,6 +196,9 @@ def build_and_run_pytest(redo_cmake=False):
     args = [x for x in sys.argv[1:] if x.endswith('.py') and
             os.path.basename(x).startswith('test')]
     ncpu = int(multiprocessing.cpu_count() / 2)
+    print('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
+    print(os.getcwd())
+    print('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
     if not args:
         args = ['.', '--ignore', 'build', '-n%s' % (ncpu)]
     else:  # running one file, don't scan
