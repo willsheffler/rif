@@ -64,31 +64,31 @@ matrix:
     ##########################################################################
     # Clang 3.5
     # TODO: Find out why this fails to compile the test suite.
-    # - env: UNIT_TESTS=true LLVM_VERSION=3.5.2 BOOST_VERSION=default ENABLE_MEMCHECK=true
+    # - env: UNIT_TESTS=true LLVM_VERSION=3.5.2 BOOST_VERSION=default
 
     # Clang 3.6
     - os: linux
-      env: UNIT_TESTS=true LLVM_VERSION=3.6.2 BOOST_VERSION=default ENABLE_MEMCHECK=true
+      env: UNIT_TESTS=true LLVM_VERSION=3.6.2 BOOST_VERSION=default
       compiler: clang
 
     # Clang 3.7
     - os: linux
-      env: UNIT_TESTS=true LLVM_VERSION=3.7.1 BOOST_VERSION=default ENABLE_MEMCHECK=true
+      env: UNIT_TESTS=true LLVM_VERSION=3.7.1 BOOST_VERSION=default
       compiler: clang
 
     # Clang 3.8
     - os: linux
-      env: UNIT_TESTS=true LLVM_VERSION=3.8.0 BOOST_VERSION=default ENABLE_MEMCHECK=true
+      env: UNIT_TESTS=true LLVM_VERSION=3.8.0 BOOST_VERSION=default
       compiler: clang
 
     # Clang 3.9
     - os: linux
-      env: UNIT_TESTS=true LLVM_VERSION=3.9.0 BOOST_VERSION=default ENABLE_MEMCHECK=true
+      env: UNIT_TESTS=true LLVM_VERSION=3.9.0 BOOST_VERSION=default
       compiler: clang
 
     # GCC 6
     - os: linux
-      env: UNIT_TESTS=true COMPILER=g++-6     BOOST_VERSION=default ENABLE_MEMCHECK=true
+      env: UNIT_TESTS=true COMPILER=g++-6     BOOST_VERSION=default
       compiler: gcc
 
     # Xcode 6.4
@@ -267,12 +267,27 @@ install:
     pip install .
     cd ../../../
 
-# before_script:
+before_script:
+  - cd ${TRAVIS_BUILD_DIR}
 
 
 script:
+    ############################################################################
+  # Check for common formatting errors.
+  ############################################################################
   - |
-    if [[ "${UNIT_TESTS}" == "true" ]]; then
+    if [[ "${CHECK_FORMATTING}" == "true" ]]; then
+      # Find non-ASCII characters in headers
+      hpps=$(find include doc -name \*\.hpp)
+      cpps=$(find test example -name \*\.cpp)
+      pcregrep --color='auto' -n "[\x80-\xFF]" ${hpps} ${cpps}
+      if [[ $? -ne 1 ]]; then exit 1; fi
+
+      # F001: Source files should not use the '\r' (CR) character
+      # L001: No trailing whitespace at the end of lines
+      # L002: Don't use tab characters
+      find include -name \*\.hpp | vera++ --rule F001 --rule L001 --rule L002 --error
+    elif [[ "${UNIT_TESTS}" == "true" ]]; then
       python tools/cmake_build_and_run_pytest.py
     elif [[ "${DOCUMENTATION}" == "true" ]]; then
       cd docs
