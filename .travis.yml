@@ -14,15 +14,15 @@ matrix:
       apt:
         sources: [ubuntu-toolchain-r-test, kubuntu-backports, deadsnakes]
         packages: [g++-5, cmake, python3.5-dev, libboost-system-dev, libboost-iostreams-dev]
-  - sudo: true
-    services: docker
-    env: PYTHON=2.7 CPP=14 GCC=6
-  - sudo: true
-    services: docker
-    env: PYTHON=3.5 CPP=14 GCC=6 DEBUG=1
-  - sudo: true
-    services: docker
-    env: PYTHON=3.5 CPP=17 GCC=7
+  # - sudo: true
+    # services: docker
+    # env: PYTHON=2.7 CPP=14 GCC=6
+  # - sudo: true
+    # services: docker
+    # env: PYTHON=3.5 CPP=14 GCC=6 DEBUG=1
+  # - sudo: true
+    # services: docker
+    # env: PYTHON=3.5 CPP=17 GCC=7
   - os: osx
     osx_image: xcode7.3
     env: PYTHON=2.7 CPP=14 CLANG
@@ -71,20 +71,21 @@ before_install:
   if [ -n "$DEBUG" ]; then export CMAKE_EXTRA_ARGS="-DCMAKE_BUILD_TYPE=Debug"; fi
 - |
   # Initialize environment
-  if [ -n "$DOCKER" ]; then
-    docker pull $DOCKER
-    # Disable LTO with gcc until gcc 79296 is fixed:
-    export CMAKE_EXTRA_ARGS="${CMAKE_EXTRA_ARGS} -DPYBIND11_LTO_CXX_FLAGS="
-    export containerid=$(docker run --detach --tty \
-      --volume="$PWD":/pybind11 --workdir=/pybind11 \
-      --env="CXXFLAGS=$CXXFLAGS" \
-      --env="CC=$CC" --env="CXX=$CXX" --env="DEBIAN_FRONTEND=$DEBIAN_FRONTEND" \
-      --env=GCC_COLORS=\  \
-      $DOCKER)
-    docker exec --tty "$containerid" sh -c 'for s in 0 15; do sleep $s; apt-get update && apt-get -qy dist-upgrade && break; done'
-    export SCRIPT_RUN_PREFIX="docker exec --tty $containerid"
-    # gcc-7 currently generates warnings; some are upstream bugs, so just turn off -Werror for now
-    if [ "$GCC" = "7" ]; then WERROR=off; fi
+  if [ ]; then
+  # if [ -n "$DOCKER" ]; then
+  #   docker pull $DOCKER
+  #   # Disable LTO with gcc until gcc 79296 is fixed:
+  #   export CMAKE_EXTRA_ARGS="${CMAKE_EXTRA_ARGS} -DPYBIND11_LTO_CXX_FLAGS="
+  #   export containerid=$(docker run --detach --tty \
+  #     --volume="$PWD":/pybind11 --workdir=/pybind11 \
+  #     --env="CXXFLAGS=$CXXFLAGS" \
+  #     --env="CC=$CC" --env="CXX=$CXX" --env="DEBIAN_FRONTEND=$DEBIAN_FRONTEND" \
+  #     --env=GCC_COLORS=\  \
+  #     $DOCKER)
+  #   docker exec --tty "$containerid" sh -c 'for s in 0 15; do sleep $s; apt-get update && apt-get -qy dist-upgrade && break; done'
+  #   export SCRIPT_RUN_PREFIX="docker exec --tty $containerid"
+  #   # gcc-7 currently generates warnings; some are upstream bugs, so just turn off -Werror for now
+  #   if [ "$GCC" = "7" ]; then WERROR=off; fi
   else
     if [ "$TRAVIS_OS_NAME" = "linux" ]; then
       pip install --user --upgrade pip virtualenv
@@ -103,19 +104,23 @@ before_install:
   fi
 install:
 - |
+if [ ]; then
   # Install dependencies
-  if [ -n "$DOCKER" ]; then
-    if [ -n "$DEBUG" ]; then
-      PY_DEBUG="python$PY-dbg python$PY-scipy-dbg"
-      export CMAKE_EXTRA_ARGS="${CMAKE_EXTRA_ARGS} -DPYTHON_EXECUTABLE=/usr/bin/python${PYTHON}dm"
-    fi
-    docker exec --tty "$containerid" sh -c "for s in 0 15; do sleep \$s; \
-      apt-get -qy --no-install-recommends $APT_GET_EXTRA install \
-        $PY_DEBUG python$PY-dev python$PY-pytest python$PY-scipy python$PY-pandas \
-        libeigen3-dev cmake make ${COMPILER_PACKAGES} && break; done"
+  # if [ -n "$DOCKER" ]; then
+    # if [ -n "$DEBUG" ]; then
+      # PY_DEBUG="python$PY-dbg python$PY-scipy-dbg"
+      # export CMAKE_EXTRA_ARGS="${CMAKE_EXTRA_ARGS} -DPYTHON_EXECUTABLE=/usr/bin/python${PYTHON}dm"
+    # fi
+    # docker exec --tty "$containerid" sh -c "for s in 0 15; do sleep \$s; \
+      # apt-get -qy --no-install-recommends $APT_GET_EXTRA install \
+        # $PY_DEBUG python$PY-dev python$PY-pytest python$PY-scipy python$PY-pandas \
+        # libeigen3-dev cmake make ${COMPILER_PACKAGES} && break; done"
   else
-    pip install numpy scipy pytest pandas future jinja2 pytest-xdist hypothesis
-    pip install numpy-quaternion
+    pip install numpy scipy pytest pandas future jinja2 pytest-xdist hypothesis enum34
+    git clone https://github.com/moble/quaternion.git
+    cd quaternion
+    pip install .
+    cd ..
     cd external/hacked_packages/pytest-cpp-0.4
     pip install .
     cd ../../../
@@ -127,4 +132,4 @@ script:
 - $SCRIPT_RUN_PREFIX python tools/cmake_build_and_run_pytest.py
 after_failure: cat tests/test_cmake_build/*.log
 after_script:
-- if [ -n "$DOCKER" ]; then docker stop "$containerid"; docker rm "$containerid"; fi
+# - if [ -n "$DOCKER" ]; then docker stop "$containerid"; docker rm "$containerid"; fi

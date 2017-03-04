@@ -198,7 +198,10 @@ def build_and_run_pytest(redo_cmake=False):
     ncpu = int(multiprocessing.cpu_count() / 2)
     print('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
     print(os.getcwd())
+    for f in os.listdir('.'):
+        print(f)
     print('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
+
     if not args:
         args = ['.', '--ignore', 'build', '-n%s' % (ncpu)]
     else:  # running one file, don't scan
@@ -206,4 +209,5 @@ def build_and_run_pytest(redo_cmake=False):
     for decoy in get_ignored_dirs(cfg):
         args += ['--ignore', decoy]
     print('pytest.main(', ' '.join(args), ')')
-    pytest.main(args)
+    if not 'CI' in os.environ:
+        pytest.main(args)
