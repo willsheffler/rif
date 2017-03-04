@@ -71,22 +71,6 @@ before_install:
   if [ -n "$DEBUG" ]; then export CMAKE_EXTRA_ARGS="-DCMAKE_BUILD_TYPE=Debug"; fi
 - |
   # Initialize environment
-  if [ ]; then
-  # if [ -n "$DOCKER" ]; then
-  #   docker pull $DOCKER
-  #   # Disable LTO with gcc until gcc 79296 is fixed:
-  #   export CMAKE_EXTRA_ARGS="${CMAKE_EXTRA_ARGS} -DPYBIND11_LTO_CXX_FLAGS="
-  #   export containerid=$(docker run --detach --tty \
-  #     --volume="$PWD":/pybind11 --workdir=/pybind11 \
-  #     --env="CXXFLAGS=$CXXFLAGS" \
-  #     --env="CC=$CC" --env="CXX=$CXX" --env="DEBIAN_FRONTEND=$DEBIAN_FRONTEND" \
-  #     --env=GCC_COLORS=\  \
-  #     $DOCKER)
-  #   docker exec --tty "$containerid" sh -c 'for s in 0 15; do sleep $s; apt-get update && apt-get -qy dist-upgrade && break; done'
-  #   export SCRIPT_RUN_PREFIX="docker exec --tty $containerid"
-  #   # gcc-7 currently generates warnings; some are upstream bugs, so just turn off -Werror for now
-  #   if [ "$GCC" = "7" ]; then WERROR=off; fi
-  else
     if [ "$TRAVIS_OS_NAME" = "linux" ]; then
       pip install --user --upgrade pip virtualenv
       virtualenv -p python$PYTHON venv
@@ -101,22 +85,8 @@ before_install:
       python$PY -m virtualenv venv
     fi
     source venv/bin/activate
-  fi
 install:
 - |
-  if [ ]; then
-    echo docker: $DOCKER
-    # Install dependencies
-    # if [ -n "$DOCKER" ]; then
-      # if [ -n "$DEBUG" ]; then
-        # PY_DEBUG="python$PY-dbg python$PY-scipy-dbg"
-        # export CMAKE_EXTRA_ARGS="${CMAKE_EXTRA_ARGS} -DPYTHON_EXECUTABLE=/usr/bin/python${PYTHON}dm"
-      # fi
-      # docker exec --tty "$containerid" sh -c "for s in 0 15; do sleep \$s; \
-        # apt-get -qy --no-install-recommends $APT_GET_EXTRA install \
-          # $PY_DEBUG python$PY-dev python$PY-pytest python$PY-scipy python$PY-pandas \
-          # libeigen3-dev cmake make ${COMPILER_PACKAGES} && break; done"
-  else
     pip install numpy scipy pytest pandas future jinja2 pytest-xdist hypothesis enum34
     git clone https://github.com/moble/quaternion.git
     cd quaternion
@@ -128,7 +98,7 @@ install:
     # wget -q -O eigen.tar.gz https://bitbucket.org/eigen/eigen/get/3.3.0.tar.gz
     # tar xzf eigen.tar.gz
     export CMAKE_EXTRA_ARGS="${CMAKE_EXTRA_ARGS} -DCMAKE_INCLUDE_PATH=$PWD/eigen-eigen-26667be4f70b"
-  fi
+
 script:
 - $SCRIPT_RUN_PREFIX python tools/cmake_build_and_run_pytest.py
 after_failure: cat tests/test_cmake_build/*.log
