@@ -134,6 +134,10 @@ class CMakeBuild(build_ext):
                       '-DPYTHON_EXECUTABLE=' + sys.executable,
                       ]
 
+        if 'CI' in os.environ:
+            print('checking for CMAKE_OPTIONS')
+            for k, v in os.environ.items():
+                print('ENV', k, '=', v)
         if 'CMAKE_OPTIONS' in os.environ:
             print('setup.py add CMAKE_OPTIONS:', os.environ['CMAKE_OPTIONS'])
             cmake_args += os.environ['CMAKE_OPTIONS'].split()
