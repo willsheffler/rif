@@ -119,7 +119,8 @@ install:
         $PY_DEBUG python$PY-dev python$PY-pytest python$PY-scipy python$PY-pandas \
         libeigen3-dev cmake make ${COMPILER_PACKAGES} && break; done"
   else
-    pip install numpy scipy pytest pandas
+    pip install numpy scipy pytest pandas future jinja2
+    pip install numpy-quaternion
     cd external/hacked_packages/pytest-cpp-0.4
     pip install .
     cd ../../../
