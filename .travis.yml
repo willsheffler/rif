@@ -134,15 +134,6 @@ matrix:
       env: DOCUMENTATION=true LLVM_VERSION=default BOOST_VERSION=default
       compiler: clang
 
-
-
-
-
-  allow_failures:
-    # - env: UNIT_TESTS=true LLVM_VERSION=trunk BOOST_VERSION=default
-    - env: UNIT_TESTS=true LLVM_VERSION=default BOOST_VERSION=trunk
-
-
 install:
   ############################################################################
   # All the dependencies are installed in ${TRAVIS_BUILD_DIR}/deps/

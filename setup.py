@@ -133,6 +133,7 @@ class CMakeBuild(build_ext):
         cmake_args = ['-DCMAKE_LIBRARY_OUTPUT_DIRECTORY=' + extdir,
                       '-DPYTHON_EXECUTABLE=' + sys.executable,
                       ]
+
         if 'CMAKE_OPTIONS' in os.environ:
             print('setup.py add CMAKE_OPTIONS:', os.environ['CMAKE_OPTIONS'])
             cmake_args += os.environ['CMAKE_OPTIONS'].split()

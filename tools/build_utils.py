@@ -197,7 +197,7 @@ def build_and_run_pytest(redo_cmake=False):
             os.path.basename(x).startswith('test')]
     ncpu = multiprocessing.cpu_count()
     if ncpu > 2:
-        ncpu /= 2
+        ncpu = int(ncpu / 2)
     if 'CI' in os.environ:
         print('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
         print(os.getcwd())

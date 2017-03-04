@@ -35,6 +35,7 @@ function(print_config)
     message("cmake: CMAKE_BUILD_TYPE: " ${CMAKE_BUILD_TYPE})
     message("cmake: CMAKE_CXX_FLAGS: " ${CMAKE_CXX_FLAGS})
     message("cmake: extra_libs: " ${extra_libs})
+    message("cmake: CMAKE_OPTIONS : " $ENV{CMAKE_OPTIONS})    
 endfunction()
 
 function(make_any_missing__init__py_and_copy_py_to_liboutdir)
