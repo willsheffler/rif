@@ -7,13 +7,13 @@ matrix:
     addons:
       apt:
         sources: [ubuntu-toolchain-r-test, kubuntu-backports]
-        packages: [g++-5, cmake]
+        packages: [g++-5, cmake, libboost-system-dev, libboost-iostreams-dev]
   - os: linux
     env: PYTHON=3.5 CPP=11 GCC=5
     addons:
       apt:
         sources: [ubuntu-toolchain-r-test, kubuntu-backports, deadsnakes]
-        packages: [g++-5, cmake, python3.5-dev]
+        packages: [g++-5, cmake, python3.5-dev, libboost-system-dev, libboost-iostreams-dev]
   - sudo: true
     services: docker
     env: PYTHON=2.7 CPP=14 GCC=6
