@@ -21,7 +21,6 @@ addons:
       # - python3.5-dev
       - libboost-system-dev
       - libboost-iostreams-dev
-      - python-pytest
       - python-numpy
       - python-pandas
     sources: &sources
@@ -317,7 +316,7 @@ install:
 
   - |
     pip install --upgrade pip --user
-    pip install future jinja2 pytest-xdist hypothesis enum34
+    pip install future jinja2 pytest pytest-xdist hypothesis enum34
     git clone https://github.com/moble/quaternion.git
     cd quaternion
     pip install .
