@@ -8,6 +8,7 @@ of *.pybind.cpp components"""
 import subprocess
 import os
 import re
+import datetime
 from collections import OrderedDict
 
 import jinja2
@@ -120,7 +121,8 @@ def main(template_fname, srcdir, dstdir):
     forward, code = shitty_make_code(pymodules)
     with open(template_fname, 'r') as template_file:
         template = jinja2.Template(template_file.read())
-    newcontent = template.render(forward=forward, code=code)
+    newcontent = template.render(
+        forward=forward, code=code, mydate=str(datetime.datetime.now()))
     update_file_if_needed(destfile, newcontent)
 
 if __name__ == '__main__':

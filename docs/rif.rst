@@ -1,12 +1,12 @@
 RIF Module Documentation
 **************************
 
-module rif:
-------------
+package rif:
+--------------
 .. automodule:: rif
 
-module rif_cpp:
----------------
+package rif_cpp:
+-------------------
 .. automodule:: rif_cpp
 
 doxygen test:

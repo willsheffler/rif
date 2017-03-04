@@ -35,6 +35,13 @@ def my_getenv(name):
         return "DEFAULT_" + name
 
 
+def in_conda():
+    return ('Anaconda' in sys.version or
+            'Continuum Analytics' in sys.version or
+            'conda' in sys.executable
+            )
+
+
 def which(program):
     import os
 
@@ -149,6 +156,11 @@ class CMakeBuild(build_ext):
         env = os.environ.copy()
         env['CXXFLAGS'] = '{} -DVERSION_INFO=\\"{}\\"'.format(
             env.get('CXXFLAGS', ''), self.distribution.get_version())
+        if in_conda():
+            condadir = os.path.dirname(sys.executable)[:-4]
+            env['CXXFLAGS'] = env['CXXFLAGS'] + ' -I' + condadir + '/include'
+            env['CXXFLAGS'] = env['CXXFLAGS'] + ' -L' + condadir + '/lib'
+            print('setup.py: adding -I/-L for conda', condadir)
         if not os.path.exists(self.build_temp):
             os.makedirs(self.build_temp)
         subprocess.check_call(
