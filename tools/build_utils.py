@@ -4,6 +4,7 @@ from builtins import bytes
 import glob
 import os
 import sys
+import multiprocessing
 
 import pytest
 
@@ -194,8 +195,9 @@ def build_and_run_pytest(redo_cmake=False):
         proj_root = bytes(proj_root, 'ascii')
     args = [x for x in sys.argv[1:] if x.endswith('.py') and
             os.path.basename(x).startswith('test')]
+    ncpu = multiprocessing.cpu_count() / 2
     if not args:
-        args = ['.', '-n4', '--ignore', 'build']
+        args = ['.', '--ignore', 'build', '-n%s' % (ncpu)]
     else:  # running one file, don't scan
         args += ['--ignore', 'build_setup_py_Release']
     for decoy in get_ignored_dirs(cfg):
