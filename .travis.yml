@@ -18,9 +18,12 @@ addons:
       - g++-6
       - cmake
       - cmake-data
-      - python3.5-dev
+      # - python3.5-dev
       - libboost-system-dev
       - libboost-iostreams-dev
+      - python-pytest
+      - python-numpy
+      - python-pandas
     sources: &sources
       - ubuntu-toolchain-r-test
       - kubuntu-backports
@@ -313,8 +316,8 @@ install:
   - if [[ "${CHECK_FORMATTING}" == "true" ]]; then brew install pcre vera++; fi
 
   - |
-    pip install --upgrade pip
-    pip install numpy scipy pytest pandas future jinja2 pytest-xdist hypothesis enum34
+    pip install --upgrade pip --user
+    pip install future jinja2 pytest-xdist hypothesis enum34
     git clone https://github.com/moble/quaternion.git
     cd quaternion
     pip install .
