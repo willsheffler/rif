@@ -6,14 +6,17 @@ matrix:
     env: PYTHON=2.7 CPP=14 GCC=6
     addons:
       apt:
-        sources: [ubuntu-toolchain-r-test, kubuntu-backports]
-        packages: [g++-5, cmake, libboost-system-dev, libboost-iostreams-dev]
+        sources:
+        - ubuntu-toolchain-r-test
+        - kubuntu-backports
+        - george-edison55-precise-backports # cmake 3.2.3 / doxygen 1.8.3
+        packages: [g++-6, cmake, cmake-data, libboost-system-dev, libboost-iostreams-dev]
   - os: linux
     env: PYTHON=3.5 CPP=14 GCC=6
     addons:
       apt:
         sources: [ubuntu-toolchain-r-test, kubuntu-backports, deadsnakes]
-        packages: [g++-5, cmake, python3.5-dev, libboost-system-dev, libboost-iostreams-dev]
+        packages: [g++-6, cmake, cmake-data, python3.5-dev, libboost-system-dev, libboost-iostreams-dev]
   # - sudo: true
     # services: docker
     # env: PYTHON=2.7 CPP=14 GCC=6
@@ -32,7 +35,7 @@ matrix:
   # Documentation build:
   - os: linux
     language: docs
-    env: DOCS STYLE LINT
+    env: DOCS STYLE LINT CPP=14 GCC=6 PYTHON=2.7
     install:
     - pip install --upgrade sphinx sphinx_rtd_theme flake8 pep8-naming
     - |

@@ -203,11 +203,10 @@ def build_and_run_pytest(redo_cmake=False):
     print('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
 
     if not args:
-        args = ['.', '--ignore', 'build', '-n%s' % (ncpu)]
+        args = ('. --ignore build -n%s' % (ncpu)).split()
     else:  # running one file, don't scan
-        args += ['--ignore', 'build_setup_py_Release']
+        args += '--ignore build_setup_py_Release'.split()
     for decoy in get_ignored_dirs(cfg):
         args += ['--ignore', decoy]
     print('pytest.main(', ' '.join(args), ')')
-    if not 'CI' in os.environ:
-        pytest.main(args)
+    pytest.main(args)
