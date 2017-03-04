@@ -25,6 +25,7 @@ addons:
       - ubuntu-toolchain-r-test
       - kubuntu-backports
       - george-edison55-precise-backports # cmake 3.2.3 / doxygen 1.8.3
+      - deadsnakes
 
 
 cache:
