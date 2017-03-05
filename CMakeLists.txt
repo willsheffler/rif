@@ -7,7 +7,8 @@ if(NOT DEFINED CMAKE_LIBRARY_OUTPUT_DIRECTORY)
 endif()
 
 if(DEFINED BOOST_ROOT)
-    link_directories(${BOOST_ROOT})
+    include_directories(${BOOST_ROOT}/include)
+    link_directories(${BOOST_ROOT}/lib)
 endif()
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} $ENV{CXXFLAGS}")
