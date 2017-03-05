@@ -91,10 +91,6 @@ before_install:
 install:
 - |
     pip install numpy scipy pytest pandas future jinja2 pytest-xdist hypothesis enum34
-    git clone https://github.com/moble/quaternion.git
-    cd quaternion
-    pip install .
-    cd ..
     cd external/hacked_packages/pytest-cpp-0.4
     pip install .
     cd ../../../

@@ -258,14 +258,7 @@ install:
   - |
     cd ${TRAVIS_BUILD_DIR}
     pip install --user sphinx numpy pandas future jinja2 pytest pytest-cov pytest-xdist hypothesis enum34 codecov
-    cd deps
-    git clone https://github.com/moble/quaternion.git
-    cd quaternion
-    git reset --hard 234032961
-    pip install --user .
-    cd ../..
-    cd external/hacked_packages/pytest-cpp-0.4
-    pip install --user .
+    (cd external/hacked_packages/pytest-cpp-0.4 && pip install --user . && cd ../..)
 
 before_script:
   - cd ${TRAVIS_BUILD_DIR}

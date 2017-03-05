@@ -2,7 +2,6 @@ tell willsheffler@gmail.com to put something in this readme!
 
 python requirements
 numpy, jinja2, pytest, pytest-cpp*, hypothesis, pandas
-numpy-quaternion
 
 *use the pytest\_cpp in external: "cd \<rifdi\r>/external/hacked_packages/pytest-cpp-0.4 && pip install ."
 
@@ -38,7 +37,6 @@ brew install python cmake ninja boost
 
 (if you are lame like me, pip -> sudo -H pip2/3)
 pip install future pytest-xdist pytest-cov hypothesis jinja2 tox numpy pandas
-pip install numpy-quaternion
 cd external/hacked_packages/pytest-cpp-0.4 && pip install . && cd -
 python tools/cmake_build_and_run_pytest.py
 tox (if you are ambitious)
