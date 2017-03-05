@@ -10,7 +10,7 @@ env:
 addons:
   apt:
     packages:
-      - g++-6
+      - g++-5
       - cmake
       - cmake-data
       - python-pip
@@ -65,20 +65,12 @@ before_install:
   - if [[ "${BOOST_VERSION}" == "default" ]]; then BOOST_VERSION=1.63.0; fi
   - if [[ "${COMPILER}" != "" ]]; then export CXX=${COMPILER}; fi
 install:
-  - CC=gcc-6
-  - CXX=g++-6
-
-  - if [[ "$BOOST_VERSION" ]]; then get_boost $DEPS_DIR $BOOST_VERSION; fi
-  - export CMAKE_OPTIONS=" -DBOOST_ROOT=${BOOST_DIR}"
-
+  - CC=gcc-$GCC
+  - CXX=g++-$GCC
   - travis_get_cmake
-  - cmake --version
-
   - if [[ "$LLVM_VERSION" ]]; then get_clang $DEPS_DIR $LLVM_VERSION; fi
-  - ${CXX} --version
-
+  - if [[ "$BOOST_VERSION" ]]; then get_boost $DEPS_DIR $BOOST_VERSION; fi
   - if [[ "${DOCUMENTATION}" == "true" ]]; then get_doxygen; fi
-
   - pip install --user sphinx numpy pandas future jinja2 pytest pytest-cov pytest-xdist hypothesis enum34 codecov
   - (cd external/hacked_packages/pytest-cpp-0.4 && pip install --user .)
 

@@ -51,6 +51,7 @@ function get_boost {
 				--with-system --with-iostreams install && touch .is_built)
 		else
 			echo "$ME:$FUNCNAME: ${BOOST_DIR}/.is_built exists, skipping build"
+			export CMAKE_OPTIONS=" -DBOOST_ROOT=${BOOST_DIR}"
 		fi
 	else
 		echo "$ME:$FUNCNAME: no \$__VERSION (arg 2), doing nothing"

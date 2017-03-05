@@ -140,11 +140,14 @@ class CMakeBuild(build_ext):
                 print('ENV', k, '=', v)
                 if k is 'CMAKE_OPTIONS':
                     print('finding any *.so in local boost root')
-                    os.system('find %s -name \*.so' % v.replace('-DBOOST_ROOT=',''))
+                    os.system('find %s -name \*.so' %
+                              v.replace('-DBOOST_ROOT=', ''))
         if 'CMAKE_OPTIONS' in os.environ:
             print('setup.py add CMAKE_OPTIONS:', os.environ['CMAKE_OPTIONS'])
             cmake_args += os.environ['CMAKE_OPTIONS'].split()
         ncpu = multiprocessing.cpu_count()
+        if 'CI' in os.environ:
+            ncpu = 1
         if which('ninja'):
             cmake_args.append('-GNinja')
         cfg = infer_config_from_build_dirname(self.build_temp)
