@@ -257,7 +257,7 @@ install:
 
   - |
     cd ${TRAVIS_BUILD_DIR}
-    pip install --user numpy pandas future jinja2 pytest pytest-cov pytest-xdist hypothesis enum34 codecov
+    pip install --user sphinx numpy pandas future jinja2 pytest pytest-cov pytest-xdist hypothesis enum34 codecov
     cd deps
     git clone https://github.com/moble/quaternion.git
     cd quaternion
