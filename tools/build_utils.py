@@ -198,13 +198,6 @@ def build_and_run_pytest(redo_cmake=False):
     ncpu = multiprocessing.cpu_count()
     if ncpu > 2:
         ncpu = int(ncpu / 2)
-    if 'CI' in os.environ:
-        print('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
-        print(os.getcwd())
-        for f in os.listdir('.'):
-            print(f)
-        os.system('find . -name numpy_quaternion.so')
-        print('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
     if not args:
         args = ('. --ignore build --cov=./src -n%s' % (ncpu)).split()
     else:  # running one file, don't scan

@@ -277,11 +277,10 @@ script:
     elif [[ "${UNIT_TESTS}" == "true" ]]; then
       pwd
       ls tools
-      python tools/cmake_build_and_run_pytest.py
+      python tools/cmake_build_and_run_pytest.py && codecov
       # todo should codecov go here?
     elif [[ "${DOCUMENTATION}" == "true" ]]; then
       cd docs
       make html
     fi
-    codecov
 

@@ -138,6 +138,8 @@ class CMakeBuild(build_ext):
             print('checking for CMAKE_OPTIONS')
             for k, v in os.environ.items():
                 print('ENV', k, '=', v)
+                if k is 'CMAKE_OPTIONS':
+                    os.system('find %s -name \*.so' % v.replace('-DBOOST_ROOT=',''))
         if 'CMAKE_OPTIONS' in os.environ:
             print('setup.py add CMAKE_OPTIONS:', os.environ['CMAKE_OPTIONS'])
             cmake_args += os.environ['CMAKE_OPTIONS'].split()
