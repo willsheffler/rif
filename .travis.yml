@@ -1,4 +1,4 @@
-# copied largely from boost hana .travis config
+# copied largely from boost hana and pybind11 .travis config
 
 language: c++
 sudo: false
@@ -17,6 +17,8 @@ addons:
       - python-pip
       - python-numpy
       - python-pandas
+      - libz-dev
+      - libbz2-dev
       - libboost-iostreams-dev
       - libboost-system-dev
     sources: &sources
@@ -49,7 +51,7 @@ matrix:
 
     - os: linux
       dist: trusty
-      env: UNIT_TESTS=true
+      env: UNIT_TESTS=true GCC=6
       compiler: gcc5
 
     # Clang 3.5
@@ -129,6 +131,7 @@ matrix:
 
 install:
   - env
+  - source tools/build_utils.sh
   ############################################################################
   # All the dependencies are installed in ${TRAVIS_BUILD_DIR}/deps/
   ############################################################################
@@ -145,99 +148,29 @@ install:
   ############################################################################
   # Install Boost headers
   ############################################################################
-  - |
-    if [[ $BOOST_VERSION ]]; then
-      BOOST_DIR=${DEPS_DIR}/boost-${BOOST_VERSION}
-      if [[ -z $(ls -A $BOOST_DIR) ]]; then
-        if [[ $BOOST_VERSION == "trunk" ]]; then
-          BOOST_URL="http://github.com/boostorg/boost.git"
-          travis_retry git clone --depth 1 --recursive --quiet ${BOOST_URL} ${BOOST_DIR} || exit 1
-          (cd ${BOOST_DIR} && ./bootstrap.sh && ./b2 headers)
-        else
-          BOOST_URL="http://sourceforge.net/projects/boost/files/boost/${BOOST_VERSION}/boost_${BOOST_VERSION//\./_}.tar.gz"
-          mkdir -p ${BOOST_DIR}
-          echo DOWNLOADING $BOOST_URL
-          { travis_retry wget --quiet -O - ${BOOST_URL} | tar --strip-components=1 -xz -C ${BOOST_DIR}; } || exit 1
-          echo DONE DOWNLOADING $BOOST_URL
-        fi
-        # Make sure we don't conflict with the Hana shipped with Boost
-        rm -rf ${BOOST_ROOT}/include/boost/{hana,hana.hpp}
-      fi
-      echo '!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
-      echo BOOST_DIR: ${BOOST_DIR}
-      ls ${BOOST_DIR}
-      echo '!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
-      export CMAKE_OPTIONS=" -DBOOST_ROOT=${BOOST_DIR}"
-    fi
+  - get_boost $DEPS_DIR $BOOST_VERSION
+  - CMAKE_OPTIONS=" -DBOOST_ROOT=${BOOST_DIR}"
+
 
   ############################################################################
   # Install a recent CMake
   ############################################################################
-  - |
-    if [[ "${TRAVIS_OS_NAME}" == "linux" ]]; then
-      CMAKE_URL="https://cmake.org/files/v3.7/cmake-3.7.2-Linux-x86_64.tar.gz"
-      echo DOWNLOADING $CMAKE_URL
-      mkdir cmake && travis_retry wget --no-check-certificate --quiet -O - ${CMAKE_URL} | tar --strip-components=1 -xz -C cmake
-      echo DONE DOWNLOADING $CMAKE_URL
-      export PATH=${DEPS_DIR}/cmake/bin:${PATH}
-    elif [ "$TRAVIS_OS_NAME" = 'osx' ]; then
-      brew install cmake
-      brew upgrade cmake
-      export PATH=${PATH}:/Users/travis/Library/Python/2.7/bin
-    else
-      echo "not on osx or linux???"
-    fi
+  - travis_get_cmake
   - cmake --version
-
-  ############################################################################
-  # Install Boost.Build
-  ############################################################################
-  - |
-    if [[ "${BOOST_BUILD}" == "true" ]]; then
-      (cd ${BOOST_DIR}/tools/build && ./bootstrap.sh && ./b2 install --prefix=${DEPS_DIR}/b2)
-      export PATH=${DEPS_DIR}/b2/bin:${PATH}
-    fi
 
   ############################################################################
   # Install Boost iostreams and system
   ############################################################################
   - |
     if [[ $BOOST_VERSION ]]; then
-      (cd ${BOOST_DIR} && ./bootstrap.sh && ./b2 -d0 --prefix=./ --shared --with-system --with-iostreams install)
+
     fi
 
   ############################################################################
   # Install Clang, libc++ and libc++abi
   ############################################################################
   - |
-    if [[ $LLVM_VERSION ]]; then
-      LLVM_DIR=${DEPS_DIR}/llvm-${LLVM_VERSION}
-      if [[ -z "$(ls -A ${LLVM_DIR})" ]]; then
-        LLVM_URL="http://llvm.org/releases/${LLVM_VERSION}/llvm-${LLVM_VERSION}.src.tar.xz"
-        LIBCXX_URL="http://llvm.org/releases/${LLVM_VERSION}/libcxx-${LLVM_VERSION}.src.tar.xz"
-        LIBCXXABI_URL="http://llvm.org/releases/${LLVM_VERSION}/libcxxabi-${LLVM_VERSION}.src.tar.xz"
-        CLANG_URL="http://llvm.org/releases/${LLVM_VERSION}/clang+llvm-${LLVM_VERSION}-x86_64-linux-gnu-ubuntu-14.04.tar.xz"
-
-        mkdir -p ${LLVM_DIR} ${LLVM_DIR}/build ${LLVM_DIR}/projects/libcxx ${LLVM_DIR}/projects/libcxxabi ${LLVM_DIR}/clang
-        echo DOWNLOADING $LLVM_URL
-        travis_retry wget --quiet -O - ${LLVM_URL}      | tar --strip-components=1 -xJ -C ${LLVM_DIR}
-        echo DOWNLOADING $LIBCXX_URL
-        travis_retry wget --quiet -O - ${LIBCXX_URL}    | tar --strip-components=1 -xJ -C ${LLVM_DIR}/projects/libcxx
-        echo DOWNLOADING $LIBCXXABI_URL
-        travis_retry wget --quiet -O - ${LIBCXXABI_URL} | tar --strip-components=1 -xJ -C ${LLVM_DIR}/projects/libcxxabi
-        echo DOWNLOADING $CLANG_URL
-        travis_retry wget --quiet -O - ${CLANG_URL}     | tar --strip-components=1 -xJ -C ${LLVM_DIR}/clang
-        echo DONE DOWNLOADING $CLANG_URL
-        (cd ${LLVM_DIR}/build && cmake .. -DCMAKE_INSTALL_PREFIX=${LLVM_DIR}/install -DCMAKE_CXX_COMPILER=clang++)
-        (cd ${LLVM_DIR}/build/projects/libcxx && make install -j2)
-        (cd ${LLVM_DIR}/build/projects/libcxxabi && make install -j2)
-      fi
-
-      export CXXFLAGS="-nostdinc++ -isystem ${LLVM_DIR}/install/include/c++/v1"
-      export LDFLAGS="-L ${LLVM_DIR}/install/lib -l c++ -l c++abi"
-      export LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:${LLVM_DIR}/install/lib"
-      export PATH="${LLVM_DIR}/clang/bin:${PATH}"
-    fi
+    get_clang()
   - ${CXX} --version
 
   ############################################################################
@@ -245,12 +178,7 @@ install:
   ############################################################################
   - |
     if [[ "${DOCUMENTATION}" == "true" ]]; then
-      DOXYGEN_URL="http://ftp.stack.nl/pub/users/dimitri/doxygen-1.8.11.linux.bin.tar.gz"
-      echo DOWNLOADING $DOXYGEN_URL
-      mkdir doxygen && travis_retry wget --quiet -O - ${DOXYGEN_URL} | tar --strip-components=1 -xz -C doxygen
-      echo DONE DOWNLOADING $DOXYGEN_URL
-      export PATH=${DEPS_DIR}/doxygen/bin:${PATH}
-      doxygen --version
+      get_doxygen()
     fi
 
   ############################################################################

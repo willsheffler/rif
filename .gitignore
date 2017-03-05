@@ -24,3 +24,4 @@ _build
 docs/html
 docs/latex
 .coverage
+deps
