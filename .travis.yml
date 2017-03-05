@@ -145,10 +145,10 @@ install:
   # Install Boost headers
   ############################################################################
   - |
-    if [[ "${BOOST_VERSION}" != "system" ]]; then
+    if [[ $BOOST_VERSION]]; then
       BOOST_DIR=${DEPS_DIR}/boost-${BOOST_VERSION}
-      if [[ -z "$(ls -A ${BOOST_DIR})" ]]; then
-        if [[ "${BOOST_VERSION}" == "trunk" ]]; then
+      if [[ -z $(ls -A $BOOST_DIR) ]]; then
+        if [[ $BOOST_VERSION == "trunk" ]]; then
           BOOST_URL="http://github.com/boostorg/boost.git"
           travis_retry git clone --depth 1 --recursive --quiet ${BOOST_URL} ${BOOST_DIR} || exit 1
           (cd ${BOOST_DIR} && ./bootstrap.sh && ./b2 headers)
