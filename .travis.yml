@@ -1,15 +1,11 @@
-# Copyright Louis Dionne 2013-2017
-# Distributed under the Boost Software License, Version 1.0.
-# (See accompanying file LICENSE.md or copy at http://boost.org/LICENSE_1_0.txt)
+# copied largely from boost hana .travis config
 
 language: c++
 sudo: false
 
-
 env:
   matrix:
     - TRAVIS_EMPTY_JOB_WORKAROUND=true
-
 
 addons:
   apt:
@@ -26,7 +22,6 @@ addons:
       - kubuntu-backports
       - george-edison55-precise-backports # cmake 3.2.3 / doxygen 1.8.3
       - deadsnakes
-
 
 cache:
   directories:
@@ -170,6 +165,7 @@ install:
       fi
       echo '!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
       echo BOOST_DIR: ${BOOST_DIR}
+      ls ${BOOST_DIR}
       echo '!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
       export CMAKE_OPTIONS=" -DBOOST_ROOT=${BOOST_DIR}"
     fi
