@@ -130,7 +130,8 @@ function get_clang {
 		else
 			echo "$ME:$FUNCNAME: ${LLVM_DIR}/.is_downloaded exists, skipping download"
 		fi
-
+		export CC=clang
+		export CXX=clang++
 		export CXXFLAGS="-nostdinc++ -isystem ${LLVM_DIR}/install/include/c++/v1"
 		export LDFLAGS="-L ${LLVM_DIR}/install/lib -l c++ -l c++abi"
 		export LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:${LLVM_DIR}/install/lib"

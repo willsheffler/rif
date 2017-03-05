@@ -65,6 +65,9 @@ before_install:
   - if [[ "${BOOST_VERSION}" == "default" ]]; then BOOST_VERSION=1.63.0; fi
   - if [[ "${COMPILER}" != "" ]]; then export CXX=${COMPILER}; fi
 install:
+  - CC=gcc-6
+  - CXX=g++-6
+
   - get_boost $DEPS_DIR $BOOST_VERSION
   - CMAKE_OPTIONS=" -DBOOST_ROOT=${BOOST_DIR}"
 
@@ -86,10 +89,8 @@ script:
   - |
     if [[ "${UNIT_TESTS}" == "true" ]]; then
       (python tools/cmake_build_and_run_pytest.py && codecov)
-      # todo should codecov go here?
     elif [[ "${DOCUMENTATION}" == "true" ]]; then
-      cd docs
-      make html
+      (cd docs && make html)
     fi
 
 
