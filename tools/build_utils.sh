@@ -1,14 +1,14 @@
 #!/bin/bashpp
 
+ME=$(basename "$0")
+
 if [[ $CI ]]; then
 	TR=travis_retry
 	#__QUIET = --quiet
 fi
 
-ME=$(basename "$0")
-
 function download_boost {
-	echo "$ME:$FUNCNAME: BEGIN"
+	echo "$ME:$FUNCNAME: BEGIN in $(pwd)"
 
 	if [[ $1 ]]; then __DIR=$1; else echo "$ME:$FUNCNAME: \$1 must be location"; return; fi;
 	if [[ $2 ]]; then __VERSION=$2; else __VERSION=1.58.0; fi
@@ -37,10 +37,11 @@ function download_boost {
 	else
 		echo "$ME:$FUNCNAME: no \$__VERSION (arg 2), doing nothing"
 	fi
-	echo "$ME:$FUNCNAME: END"
+	echo "$ME:$FUNCNAME: END in $(pwd)"
 }
 
 function get_boost {
+	echo "$ME:$FUNCNAME: BEGIN in $(pwd)"
 	if [[ $1 ]]; then __DIR=$1; else echo "$ME:$FUNCNAME: $1 must be location"; return; fi;
 	if [[ $2 ]]; then __VERSION=$2; else __VERSION=1.58.0; fi
 
@@ -55,9 +56,11 @@ function get_boost {
 	else
 		echo "$ME:$FUNCNAME: no \$__VERSION (arg 2), doing nothing"
 	fi
+	echo "$ME:$FUNCNAME: END in $(pwd)"
 }
 
 function get_cmake {
+	echo "$ME:$FUNCNAME: BEGIN in $(pwd)"
 	if [[ $1 ]]; then __DIR=$1; else echo "$ME:$FUNCNAME: \$1 must be location"; return; fi;
 	if [[ ! -f $__DIR/cmake/.is_downloaded ]]; then
 		CMAKE_URL="https://cmake.org/files/v3.7/cmake-3.7.2-Linux-x86_64.tar.gz"
@@ -71,9 +74,11 @@ function get_cmake {
 	else
 		echo "$ME:$FUNCNAME: ${__DIR}/cmake/.is_downloaded exists, skipping download"
 	fi
+	echo "$ME:$FUNCNAME: END in $(pwd)"
 }
 
 function travis_get_cmake {
+	echo "$ME:$FUNCNAME: BEGIN in $(pwd)"
 	if [[ "${TRAVIS_OS_NAME}" == "linux" ]]; then
 		get_cmake "$1" "$2"
 	elif [ "$TRAVIS_OS_NAME" = 'osx' ]; then
@@ -83,9 +88,11 @@ function travis_get_cmake {
 	else
 		echo "$ME:$FUNCNAME: not on osx or linux???"
 	fi
+	echo "$ME:$FUNCNAME: END in $(pwd)"
 }
 
 function get_clang {
+	echo "$ME:$FUNCNAME: BEGIN in $(pwd)"
 	if [[ $1 ]]; then
 		__DIR=$1; else echo "$ME:$FUNCNAME: \$1 must be location"; return; fi;
 	if [[ $2 ]]; then
@@ -131,11 +138,12 @@ function get_clang {
 	else
 		echo "$ME:$FUNCNAME: no \$__VERSION (arg2), doing nothing"
 	fi
-
+	echo "$ME:$FUNCNAME: END in $(pwd)"
 }
 
 
 function get_doxygen {
+	echo "$ME:$FUNCNAME: BEGIN in $(pwd)"
 	DOXYGEN_URL="http://ftp.stack.nl/pub/users/dimitri/doxygen-1.8.11.linux.bin.tar.gz"
 	echo "$ME:$FUNCNAME: DOWNLOADING $DOXYGEN_URL"
 	mkdir doxygen && $TR wget "$__QUIET" -O - ${DOXYGEN_URL} \
@@ -144,4 +152,5 @@ function get_doxygen {
 	echo "$ME:$FUNCNAME: add doxygen to path"
 	export PATH=${__DIR}/doxygen/bin:${PATH}
 	doxygen --version
+	echo "$ME:$FUNCNAME: END in $(pwd)"
 }
