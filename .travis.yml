@@ -46,7 +46,7 @@ matrix:
   include:
     - os: linux
       dist: trusty
-      env: UNIT_TESTS=true GCC=6 BOOST_VERSION=system
+      env: UNIT_TESTS=true GCC=6
       compiler: gcc
     - os: linux
       env: UNIT_TESTS=true LLVM_VERSION=3.6.2 BOOST_VERSION=default
@@ -68,14 +68,13 @@ install:
   - CC=gcc-6
   - CXX=g++-6
 
-  - if [[ "$BOOST_VERSION" != "system" ]]; then get_boost $DEPS_DIR $BOOST_VERSION; fi
-
+  - if [[ "$BOOST_VERSION" ]]; then get_boost $DEPS_DIR $BOOST_VERSION; fi
   - export CMAKE_OPTIONS=" -DBOOST_ROOT=${BOOST_DIR}"
 
   - travis_get_cmake
   - cmake --version
 
-  - get_clang $DEPS_DIR $LLVM_VERSION
+  - if [[ "$LLVM_VERSION" ]]; then get_clang $DEPS_DIR $LLVM_VERSION; fi
   - ${CXX} --version
 
   - if [[ "${DOCUMENTATION}" == "true" ]]; then get_doxygen; fi
