@@ -198,7 +198,7 @@ install:
   # Install Boost iostreams and system
   ############################################################################
   - |
-    (cd ${BOOST_DIR} && ./bootstrap.sh && ./b2 --prefix=./ --shared --with-system --with-iostreams install)
+    (cd ${BOOST_DIR} && ./bootstrap.sh && ./b2 -d0 --prefix=./ --shared --with-system --with-iostreams install)
 
   ############################################################################
   # Install Clang, libc++ and libc++abi
