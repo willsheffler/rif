@@ -17,6 +17,8 @@ addons:
       - python-pip
       - python-numpy
       - python-pandas
+      - libboost-iostreams-dev
+      - libboost-system-dev
     sources: &sources
       - ubuntu-toolchain-r-test
       - kubuntu-backports
@@ -47,8 +49,8 @@ matrix:
 
     - os: linux
       dist: trusty
-      env: UNIT_TESTS=true BOOST_VERSION=default
-      compiler: clang
+      env: UNIT_TESTS=true
+      compiler: gcc
 
     # Clang 3.5
     # TODO: Find out why this fails to compile the test suite.
@@ -91,7 +93,7 @@ matrix:
 
     # Xcode 8
     - os: osx
-      env: UNIT_TESTS=true BOOST_VERSION=default
+      env: UNIT_TESTS=true LLVM_VERSION=default BOOST_VERSION=default
       osx_image: xcode8
 
     # With Boost 1.59
@@ -136,8 +138,6 @@ install:
   ############################################################################
   # Setup default versions and override compiler if needed
   ############################################################################
-  - if [[ "${LLVM_VERSION}" == "default" ]]; then LLVM_VERSION=3.9.0; fi
-  - if [[ "${BOOST_VERSION}" == "default" ]]; then BOOST_VERSION=1.63.0; fi
 
   - if [[ "${COMPILER}" != "" ]]; then export CXX=${COMPILER}; fi
 
@@ -145,7 +145,7 @@ install:
   # Install Boost headers
   ############################################################################
   - |
-    if [[ "${BOOST_VERSION}" != "" ]]; then
+    if [[ "${BOOST_VERSION}" != "system" ]]; then
       BOOST_DIR=${DEPS_DIR}/boost-${BOOST_VERSION}
       if [[ -z "$(ls -A ${BOOST_DIR})" ]]; then
         if [[ "${BOOST_VERSION}" == "trunk" ]]; then
@@ -201,7 +201,7 @@ install:
   # Install Boost iostreams and system
   ############################################################################
   - |
-    if [[ "${BOOST_VERSION}" != "" ]]; then
+    if [[ $BOOST_VERSION ]]; then
       (cd ${BOOST_DIR} && ./bootstrap.sh && ./b2 -d0 --prefix=./ --shared --with-system --with-iostreams install)
     fi
 
@@ -209,7 +209,7 @@ install:
   # Install Clang, libc++ and libc++abi
   ############################################################################
   - |
-    if [[ "${LLVM_VERSION}" != "" ]]; then
+    if [[ $LLVM_VERSION ]]; then
       LLVM_DIR=${DEPS_DIR}/llvm-${LLVM_VERSION}
       if [[ -z "$(ls -A ${LLVM_DIR})" ]]; then
         LLVM_URL="http://llvm.org/releases/${LLVM_VERSION}/llvm-${LLVM_VERSION}.src.tar.xz"
