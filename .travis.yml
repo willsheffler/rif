@@ -145,7 +145,7 @@ install:
   # Install Boost headers
   ############################################################################
   - |
-    if [[ $BOOST_VERSION]]; then
+    if [[ $BOOST_VERSION ]]; then
       BOOST_DIR=${DEPS_DIR}/boost-${BOOST_VERSION}
       if [[ -z $(ls -A $BOOST_DIR) ]]; then
         if [[ $BOOST_VERSION == "trunk" ]]; then
