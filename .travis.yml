@@ -45,166 +45,54 @@ matrix:
     - env: TRAVIS_EMPTY_JOB_WORKAROUND=true
 
   include:
-    # - os: osx
-    #   env: CHECK_FORMATTING=true
-    #   osx_image: xcode8
-
     - os: linux
       dist: trusty
       env: UNIT_TESTS=true GCC=6
-      compiler: gcc5
-
-    # Clang 3.5
-    # TODO: Find out why this fails to compile the test suite.
-    # - env: UNIT_TESTS=true LLVM_VERSION=3.5.2 BOOST_VERSION=default
-
-    # Clang 3.6
+      compiler: gcc
     - os: linux
       env: UNIT_TESTS=true LLVM_VERSION=3.6.2 BOOST_VERSION=default
       compiler: clang
-
-    # # Clang 3.7
-    # - os: linux
-    #   env: UNIT_TESTS=true LLVM_VERSION=3.7.1 BOOST_VERSION=default
-    #   compiler: clang
-
-    # # Clang 3.8
-    # - os: linux
-    #   env: UNIT_TESTS=true LLVM_VERSION=3.8.0 BOOST_VERSION=default
-    #   compiler: clang
-
-    # # Clang 3.9
-    # - os: linux
-    #   env: UNIT_TESTS=true LLVM_VERSION=3.9.0 BOOST_VERSION=default
-    #   compiler: clang
-
-    # # GCC 6
-    # - os: linux
-    #   env: UNIT_TESTS=true COMPILER=g++-6     BOOST_VERSION=default
-    #   compiler: gcc
-
-    # Xcode 6.4
-    # - os: osx
-    #   env: UNIT_TESTS=true BOOST_VERSION=default
-    #   osx_image: xcode6.4
-
-    # # Xcode 7.3
-    # - os: osx
-    #   env: UNIT_TESTS=true BOOST_VERSION=default
-    #   osx_image: xcode7.3
-
-    # Xcode 8
     - os: osx
       env: UNIT_TESTS=true LLVM_VERSION=default BOOST_VERSION=default
       osx_image: xcode8
-
-    # With Boost 1.59
     - os: linux
       env: UNIT_TESTS=true LLVM_VERSION=default BOOST_VERSION=1.59.0
       compiler: clang
 
-    # # With Boost 1.60
-    # - os: linux
-    #   env: UNIT_TESTS=true LLVM_VERSION=default BOOST_VERSION=1.60.0
-    #   compiler: clang
-
-    # # With Boost 1.61
-    # - os: linux
-    #   env: UNIT_TESTS=true LLVM_VERSION=default BOOST_VERSION=1.61.0
-    #   compiler: clang
-
-    # # With Boost 1.62
-    # - os: linux
-    #   env: UNIT_TESTS=true LLVM_VERSION=default BOOST_VERSION=1.62.0
-    #   compiler: clang
-
-
-    ##########################################################################
-    # Generate the documentation
-    ##########################################################################
-    # - os: linux
-    #   env: DOCUMENTATION=true LLVM_VERSION=default BOOST_VERSION=default
-    #   compiler: clang
-    # - os: osx
-    #   env: DOCUMENTATION=true LLVM_VERSION=default BOOST_VERSION=default
-    #   compiler: clang
-
 install:
   - env
   - source tools/build_utils.sh
-  ############################################################################
-  # All the dependencies are installed in ${TRAVIS_BUILD_DIR}/deps/
-  ############################################################################
   - DEPS_DIR="${TRAVIS_BUILD_DIR}/deps"
   - mkdir -p ${DEPS_DIR} && cd ${DEPS_DIR}
 
-  ############################################################################
-  # Setup default versions and override compiler if needed
-  ############################################################################
   - if [[ "${LLVM_VERSION}" == "default" ]]; then LLVM_VERSION=3.9.0; fi
   - if [[ "${BOOST_VERSION}" == "default" ]]; then BOOST_VERSION=1.63.0; fi
   - if [[ "${COMPILER}" != "" ]]; then export CXX=${COMPILER}; fi
 
-  ############################################################################
-  # Install Boost headers
-  ############################################################################
   - get_boost $DEPS_DIR $BOOST_VERSION
   - CMAKE_OPTIONS=" -DBOOST_ROOT=${BOOST_DIR}"
-
-
-  ############################################################################
-  # Install a recent CMake
-  ############################################################################
   - travis_get_cmake
   - cmake --version
 
-  ############################################################################
-  # Install Boost iostreams and system
-  ############################################################################
-  - |
-    if [[ $BOOST_VERSION ]]; then
-
-    fi
-
-  ############################################################################
-  # Install Clang, libc++ and libc++abi
-  ############################################################################
-  - |
-    get_clang()
+  - get_clang $DEPS_DIR $LLVM_VERSION
   - ${CXX} --version
 
-  ############################################################################
-  # Install a recent Doxygen
-  ############################################################################
-  - |
-    if [[ "${DOCUMENTATION}" == "true" ]]; then
-      get_doxygen()
-    fi
+  - if [[ "${DOCUMENTATION}" == "true" ]]; then get_doxygen fi
 
-  ############################################################################
-  # Install and use a more recent Ruby and install the gems for the benchmarks
-  ############################################################################
   - rvm use 2.1 --install --binary --fuzzy
   - gem install ruby-progressbar tilt
 
-  ############################################################################
-  # Install tools to check for code formatting errors (run on OS X only)
-  ############################################################################
   - if [[ "${CHECK_FORMATTING}" == "true" ]]; then brew install pcre vera++; fi
 
-  - |
-    cd ${TRAVIS_BUILD_DIR}
-    pip install --user sphinx numpy pandas future jinja2 pytest pytest-cov pytest-xdist hypothesis enum34 codecov
-    (cd external/hacked_packages/pytest-cpp-0.4 && pip install --user . && cd ../..)
+  - cd ${TRAVIS_BUILD_DIR}
+  - pip install --user sphinx numpy pandas future jinja2 pytest pytest-cov pytest-xdist hypothesis enum34 codecov
+  - (cd external/hacked_packages/pytest-cpp-0.4 && pip install --user . && cd ../..)
 
 before_script:
   - cd ${TRAVIS_BUILD_DIR}
 
 
 script:
-    ############################################################################
-  # Check for common formatting errors.
-  ############################################################################
   - |
     if [[ "${CHECK_FORMATTING}" == "true" ]]; then
       # Find non-ASCII characters in headers

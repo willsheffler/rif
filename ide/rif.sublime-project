@@ -70,6 +70,7 @@
 				"external/googletest",
 				"external/include",
 				"external/pybind11",
+				"deps",
 			],
 			"path": ".."
 		}
