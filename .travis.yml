@@ -50,7 +50,7 @@ matrix:
     - os: linux
       dist: trusty
       env: UNIT_TESTS=true
-      compiler: gcc
+      compiler: gcc5
 
     # Clang 3.5
     # TODO: Find out why this fails to compile the test suite.
@@ -138,7 +138,8 @@ install:
   ############################################################################
   # Setup default versions and override compiler if needed
   ############################################################################
-
+  - if [[ "${LLVM_VERSION}" == "default" ]]; then LLVM_VERSION=3.9.0; fi
+  - if [[ "${BOOST_VERSION}" == "default" ]]; then BOOST_VERSION=1.63.0; fi
   - if [[ "${COMPILER}" != "" ]]; then export CXX=${COMPILER}; fi
 
   ############################################################################
