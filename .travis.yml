@@ -181,6 +181,7 @@ install:
     else
       brew install cmake
       brew upgrade cmake
+      # todo 'figure out how go get pip'
     fi
   - cmake --version
 
@@ -192,6 +193,12 @@ install:
       (cd ${BOOST_DIR}/tools/build && ./bootstrap.sh && ./b2 install --prefix=${DEPS_DIR}/b2)
       export PATH=${DEPS_DIR}/b2/bin:${PATH}
     fi
+
+  ############################################################################
+  # Install Boost iostreams and system
+  ############################################################################
+  - |
+    (cd ${BOOST_DIR} && ./bootstrap.sh && ./b2 --prefix=./ --shared --with-system --with-iostreams install)
 
   ############################################################################
   # Install Clang, libc++ and libc++abi
