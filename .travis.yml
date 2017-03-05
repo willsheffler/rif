@@ -68,7 +68,7 @@ install:
   - CC=gcc-6
   - CXX=g++-6
 
-  - if [[ ! "$BOOST_VERSION" == "system" ]]; then get_boost $DEPS_DIR $BOOST_VERSION fi
+  - if [[ "$BOOST_VERSION" != "system" ]]; then get_boost $DEPS_DIR $BOOST_VERSION; fi
 
   - export CMAKE_OPTIONS=" -DBOOST_ROOT=${BOOST_DIR}"
 
