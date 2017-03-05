@@ -250,7 +250,7 @@ install:
 
   - |
     cd ${TRAVIS_BUILD_DIR}
-    pip install --user future jinja2 pytest pytest-xdist hypothesis enum34
+    pip install --user future jinja2 pytest pytest-cov pytest-xdist hypothesis enum34 codecov
     git clone https://github.com/moble/quaternion.git
     cd quaternion
     pip install --user .
@@ -282,9 +282,10 @@ script:
       pwd
       ls tools
       python tools/cmake_build_and_run_pytest.py
+      # todo should codecov go here?
     elif [[ "${DOCUMENTATION}" == "true" ]]; then
       cd docs
       make html
     fi
-
+    codecov
 

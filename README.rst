@@ -15,7 +15,7 @@ I use sublime plugins EasyClangComplete, Git, C++11, GitGutter, SublimeLinter
 NOTES:
 iff you have pyrosetta4 on your path, functions using pyrosetta will be used/tested
 iff you have pymol on your path, functions using pymol will be used/tested
- 
+
 -------------- docs --------------
 install doxygen (--with-libclang probably best...)
 pip3 install sphinx_rtd_theme breathe
@@ -29,18 +29,16 @@ sudo sudo apt install git
 git clone git@github.com:willsheffler/rif.git
 sudo apt-get install python-pip python3-pip cmake ninja-build clang g++-6 libboost-system-dev libboost-iostreams-dev
 sudo apt-get install clang g++-6 # optional
-cd external/hacked_packages/pytest-cpp-0.4 && sudo -H pip2 install . && cd -
-sudo -H pip2 install future pytest-xdist hypothesis jinja2 tox numpy pandas
-sudo -H pip2 install numpy-quaternion
-cd external/hacked_packages/pytest-cpp-0.4 && sudo -H pip3 install . && cd -
-sudo -H pip3 install future pytest-xdist hypothesis jinja2 tox numpy pandas
-sudo -H pip3 install numpy-quaternion
-python tools/cmake_build_and_run_pytest.py # convenient script to build and test without installing
-tox
+
 
 ----------------- mac (tested on 10.10 and 10.12) -------------------
 brew install python cmake ninja boost
-/usr/local/bin/pip2 install future pytest-xdist hypothesis jinja2 tox numpy pandas
-/usr/local/bin/pip2 install numpy-quaternion
-cd external/hacked_packages/pytest-cpp-0.4 && /usr/local/bin/pip2 install . && cd -
-/usr/local/bin/python tools/cmake_build_and_run_pytest.py
+
+---------------- universal ---------------
+
+(if you are lame like me, pip -> sudo -H pip2/3)
+pip install future pytest-xdist pytest-cov hypothesis jinja2 tox numpy pandas
+pip install numpy-quaternion
+cd external/hacked_packages/pytest-cpp-0.4 && pip install . && cd -
+python tools/cmake_build_and_run_pytest.py
+tox (if you are ambitious)
