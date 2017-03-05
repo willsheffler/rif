@@ -178,10 +178,12 @@ install:
       CMAKE_URL="https://cmake.org/files/v3.7/cmake-3.7.2-Linux-x86_64.tar.gz"
       mkdir cmake && travis_retry wget --no-check-certificate --quiet -O - ${CMAKE_URL} | tar --strip-components=1 -xz -C cmake
       export PATH=${DEPS_DIR}/cmake/bin:${PATH}
-    else
+    elif [ "$TRAVIS_OS_NAME" = 'osx' ]; then
       brew install cmake
       brew upgrade cmake
-      # todo 'figure out how go get pip'
+      export PATH=${PATH}:/Users/travis/Library/Python/2.7/bin
+    else
+      echo "not on osx or linux???"
     fi
   - cmake --version
 
@@ -198,7 +200,9 @@ install:
   # Install Boost iostreams and system
   ############################################################################
   - |
-    (cd ${BOOST_DIR} && ./bootstrap.sh && ./b2 -d0 --prefix=./ --shared --with-system --with-iostreams install)
+    if [[ "${BOOST_VERSION}" != "" ]]; then
+      (cd ${BOOST_DIR} && ./bootstrap.sh && ./b2 -d0 --prefix=./ --shared --with-system --with-iostreams install)
+    fi
 
   ############################################################################
   # Install Clang, libc++ and libc++abi
@@ -253,11 +257,13 @@ install:
 
   - |
     cd ${TRAVIS_BUILD_DIR}
-    pip install --user future jinja2 pytest pytest-cov pytest-xdist hypothesis enum34 codecov
+    pip install --user numpy pandas future jinja2 pytest pytest-cov pytest-xdist hypothesis enum34 codecov
+    cd deps
     git clone https://github.com/moble/quaternion.git
     cd quaternion
+    git reset --hard 234032961
     pip install --user .
-    cd ..
+    cd ../..
     cd external/hacked_packages/pytest-cpp-0.4
     pip install --user .
 
