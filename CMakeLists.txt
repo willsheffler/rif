@@ -7,9 +7,10 @@ if(NOT DEFINED CMAKE_LIBRARY_OUTPUT_DIRECTORY)
 endif()
 
 if(DEFINED BOOST_ROOT)
-    message("using BOOST_ROOT" ${BOOST_ROOT})
-    include_directories(${BOOST_ROOT}/include)
-    link_directories(${BOOST_ROOT}/lib)
+    message("cmake: using BOOST_ROOT " ${BOOST_ROOT})
+    include_directories(${BOOST_ROOT})
+else()
+    message("cmake NOT using BOOST_ROOT")
 endif()
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} $ENV{CXXFLAGS}")
