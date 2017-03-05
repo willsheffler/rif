@@ -126,6 +126,7 @@ matrix:
     #   compiler: clang
 
 install:
+  - env
   ############################################################################
   # All the dependencies are installed in ${TRAVIS_BUILD_DIR}/deps/
   ############################################################################
@@ -156,6 +157,7 @@ install:
           mkdir -p ${BOOST_DIR}
           echo DOWNLOADING $BOOST_URL
           { travis_retry wget --quiet -O - ${BOOST_URL} | tar --strip-components=1 -xz -C ${BOOST_DIR}; } || exit 1
+          echo DONE DOWNLOADING $BOOST_URL
         fi
         # Make sure we don't conflict with the Hana shipped with Boost
         rm -rf ${BOOST_ROOT}/include/boost/{hana,hana.hpp}
@@ -175,6 +177,7 @@ install:
       CMAKE_URL="https://cmake.org/files/v3.7/cmake-3.7.2-Linux-x86_64.tar.gz"
       echo DOWNLOADING $CMAKE_URL
       mkdir cmake && travis_retry wget --no-check-certificate --quiet -O - ${CMAKE_URL} | tar --strip-components=1 -xz -C cmake
+      echo DONE DOWNLOADING $CMAKE_URL
       export PATH=${DEPS_DIR}/cmake/bin:${PATH}
     elif [ "$TRAVIS_OS_NAME" = 'osx' ]; then
       brew install cmake
@@ -223,6 +226,7 @@ install:
         travis_retry wget --quiet -O - ${LIBCXXABI_URL} | tar --strip-components=1 -xJ -C ${LLVM_DIR}/projects/libcxxabi
         echo DOWNLOADING $CLANG_URL
         travis_retry wget --quiet -O - ${CLANG_URL}     | tar --strip-components=1 -xJ -C ${LLVM_DIR}/clang
+        echo DONE DOWNLOADING $CLANG_URL
         (cd ${LLVM_DIR}/build && cmake .. -DCMAKE_INSTALL_PREFIX=${LLVM_DIR}/install -DCMAKE_CXX_COMPILER=clang++)
         (cd ${LLVM_DIR}/build/projects/libcxx && make install -j2)
         (cd ${LLVM_DIR}/build/projects/libcxxabi && make install -j2)
@@ -243,6 +247,7 @@ install:
       DOXYGEN_URL="http://ftp.stack.nl/pub/users/dimitri/doxygen-1.8.11.linux.bin.tar.gz"
       echo DOWNLOADING $DOXYGEN_URL
       mkdir doxygen && travis_retry wget --quiet -O - ${DOXYGEN_URL} | tar --strip-components=1 -xz -C doxygen
+      echo DONE DOWNLOADING $DOXYGEN_URL
       export PATH=${DEPS_DIR}/doxygen/bin:${PATH}
       doxygen --version
     fi
