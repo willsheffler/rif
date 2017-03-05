@@ -13,7 +13,6 @@ addons:
       - g++-6
       - cmake
       - cmake-data
-      # - python3.5-dev
       - python-pip
       - python-numpy
       - python-pandas
@@ -59,59 +58,38 @@ matrix:
       env: UNIT_TESTS=true LLVM_VERSION=default BOOST_VERSION=1.59.0
       compiler: clang
 
-install:
-  - env
-  - source tools/build_utils.sh
+before_install:
   - DEPS_DIR="${TRAVIS_BUILD_DIR}/deps"
-  - mkdir -p ${DEPS_DIR} && cd ${DEPS_DIR}
-
+  - source tools/build_utils.sh
   - if [[ "${LLVM_VERSION}" == "default" ]]; then LLVM_VERSION=3.9.0; fi
   - if [[ "${BOOST_VERSION}" == "default" ]]; then BOOST_VERSION=1.63.0; fi
   - if [[ "${COMPILER}" != "" ]]; then export CXX=${COMPILER}; fi
-
+install:
   - get_boost $DEPS_DIR $BOOST_VERSION
   - CMAKE_OPTIONS=" -DBOOST_ROOT=${BOOST_DIR}"
+
   - travis_get_cmake
   - cmake --version
 
   - get_clang $DEPS_DIR $LLVM_VERSION
   - ${CXX} --version
 
-  - if [[ "${DOCUMENTATION}" == "true" ]]; then get_doxygen fi
+  - if [[ "${DOCUMENTATION}" == "true" ]]; then get_doxygen; fi
 
-  - rvm use 2.1 --install --binary --fuzzy
-  - gem install ruby-progressbar tilt
-
-  - if [[ "${CHECK_FORMATTING}" == "true" ]]; then brew install pcre vera++; fi
-
-  - cd ${TRAVIS_BUILD_DIR}
   - pip install --user sphinx numpy pandas future jinja2 pytest pytest-cov pytest-xdist hypothesis enum34 codecov
-  - (cd external/hacked_packages/pytest-cpp-0.4 && pip install --user . && cd ../..)
+  - (cd external/hacked_packages/pytest-cpp-0.4 && pip install --user .)
 
 before_script:
   - cd ${TRAVIS_BUILD_DIR}
 
-
 script:
   - |
-    if [[ "${CHECK_FORMATTING}" == "true" ]]; then
-      # Find non-ASCII characters in headers
-      hpps=$(find include doc -name \*\.hpp)
-      cpps=$(find test example -name \*\.cpp)
-      pcregrep --color='auto' -n "[\x80-\xFF]" ${hpps} ${cpps}
-      if [[ $? -ne 1 ]]; then exit 1; fi
-
-      # F001: Source files should not use the '\r' (CR) character
-      # L001: No trailing whitespace at the end of lines
-      # L002: Don't use tab characters
-      find include -name \*\.hpp | vera++ --rule F001 --rule L001 --rule L002 --error
-    elif [[ "${UNIT_TESTS}" == "true" ]]; then
-      pwd
-      ls tools
-      python tools/cmake_build_and_run_pytest.py && codecov
+    if [[ "${UNIT_TESTS}" == "true" ]]; then
+      (python tools/cmake_build_and_run_pytest.py && codecov)
       # todo should codecov go here?
     elif [[ "${DOCUMENTATION}" == "true" ]]; then
       cd docs
       make html
     fi
+
 
