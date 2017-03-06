@@ -10,7 +10,8 @@ env:
 addons:
   apt:
     packages:
-      - g++-${GCC}
+      - g++-5
+      - clang++
       - cmake
       - cmake-data
       - python-pip
