@@ -147,7 +147,7 @@ class CMakeBuild(build_ext):
             cmake_args += os.environ['CMAKE_OPTIONS'].split()
         ncpu = multiprocessing.cpu_count()
         if 'CI' in os.environ:
-            ncpu = 1
+            ncpu = 2
         if which('ninja'):
             cmake_args.append('-GNinja')
         cfg = infer_config_from_build_dirname(self.build_temp)

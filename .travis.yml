@@ -76,7 +76,7 @@ install:
   - if [[ "$LLVM_VERSION" ]]; then get_clang $DEPS_DIR $LLVM_VERSION; fi
   - if [[ "$BOOST_VERSION" ]]; then get_boost $DEPS_DIR $BOOST_VERSION; fi
   - if [[ "${DOCUMENTATION}" == "true" ]]; then get_doxygen; fi
-  - pip install --user sphinx numpy pandas future jinja2 pytest pytest-cov pytest-sugar hypothesis enum34 codecov
+  - pip install --user sphinx numpy pandas future jinja2 pytest pytest-cov pytest-sugar pytest-xdist hypothesis enum34 codecov
   - (cd external/hacked_packages/pytest-cpp-0.4 && pip install --user .)
 
 before_script:
