@@ -102,7 +102,8 @@ install:
       if [[ $TRAVIS_OS_NAME == "osx" ]]; then brew install python3; fi
       python3 -m ensurepip
     fi
-  - pip$PY install --user sphinx numpy pandas future jinja2 pytest pytest-cov pytest-sugar pytest-xdist hypothesis enum34 codecov
+  - which pip$PY
+  - pip$PY install --verbose --user sphinx numpy pandas future jinja2 pytest pytest-cov pytest-sugar pytest-xdist hypothesis enum34 codecov
   - (cd external/hacked_packages/pytest-cpp-0.4 && pip install --user .)
 
 before_script:

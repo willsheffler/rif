@@ -127,10 +127,10 @@ function get_clang {
 	fi
 	export CC=clang
 	export CXX=clang++
-	export CXXFLAGS="-nostdinc++ -isystem ${LLVM_DIR}/install/include/c++/v1"
-	export LDFLAGS="-L${LLVM_DIR}/install/lib -lc++ -lc++abi"
+	export CXXFLAGS="-nostdinc++ -isystem ${LLVM_DIR}/install/include/c++/v1 -Wl,-L${LLVM_DIR}/install/lib -Wl,-lc++ -Wl,-lc++abi"
 	export LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:${LLVM_DIR}/install/lib"
 	export PATH="${LLVM_DIR}/clang/bin:${PATH}"
+	ls "${LLVM_DIR}/install/lib"
 	echo "$ME:$FUNCNAME: END in $(pwd)"
 }
 
