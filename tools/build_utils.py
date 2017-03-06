@@ -200,6 +200,9 @@ def build_and_run_pytest(redo_cmake=False):
         ncpu = int(ncpu / 2)
     if 'CI' in os.environ:
         ncpu = 4
+        os.system('uname -a')
+        print('build_utils.py: multiprocessing.cpu_count() = ',
+              multiprocessing.cpu_count())
     if not args:
         args = '. --ignore build --cov=./src -n{}'.format(ncpu).split()
     else:  # running one file, don't scan
