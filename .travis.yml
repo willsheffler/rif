@@ -11,7 +11,8 @@ addons:
   apt:
     packages:
       - g++-5
-      - clang++
+      - g++-6
+      - clang++3.5
       - cmake
       - cmake-data
       - python-pip
