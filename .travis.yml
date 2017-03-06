@@ -10,7 +10,7 @@ env:
 addons:
   apt:
     packages:
-      - g++-5
+      - g++-${GCC}
       - cmake
       - cmake-data
       - python-pip
@@ -46,7 +46,7 @@ matrix:
   include:
     - os: linux
       dist: trusty
-      env: UNIT_TESTS=true GCC=6
+      env: UNIT_TESTS=true GCC=5
       compiler: gcc
     - os: linux
       env: UNIT_TESTS=true LLVM_VERSION=3.6.2 BOOST_VERSION=default
