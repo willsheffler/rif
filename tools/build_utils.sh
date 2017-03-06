@@ -108,15 +108,10 @@ function get_clang {
 
 			mkdir -p "${LLVM_DIR}" "${LLVM_DIR}/build" "${LLVM_DIR}/projects/libcxx" \
 				"${LLVM_DIR}/projects/libcxxabi" "${LLVM_DIR}/clang"
-			echo "$ME:$FUNCNAME: DOWNLOADING $LLVM_URL"
-			$TR wget "$__QUIET" -O - ${LLVM_URL} | tar --strip-components=1 -xJ -C "${LLVM_DIR}"
-			echo "$ME:$FUNCNAME: DOWNLOADING $LIBCXX_URL"
-			$TR wget "$__QUIET" -O - ${LIBCXX_URL} | tar --strip-components=1 -xJ -C "${LLVM_DIR}/projects/libcxx"
-			echo "$ME:$FUNCNAME: DOWNLOADING $LIBCXXABI_URL"
-			$TR wget "$__QUIET" -O - ${LIBCXXABI_URL} | tar --strip-components=1 -xJ -C "${LLVM_DIR}/projects/libcxxabi"
-			echo "$ME:$FUNCNAME: DOWNLOADING $CLANG_URL"
-			$TR wget "$__QUIET" -O - ${CLANG_URL}     | tar --strip-components=1 -xJ -C "${LLVM_DIR}/clang"
-			echo "$ME:$FUNCNAME: DONE DOWNLOADING $CLANG_URL"
+	        $TR wget --quiet -O - ${LLVM_URL}      | tar --strip-components=1 -xJ -C ${LLVM_DIR}
+    	    $TR wget --quiet -O - ${LIBCXX_URL}    | tar --strip-components=1 -xJ -C ${LLVM_DIR}/projects/libcxx
+        	$TR wget --quiet -O - ${LIBCXXABI_URL} | tar --strip-components=1 -xJ -C ${LLVM_DIR}/projects/libcxxabi
+        	$TR wget --quiet -O - ${CLANG_URL}     | tar --strip-components=1 -xJ -C ${LLVM_DIR}/clang
 			(cd "${LLVM_DIR}/build" && cmake .. -DCMAKE_INSTALL_PREFIX="${LLVM_DIR}/install" -DCMAKE_CXX_COMPILER=clang++)
 			(cd "${LLVM_DIR}/build/projects/libcxx" && make install -j2)
 			(cd "${LLVM_DIR}/build/projects/libcxxabi" && make install -j2)
