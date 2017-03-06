@@ -17,9 +17,7 @@ addons:
       - python-pip
       - python-numpy
       - python-pandas
-      - python3-pip
-      - python3-numpy
-      - python3-pandas
+      - python3
       - libz-dev
       - libbz2-dev
       - libboost-iostreams-dev
@@ -78,6 +76,9 @@ matrix:
     - os: osx
       env: UNIT_TESTS=true BOOST_VERSION=default
       osx_image: xcode8
+    - os: osx
+      env: UNIT_TESTS=true BOOST_VERSION=default PY=3
+      osx_image: xcode8
     - os: linux
       env: UNIT_TESTS=true LLVM_VERSION=default BOOST_VERSION=1.59.0
       compiler: clang
@@ -96,6 +97,11 @@ install:
   - if [[ "$LLVM_VERSION" ]]; then get_clang $DEPS_DIR $LLVM_VERSION; fi
   - if [[ "$BOOST_VERSION" ]]; then get_boost $DEPS_DIR $BOOST_VERSION; fi
   - if [[ "${DOCUMENTATION}" == "true" ]]; then get_doxygen; fi
+  - |
+    if [[ $PY == "3" ]]; then
+      sudo curl "https://bootstrap.pypa.io/get-pip.py" -o "get-pip.py"
+      sudo python$PY get-pip.py
+    fi
   - pip$PY install --user sphinx numpy pandas future jinja2 pytest pytest-cov pytest-sugar pytest-xdist hypothesis enum34 codecov
   - (cd external/hacked_packages/pytest-cpp-0.4 && pip install --user .)
 
