@@ -99,8 +99,7 @@ install:
   - if [[ "${DOCUMENTATION}" == "true" ]]; then get_doxygen; fi
   - |
     if [[ $PY == "3" ]]; then
-      sudo curl "https://bootstrap.pypa.io/get-pip.py" -o "get-pip.py"
-      sudo python$PY get-pip.py
+      python3 -m ensurepip
     fi
   - pip$PY install --user sphinx numpy pandas future jinja2 pytest pytest-cov pytest-sugar pytest-xdist hypothesis enum34 codecov
   - (cd external/hacked_packages/pytest-cpp-0.4 && pip install --user .)
