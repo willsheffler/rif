@@ -19,10 +19,10 @@ TEST(Orientation, read_karney_datasets) {
   // std::string s;
   // while(in >> s) std::cout << s << endl;
   // todo: assuming run from project root dir
-  std::cerr << "TEST read_karney_datasets cwd: " << get_working_path()
-            << std::endl;
-  auto tuple =
-      read_karney_orientation_file("data/orientations/karney/c48u1.grid.gz");
+  auto datfile =
+      get_working_path() + "/" + "data/orientations/karney/c48u1.grid.gz";
+  std::cerr << "TEST read_karney_datasets: " << datfile << std::endl;
+  auto tuple = read_karney_orientation_file(datfile);
   Eigen::MatrixXd quats = std::get<0>(tuple);
   Eigen::VectorXd cover = std::get<1>(tuple);
 

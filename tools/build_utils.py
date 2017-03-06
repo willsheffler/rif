@@ -199,12 +199,7 @@ def build_and_run_pytest(redo_cmake=False):
     if ncpu > 2:
         ncpu = int(ncpu / 2)
     if 'CI' in os.environ:
-        print('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
-        print(os.getcwd())
-        for f in os.listdir('.'):
-            print(f)
-        print("NCPU:", ncpu)
-        print('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
+        ncpu = 4
     if not args:
         args = '. --ignore build --cov=./src -n{}'.format(ncpu).split()
     else:  # running one file, don't scan
