@@ -21,8 +21,11 @@ except ImportError as error:
     print('SYS.PATH')
     for p in sys.path:
         print('   ', p)
-        for d in os.listdir(p):
-            print('       ', d)
+        try:
+            for d in os.listdir(p):
+                print('       ', d)
+        except:
+            print('cant read', d)
     raise error
 
 
