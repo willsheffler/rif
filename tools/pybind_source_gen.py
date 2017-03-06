@@ -10,14 +10,24 @@ import os
 import re
 import datetime
 from collections import OrderedDict
+import sys
 
-import jinja2
+try:
+    import jinja2
+except ImportError as error:
+    print('!!!!!!!!!!!!!! ' * 100)
+    print('cant import jinja2')
+    print(sys.executable)
+    print('SYS.PATH')
+    for p in sys.path:
+        print('   ', p)
+        for d in os.listdir(p):
+            print('       ', d)
+    raise error
 
 
 def get_pybind_modules(srcpath):
     "find RIFLIB_PYBIND_ functions in *.pybind.cpp files"
-    pbfiles = subprocess.check_output(
-        'find {} -regex [^.].+pybind.cpp'.format(srcpath).split())
     pymodules = OrderedDict()
     for root, _, files in os.walk(srcpath):
         for basename in (x for x in files if x.endswith('.pybind.cpp')):

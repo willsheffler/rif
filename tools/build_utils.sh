@@ -65,8 +65,8 @@ function get_cmake {
 	if [[ ! -f $__DIR/cmake/.is_downloaded ]]; then
 		CMAKE_URL="https://cmake.org/files/v3.7/cmake-3.7.2-Linux-x86_64.tar.gz"
 		echo "$ME:$FUNCNAME: DOWNLOADING $CMAKE_URL"
-		mkdir -p "$__DIR/cmake" && \
-			$TR wget --no-check-certificate "$__QUIET" -O - ${CMAKE_URL} | tar --strip-components=1 -xz -C "$__DIR/cmake"
+		mkdir -p "$__DIR/cmake" && $TR wget --no-check-certificate "$__QUIET" -O - ${CMAKE_URL} \
+			| tar --strip-components=1 -xz -C "$__DIR/cmake"
 		echo "$ME:$FUNCNAME: DONE DOWNLOADING $CMAKE_URL"
 		export PATH=${__DIR}/cmake/bin:${PATH}
 		touch "$__DIR/cmake/.is_downloaded"
@@ -92,14 +92,12 @@ function travis_get_cmake {
 
 function get_clang {
 	echo "$ME:$FUNCNAME: BEGIN in $(pwd)"
-	if [[ $1 ]]; then
-		__DIR=$1; else echo "$ME:$FUNCNAME: \$1 must be location"; return; fi;
-	if [[ $2 ]]; then
-		__VERSION=$2; else __VERSION=3.9.0; fi
+	if [[ $1 ]]; then	__DIR=$1; else echo "$ME:$FUNCNAME: \$1 must be location"; return; fi;
+	if [[ $2 ]]; then	__VERSION=$2; else __VERSION=3.9.0; fi
 
 	if [[ $__VERSION ]]; then
 		LLVM_DIR=${__DIR}/llvm-${__VERSION}
-		if [[ ! -f $LLVM_DIR/.is_downloaded ]]; then
+		if [[ ! -f $LLVM_DIR/.is_built ]]; then
 			mkdir -p "$LLVM_DIR"
 			LLVM_URL="http://llvm.org/releases/${__VERSION}/llvm-${__VERSION}.src.tar.xz"
 			LIBCXX_URL="http://llvm.org/releases/${__VERSION}/libcxx-${__VERSION}.src.tar.xz"
@@ -108,26 +106,31 @@ function get_clang {
 
 			mkdir -p "${LLVM_DIR}" "${LLVM_DIR}/build" "${LLVM_DIR}/projects/libcxx" \
 				"${LLVM_DIR}/projects/libcxxabi" "${LLVM_DIR}/clang"
-	        $TR wget --quiet -O - ${LLVM_URL}      | tar --strip-components=1 -xJ -C ${LLVM_DIR}
-    	    $TR wget --quiet -O - ${LIBCXX_URL}    | tar --strip-components=1 -xJ -C ${LLVM_DIR}/projects/libcxx
-        	$TR wget --quiet -O - ${LIBCXXABI_URL} | tar --strip-components=1 -xJ -C ${LLVM_DIR}/projects/libcxxabi
-        	$TR wget --quiet -O - ${CLANG_URL}     | tar --strip-components=1 -xJ -C ${LLVM_DIR}/clang
+			if [[ ! -f $LLVM_DIR/.is_downloaded ]]; then
+			  $TR wget --quiet -O - ${LLVM_URL}      | tar --strip-components=1 -xJ -C ${LLVM_DIR}
+   	    $TR wget --quiet -O - ${LIBCXX_URL}    | tar --strip-components=1 -xJ -C ${LLVM_DIR}/projects/libcxx
+       	$TR wget --quiet -O - ${LIBCXXABI_URL} | tar --strip-components=1 -xJ -C ${LLVM_DIR}/projects/libcxxabi
+       	$TR wget --quiet -O - ${CLANG_URL}     | tar --strip-components=1 -xJ -C ${LLVM_DIR}/clang
+				touch "$LLVM_DIR/.is_downloaded"
+			else
+				echo "$ME:$FUNCNAME: ${LLVM_DIR}/.is_downloaded exists, skipping llvm download"
+      fi
 			(cd "${LLVM_DIR}/build" && cmake .. -DCMAKE_INSTALL_PREFIX="${LLVM_DIR}/install" -DCMAKE_CXX_COMPILER=clang++)
 			(cd "${LLVM_DIR}/build/projects/libcxx" && make install -j2)
 			(cd "${LLVM_DIR}/build/projects/libcxxabi" && make install -j2)
-			touch "$LLVM_DIR/.is_downloaded"
+			touch "$LLVM_DIR/.is_built"
 		else
-			echo "$ME:$FUNCNAME: ${LLVM_DIR}/.is_downloaded exists, skipping download"
+			echo "$ME:$FUNCNAME: ${LLVM_DIR}/.is_built exists, skipping llvm build"
 		fi
-		export CC=clang
-		export CXX=clang++
-		export CXXFLAGS="-nostdinc++ -isystem ${LLVM_DIR}/install/include/c++/v1"
-		export LDFLAGS="-L ${LLVM_DIR}/install/lib -l c++ -l c++abi"
-		export LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:${LLVM_DIR}/install/lib"
-		export PATH="${LLVM_DIR}/clang/bin:${PATH}"
 	else
 		echo "$ME:$FUNCNAME: no \$__VERSION (arg2), doing nothing"
 	fi
+	export CC=clang
+	export CXX=clang++
+	export CXXFLAGS="-nostdinc++ -isystem ${LLVM_DIR}/install/include/c++/v1"
+	export LDFLAGS="-L ${LLVM_DIR}/install/lib -l c++ -l c++abi"
+	export LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:${LLVM_DIR}/install/lib"
+	export PATH="${LLVM_DIR}/clang/bin:${PATH}"
 	echo "$ME:$FUNCNAME: END in $(pwd)"
 }
 
