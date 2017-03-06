@@ -17,6 +17,9 @@ addons:
       - python-pip
       - python-numpy
       - python-pandas
+      - python3-pip
+      - python3-numpy
+      - python3-pandas
       - libz-dev
       - libbz2-dev
       - libboost-iostreams-dev
@@ -54,10 +57,14 @@ matrix:
       env: UNIT_TESTS=true GCC=6
       compiler: gcc
     - os: linux
-      env: UNIT_TESTS=true GCC=5
+      dist: trusty
+      env: UNIT_TESTS=true GCC=6 PY=3
       compiler: gcc
     - os: linux
-      env: UNIT_TESTS=true GCC=6
+      env: UNIT_TESTS=true GCC=5 BOOST_VERSION=default
+      compiler: gcc
+    - os: linux
+      env: UNIT_TESTS=true GCC=6 BOOST_VERSION=default
       compiler: gcc
     - os: linux
       env: UNIT_TESTS=true LLVM_VERSION=3.6.2 BOOST_VERSION=default
@@ -81,6 +88,7 @@ before_install:
   - if [[ "${LLVM_VERSION}" == "default" ]]; then LLVM_VERSION=3.9.0; fi
   - if [[ "${BOOST_VERSION}" == "default" ]]; then BOOST_VERSION=1.63.0; fi
   - if [[ "${COMPILER}" != "" ]]; then export CXX=${COMPILER}; fi
+  - if [[ ! "$PY" ]]; then PY=2; fi
 install:
   - CC=gcc-$GCC; CXX=g++-$GCC
   - if [[ $TRAVIS_OS_NAME == "osx" ]]; then CC=clang; CXX=clang++; fi
@@ -88,7 +96,7 @@ install:
   - if [[ "$LLVM_VERSION" ]]; then get_clang $DEPS_DIR $LLVM_VERSION; fi
   - if [[ "$BOOST_VERSION" ]]; then get_boost $DEPS_DIR $BOOST_VERSION; fi
   - if [[ "${DOCUMENTATION}" == "true" ]]; then get_doxygen; fi
-  - pip install --user sphinx numpy pandas future jinja2 pytest pytest-cov pytest-sugar pytest-xdist hypothesis enum34 codecov
+  - pip$PY install --user sphinx numpy pandas future jinja2 pytest pytest-cov pytest-sugar pytest-xdist hypothesis enum34 codecov
   - (cd external/hacked_packages/pytest-cpp-0.4 && pip install --user .)
 
 before_script:
@@ -97,7 +105,7 @@ before_script:
 script:
   - |
     if [[ "${UNIT_TESTS}" == "true" ]]; then
-      (python tools/cmake_build_and_run_pytest.py && codecov)
+      (python$PY tools/cmake_build_and_run_pytest.py && codecov)
     elif [[ "${DOCUMENTATION}" == "true" ]]; then
       (cd docs && make html)
     fi
