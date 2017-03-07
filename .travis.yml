@@ -38,7 +38,7 @@ matrix:
 
     - os: linux
       dist: trusty
-      env: OS=LU14 UNIT= GCC=5
+      env: OS=LU14 UNIT=T GCC=5
       compiler: gcc
       addons:
         apt:
@@ -47,7 +47,7 @@ matrix:
 
     - os: linux
       dist: trusty
-      env: OS=LU14 UNIT= GCC=6
+      env: OS=LU14 UNIT=T GCC=6
       compiler: gcc
       addons:
         apt:
@@ -56,7 +56,7 @@ matrix:
 
     - os: linux
       dist: trusty
-      env: OS=LU14 UNIT= GCC=6 PY=3
+      env: OS=LU14 UNIT=T GCC=6 PY=3
       addons:
         apt:
           sources: *sources
@@ -65,7 +65,7 @@ matrix:
 
     - os: linux
       dist: trusty
-      env: OS=LU14 UNIT= BOOST_VERSION=default
+      env: OS=LU14 UNIT=T BOOST_VERSION=default
       compiler: clang
       addons:
         apt:
@@ -73,19 +73,19 @@ matrix:
           packages: [clang++-3.5]
 
     - os: osx
-      env: OS=OSX6 UNIT= BOOST_VERSION=default
+      env: OS=OSX6 UNIT=T BOOST_VERSION=default
       osx_image: xcode6
 
     - os: osx
-      env: OS=OSX8 UNIT= BOOST_VERSION=default PY=3
+      env: OS=OSX8 UNIT=T BOOST_VERSION=default PY=3
       osx_image: xcode8
 
     - os: linux
-      env: OS=LU12 UNIT= LLVM_VERSION=default BOOST_VERSION=1.59.0
+      env: OS=LU12 UNIT=T LLVM_VERSION=default BOOST_VERSION=1.59.0
       compiler: clang
 
     - os: linux
-      env: OS=LU12 UNIT= GCC=6 BOOST_VERSION=default
+      env: OS=LU12 UNIT=T GCC=6 BOOST_VERSION=default
       addons:
         apt:
           sources: *sources
