@@ -47,7 +47,7 @@ matrix:
       compiler: gcc
       addons:
         apt:
-          sources: *sources
+          sources: [ubuntu-toolchain-r-test]
       addons:
         apt:
           packages: [g++-5, libboost-iostreams-dev, libboost-system-dev]
@@ -57,7 +57,7 @@ matrix:
       compiler: gcc
       addons:
         apt:
-          sources: *sources
+          sources: [ubuntu-toolchain-r-test]
       addons:
         apt:
           packages: [g++-6, libboost-iostreams-dev, libboost-system-dev]
@@ -66,7 +66,7 @@ matrix:
       env: UNIT_TESTS=true GCC=6 PY=3
       addons:
         apt:
-          sources: *sources
+          sources: [ubuntu-toolchain-r-test]
       addons:
         apt:
           packages: [g++-6, libboost-iostreams-dev, libboost-system-dev]
@@ -75,7 +75,7 @@ matrix:
       env: UNIT_TESTS=true GCC=5 BOOST_VERSION=default
       addons:
         apt:
-          sources: *sources
+          sources: [ubuntu-toolchain-r-test]
       addons:
         apt:
           packages: [g++-5]
@@ -84,7 +84,7 @@ matrix:
       env: UNIT_TESTS=true GCC=6 BOOST_VERSION=default
       addons:
         apt:
-          sources: *sources
+          sources: [ubuntu-toolchain-r-test]
       addons:
         apt:
           packages: [g++-6]
