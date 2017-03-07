@@ -26,7 +26,7 @@ function download_boost {
 				BOOST_URL="http://sourceforge.net/projects/boost/files/boost/${__VERSION}/boost_${__VERSION//\./_}.tar.gz"
 				mkdir -p "${BOOST_DIR}"
 				echo "$ME:$FUNCNAME: DOWNLOADING $BOOST_URL"
-          		{ travis_retry wget "${__QUIET}" -O - ${BOOST_URL} | tar --strip-components=1 -xz -C "${BOOST_DIR}"; } || exit 1
+          		{ travis_retry wget --progress=dot:mega "${__QUIET}" -O - ${BOOST_URL} | tar --strip-components=1 -xz -C "${BOOST_DIR}"; } || exit 1
           		echo "$ME:$FUNCNAME: DONE DOWNLOADING $BOOST_URL"
 			fi
 			touch "$BOOST_DIR/.is_downloaded"
@@ -65,7 +65,7 @@ function get_cmake {
 	if [[ ! -f $__DIR/cmake/.is_downloaded ]]; then
 		CMAKE_URL="https://cmake.org/files/v3.7/cmake-3.7.2-Linux-x86_64.tar.gz"
 		echo "$ME:$FUNCNAME: DOWNLOADING $CMAKE_URL"
-		mkdir -p "$__DIR/cmake" && $TR wget --no-check-certificate "$__QUIET" -O - ${CMAKE_URL} \
+		mkdir -p "$__DIR/cmake" && $TR wget --progress=dot:mega --no-check-certificate "$__QUIET" -O - ${CMAKE_URL} \
 			| tar --strip-components=1 -xz -C "$__DIR/cmake"
 		echo "$ME:$FUNCNAME: DONE DOWNLOADING $CMAKE_URL"
 		export PATH=${__DIR}/cmake/bin:${PATH}
@@ -107,10 +107,10 @@ function get_clang {
 			mkdir -p "${LLVM_DIR}" "${LLVM_DIR}/build" "${LLVM_DIR}/projects/libcxx" \
 				"${LLVM_DIR}/projects/libcxxabi" "${LLVM_DIR}/clang"
 			if [[ ! -f $LLVM_DIR/.is_downloaded ]]; then
-			  $TR wget --quiet -O - ${LLVM_URL}      | tar --strip-components=1 -xJ -C ${LLVM_DIR}
-   	    $TR wget --quiet -O - ${LIBCXX_URL}    | tar --strip-components=1 -xJ -C ${LLVM_DIR}/projects/libcxx
-       	$TR wget --quiet -O - ${LIBCXXABI_URL} | tar --strip-components=1 -xJ -C ${LLVM_DIR}/projects/libcxxabi
-       	$TR wget --quiet -O - ${CLANG_URL}     | tar --strip-components=1 -xJ -C ${LLVM_DIR}/clang
+			  $TR wget --progress=dot:mega --quiet -O - ${LLVM_URL}      | tar --strip-components=1 -xJ -C ${LLVM_DIR}
+   	    $TR wget --progress=dot:mega --quiet -O - ${LIBCXX_URL}    | tar --strip-components=1 -xJ -C ${LLVM_DIR}/projects/libcxx
+       	$TR wget --progress=dot:mega --quiet -O - ${LIBCXXABI_URL} | tar --strip-components=1 -xJ -C ${LLVM_DIR}/projects/libcxxabi
+       	$TR wget --progress=dot:mega --quiet -O - ${CLANG_URL}     | tar --strip-components=1 -xJ -C ${LLVM_DIR}/clang
 				touch "$LLVM_DIR/.is_downloaded"
 			else
 				echo "$ME:$FUNCNAME: ${LLVM_DIR}/.is_downloaded exists, skipping llvm download"
@@ -139,7 +139,7 @@ function get_doxygen {
 	echo "$ME:$FUNCNAME: BEGIN in $(pwd)"
 	DOXYGEN_URL="http://ftp.stack.nl/pub/users/dimitri/doxygen-1.8.11.linux.bin.tar.gz"
 	echo "$ME:$FUNCNAME: DOWNLOADING $DOXYGEN_URL"
-	mkdir doxygen && $TR wget "$__QUIET" -O - ${DOXYGEN_URL} | tar --strip-components=1 -xz -C doxygen
+	mkdir doxygen && $TR wget --progress=dot:mega "$__QUIET" -O - ${DOXYGEN_URL} | tar --strip-components=1 -xz -C doxygen
 	echo "$ME:$FUNCNAME: DONE DOWNLOADING $DOXYGEN_URL"
 	echo "$ME:$FUNCNAME: add doxygen to path"
 	export PATH=${__DIR}/doxygen/bin:${PATH}
