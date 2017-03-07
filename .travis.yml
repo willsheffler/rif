@@ -30,6 +30,8 @@ addons:
 
 cache:
   directories:
+    - $HOME/.cache/pip
+    - $HOME/Library/Caches/pip
     - ${TRAVIS_BUILD_DIR}/deps/llvm-3.6.2
     - ${TRAVIS_BUILD_DIR}/deps/llvm-3.7.1
     - ${TRAVIS_BUILD_DIR}/deps/llvm-3.8.0

@@ -18,7 +18,6 @@ import sys
 import os
 import subprocess
 import glob
-import shutil
 
 version = str(sys.version_info.major) + '.' + str(sys.version_info.minor)
 # If extensions (or modules to document with autodoc) are in another directory,
