@@ -117,8 +117,8 @@ install:
       export PIP=$(which pip)
       export PYTHON=$(which python2)
     fi
-  - echo "!!!!!! .travis.yml:install using pip $PIP"
-  - echo "!!!!!! .travis.yml:install using python $PYTHON
+  - echo "!!!!!! travis.yml install using pip $PIP"
+  - echo "!!!!!! travis.yml install using python $PYTHON"
   - $PIP install -rrequirements.txt codecov
   # - pip install --verbose jinja2
   # - pip$PY install --verbose jinja2
