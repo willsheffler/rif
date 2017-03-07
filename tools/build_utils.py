@@ -209,5 +209,7 @@ def build_and_run_pytest(redo_cmake=False):
         args += '--ignore build_setup_py_Release'.split()
     for decoy in get_ignored_dirs(cfg):
         args += ['--ignore', decoy]
-    print('pytest.main(', ' '.join(args), ')')
+    print('============== starting pytest' , sys.executable,'====================================')
+    print('============== pytest.main(', ' '.join(args), ')')
+    print('==================================================================================')
     return pytest.main(args)

@@ -1,6 +1,18 @@
 cmake_minimum_required(VERSION 3.0)
 project(rif)
 
+message("============== CMAKE ==============================================================")
+
+function(main)
+    message("-------------- CMAKE main ---------------------------------------------------------")
+    print_config()
+    add_subdirectory(external/pybind11)
+    build_python_bindings("")
+    build_gtests()
+    summary()
+endfunction()
+
+
 if(NOT DEFINED CMAKE_LIBRARY_OUTPUT_DIRECTORY)
     message("CMAKE_LIBRARY_OUTPUT_DIRECTORY not defined, setting to .")
     set(CMAKE_LIBRARY_OUTPUT_DIRECTORY .)
@@ -46,6 +58,7 @@ list(APPEND extra_libs boost_system)
 list(APPEND extra_libs boost_iostreams)
 
 function(print_config)
+    message("-------------- CMAKE print_config -------------------------------------------------")
     message("cmake: CC:  " $ENV{CC})
     message("cmake: CXX: " $ENV{CXX})
     message("cmake: CXXFLAGS: " $ENV{CXXFLAGS})
@@ -58,6 +71,7 @@ function(print_config)
 endfunction()
 
 function(make_any_missing__init__py_and_copy_py_to_liboutdir)
+    message("-------------- CMAKE make_any_missing__init__py_and_copy_py_to_liboutdir ----------")
     execute_process(COMMAND python ${CMAKE_SOURCE_DIR}/tools/gen__init__.py src/rif
         WORKING_DIRECTORY ${CMAKE_SOURCE_DIR} RESULT_VARIABLE STATUS)
     if(NOT "${STATUS}" STREQUAL "0")
@@ -72,6 +86,7 @@ function(make_any_missing__init__py_and_copy_py_to_liboutdir)
 endfunction()
 
 function(build_python_bindings)
+    message("-------------- CMAKE build_python_bindings ----------------------------------------")
     make_any_missing__init__py_and_copy_py_to_liboutdir()
     set(SRCGEN ${CMAKE_SOURCE_DIR}/tools/pybind_source_gen.py)
     add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/rif.gen.cpp COMMAND python ${SRCGEN} ${CMAKE_SOURCE_DIR}/src/rif ${CMAKE_CURRENT_BINARY_DIR} DEPENDS src/rif/rif.gen.cpp.jinja)
@@ -82,6 +97,7 @@ endfunction()
 
 
 function(build_gtests)
+    message("-------------- CMAKE build_gtests -------------------------------------------------")
     add_subdirectory(external/googletest)
     include_directories("external/googletest/include")
     list(APPEND extra_libs gtest)
@@ -101,28 +117,16 @@ function(build_gtests)
     target_link_libraries(gtest_wip rif_data ${extra_libs})
 endfunction()
 
-function(SUMMARY)
+function(summary)
+    message("-------------- CMAKE summary ------------------------------------------------------")
     if(CCACHE_PROGRAM)
-        execute_process(COMMAND ccache -s
+        message("outputting ccache stats:")
+        execute_process(COMMAND ${CCACHE_PROGRAM} -s
         WORKING_DIRECTORY ${CMAKE_SOURCE_DIR} RESULT_VARIABLE STATUS)
     endif()
 endfunction()
 
+main()
 
 
-
-
-
-
-
-
-print_config()
-
-add_subdirectory(external/pybind11)
-build_python_bindings("")
-
-build_gtests()
-
-SUMMARY()
-
-
+message("============== CMAKE DONE =========================================================")

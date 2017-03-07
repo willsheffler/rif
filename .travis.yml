@@ -10,6 +10,7 @@ addons:
       - cmake-data
       - libz-dev
       - libbz2-dev
+      - I_AM_NOT_A_PACKAGE
     sources: &sources
       - ubuntu-toolchain-r-test
       - kubuntu-backports
@@ -37,7 +38,7 @@ matrix:
 
     - os: linux
       dist: trusty
-      env: OS=LU14 TEST=UNIT GCC=5
+      env: OS=LU14 UNIT= GCC=5
       compiler: gcc
       addons:
         apt:
@@ -46,7 +47,7 @@ matrix:
 
     - os: linux
       dist: trusty
-      env: OS=LU14 TEST=UNIT GCC=6
+      env: OS=LU14 UNIT= GCC=6
       compiler: gcc
       addons:
         apt:
@@ -55,7 +56,7 @@ matrix:
 
     - os: linux
       dist: trusty
-      env: OS=LU14 TEST=UNIT GCC=6 PY=3
+      env: OS=LU14 UNIT= GCC=6 PY=3
       addons:
         apt:
           sources: *sources
@@ -64,7 +65,7 @@ matrix:
 
     - os: linux
       dist: trusty
-      env: OS=LU14 TEST=UNIT BOOST_VERSION=default
+      env: OS=LU14 UNIT= BOOST_VERSION=default
       compiler: clang
       addons:
         apt:
@@ -72,19 +73,19 @@ matrix:
           packages: [clang++-3.5]
 
     - os: osx
-      env: OS=OSX6 TEST=UNIT BOOST_VERSION=default
+      env: OS=OSX6 UNIT= BOOST_VERSION=default
       osx_image: xcode6
 
     - os: osx
-      env: OS=OSX8 TEST=UNIT BOOST_VERSION=default PY=3
+      env: OS=OSX8 UNIT= BOOST_VERSION=default PY=3
       osx_image: xcode8
 
     - os: linux
-      env: OS=LU12 TEST=UNIT LLVM_VERSION=default BOOST_VERSION=1.59.0
+      env: OS=LU12 UNIT= LLVM_VERSION=default BOOST_VERSION=1.59.0
       compiler: clang
 
     - os: linux
-      env: OS=LU12 TEST=UNIT GCC=6 BOOST_VERSION=default
+      env: OS=LU12 UNIT= GCC=6 BOOST_VERSION=default
       addons:
         apt:
           sources: *sources
@@ -122,7 +123,7 @@ before_script:
 
 script:
   - |
-    if [ ! -z ${TEST+x} ]; then
+    if [ ! -z ${UNIT+x} ]; then
       (python$PY tools/cmake_build_and_run_pytest.py && codecov)
     elif [ ! -z ${DOCS+x} ]; then
       (cd docs && make html)
