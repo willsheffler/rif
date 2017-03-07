@@ -67,8 +67,6 @@ matrix:
       addons:
         apt:
           sources: [ubuntu-toolchain-r-test]
-      addons:
-        apt:
           packages: [g++-5]
       compiler: gcc
     - os: linux
