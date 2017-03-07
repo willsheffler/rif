@@ -1,5 +1,6 @@
 # copied largely from boost hana and pybind11 .travis config
 
+language: c++
 sudo: false
 
 
@@ -24,7 +25,6 @@ cache:
     - ${TRAVIS_BUILD_DIR}/deps/boost-1.61.0
     - ${TRAVIS_BUILD_DIR}/deps/boost-1.62.0
     - ${TRAVIS_BUILD_DIR}/deps/boost-1.63.0
-    - ${TRAVIS_BUILD_DIR}/build_setup_py_Release
 
 matrix:
   include:
@@ -98,6 +98,7 @@ before_install:
   - export PATH=/usr/lib/ccache:$PATH
   - export CCACHE_DISABLE=false
   - if [[ $TRAVIS_OS_NAME == "osx" ]]; then CC=clang; CXX=clang++; fi
+  - (echo FINDING_CCACHE in $HOME && find $HOME -name .ccache)
 install:
   - travis_get_cmake
   - if [[ "$LLVM_VERSION" ]]; then get_clang $DEPS_DIR $LLVM_VERSION; fi
@@ -107,11 +108,14 @@ install:
     if [[ $PY == "3" ]]; then
       if [[ $TRAVIS_OS_NAME == "osx" ]]; then brew install python3; fi
       python3 -m ensurepip
+      export PIP=pip3
+    else
+      export PIP=pip
     fi
   - which pip$PY
-  - pip$PY install -rrequirements.txt codecov
-  - pip install --verbose jinja2
-  - pip$PY install --verbose jinja2
+  - $PIP install -rrequirements.txt codecov
+  # - pip install --verbose jinja2
+  # - pip$PY install --verbose jinja2
 
 before_script:
   - cd ${TRAVIS_BUILD_DIR}
@@ -128,4 +132,5 @@ script:
       echo "unknown config, nothing done"
     fi
 
-
+after_script:
+  - (echo FINDING_CCACHE in $HOME && find $HOME -name .ccache)
