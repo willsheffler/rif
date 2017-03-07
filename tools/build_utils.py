@@ -113,7 +113,7 @@ def add_to_pypath(newpath):
 def rebuild_setup_py_rif(cfg='Release'):
     proj_root = get_proj_root()
     return os.system('cd ' + proj_root + '; ' + sys.executable +
-                 ' setup.py build --build-base=build_setup_py_' + cfg):
+                 ' setup.py build --build-base=build_setup_py_' + cfg)
 
 
 def rebuild_fast(target='rif_cpp', cfg='Release', redo_cmake=False):
@@ -126,7 +126,7 @@ def rebuild_fast(target='rif_cpp', cfg='Release', redo_cmake=False):
     except:
         cmake_dir = None
     if not cmake_dir or redo_cmake:
-        exitcode = rebuild_setup_py_rif(cfg=cfg):
+        exitcode = rebuild_setup_py_rif(cfg=cfg)
         if exitcode:
             return exitcode
         cmake_dir = get_cmake_dir('temp', cfg=cfg)
@@ -176,7 +176,7 @@ def build_and_run_pytest(redo_cmake=False):
             return errcode
     assert os.path.exists(build_dir)
     errcode = rebuild_fast(target='rif_cpp gtest_all',
-                    cfg=cfg, redo_cmake=redo_cmake):
+                    cfg=cfg, redo_cmake=redo_cmake)
     if errcode:
         return errcode
     # TODO both here and in docs, this gets messed
