@@ -8,10 +8,6 @@ addons:
     packages:
       - cmake
       - cmake-data
-      - python-pip
-      - python-numpy
-      - python-pandas
-      - python3
       - libz-dev
       - libbz2-dev
     sources: &sources
@@ -38,49 +34,57 @@ cache:
 
 matrix:
   include:
+
     - os: linux
       dist: trusty
-      env: OS=LU_14 UNIT_TESTS=true GCC=5
+      env: OS=LU14 TEST= GCC=5
       compiler: gcc
       addons:
         apt:
           sources: *sources
           packages: [g++-5, libboost-iostreams-dev, libboost-system-dev]
+
     - os: linux
       dist: trusty
-      env: OS=LU_14 UNIT_TESTS=true GCC=6
+      env: OS=LU14 TEST= GCC=6
       compiler: gcc
       addons:
         apt:
           sources: *sources
           packages: [g++-6, libboost-iostreams-dev, libboost-system-dev]
+
     - os: linux
       dist: trusty
-      env: OS=LU_14 UNIT_TESTS=true GCC=6 PY=3
+      env: OS=LU14 TEST= GCC=6 PY=3
       addons:
         apt:
           sources: *sources
           packages: [g++-6, libboost-iostreams-dev, libboost-system-dev, python3]
       compiler: gcc
+
     - os: linux
       dist: trusty
-      env: OS=LU_14 UNIT_TESTS=true BOOST_VERSION=default
+      env: OS=LU14 TEST= BOOST_VERSION=default
       compiler: clang
       addons:
         apt:
           sources: *sources
-          packages: [clang++]
+          packages: [clang++-3.5]
+
     - os: osx
-      env: OS=OSX_6 UNIT_TESTS=true BOOST_VERSION=default
+      env: OS=OSX6 TEST= BOOST_VERSION=default
       osx_image: xcode6
+
     - os: osx
-      env: OS=OSX_8 UNIT_TESTS=true BOOST_VERSION=default PY=3
+      env: OS=OSX8 TEST= BOOST_VERSION=default PY=3
       osx_image: xcode8
+
     - os: linux
-      env: OS=LU_12 UNIT_TESTS=true LLVM_VERSION=default BOOST_VERSION=1.59.0
+      env: OS=LU12 TEST= LLVM_VERSION=default BOOST_VERSION=1.59.0
       compiler: clang
+
     - os: linux
-      env: OS=LU_12 UNIT_TESTS=true GCC=6 BOOST_VERSION=default
+      env: OS=LU12 TEST= GCC=6 BOOST_VERSION=default
       addons:
         apt:
           sources: *sources
@@ -88,6 +92,7 @@ matrix:
       compiler: gcc
 
 before_install:
+  - CC=gcc-$GCC; CXX=g++-$GCC
   - DEPS_DIR="${TRAVIS_BUILD_DIR}/deps"
   - source tools/build_utils.sh
   - if [[ "${LLVM_VERSION}" == "default" ]]; then LLVM_VERSION=3.9.0; fi
@@ -96,30 +101,30 @@ before_install:
   - if [[ ! "$PY" ]]; then PY=2; fi
   - export PATH=/usr/lib/ccache:$PATH
   - export CCACHE_DISABLE=false
-install:
-  - CC=gcc-$GCC; CXX=g++-$GCC
   - if [[ $TRAVIS_OS_NAME == "osx" ]]; then CC=clang; CXX=clang++; fi
+install:
   - travis_get_cmake
   - if [[ "$LLVM_VERSION" ]]; then get_clang $DEPS_DIR $LLVM_VERSION; fi
   - if [[ "$BOOST_VERSION" ]]; then get_boost $DEPS_DIR $BOOST_VERSION; fi
-  - if [[ "${DOCUMENTATION}" == "true" ]]; then get_doxygen; fi
+  - if [ -z ${DOCS+x} ]; then get_doxygen; fi
   - |
     if [[ $PY == "3" ]]; then
       if [[ $TRAVIS_OS_NAME == "osx" ]]; then brew install python3; fi
       python3 -m ensurepip
     fi
   - which pip$PY
-  - pip$PY install --verbose --user sphinx numpy pandas future jinja2 pytest pytest-cov pytest-sugar pytest-xdist hypothesis enum34 codecov
-  - (cd external/hacked_packages/pytest-cpp-0.4 && pip install --user .)
+  - pip$PY install -rrequirements.txt codecov
+  - pip install --verbose jinja2
+  - pip$PY install --verbose jinja2
 
 before_script:
   - cd ${TRAVIS_BUILD_DIR}
 
 script:
   - |
-    if [[ "${UNIT_TESTS}" == "true" ]]; then
+    if [ -z ${TEST+x} ]; then
       (python$PY tools/cmake_build_and_run_pytest.py && codecov)
-    elif [[ "${DOCUMENTATION}" == "true" ]]; then
+    elif [ -z ${DOCS+x} ]; then
       (cd docs && make html)
     fi
 

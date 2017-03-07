@@ -26,7 +26,7 @@ function download_boost {
 				BOOST_URL="http://sourceforge.net/projects/boost/files/boost/${__VERSION}/boost_${__VERSION//\./_}.tar.gz"
 				mkdir -p "${BOOST_DIR}"
 				echo "$ME:$FUNCNAME: DOWNLOADING $BOOST_URL"
-          		{ travis_retry wget ${__QUIET} -O - ${BOOST_URL} | tar --strip-components=1 -xz -C ${BOOST_DIR}; } || exit 1
+          		{ travis_retry wget "${__QUIET}" -O - ${BOOST_URL} | tar --strip-components=1 -xz -C "${BOOST_DIR}"; } || exit 1
           		echo "$ME:$FUNCNAME: DONE DOWNLOADING $BOOST_URL"
 			fi
 			touch "$BOOST_DIR/.is_downloaded"

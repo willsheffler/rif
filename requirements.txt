@@ -1,13 +1,14 @@
-future
-jinja2
-pytest
-pytest-xdist
-pytest-sugar
--e external/hacked_packages/pytest-cpp-0.4
-hypothesis
+breathe
 colorama
+future
+hypothesis
+jinja2
 numpy
 pandas
+pytest
+pytest-cov
+pytest-sugar
+pytest-xdist
 sphinx_rtd_theme
-breathe
-
+enum34
+-e external/hacked_packages/pytest-cpp-0.4
