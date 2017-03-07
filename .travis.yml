@@ -88,9 +88,6 @@ matrix:
     #       sources: *sources
     #       packages: [g++-6]
 
-before_cache:
-  - ccache -s
-
 before_install:
   # these may be over-ridden in build_util.sh
   - if [ ! -z ${CLANG+x} ]; then export CC=clang   ; export CXX=clang++ ; fi
