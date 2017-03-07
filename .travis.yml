@@ -37,9 +37,6 @@ cache:
     - ${TRAVIS_BUILD_DIR}/build_setup_py_Release
 
 matrix:
-  exclude:
-    - env: TRAVIS_EMPTY_JOB_WORKAROUND=true
-
   include:
     - os: linux
       dist: trusty
@@ -108,6 +105,7 @@ before_install:
   - if [[ "${COMPILER}" != "" ]]; then export CXX=${COMPILER}; fi
   - if [[ ! "$PY" ]]; then PY=2; fi
   - export PATH=/usr/lib/ccache:$PATH
+  - export CCACHE_DISABLE=false
 install:
   - CC=gcc-$GCC; CXX=g++-$GCC
   - if [[ $TRAVIS_OS_NAME == "osx" ]]; then CC=clang; CXX=clang++; fi

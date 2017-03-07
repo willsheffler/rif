@@ -25,3 +25,4 @@ docs/html
 docs/latex
 .coverage
 deps
+rif.egg-info
