@@ -123,10 +123,12 @@ before_script:
 
 script:
   - |
-    if [ ! -z ${UNIT+x} ]; then
+    if [[ $UNIT == T ]]; then
       (python$PY tools/cmake_build_and_run_pytest.py && codecov)
-    elif [ ! -z ${DOCS+x} ]; then
+    elif [[ $DOSC == T ]]; then
       (cd docs && make html)
+    else
+      echo "unknown config, nothing done"
     fi
 
 
