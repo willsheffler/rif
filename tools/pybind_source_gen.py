@@ -23,7 +23,8 @@ except ImportError as error:
         print('   ', p)
         try:
             for d in os.listdir(p):
-                print('       ', d)
+                if 'jinja' in d:
+                    print('       ', d)
         except:
             print('cant read', d)
     raise error

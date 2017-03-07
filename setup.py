@@ -169,6 +169,7 @@ class CMakeBuild(build_ext):
             build_args += ['--', '-j' + str(ncpu)]
         cmake_args += _rif_setup_opts['cmake_args']
         build_args += _rif_setup_opts['build_args']
+        cmake_args += ['-DPYTHON_EXECUTABLE:FILEPATH=' + sys.executable, ]
 
         env = os.environ.copy()
         env['CXXFLAGS'] = '{} -DVERSION_INFO=\\"{}\\"'.format(

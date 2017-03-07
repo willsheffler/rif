@@ -26,3 +26,4 @@ docs/latex
 .coverage
 deps
 rif.egg-info
+log/*.log

@@ -87,6 +87,9 @@ matrix:
           sources: *sources
           packages: [g++-6]
 
+before_cache:
+  - ccache -s
+
 before_install:
   - CC=gcc-$GCC; CXX=g++-$GCC
   - DEPS_DIR="${TRAVIS_BUILD_DIR}/deps"
@@ -96,9 +99,9 @@ before_install:
   - if [[ "${COMPILER}" != "" ]]; then export CXX=${COMPILER}; fi
   - if [[ ! "$PY" ]]; then PY=2; fi
   - export PATH=/usr/lib/ccache:$PATH
-  - export CCACHE_DISABLE=false
   - if [[ $TRAVIS_OS_NAME == "osx" ]]; then CC=clang; CXX=clang++; fi
-  - (echo FINDING_CCACHE in $HOME && find $HOME -name .ccache)
+  - (echo FINDING_CCACHE in $HOME  && find $HOME -name .ccache)
+
 install:
   - travis_get_cmake
   - if [[ "$LLVM_VERSION" ]]; then get_clang $DEPS_DIR $LLVM_VERSION; fi
@@ -108,17 +111,29 @@ install:
     if [[ $PY == "3" ]]; then
       if [[ $TRAVIS_OS_NAME == "osx" ]]; then brew install python3; fi
       python3 -m ensurepip
-      export PIP=pip3
+      export PIP=$(which pip3)
+      export PYTHON=$(which python3)
     else
-      export PIP=pip
+      export PIP=$(which pip)
+      export PYTHON=$(which python2)
     fi
-  - which pip$PY
+  - echo "!!!!!! .travis.yml:install using pip $PIP"
+  - echo "!!!!!! .travis.yml:install using python $PYTHON
   - $PIP install -rrequirements.txt codecov
   # - pip install --verbose jinja2
   # - pip$PY install --verbose jinja2
 
 before_script:
-  - cd ${TRAVIS_BUILD_DIR}
+  - unset CCACHE_DISABLE
+  - export NUMJOBS=4
+  - export USE_CCACHE=1
+  - export CCACHE_SLOPPINESS=pch_defines,time_macros
+  - export CCACHE_COMPRESS=1
+  - export URHO3D_MODERN_CPP=0
+  - export URHO3D_AMALG=0
+  - export PATH=$(whereis -b ccache |grep -o '\\S*lib\\S*'):$PATH
+  - if [ \"$CC\"  == \"clang\" ]; then ln -s $(which ccache) $HOME/clang && ln -s $(which ccache) $HOME/clang++ && export PATH=$HOME:$PATH; fi
+  - ccache -z -M 100M
 
 script:
   - |

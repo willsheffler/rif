@@ -68,6 +68,7 @@ function(print_config)
     message("cmake: extra_libs: " ${extra_libs})
     message("cmake: CMAKE_OPTIONS: " $ENV{CMAKE_OPTIONS})
     message("cmake: BOOST_ROOT: " $ENV{BOOST_ROOT})
+    message("PYTHON_EXECUTABLE: " ${PYTHON_EXECUTABLE})
 endfunction()
 
 function(make_any_missing__init__py_and_copy_py_to_liboutdir)
