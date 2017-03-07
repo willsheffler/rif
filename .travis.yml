@@ -37,7 +37,7 @@ matrix:
 
     - os: linux
       dist: trusty
-      env: OS=LU14 TEST= GCC=5
+      env: OS=LU14 TEST=UNIT GCC=5
       compiler: gcc
       addons:
         apt:
@@ -46,7 +46,7 @@ matrix:
 
     - os: linux
       dist: trusty
-      env: OS=LU14 TEST= GCC=6
+      env: OS=LU14 TEST=UNIT GCC=6
       compiler: gcc
       addons:
         apt:
@@ -55,7 +55,7 @@ matrix:
 
     - os: linux
       dist: trusty
-      env: OS=LU14 TEST= GCC=6 PY=3
+      env: OS=LU14 TEST=UNIT GCC=6 PY=3
       addons:
         apt:
           sources: *sources
@@ -64,7 +64,7 @@ matrix:
 
     - os: linux
       dist: trusty
-      env: OS=LU14 TEST= BOOST_VERSION=default
+      env: OS=LU14 TEST=UNIT BOOST_VERSION=default
       compiler: clang
       addons:
         apt:
@@ -72,19 +72,19 @@ matrix:
           packages: [clang++-3.5]
 
     - os: osx
-      env: OS=OSX6 TEST= BOOST_VERSION=default
+      env: OS=OSX6 TEST=UNIT BOOST_VERSION=default
       osx_image: xcode6
 
     - os: osx
-      env: OS=OSX8 TEST= BOOST_VERSION=default PY=3
+      env: OS=OSX8 TEST=UNIT BOOST_VERSION=default PY=3
       osx_image: xcode8
 
     - os: linux
-      env: OS=LU12 TEST= LLVM_VERSION=default BOOST_VERSION=1.59.0
+      env: OS=LU12 TEST=UNIT LLVM_VERSION=default BOOST_VERSION=1.59.0
       compiler: clang
 
     - os: linux
-      env: OS=LU12 TEST= GCC=6 BOOST_VERSION=default
+      env: OS=LU12 TEST=UNIT GCC=6 BOOST_VERSION=default
       addons:
         apt:
           sources: *sources
@@ -106,7 +106,7 @@ install:
   - travis_get_cmake
   - if [[ "$LLVM_VERSION" ]]; then get_clang $DEPS_DIR $LLVM_VERSION; fi
   - if [[ "$BOOST_VERSION" ]]; then get_boost $DEPS_DIR $BOOST_VERSION; fi
-  - if [ -z ${DOCS+x} ]; then get_doxygen; fi
+  - if [ ! -z ${DOCS+x} ]; then get_doxygen; fi
   - |
     if [[ $PY == "3" ]]; then
       if [[ $TRAVIS_OS_NAME == "osx" ]]; then brew install python3; fi
@@ -122,9 +122,9 @@ before_script:
 
 script:
   - |
-    if [ -z ${TEST+x} ]; then
+    if [ ! -z ${TEST+x} ]; then
       (python$PY tools/cmake_build_and_run_pytest.py && codecov)
-    elif [ -z ${DOCS+x} ]; then
+    elif [ ! -z ${DOCS+x} ]; then
       (cd docs && make html)
     fi
 
