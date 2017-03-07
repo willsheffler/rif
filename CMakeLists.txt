@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 3.0)
 project(rif)
 
 if(NOT DEFINED CMAKE_LIBRARY_OUTPUT_DIRECTORY)
@@ -81,7 +81,7 @@ function(build_python_bindings)
 endfunction()
 
 
-function(BUILD_GTESTS)
+function(build_gtests)
     add_subdirectory(external/googletest)
     include_directories("external/googletest/include")
     list(APPEND extra_libs gtest)
@@ -101,11 +101,28 @@ function(BUILD_GTESTS)
     target_link_libraries(gtest_wip rif_data ${extra_libs})
 endfunction()
 
+function(SUMMARY)
+    if(CCACHE_PROGRAM)
+        execute_process(COMMAND ccache -s
+        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR} RESULT_VARIABLE STATUS)
+    endif()
+endfunction()
+
+
+
+
+
+
+
+
 
 print_config()
 
 add_subdirectory(external/pybind11)
 build_python_bindings("")
 
-BUILD_GTESTS()
+build_gtests()
+
+SUMMARY()
+
 
