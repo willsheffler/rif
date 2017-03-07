@@ -1,6 +1,5 @@
 # copied largely from boost hana and pybind11 .travis config
 
-language: c++
 sudo: false
 
 
@@ -11,6 +10,7 @@ default_sources: &sources
   - deadsnakes
 
 cache:
+  apt: true # this currently does nothing?
   directories:
     - $HOME/.ccache
     - $HOME/.cache/pip
@@ -32,6 +32,7 @@ matrix:
     - os: linux
       dist: trusty
       env: OS=LU14 UNIT=T GCC=5
+      language: c++
       addons:
         apt:
           sources: *sources
@@ -40,6 +41,7 @@ matrix:
     - os: linux
       dist: trusty
       env: OS=LU14 UNIT=T GCC=6
+      language: c++
       addons:
         apt:
           sources: *sources
@@ -48,6 +50,7 @@ matrix:
     - os: linux
       dist: trusty
       env: OS=LU14 UNIT=T GCC=6 PY=3
+      language: c++
       addons:
         apt:
           sources: *sources
@@ -56,6 +59,7 @@ matrix:
     - os: linux
       dist: trusty
       env: OS=LU14 UNIT=T BOOST_VERSION=default
+      language: c++
       addons:
         apt:
           sources: *sources
@@ -63,17 +67,21 @@ matrix:
 
     - os: osx
       env: OS=OSX6 UNIT=T BOOST_VERSION=default
+      language: c++
       osx_image: xcode6
 
     - os: osx
       env: OS=OSX8 UNIT=T BOOST_VERSION=default PY=3
+      language: c++
       osx_image: xcode8
 
     - os: linux
       env: OS=LU12 UNIT=T LLVM_VERSION=default BOOST_VERSION=1.59.0
+      language: c++
 
     - os: linux
       env: OS=LU12 UNIT=T GCC=6 BOOST_VERSION=default
+      language: c++
       addons:
         apt:
           sources: *sources

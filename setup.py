@@ -186,7 +186,8 @@ class CMakeBuild(build_ext):
             ['cmake', '--build', '.'] + build_args, cwd=self.build_temp)
         if os.path.exists(defaultextdir):
             os.remove(defaultextdir)
-        # os.symlink(extdir, defaultextdir)
+        # TODO: figure out how to remove this, needed for tox
+        os.symlink(extdir, defaultextdir)
 
 
 setup(

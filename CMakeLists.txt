@@ -125,7 +125,7 @@ function(summary)
             COMMAND ${CCACHE_PROGRAM} -s
             WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
             COMMENT "!!!!!!!!!!!!!!!!!!!! getting ccache stats !!!!!!!!!!!!!!!!!!!!!!!!!!"
-            DEPENDS rif_cpp
+            DEPENDS rif_cpp gtest_all
         )
     endif()
 endfunction()
