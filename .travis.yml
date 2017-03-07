@@ -40,7 +40,7 @@ matrix:
   include:
     - os: linux
       dist: trusty
-      env: UNIT_TESTS=true GCC=5
+      env: OS=LU_14 UNIT_TESTS=true GCC=5
       compiler: gcc
       addons:
         apt:
@@ -48,7 +48,7 @@ matrix:
           packages: [g++-5, libboost-iostreams-dev, libboost-system-dev]
     - os: linux
       dist: trusty
-      env: UNIT_TESTS=true GCC=6
+      env: OS=LU_14 UNIT_TESTS=true GCC=6
       compiler: gcc
       addons:
         apt:
@@ -56,35 +56,36 @@ matrix:
           packages: [g++-6, libboost-iostreams-dev, libboost-system-dev]
     - os: linux
       dist: trusty
-      env: UNIT_TESTS=true GCC=6 PY=3
+      env: OS=LU_14 UNIT_TESTS=true GCC=6 PY=3
       addons:
         apt:
           sources: *sources
           packages: [g++-6, libboost-iostreams-dev, libboost-system-dev, python3]
       compiler: gcc
     - os: linux
-      env: UNIT_TESTS=true GCC=6 BOOST_VERSION=default
-      addons:
-        apt:
-          sources: *sources
-          packages: [g++-6]
-      compiler: gcc
-    - os: linux
-      env: UNIT_TESTS=true BOOST_VERSION=default
+      dist: trusty
+      env: OS=LU_14 UNIT_TESTS=true BOOST_VERSION=default
       compiler: clang
       addons:
         apt:
           sources: *sources
           packages: [clang++]
-    - os: linux
-      env: UNIT_TESTS=true LLVM_VERSION=default BOOST_VERSION=1.59.0
-      compiler: clang
     - os: osx
-      env: UNIT_TESTS=true BOOST_VERSION=default
+      env: OS=OSX_6 UNIT_TESTS=true BOOST_VERSION=default
       osx_image: xcode6
     - os: osx
-      env: UNIT_TESTS=true BOOST_VERSION=default PY=3
+      env: OS=OSX_8 UNIT_TESTS=true BOOST_VERSION=default PY=3
       osx_image: xcode8
+    - os: linux
+      env: OS=LU_12 UNIT_TESTS=true LLVM_VERSION=default BOOST_VERSION=1.59.0
+      compiler: clang
+    - os: linux
+      env: OS=LU_12 UNIT_TESTS=true GCC=6 BOOST_VERSION=default
+      addons:
+        apt:
+          sources: *sources
+          packages: [g++-6]
+      compiler: gcc
 
 before_install:
   - DEPS_DIR="${TRAVIS_BUILD_DIR}/deps"

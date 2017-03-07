@@ -47,8 +47,7 @@ TEST(hana, demo_test) {
   std::string s;
   hana::int_c<10>.times([&] { s += "x"; });
   // equivalent to s += "x"; s += "x"; ... s += "x";
-  // ASSERT_EQ(s, "xxxxxxxxxx");
-  ASSERT_EQ(s, "xxxxxxxxx");
+  ASSERT_EQ(s, "xxxxxxxxxx");
 
   // 3. Easily check whether an expression is valid.
   //    This is usually achieved with complex SFINAE-based tricks.
