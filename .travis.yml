@@ -90,7 +90,12 @@ matrix:
 
 before_install:
   # these may be over-ridden in build_util.sh
-  - if [ ! -z ${CLANG+x} ]; then export CC=clang   ; export CXX=clang++ ; fi
+  - |
+    if [ ! -z ${CLANG+x} ]; then
+      export CC=clang   ;
+      export CXX=clang++ ;
+      export CXXFLAGS="-nostdinc++ -Wl,-L${LLVM_DIR}/install/lib -Wl,-lc++ -Wl,-lc++abi"
+    fi
   - if [ ! -z ${GCC+x}   ]; then export CC=gcc-$GCC; export CXX=g++-$GCC; fi
   - DEPS_DIR="${TRAVIS_BUILD_DIR}/deps"
   - source tools/build_utils.sh

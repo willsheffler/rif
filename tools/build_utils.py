@@ -112,9 +112,8 @@ def add_to_pypath(newpath):
 
 def rebuild_setup_py_rif(cfg='Release'):
     proj_root = get_proj_root()
-    if os.system('cd ' + proj_root + '; ' + sys.executable +
+    return os.system('cd ' + proj_root + '; ' + sys.executable +
                  ' setup.py build --build-base=build_setup_py_' + cfg):
-        return -1
 
 
 def rebuild_fast(target='rif_cpp', cfg='Release', redo_cmake=False):
@@ -127,8 +126,9 @@ def rebuild_fast(target='rif_cpp', cfg='Release', redo_cmake=False):
     except:
         cmake_dir = None
     if not cmake_dir or redo_cmake:
-        if rebuild_setup_py_rif(cfg=cfg):
-            return -1
+        exitcode = rebuild_setup_py_rif(cfg=cfg):
+        if exitcode:
+            return exitcode
         cmake_dir = get_cmake_dir('temp', cfg=cfg)
 
     return os.system('cd ' + cmake_dir + '; ' + makeexe + ' -j8 ' + target)
@@ -138,7 +138,7 @@ def make_docs(kind='html', cfg='Release'):
     proj_root = get_proj_root()
     rebuild_setup_py_rif()
     add_to_pypath(get_cmake_dir('lib', cfg=cfg))
-    os.system('cd ' + proj_root + '/docs; make ' + kind)
+    return os.system('cd ' + proj_root + '/docs; make ' + kind)
 
 
 def rif_is_installed():
@@ -171,11 +171,14 @@ def build_and_run_pytest(redo_cmake=False):
     build_dir = get_build_dir(cfg)
     print('calling rebuild_fast')
     if not os.path.exists(build_dir):
-        rebuild_setup_py_rif(cfg)
+        errcode = rebuild_setup_py_rif(cfg)
+        if errcode:
+            return errcode
     assert os.path.exists(build_dir)
-    if rebuild_fast(target='rif_cpp gtest_all',
+    errcode = rebuild_fast(target='rif_cpp gtest_all',
                     cfg=cfg, redo_cmake=redo_cmake):
-        sys.exit(-1)
+    if errcode:
+        return errcode
     # TODO both here and in docs, this gets messed
     #      up when rif is actually installed
     libdir = os.path.abspath(get_cmake_dir('lib', cfg))
