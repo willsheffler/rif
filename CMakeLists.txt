@@ -120,9 +120,13 @@ endfunction()
 function(summary)
     message("-------------- CMAKE summary ------------------------------------------------------")
     if(CCACHE_PROGRAM)
-        message("outputting ccache stats:")
-        execute_process(COMMAND ${CCACHE_PROGRAM} -s
-        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR} RESULT_VARIABLE STATUS)
+        message("cmake: add_custom_target: ccache -s")
+        add_custom_target(ccache_stats ALL
+            COMMAND ${CCACHE_PROGRAM} -s
+            WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+            COMMENT "!!!!!!!!!!!!!!!!!!!! getting ccache stats !!!!!!!!!!!!!!!!!!!!!!!!!!"
+            DEPENDS rif_cpp
+        )
     endif()
 endfunction()
 

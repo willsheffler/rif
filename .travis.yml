@@ -3,19 +3,12 @@
 language: c++
 sudo: false
 
-addons:
-  apt:
-    packages:
-      - cmake
-      - cmake-data
-      - libz-dev
-      - libbz2-dev
-      - I_AM_NOT_A_PACKAGE
-    sources: &sources
-      - ubuntu-toolchain-r-test
-      - kubuntu-backports
-      - george-edison55-precise-backports # cmake 3.2.3 / doxygen 1.8.3
-      - deadsnakes
+
+default_sources: &sources
+  - ubuntu-toolchain-r-test
+  - kubuntu-backports
+  - george-edison55-precise-backports # cmake 3.2.3 / doxygen 1.8.3
+  - deadsnakes
 
 cache:
   directories:
@@ -119,6 +112,8 @@ script:
   - |
     if [[ $UNIT == T ]]; then
       (python$PY tools/cmake_build_and_run_pytest.py && codecov)
+      echo REMOVE THIS IF CMAKE CALLS IT !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+      ccache -s
     elif [[ $DOSC == T ]]; then
       (cd docs && make html)
     else

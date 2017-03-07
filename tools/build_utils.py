@@ -157,10 +157,6 @@ def is_devel_install():
     return proj_root + '/src' in sys.path
 
 
-def rif_is_installed():
-    raise NotImplemented
-
-
 def remove_installed_rif():
     if rif_is_installed():
         os.system('echo y | ' + sys.executable + ' -m pip uninstall rif')
@@ -209,7 +205,8 @@ def build_and_run_pytest(redo_cmake=False):
         args += '--ignore build_setup_py_Release'.split()
     for decoy in get_ignored_dirs(cfg):
         args += ['--ignore', decoy]
-    print('============== starting pytest' , sys.executable,'====================================')
+    print('============== starting pytest', sys.executable,
+          '====================================')
     print('============== pytest.main(', ' '.join(args), ')')
     print('==================================================================================')
     return pytest.main(args)
