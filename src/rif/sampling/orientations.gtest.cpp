@@ -11,7 +11,9 @@ std::string get_working_path() {
   return (getcwd(temp, MAXPATHLEN) ? std::string(temp) : std::string(""));
 }
 
-TEST(Orientation, read_karney_datasets) {
+// fails on travis-ci with llvm
+// shouldn't touch the fs from the c++ layer
+TEST(Orientation, DISABLED_read_karney_datasets) {
   // todo: unzip data files
   // fill in data structure instead of stream
   std::cout << "TEST read_karney_datasets" << std::endl;

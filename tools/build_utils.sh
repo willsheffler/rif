@@ -85,6 +85,7 @@ function travis_get_cmake {
 	elif [ "$TRAVIS_OS_NAME" = 'osx' ]; then
 		brew install cmake
 		brew upgrade cmake
+		# todo, this doesn't belong here....
 		export PATH=${PATH}:/Users/travis/Library/Python/2.7/bin
 	else
 		echo "$ME:$FUNCNAME: not on osx or linux???"
