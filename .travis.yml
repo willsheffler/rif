@@ -100,12 +100,12 @@ matrix:
           sources: *sources
           packages: [g++-5, python-numpy, python-pandas]
 
-    - os:  linux
-      env: OS=LU12 UNIT=T GCC=6 BOOST=1.59.0 PY=2
-      addons:
-        apt:
-          sources: *sources
-          packages: [g++-6, python-numpy, python-pandas]
+    # - os:  linux
+    #   env: OS=LU12 UNIT=T GCC=6 BOOST=1.59.0 PY=2
+    #   addons:
+    #     apt:
+    #       sources: *sources
+    #       packages: [g++-6, python-numpy, python-pandas]
 
     - os: osx
       env: OS=OSX6 UNIT=T BOOST=T PY=2
@@ -127,7 +127,7 @@ before_install:
   # - find . -name .is_built -exec rm {} \; # uncomment if llvm gets messed up
   # these may be over-ridden in build_util.sh
   - echo "NUM_JOBS $NUM_JOBS"
-  - |  
+  - |
     if [ ! -z ${CLANG+x} ]; then
       export CC=clang   ;
       export CXX=clang++ ;
