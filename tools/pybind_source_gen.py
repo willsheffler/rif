@@ -25,9 +25,9 @@ except ImportError as error:
             for d in os.listdir(p):
                 if 'jinja' in d:
                     print('       ', d)
-        except:
+        except OSError:
             print('cant read', d)
-    raise error
+    sys.exit(-1)
 
 
 def get_pybind_modules(srcpath):
@@ -42,7 +42,7 @@ def get_pybind_modules(srcpath):
                 grepped = subprocess.check_output(
                     ['grep', '-H', 'RIFLIB_PYBIND_', pybindfile])
                 print('grepped', grepped)
-            except:
+            except OSError:
                 continue
             for line in grepped.splitlines():
                 line = str(line)

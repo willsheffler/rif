@@ -4,7 +4,7 @@ def test_import_pigen():
     try:
         import rif.numeric.pigen
         success = True
-    except:
+    except ImportError:
         success = False
     assert success
 

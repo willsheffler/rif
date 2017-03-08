@@ -181,10 +181,15 @@ class CMakeBuild(build_ext):
             print('setup.py: adding -I/-L for conda', condadir)
         if not os.path.exists(self.build_temp):
             os.makedirs(self.build_temp)
-        subprocess.check_call(
-            ['cmake', ext.sourcedir] + cmake_args, cwd=self.build_temp, env=env)
-        subprocess.check_call(
-            ['cmake', '--build', '.'] + build_args, cwd=self.build_temp)
+        try:
+            subprocess.check_call(
+                ['cmake', ext.sourcedir] + cmake_args, cwd=self.build_temp, env=env)
+            subprocess.check_call(
+                ['cmake', '--build', '.'] + build_args, cwd=self.build_temp)
+        except subprocess.CalledProcessError as e:
+            print('setup.py exiting with returncode', e.returncode)
+            sys.exit(e.returncode)
+            print('this should never happen')
         if os.path.exists(defaultextdir):
             os.remove(defaultextdir)
         # TODO: figure out how to remove this, needed for tox
