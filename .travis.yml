@@ -33,28 +33,28 @@ matrix:
 ############################ GCC 5/6 ###########################
     - os: linux
       dist: trusty
-      env: OS=LU14 UNIT=T GCC=5 PY=2
+      env: OS=LU14 UNIT=T GCC=5 PY=2 CACHE_NAME=LU14_GCC5_PY2
       addons:
         apt:
           sources: *sources
           packages: [g++-5, libboost-iostreams-dev, libboost-system-dev]
     - os: linux
       dist: trusty
-      env: OS=LU14 UNIT=T GCC=5 PY=3
+      env: OS=LU14 UNIT=T GCC=5 PY=3 CACHE_NAME=LU14_GCC5_PY3
       addons:
         apt:
           sources: *sources
           packages: [g++-5, libboost-iostreams-dev, libboost-system-dev]
     - os: linux
       dist: trusty
-      env: OS=LU14 UNIT=T GCC=6 PY=2
+      env: OS=LU14 UNIT=T GCC=6 PY=2 CACHE_NAME=LU14_GCC6_PY2
       addons:
         apt:
           sources: *sources
           packages: [g++-6, libboost-iostreams-dev, libboost-system-dev]
     - os: linux
       dist: trusty
-      env: OS=LU14 UNIT=T GCC=6 PY=3
+      env: OS=LU14 UNIT=T GCC=6 PY=3 CACHE_NAME=LU14_GCC6_PY3
       addons:
         apt:
           sources: *sources
@@ -63,57 +63,56 @@ matrix:
 ############################ CLANG ###########################
     - os:   linux
       dist: trusty
-      env:  OS=LU14 UNIT=T LLVM=3.6.2 PY=2
+      env:  OS=LU14 UNIT=T LLVM=3.6.2 PY=2 CACHE_NAME=LU14_LLVM362_PY2
       addons:
         apt:
           sources: *sources
           packages: [g++-5, libboost-iostreams-dev, libboost-system-dev]
     - os:   linux
       dist: trusty
-      env:  OS=LU14 UNIT=T LLVM=3.7.1 PY=2
-      addons:
-        apt:
-          sources: *sources
-          packages: [g++-5, libboost-iostreams-dev, libboost-system-dev]
-    - os:   linux
-      dist: trusty
-      env:  OS=LU14 UNIT=T LLVM=3.8.0 PY=2
-      addons:
-        apt:
-          sources: *sources
-          packages: [g++-5, libboost-iostreams-dev, libboost-system-dev]
-    - os:   linux
-      dist: trusty
-      env:  OS=LU14 UNIT=T LLVM=3.9.0 PY=2
-      addons:
-        apt:
-          sources: *sources
-          packages: [g++-5, libboost-iostreams-dev, libboost-system-dev]
-
-    - os:   linux
-      dist: trusty
-      env:  OS=LU14 UNIT=T LLVM=3.6.2 PY=3
+      env:  OS=LU14 UNIT=T LLVM=3.6.2 PY=3 CACHE_NAME=LU14_LLVM362_PY3
       addons:
         apt:
           sources: *sources
           packages: [g++-5, libboost-iostreams-dev, libboost-system-dev, python3]
     - os:   linux
       dist: trusty
-      env:  OS=LU14 UNIT=T LLVM=3.7.1 PY=3
+      env:  OS=LU14 UNIT=T LLVM=3.7.1 PY=2 CACHE_NAME=LU14_LLVM371_PY2
+      addons:
+        apt:
+          sources: *sources
+          packages: [g++-5, libboost-iostreams-dev, libboost-system-dev]
+    - os:   linux
+      dist: trusty
+      env:  OS=LU14 UNIT=T LLVM=3.7.1 PY=3 CACHE_NAME=LU14_LLVM371_PY3
       addons:
         apt:
           sources: *sources
           packages: [g++-5, libboost-iostreams-dev, libboost-system-dev, python3]
     - os:   linux
       dist: trusty
-      env:  OS=LU14 UNIT=T LLVM=3.8.0 PY=3
+      env:  OS=LU14 UNIT=T LLVM=3.8.0 PY=2 CACHE_NAME=LU14_LLVM380_PY2
+      addons:
+        apt:
+          sources: *sources
+          packages: [g++-5, libboost-iostreams-dev, libboost-system-dev]
+    - os:   linux
+      dist: trusty
+      env:  OS=LU14 UNIT=T LLVM=3.8.0 PY=3 CACHE_NAME=LU14_LLVM380_PY3
       addons:
         apt:
           sources: *sources
           packages: [g++-5, libboost-iostreams-dev, libboost-system-dev, python3]
     - os:   linux
       dist: trusty
-      env:  OS=LU14 UNIT=T LLVM=3.9.0 PY=3
+      env:  OS=LU14 UNIT=T LLVM=3.9.0 PY=2 CACHE_NAME=LU14_LLVM390_PY2
+      addons:
+        apt:
+          sources: *sources
+          packages: [g++-5, libboost-iostreams-dev, libboost-system-dev]
+    - os:   linux
+      dist: trusty
+      env:  OS=LU14 UNIT=T LLVM=3.9.0 PY=3 CACHE_NAME=LU14_LLVM390_PY3
       addons:
         apt:
           sources: *sources
@@ -122,13 +121,13 @@ matrix:
 ####################### 12.04 ####################################3
     - os:   linux
       dist: trusty
-      env:  OS=LU12 UNIT=T GCC=5 BOOST=1.59.0 PY=2
+      env:  OS=LU12 UNIT=T GCC=5 BOOST=1.59.0 PY=2 CACHE_NAME=LU12_GCC5_BOOST159_PY2
       addons:
         apt:
           sources: *sources
           packages: [g++-5, python-numpy, python-pandas]
     - os:  linux
-      env: OS=LU12 UNIT=T GCC=6 BOOST=1.59.0 PY=2
+      env: OS=LU12 UNIT=T GCC=6 BOOST=1.59.0 PY=2 CACHE_NAME=LU12_GCC6_BOOST159_PY2
       addons:
         apt:
           sources: *sources
@@ -136,16 +135,16 @@ matrix:
 
 ########################### OSX ##############################
     - os: osx
-      env: OS=OSX6 UNIT=T BOOST=T PY=2
+      env: OS=OSX6 UNIT=T BOOST=T PY=2 CACHE_NAME=OSX6_BOOST_PY2
       osx_image: xcode6
     - os: osx
-      env: OS=OSX7 UNIT=T PY=3
+      env: OS=OSX7 UNIT=T PY=3 CACHE_NAME=OSX7_PY3
       osx_image: xcode7
     - os: osx
-      env: OS=OSX8 UNIT=T BOOST=T PY=2
+      env: OS=OSX8 UNIT=T BOOST=T PY=2 CACHE_NAME=OSX8_BOOST_PY2
       osx_image: xcode8
     - os: osx
-      env: OS=OSX8 UNIT=T PY=3
+      env: OS=OSX8 UNIT=T PY=3 CACHE_NAME=OSX8_PY3
       osx_image: xcode8
 
 before_install:
