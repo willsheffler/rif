@@ -126,7 +126,8 @@ matrix:
 before_install:
   # - find . -name .is_built -exec rm {} \; # uncomment if llvm gets messed up
   # these may be over-ridden in build_util.sh
-  - |
+  - echo "NUM_JOBS $NUM_JOBS"
+  - |  
     if [ ! -z ${CLANG+x} ]; then
       export CC=clang   ;
       export CXX=clang++ ;
