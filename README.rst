@@ -1,4 +1,29 @@
+.. inclusion-marker-do-not-remove
+
+Rotamer Interaction Field README
+=================================
+
+
+.. image:: https://img.shields.io/travis/willsheffler/rif.svg
+    :target: http://travis-ci.org/willsheffler/rif
+.. image:: https://img.shields.io/pypi/v/rif.svg
+    :target: https://pypi.python.org/pypi/rif/
+.. image:: https://img.shields.io/codecov/c/github/willsheffler/rif.svg
+    :target: https://codecov.io/gh/willsheffler/rif
+
+
+
+
+devel:
+
+.. image:: https://img.shields.io/travis/willsheffler/rif/devel.svg
+    :target: http://travis-ci.org/willsheffler/rif
+.. image:: https://img.shields.io/codecov/c/github/willsheffler/rif/devel.svg
+    :target: https://codecov.io/gh/willsheffler/rif/branch/devel
+
+
 tell willsheffler@gmail.com to put something in this readme!
+------------------------------------------------------------
 
 python requirements
 numpy, jinja2, pytest, pytest-cpp*, hypothesis, pandas

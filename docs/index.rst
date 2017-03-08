@@ -1,9 +1,10 @@
 RIF Documentation
 ================================
 
-
 .. toctree::
-   :maxdepth: 1
+   :maxdepth: 2
+
+   readme_include
 
    intro
 
