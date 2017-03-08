@@ -29,6 +29,7 @@ function download_boost {
           		{ travis_retry wget --progress=dot:mega "${__QUIET}" -O - ${BOOST_URL} | tar --strip-components=1 -xz -C "${BOOST_DIR}"; } || exit 1
           		echo "$ME:$FUNCNAME: DONE DOWNLOADING $BOOST_URL"
 			fi
+			echo "$ME:$FUNCNAME: ${BOOST_DIR} recording successful download"
 			touch "$BOOST_DIR/.is_downloaded"
 		else
 			echo "$ME:$FUNCNAME: ${BOOST_DIR}/.is_downloaded exists, skipping download"
