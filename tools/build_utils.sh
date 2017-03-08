@@ -97,6 +97,7 @@ function get_clang {
 	echo "$ME:$FUNCNAME: BEGIN in $(pwd)"
 	if [[ $1 ]]; then	__DIR=$1; else echo "$ME:$FUNCNAME: \$1 must be location"; return; fi;
 	if [[ $2 ]]; then	__VERSION=$2; else __VERSION=3.9.0; fi
+	if [[ $3 ]]; then	__GCC=$3; else __GCC=5; fi		
 
 	if [[ $__VERSION ]]; then
 		LLVM_DIR=${__DIR}/llvm-${__VERSION}
@@ -119,7 +120,8 @@ function get_clang {
 			else
 				echo "$ME:$FUNCNAME: ${LLVM_DIR}/.is_downloaded exists, skipping llvm download"
       fi
-			(cd "${LLVM_DIR}/build" && cmake .. -DCMAKE_INSTALL_PREFIX="${LLVM_DIR}/install" -DCMAKE_CXX_COMPILER=gcc-5 -DCMAKE_C_COMPILER=gcc-5)
+      		# todo: fix hardcoded gcc
+			(cd "${LLVM_DIR}/build" && cmake .. -DCMAKE_INSTALL_PREFIX="${LLVM_DIR}/install" -DCMAKE_CXX_COMPILER=gcc-$GCC -DCMAKE_C_COMPILER=gcc-$__GCC)
 			(cd "${LLVM_DIR}/build/projects/libcxx" && make install -j2)
 			(cd "${LLVM_DIR}/build/projects/libcxxabi" && make install -j2)
 			if [ $? == 0 ]; then touch "$LLVM_DIR/.is_built"; else exit 1; fi
