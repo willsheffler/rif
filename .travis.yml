@@ -130,15 +130,12 @@ install:
 
 before_script:
   - unset CCACHE_DISABLE
-  - export NUMJOBS=4
+  - export NUMJOBS=8
   - export USE_CCACHE=1
   - export CCACHE_SLOPPINESS=pch_defines,time_macros
   - export CCACHE_COMPRESS=1
-  - export URHO3D_MODERN_CPP=0
-  - export URHO3D_AMALG=0
   - export PATH=$(whereis -b ccache |grep -o '\\S*lib\\S*'):$PATH
   - if [ \"$CC\"  == \"clang\" ]; then ln -s $(which ccache) $HOME/clang && ln -s $(which ccache) $HOME/clang++ && export PATH=$HOME:$PATH; fi
-  - ccache -z -M 100M
 
 script:
   - |

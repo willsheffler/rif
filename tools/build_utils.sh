@@ -69,11 +69,11 @@ function get_cmake {
 		mkdir -p "$__DIR/cmake" && $TR wget --progress=dot:mega --no-check-certificate "$__QUIET" -O - ${CMAKE_URL} \
 			| tar --strip-components=1 -xz -C "$__DIR/cmake"
 		echo "$ME:$FUNCNAME: DONE DOWNLOADING $CMAKE_URL"
-		export PATH=${__DIR}/cmake/bin:${PATH}
 		touch "$__DIR/cmake/.is_downloaded"
 	else
 		echo "$ME:$FUNCNAME: ${__DIR}/cmake/.is_downloaded exists, skipping download"
 	fi
+	export PATH=${__DIR}/cmake/bin:${PATH}
 	echo "$ME:$FUNCNAME: END in $(pwd)"
 }
 
