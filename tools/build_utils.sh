@@ -98,7 +98,7 @@ function get_clang {
 
 	if [[ $__VERSION ]]; then
 		LLVM_DIR=${__DIR}/llvm-${__VERSION}
-		if [[ ! -f $LLVM_DIR/.is_built ]]; then
+		if [[ ! -f $LLVM_DIR/.is_builtDUMMY ]]; then
 			mkdir -p "$LLVM_DIR"
 			LLVM_URL="http://llvm.org/releases/${__VERSION}/llvm-${__VERSION}.src.tar.xz"
 			LIBCXX_URL="http://llvm.org/releases/${__VERSION}/libcxx-${__VERSION}.src.tar.xz"
@@ -107,7 +107,7 @@ function get_clang {
 
 			mkdir -p "${LLVM_DIR}" "${LLVM_DIR}/build" "${LLVM_DIR}/projects/libcxx" \
 				"${LLVM_DIR}/projects/libcxxabi" "${LLVM_DIR}/clang"
-			if [[ ! -f $LLVM_DIR/.is_downloaded ]]; then
+			if [[ ! -f $LLVM_DIR/.is_downloadedDUMMY ]]; then
 			  $TR wget --progress=dot:mega --quiet -O - ${LLVM_URL}      | tar --strip-components=1 -xJ -C ${LLVM_DIR}
    	    $TR wget --progress=dot:mega --quiet -O - ${LIBCXX_URL}    | tar --strip-components=1 -xJ -C ${LLVM_DIR}/projects/libcxx
        	$TR wget --progress=dot:mega --quiet -O - ${LIBCXXABI_URL} | tar --strip-components=1 -xJ -C ${LLVM_DIR}/projects/libcxxabi
