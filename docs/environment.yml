@@ -6,7 +6,7 @@ dependencies:
 - python==3.5
 - sphinx==1.5.1
 - sphinx_rtd_theme==0.1.9
-- doxygen
+#- doxygen
 - pip
 - boost
 - cmake

@@ -142,7 +142,7 @@ script:
   - |
     if [[ $UNIT == T ]]; then
       (python$PY tools/cmake_build_and_run_pytest.py && codecov)
-      if [ -f .ERROR ]; then echo $(exit 1); done
+      if [ -f .ERROR ]; then exit 1; fi
     elif [[ $DOSC == T ]]; then
       (cd docs && make html)
     else
