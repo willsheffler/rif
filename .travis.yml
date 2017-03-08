@@ -102,7 +102,7 @@ before_install:
   - export PATH=/usr/lib/ccache:$PATH
   - if [[ $TRAVIS_OS_NAME == "osx" ]]; then CC=clang; CXX=clang++; fi
   - (echo FINDING_CCACHE in $HOME  && find $HOME -name .ccache)
-  - rm .ERROR
+  - rm -f ${TRAVIS_BUILD_DIR}/.ERROR
 
 install:
   - travis_get_cmake
