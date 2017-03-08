@@ -61,7 +61,7 @@ matrix:
     - os: linux
       dist: trusty
       env:
-        OS=LU14 UNIT=T LLVM_VERSION=3.5
+        OS=LU14 UNIT=T LLVM_VERSION=3.5.2
       language: c++
       addons:
         apt:
@@ -70,7 +70,7 @@ matrix:
     - os: linux
       dist: trusty
       env:
-        OS=LU14 UNIT=T LLVM_VERSION=3.6
+        OS=LU14 UNIT=T LLVM_VERSION=3.6.2
       language: c++
       addons:
         apt:
@@ -79,7 +79,7 @@ matrix:
     - os: linux
       dist: trusty
       env:
-        OS=LU14 UNIT=T LLVM_VERSION=3.7
+        OS=LU14 UNIT=T LLVM_VERSION=3.7.1
       language: c++
       addons:
         apt:
@@ -88,7 +88,7 @@ matrix:
     - os: linux
       dist: trusty
       env:
-        OS=LU14 UNIT=T LLVM_VERSION=3.8
+        OS=LU14 UNIT=T LLVM_VERSION=3.8.0
       language: c++
       addons:
         apt:
@@ -97,7 +97,7 @@ matrix:
     - os: linux
       dist: trusty
       env:
-        OS=LU14 UNIT=T LLVM_VERSION=3.9
+        OS=LU14 UNIT=T LLVM_VERSION=3.9.0
       language: c++
       addons:
         apt:
@@ -106,20 +106,21 @@ matrix:
 
 # 5
     - os: linux
-      env: OS=LU12 UNIT=T LLVM_VERSION=default BOOST_VERSION=1.59.0
+      dist: trusty
+      env: OS=LU12 UNIT=T GCC=5 BOOST_VERSION=1.59.0
       language: c++
       addons:
         apt:
           sources: *sources
           packages: [g++-5]
 #
-    # - os: linux
-    #   env: OS=LU12 UNIT=T GCC=6 BOOST_VERSION=default
-    #   language: c++
-    #   addons:
-    #     apt:
-    #       sources: *sources
-    #       packages: [g++-6]
+    - os: linux
+      env: OS=LU12 UNIT=T GCC=5
+      language: c++
+      addons:
+        apt:
+          sources: *sources
+          packages: [g++-5]
 # 6
     - os: osx
       env: OS=OSX6 UNIT=T BOOST_VERSION=default
