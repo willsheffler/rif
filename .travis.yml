@@ -124,7 +124,7 @@ matrix:
       osx_image: xcode8
 
 before_install:
-  - find . -name .is_built -exec rm {} \;
+  # - find . -name .is_built -exec rm {} \; # uncomment if llvm gets messed up
   # these may be over-ridden in build_util.sh
   - |
     if [ ! -z ${CLANG+x} ]; then
@@ -162,6 +162,7 @@ install:
     fi
   - echo "!!!!!! travis.yml install using pip $PIP"
   - echo "!!!!!! travis.yml install using python $PYTHON"
+  - head $PIP
   - $PIP install -rrequirements.txt codecov
   - pip install jinja2
   - pip2 install jinja2
@@ -180,7 +181,7 @@ before_script:
 script:
   - |
     if [[ $UNIT == T ]]; then
-      (python$PY tools/cmake_build_and_run_pytest.py && codecov)
+      (python$PY tools/cmake_build_and_run_pytest.py && codecov --required)
       if [ -f .ERROR ]; then exit 1; fi
     elif [[ $DOSC == T ]]; then
       (cd docs && make html)
