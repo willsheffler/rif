@@ -146,7 +146,7 @@ class CMakeBuild(build_ext):
             print('setup.py add CMAKE_OPTIONS:', os.environ['CMAKE_OPTIONS'])
             cmake_args += os.environ['CMAKE_OPTIONS'].split()
         ncpu = multiprocessing.cpu_count()
-        if 'CI' in os.environ:
+        if 'CI' in os.environ or 'READTHEDOCS' in os.environ:
             ncpu = 4
             os.system('uname -a')
             print('setup.py: multiprocessing.cpu_count() is ',
