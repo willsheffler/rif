@@ -13,8 +13,9 @@ cache:
   apt: true # this currently does nothing?
   directories:
     - $HOME/.ccache
-    - $HOME/.cache/pip
-    - $HOME/Library/Caches/pip
+    # these seem to pingpong between py2 and py3
+    # - $HOME/.cache/pip
+    # - $HOME/Library/Caches/pip
     - ${TRAVIS_BUILD_DIR}/deps/cmake
     - ${TRAVIS_BUILD_DIR}/deps/llvm-3.6.2
     - ${TRAVIS_BUILD_DIR}/deps/llvm-3.7.1
@@ -105,7 +106,7 @@ before_install:
   - rm -f ${TRAVIS_BUILD_DIR}/.ERROR
 
 install:
-  - travis_get_cmake deps
+  - travis_get_cmake $DEPS_DIR
   - which cmake
   - if [[ "$LLVM_VERSION" ]]; then get_clang $DEPS_DIR $LLVM_VERSION; fi
   - if [[ "$BOOST_VERSION" ]]; then get_boost $DEPS_DIR $BOOST_VERSION; fi

@@ -118,6 +118,7 @@ function get_clang {
 			else
 				echo "$ME:$FUNCNAME: ${LLVM_DIR}/.is_downloaded exists, skipping llvm download"
       fi
+      which cmake
 			(cd "${LLVM_DIR}/build" && cmake .. -DCMAKE_INSTALL_PREFIX="${LLVM_DIR}/install" -DCMAKE_CXX_COMPILER=clang++)
 			(cd "${LLVM_DIR}/build/projects/libcxx" && make install -j2)
 			(cd "${LLVM_DIR}/build/projects/libcxxabi" && make install -j2)
