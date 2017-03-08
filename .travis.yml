@@ -87,6 +87,7 @@ matrix:
       osx_image: xcode8
 
 before_install:
+  - find . -name .is_built -exec rm {} \;
   # these may be over-ridden in build_util.sh
   - |
     if [ ! -z ${CLANG+x} ]; then
