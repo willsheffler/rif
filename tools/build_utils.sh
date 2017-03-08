@@ -74,6 +74,7 @@ function get_cmake {
 		echo "$ME:$FUNCNAME: ${__DIR}/cmake/.is_downloaded exists, skipping download"
 	fi
 	export PATH=${__DIR}/cmake/bin:${PATH}
+	ls ${__DIR}/cmake/bin/cmake
 	echo "$ME:$FUNCNAME: END in $(pwd)"
 }
 
@@ -108,18 +109,19 @@ function get_clang {
 			mkdir -p "${LLVM_DIR}" "${LLVM_DIR}/build" "${LLVM_DIR}/projects/libcxx" \
 				"${LLVM_DIR}/projects/libcxxabi" "${LLVM_DIR}/clang"
 			if [[ ! -f $LLVM_DIR/.is_downloadedDUMMY ]]; then
-			  $TR wget --progress=dot:mega --quiet -O - ${LLVM_URL}      | tar --strip-components=1 -xJ -C ${LLVM_DIR}
-   	    $TR wget --progress=dot:mega --quiet -O - ${LIBCXX_URL}    | tar --strip-components=1 -xJ -C ${LLVM_DIR}/projects/libcxx
-       	$TR wget --progress=dot:mega --quiet -O - ${LIBCXXABI_URL} | tar --strip-components=1 -xJ -C ${LLVM_DIR}/projects/libcxxabi
-       	$TR wget --progress=dot:mega --quiet -O - ${CLANG_URL}     | tar --strip-components=1 -xJ -C ${LLVM_DIR}/clang
-				touch "$LLVM_DIR/.is_downloaded"
+			( $TR wget --progress=dot:mega --quiet -O - ${LLVM_URL}      | tar --strip-components=1 -xJ -C ${LLVM_DIR} &&
+				$TR wget --progress=dot:mega --quiet -O - ${LIBCXX_URL}    | tar --strip-components=1 -xJ -C ${LLVM_DIR}/projects/libcxx &&
+		    $TR wget --progress=dot:mega --quiet -O - ${LIBCXXABI_URL} | tar --strip-components=1 -xJ -C ${LLVM_DIR}/projects/libcxxabi &&
+				$TR wget --progress=dot:mega --quiet -O - ${CLANG_URL}     | tar --strip-components=1 -xJ -C ${LLVM_DIR}/clang
+       	)
+       	if [ $? == 0 ]; then touch "$LLVM_DIR/.is_downloaded"; fi
 			else
 				echo "$ME:$FUNCNAME: ${LLVM_DIR}/.is_downloaded exists, skipping llvm download"
       fi
 			(cd "${LLVM_DIR}/build" && cmake .. -DCMAKE_INSTALL_PREFIX="${LLVM_DIR}/install" -DCMAKE_CXX_COMPILER=clang++)
 			(cd "${LLVM_DIR}/build/projects/libcxx" && make install -j2)
 			(cd "${LLVM_DIR}/build/projects/libcxxabi" && make install -j2)
-			touch "$LLVM_DIR/.is_built"
+			if [ $? == 0 ]; then touch "$LLVM_DIR/.is_built"; else exit 1; fi
 		else
 			echo "$ME:$FUNCNAME: ${LLVM_DIR}/.is_built exists, skipping llvm build"
 		fi

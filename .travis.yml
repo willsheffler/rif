@@ -65,7 +65,7 @@ matrix:
     - os: linux
       env: OS=LU12 UNIT=T LLVM_VERSION=default BOOST_VERSION=1.59.0
       language: c++
-# 
+#
     # - os: linux
     #   env: OS=LU12 UNIT=T GCC=6 BOOST_VERSION=default
     #   language: c++
@@ -106,6 +106,7 @@ before_install:
 
 install:
   - travis_get_cmake deps
+  - which cmake
   - if [[ "$LLVM_VERSION" ]]; then get_clang $DEPS_DIR $LLVM_VERSION; fi
   - if [[ "$BOOST_VERSION" ]]; then get_boost $DEPS_DIR $BOOST_VERSION; fi
   - if [ ! -z ${DOCS+x} ]; then get_doxygen; fi
@@ -130,7 +131,6 @@ install:
 
 before_script:
   - unset CCACHE_DISABLE
-  - export NUMJOBS=8
   - export USE_CCACHE=1
   - export CCACHE_SLOPPINESS=pch_defines,time_macros
   - export CCACHE_COMPRESS=1
