@@ -1,6 +1,6 @@
 # copied largely from boost hana and pybind11 .travis config
 
-language: c++
+language: cpp
 sudo: false
 
 
