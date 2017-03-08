@@ -148,7 +148,7 @@ install:
   - travis_get_cmake $DEPS_DIR
   - which cmake
   - if [[ "$LLVM" ]]; then get_clang $DEPS_DIR $LLVM; fi
-  - if [[ "$BOOST" ]]; then get_boost $DEPS_DIR $BOOST; else if [[ $TRAVIS_OS_NAME == "osx" ]]; then brew install boost; fi; fi
+  - if [[ "$BOOST" ]]; then get_boost $DEPS_DIR $BOOST; fi
   - if [ ! -z ${DOCS+x} ]; then get_doxygen; fi
   - |
     if [[ $PY == "3" ]]; then
