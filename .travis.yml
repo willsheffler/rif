@@ -119,19 +119,20 @@ matrix:
           packages: [g++-5, libboost-iostreams-dev, libboost-system-dev, python3]
 
 ####################### 12.04 ####################################3
-    - os:   linux
-      dist: trusty
-      env:  OS=LU12 UNIT=T GCC=5 BOOST=1.59.0 PY=2 CACHE_NAME=LU12_GCC5_BOOST159_PY2
-      addons:
-        apt:
-          sources: *sources
-          packages: [g++-5, python-numpy, python-pandas]
-    - os:  linux
-      env: OS=LU12 UNIT=T GCC=6 BOOST=1.59.0 PY=2 CACHE_NAME=LU12_GCC6_BOOST159_PY2
-      addons:
-        apt:
-          sources: *sources
-          packages: [g++-6, python-numpy, python-pandas]
+  #  - os:   linux
+  #    sudo: true
+  #    env:  OS=LU12 UNIT=T GCC=5 BOOST=1.59.0 PY=2 CACHE_NAME=LU12_GCC5_BOOST159_PY2
+  #    addons:
+  #      apt:
+  #        sources: *sources
+  #        packages: [g++-5, python-numpy, python-pandas]
+  #  - os:  linux
+  #    sudo: true
+  #    env: OS=LU12 UNIT=T GCC=5 BOOST=1.59.0 PY=2 CACHE_NAME=LU12_GCC6_BOOST159_PY2
+  #    addons:
+  #      apt:
+  #        sources: *sources
+  #        packages: [g++-5, python-numpy, python-pandas]
 
 ########################### OSX ##############################
     - os: osx
@@ -141,16 +142,12 @@ matrix:
       env: OS=OSX7 UNIT=T PY=3 CACHE_NAME=OSX7_PY3
       osx_image: xcode7
     - os: osx
-      env: OS=OSX8 UNIT=T BOOST=T PY=2 CACHE_NAME=OSX8_BOOST_PY2
-      osx_image: xcode8
-    - os: osx
-      env: OS=OSX8 UNIT=T PY=3 CACHE_NAME=OSX8_PY3
+      env: OS=OSX8 UNIT=T PY=2 CACHE_NAME=OSX8_PY2
       osx_image: xcode8
 
 before_install:
   # - find . -name .is_built -exec rm {} \; # uncomment if llvm gets messed up
   # these may be over-ridden in build_util.sh
-  - echo "NUM_JOBS $NUM_JOBS"
   - |
     if [ ! -z ${CLANG+x} ]; then
       export CC=clang   ;
