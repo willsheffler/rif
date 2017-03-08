@@ -121,10 +121,11 @@ def add_to_pypath(newpath):
 def rebuild_setup_py_rif(cfg='Release'):
     proj_root = get_proj_root()
     errcode = os.system('cd ' + proj_root + '; ' + sys.executable +
-                   ' setup.py build --build-base=build_setup_py_' + cfg)
+                        ' setup.py build --build-base=build_setup_py_' + cfg)
     print('setup.py returncode', errcode)
     if errcode:
         error(errcode)
+
 
 def rebuild_fast(target='rif_cpp', cfg='Release', redo_cmake=False):
     makeexe = 'ninja'
@@ -182,14 +183,13 @@ def build_and_run_pytest(redo_cmake=False):
     print('calling rebuild_fast')
     if not os.path.exists(build_dir):
         errcode = rebuild_setup_py_rif(cfg)
-        if errcode:
-            print('build_utils.py returned errorcode', errcode)
-            return errcode
-    assert os.path.exists(build_dir)
-    errcode = rebuild_fast(target='rif_cpp gtest_all',
-                           cfg=cfg, redo_cmake=redo_cmake)
+    else:
+        errcode = rebuild_fast(target='rif_cpp gtest_all',
+                               cfg=cfg, redo_cmake=redo_cmake)
     if errcode:
+        print('build_utils.py returned errorcode', errcode)
         return errcode
+    assert os.path.exists(build_dir)
     # TODO both here and in docs, this gets messed
     #      up when rif is actually installed
     libdir = os.path.abspath(get_cmake_dir('lib', cfg))
@@ -228,4 +228,3 @@ def build_and_run_pytest(redo_cmake=False):
         error(errcode)
         raise SystemError
         return errcode
-
