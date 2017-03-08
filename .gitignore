@@ -27,3 +27,4 @@ docs/latex
 deps
 rif.egg-info
 log/*.log
+.ERROR

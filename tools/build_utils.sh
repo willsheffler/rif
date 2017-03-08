@@ -79,7 +79,7 @@ function get_cmake {
 function travis_get_cmake {
 	echo "$ME:$FUNCNAME: BEGIN in $(pwd)"
 	if [[ "${TRAVIS_OS_NAME}" == "linux" ]]; then
-		get_cmake "$1" "$2"
+		get_cmake "$1"
 	elif [ "$TRAVIS_OS_NAME" = 'osx' ]; then
 		brew install cmake
 		brew upgrade cmake

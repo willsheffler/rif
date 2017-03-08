@@ -15,6 +15,7 @@ cache:
     - $HOME/.ccache
     - $HOME/.cache/pip
     - $HOME/Library/Caches/pip
+    - ${TRAVIS_BUILD_DIR}/deps/cmake
     - ${TRAVIS_BUILD_DIR}/deps/llvm-3.6.2
     - ${TRAVIS_BUILD_DIR}/deps/llvm-3.7.1
     - ${TRAVIS_BUILD_DIR}/deps/llvm-3.8.0
@@ -105,7 +106,7 @@ before_install:
   - rm -f ${TRAVIS_BUILD_DIR}/.ERROR
 
 install:
-  - travis_get_cmake
+  - travis_get_cmake deps
   - if [[ "$LLVM_VERSION" ]]; then get_clang $DEPS_DIR $LLVM_VERSION; fi
   - if [[ "$BOOST_VERSION" ]]; then get_boost $DEPS_DIR $BOOST_VERSION; fi
   - if [ ! -z ${DOCS+x} ]; then get_doxygen; fi
@@ -141,6 +142,7 @@ script:
   - |
     if [[ $UNIT == T ]]; then
       (python$PY tools/cmake_build_and_run_pytest.py && codecov)
+      if [ -f .ERROR ]; then exit 1; done
     elif [[ $DOSC == T ]]; then
       (cd docs && make html)
     else
