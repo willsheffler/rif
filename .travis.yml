@@ -55,39 +55,39 @@ matrix:
    # - os: linux
    #   dist: trusty
    #   env:
-   #     OS=LU14 UNIT=T LLVM_VERSION=3.5.2
+   #     OS=LU14 UNIT=T LLVM=3.5.2
    #   addons:
    #     apt:
    #       sources: *sources
    #       packages: [g++-5, libboost-iostreams-dev, libboost-system-dev]
     - os:   linux
       dist: trusty
-      env:  OS=LU14 UNIT=T LLVM_VERSION=3.6.2 PY=2
+      env:  OS=LU14 UNIT=T LLVM=3.6.2 PY=2
       addons.apt:
           sources: *sources
           packages: [g++-5, libboost-iostreams-dev, libboost-system-dev]
     - os:   linux
       dist: trusty
-      env:  OS=LU14 UNIT=T LLVM_VERSION=3.7.1 PY=3
+      env:  OS=LU14 UNIT=T LLVM=3.7.1 PY=3
       addons.apt:
           sources: *sources
           packages: [g++-5, libboost-iostreams-dev, libboost-system-dev, python3]
     - os:   linux
       dist: trusty
-      env:  OS=LU14 UNIT=T LLVM_VERSION=3.8.0 PY=2
+      env:  OS=LU14 UNIT=T LLVM=3.8.0 PY=2
       addons.apt:
           sources: *sources
           packages: [g++-5, libboost-iostreams-dev, libboost-system-dev]
     - os:   linux
       dist: trusty
-      env:  OS=LU14 UNIT=T LLVM_VERSION=3.9.0 PY=3
+      env:  OS=LU14 UNIT=T LLVM=3.9.0 PY=3
       addons.apt:
           sources: *sources
           packages: [g++-5, libboost-iostreams-dev, libboost-system-dev, python3]
 
     - os:   linux
       dist: trusty
-      env:  OS=LU12 UNIT=T GCC=5 BOOST_VERSION=1.59.0 PY=2
+      env:  OS=LU12 UNIT=T GCC=5 BOOST=1.59.0 PY=2
       addons.apt:
           sources: *sources
           packages: [g++-5]
@@ -99,11 +99,11 @@ matrix:
           packages: [g++-5, python-numpy, python-pandas]
 
     - os: osx
-      env: OS=OSX6 UNIT=T BOOST_VERSION=default PY=2
+      env: OS=OSX6 UNIT=T BOOST=default PY=2
       osx_image: xcode6
 
     - os: osx
-      env: OS=OSX8 UNIT=T BOOST_VERSION=default PY=3
+      env: OS=OSX8 UNIT=T BOOST=default PY=3
       osx_image: xcode8
 
     - os: osx
@@ -126,8 +126,8 @@ before_install:
   - if [ ! -z ${GCC+x}   ]; then export CC=gcc-$GCC; export CXX=g++-$GCC; fi
   - DEPS_DIR="${TRAVIS_BUILD_DIR}/deps"
   - source tools/build_utils.sh
-  - if [[ "${LLVM_VERSION}" == "default" ]]; then LLVM_VERSION=3.9.0; fi
-  - if [[ "${BOOST_VERSION}" == "default" ]]; then BOOST_VERSION=1.63.0; fi
+  - if [[ "${LLVM}" == "default" ]]; then LLVM=3.9.0; fi
+  - if [[ "${BOOST}" == "default" ]]; then BOOST=1.63.0; fi
   - if [[ "${COMPILER}" != "" ]]; then export CXX=${COMPILER}; fi
   - if [[ ! "$PY" ]]; then PY=2; fi
   - export PATH=/usr/lib/ccache:$PATH
@@ -138,8 +138,8 @@ before_install:
 install:
   - travis_get_cmake $DEPS_DIR
   - which cmake
-  - if [[ "$LLVM_VERSION" ]]; then get_clang $DEPS_DIR $LLVM_VERSION; fi
-  - if [[ "$BOOST_VERSION" ]]; then get_boost $DEPS_DIR $BOOST_VERSION; else if [[ $TRAVIS_OS_NAME == "osx" ]] then brew install boost; fi; fi
+  - if [[ "$LLVM" ]]; then get_clang $DEPS_DIR $LLVM; fi
+  - if [[ "$BOOST" ]]; then get_boost $DEPS_DIR $BOOST; else if [[ $TRAVIS_OS_NAME == "osx" ]]; then brew install boost; fi; fi
   - if [ ! -z ${DOCS+x} ]; then get_doxygen; fi
   - |
     if [[ $PY == "3" ]]; then
