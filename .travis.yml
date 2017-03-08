@@ -60,12 +60,50 @@ matrix:
 # 4
     - os: linux
       dist: trusty
-      env: OS=LU14 UNIT=T LLVM_VERSION=default
+      env:
+        OS=LU14 UNIT=T LLVM_VERSION=3.5
       language: c++
       addons:
         apt:
           sources: *sources
           packages: [g++-5, libboost-iostreams-dev, libboost-system-dev]
+    - os: linux
+      dist: trusty
+      env:
+        OS=LU14 UNIT=T LLVM_VERSION=3.6
+      language: c++
+      addons:
+        apt:
+          sources: *sources
+          packages: [g++-5, libboost-iostreams-dev, libboost-system-dev]
+    - os: linux
+      dist: trusty
+      env:
+        OS=LU14 UNIT=T LLVM_VERSION=3.7
+      language: c++
+      addons:
+        apt:
+          sources: *sources
+          packages: [g++-5, libboost-iostreams-dev, libboost-system-dev]
+    - os: linux
+      dist: trusty
+      env:
+        OS=LU14 UNIT=T LLVM_VERSION=3.8
+      language: c++
+      addons:
+        apt:
+          sources: *sources
+          packages: [g++-5, libboost-iostreams-dev, libboost-system-dev]
+    - os: linux
+      dist: trusty
+      env:
+        OS=LU14 UNIT=T LLVM_VERSION=3.9
+      language: c++
+      addons:
+        apt:
+          sources: *sources
+          packages: [g++-5, libboost-iostreams-dev, libboost-system-dev]
+
 # 5
     - os: linux
       env: OS=LU12 UNIT=T LLVM_VERSION=default BOOST_VERSION=1.59.0

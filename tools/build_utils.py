@@ -97,6 +97,14 @@ def which(program):
     return None
 
 
+def error(errcode):
+    print('build_utils.py: exiting with returncode', errcode)
+    with open('.ERROR', 'w') as out:
+        out.write(errcode)
+        out.write('\n')
+        sys.exit(errcode)
+
+
 def add_to_pypath(newpath):
     if isinstance(newpath, str):
         newpath = [newpath]
@@ -116,10 +124,7 @@ def rebuild_setup_py_rif(cfg='Release'):
                    ' setup.py build --build-base=build_setup_py_' + cfg)
     print('setup.py returncode', errcode)
     if errcode:
-        print('build_utils.py: exiting with returncode', errcode)
-        os.system('touch .ERROR')
-        sys.exit(errcode)
-
+        error(errcode)
 
 def rebuild_fast(target='rif_cpp', cfg='Release', redo_cmake=False):
     makeexe = 'ninja'
@@ -218,4 +223,9 @@ def build_and_run_pytest(redo_cmake=False):
           '====================================')
     print('============== pytest.main(', ' '.join(args), ')')
     print('==================================================================================')
-    return pytest.main(args)
+    errcode = pytest.main(args)
+    if errcode:
+        error(errcode)
+        raise SystemError
+        return errcode
+
