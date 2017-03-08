@@ -14,6 +14,7 @@ cache:
   directories:
     - $HOME/.ccache
     # these seem to pingpong between py2 and py3
+    # but still faster with these lines?
     # - $HOME/.cache/pip
     # - $HOME/Library/Caches/pip
     - ${TRAVIS_BUILD_DIR}/deps/cmake

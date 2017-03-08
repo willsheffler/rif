@@ -99,7 +99,7 @@ function get_clang {
 
 	if [[ $__VERSION ]]; then
 		LLVM_DIR=${__DIR}/llvm-${__VERSION}
-		if [[ ! -f $LLVM_DIR/.is_builtDUMMY ]]; then
+		if [[ ! -f $LLVM_DIR/.is_built ]]; then
 			mkdir -p "$LLVM_DIR"
 			LLVM_URL="http://llvm.org/releases/${__VERSION}/llvm-${__VERSION}.src.tar.xz"
 			LIBCXX_URL="http://llvm.org/releases/${__VERSION}/libcxx-${__VERSION}.src.tar.xz"
@@ -108,7 +108,7 @@ function get_clang {
 
 			mkdir -p "${LLVM_DIR}" "${LLVM_DIR}/build" "${LLVM_DIR}/projects/libcxx" \
 				"${LLVM_DIR}/projects/libcxxabi" "${LLVM_DIR}/clang"
-			if [[ ! -f $LLVM_DIR/.is_downloadedDUMMY ]]; then
+			if [[ ! -f $LLVM_DIR/.is_downloaded ]]; then
 			( $TR wget --progress=dot:mega --quiet -O - ${LLVM_URL}      | tar --strip-components=1 -xJ -C ${LLVM_DIR} &&
 				$TR wget --progress=dot:mega --quiet -O - ${LIBCXX_URL}    | tar --strip-components=1 -xJ -C ${LLVM_DIR}/projects/libcxx &&
 		    $TR wget --progress=dot:mega --quiet -O - ${LIBCXXABI_URL} | tar --strip-components=1 -xJ -C ${LLVM_DIR}/projects/libcxxabi &&
@@ -119,6 +119,8 @@ function get_clang {
 				echo "$ME:$FUNCNAME: ${LLVM_DIR}/.is_downloaded exists, skipping llvm download"
       fi
       which cmake
+      export CC=gcc
+      export CXX=g++
 			(cd "${LLVM_DIR}/build" && cmake .. -DCMAKE_INSTALL_PREFIX="${LLVM_DIR}/install" -DCMAKE_CXX_COMPILER=clang++)
 			(cd "${LLVM_DIR}/build/projects/libcxx" && make install -j2)
 			(cd "${LLVM_DIR}/build/projects/libcxxabi" && make install -j2)
