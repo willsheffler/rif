@@ -30,7 +30,7 @@ cache:
 
 matrix:
   include:
-# 1
+############################ GCC 5/6 ###########################
     - os: linux
       dist: trusty
       env: OS=LU14 UNIT=T GCC=5 PY=2
@@ -38,7 +38,13 @@ matrix:
         apt:
           sources: *sources
           packages: [g++-5, libboost-iostreams-dev, libboost-system-dev]
-# 2
+    - os: linux
+      dist: trusty
+      env: OS=LU14 UNIT=T GCC=5 PY=3
+      addons:
+        apt:
+          sources: *sources
+          packages: [g++-5, libboost-iostreams-dev, libboost-system-dev]
     - os: linux
       dist: trusty
       env: OS=LU14 UNIT=T GCC=6 PY=2
@@ -46,7 +52,6 @@ matrix:
         apt:
           sources: *sources
           packages: [g++-6, libboost-iostreams-dev, libboost-system-dev]
-# 3
     - os: linux
       dist: trusty
       env: OS=LU14 UNIT=T GCC=6 PY=3
@@ -54,15 +59,8 @@ matrix:
         apt:
           sources: *sources
           packages: [g++-6, libboost-iostreams-dev, libboost-system-dev, python3]
-# 4
-   # - os: linux
-   #   dist: trusty
-   #   env:
-   #     OS=LU14 UNIT=T LLVM=3.5.2
-   #   addons:
-   #     apt:
-   #       sources: *sources
-   #       packages: [g++-5, libboost-iostreams-dev, libboost-system-dev]
+
+############################ CLANG ###########################
     - os:   linux
       dist: trusty
       env:  OS=LU14 UNIT=T LLVM=3.6.2 PY=2
@@ -72,11 +70,11 @@ matrix:
           packages: [g++-5, libboost-iostreams-dev, libboost-system-dev]
     - os:   linux
       dist: trusty
-      env:  OS=LU14 UNIT=T LLVM=3.7.1 PY=3
+      env:  OS=LU14 UNIT=T LLVM=3.7.1 PY=2
       addons:
         apt:
           sources: *sources
-          packages: [g++-5, libboost-iostreams-dev, libboost-system-dev, python3]
+          packages: [g++-5, libboost-iostreams-dev, libboost-system-dev]
     - os:   linux
       dist: trusty
       env:  OS=LU14 UNIT=T LLVM=3.8.0 PY=2
@@ -86,12 +84,42 @@ matrix:
           packages: [g++-5, libboost-iostreams-dev, libboost-system-dev]
     - os:   linux
       dist: trusty
+      env:  OS=LU14 UNIT=T LLVM=3.9.0 PY=2
+      addons:
+        apt:
+          sources: *sources
+          packages: [g++-5, libboost-iostreams-dev, libboost-system-dev]
+
+    - os:   linux
+      dist: trusty
+      env:  OS=LU14 UNIT=T LLVM=3.6.2 PY=3
+      addons:
+        apt:
+          sources: *sources
+          packages: [g++-5, libboost-iostreams-dev, libboost-system-dev, python3]
+    - os:   linux
+      dist: trusty
+      env:  OS=LU14 UNIT=T LLVM=3.7.1 PY=3
+      addons:
+        apt:
+          sources: *sources
+          packages: [g++-5, libboost-iostreams-dev, libboost-system-dev, python3]
+    - os:   linux
+      dist: trusty
+      env:  OS=LU14 UNIT=T LLVM=3.8.0 PY=3
+      addons:
+        apt:
+          sources: *sources
+          packages: [g++-5, libboost-iostreams-dev, libboost-system-dev, python3]
+    - os:   linux
+      dist: trusty
       env:  OS=LU14 UNIT=T LLVM=3.9.0 PY=3
       addons:
         apt:
           sources: *sources
           packages: [g++-5, libboost-iostreams-dev, libboost-system-dev, python3]
 
+####################### 12.04 ####################################3
     - os:   linux
       dist: trusty
       env:  OS=LU12 UNIT=T GCC=5 BOOST=1.59.0 PY=2
@@ -99,26 +127,23 @@ matrix:
         apt:
           sources: *sources
           packages: [g++-5, python-numpy, python-pandas]
+    - os:  linux
+      env: OS=LU12 UNIT=T GCC=6 BOOST=1.59.0 PY=2
+      addons:
+        apt:
+          sources: *sources
+          packages: [g++-6, python-numpy, python-pandas]
 
-    # - os:  linux
-    #   env: OS=LU12 UNIT=T GCC=6 BOOST=1.59.0 PY=2
-    #   addons:
-    #     apt:
-    #       sources: *sources
-    #       packages: [g++-6, python-numpy, python-pandas]
-
+########################### OSX ##############################
     - os: osx
       env: OS=OSX6 UNIT=T BOOST=T PY=2
       osx_image: xcode6
-
     - os: osx
-      env: OS=OSX8 UNIT=T BOOST=T PY=3
-      osx_image: xcode8
-
-    - os: osx
-      env: OS=OSX7 UNIT=T PY=2
+      env: OS=OSX7 UNIT=T PY=3
       osx_image: xcode7
-
+    - os: osx
+      env: OS=OSX8 UNIT=T BOOST=T PY=2
+      osx_image: xcode8
     - os: osx
       env: OS=OSX8 UNIT=T PY=3
       osx_image: xcode8
