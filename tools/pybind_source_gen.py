@@ -8,15 +8,30 @@ of *.pybind.cpp components"""
 import subprocess
 import os
 import re
+import datetime
 from collections import OrderedDict
+import sys
 
-import jinja2
+try:
+    import jinja2
+except ImportError as error:
+    print('!!!!!!!!!!!!!! ' * 100)
+    print('cant import jinja2')
+    print(sys.executable)
+    print('SYS.PATH')
+    for p in sys.path:
+        print('   ', p)
+        try:
+            for d in os.listdir(p):
+                if 'jinja' in d:
+                    print('       ', d)
+        except OSError:
+            print('cant read', d)
+    sys.exit(-1)
 
 
 def get_pybind_modules(srcpath):
     "find RIFLIB_PYBIND_ functions in *.pybind.cpp files"
-    pbfiles = subprocess.check_output(
-        'find {} -regex [^.].+pybind.cpp'.format(srcpath).split())
     pymodules = OrderedDict()
     for root, _, files in os.walk(srcpath):
         for basename in (x for x in files if x.endswith('.pybind.cpp')):
@@ -27,12 +42,12 @@ def get_pybind_modules(srcpath):
                 grepped = subprocess.check_output(
                     ['grep', '-H', 'RIFLIB_PYBIND_', pybindfile])
                 print('grepped', grepped)
-            except:
+            except OSError:
                 continue
             for line in grepped.splitlines():
                 line = str(line)
                 match = re.match(
-                    r".*src/(.+).pybind.cpp\:.* RIFLIB_PYBIND_(\w+)", line)
+                    r".*src/rif/(.+).pybind.cpp\:.* RIFLIB_PYBIND_(\w+)", line)
                 # print 'line:', line
                 # print match
                 # assert len(match.groups()) is 2
@@ -120,7 +135,8 @@ def main(template_fname, srcdir, dstdir):
     forward, code = shitty_make_code(pymodules)
     with open(template_fname, 'r') as template_file:
         template = jinja2.Template(template_file.read())
-    newcontent = template.render(forward=forward, code=code)
+    newcontent = template.render(
+        forward=forward, code=code, mydate=str(datetime.datetime.now()))
     update_file_if_needed(destfile, newcontent)
 
 if __name__ == '__main__':

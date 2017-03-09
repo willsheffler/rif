@@ -2,7 +2,7 @@ import os
 from rif_cpp.sampling.orientations import read_karney_orientation_file
 import pandas as pd
 # import numpy as np
-import quaternion as quat
+
 
 import sys
 if sys.version_info[0] < 3:
@@ -22,7 +22,6 @@ karney_index = pd.read_csv(StrIO(karney_index_str), sep='\s+')
 
 def quats_from_karney_file(fname):
     q, w = read_karney_orientation_file(fname)
-    q = quat.as_quat_array(q)
     return q, w
 
 
@@ -46,5 +45,5 @@ def quaternion_set_by_name(name):
 
 
 def filter_quaternion_set_axis_within(quats, axis, angle):
-    print(quats)
+    raise NotImplemented
     return quats

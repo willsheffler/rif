@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python2
 # -*- coding: utf-8 -*-
 #
 # rif documentation build configuration file, created by
@@ -13,15 +13,43 @@
 # All configuration values have a default; values that are commented out
 # serve to show the default.
 
+from __future__ import print_function
 import sys
 import os
 import subprocess
+import glob
 
+version = str(sys.version_info.major) + '.' + str(sys.version_info.minor)
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
-sys.path.insert(0, os.path.abspath(
-    '../build_setup_py_Release/lib.linux-x86_64-3.5'))
+
+
+def build_rif_and_add_path():
+    print('sphinx conf.py: python', sys.executable)
+    print('sphinx conf.py: rebuilding rif module for py' + version)
+    # if os.path.exists('../build_docs'):
+    # shutil.rmtree('../build_docs')
+    print('=' * 40, 'sphinx conf.py BUILDING RIF', '=' * 40)
+    sys.stdout.flush()
+    for itry in range(5):
+        # try:
+        os.system('cd ..; python' + version +
+                  ' setup.py build --build-base=build_docs ' +
+                  '--rif_setup_opts_build_args=rif_cpp ')
+        rifpath = os.path.abspath(
+            glob.glob('../build_docs/lib.*' + version + '*')[0])
+        print('sphinx conf.py adding to sys.path:',
+              os.path.abspath(rifpath))
+        sys.path.insert(0, rifpath)
+        import rif
+        print("sphinx conf.py imported rif successfully")
+
+        break
+    print('=' * 40, 'sphinx conf.py DONE BUILDING RIF', '=' * 40)
+
+
+build_rif_and_add_path()
 
 # -- General configuration ------------------------------------------------
 
@@ -33,7 +61,7 @@ sys.path.insert(0, os.path.abspath(
 # ones.
 extensions = [
     'sphinx.ext.todo',
-    'sphinx.ext.pngmath',
+    'sphinx.ext.imgmath',
     'sphinx.ext.viewcode',
     'sphinx.ext.autodoc',
     'sphinx.ext.autosummary',
@@ -44,7 +72,7 @@ breathe_projects = {
     'rif_cpp': '.build/doxygenxml'
 }
 breathe_default_project = 'rif_cpp'
-breathe_domain_by_extension = {'h': 'cpp', 'hpp':'cpp', 'cpp':'cpp'}
+breathe_domain_by_extension = {'h': 'cpp', 'hpp': 'cpp', 'cpp': 'cpp'}
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['.templates']
@@ -317,9 +345,6 @@ texinfo_documents = [
 
 # If true, do not generate a @detailsmenu in the "Top" node's menu.
 #texinfo_no_detailmenu = False
-
-primary_domain = 'cpp'
-highlight_language = 'cpp'
 
 
 def generate_doxygen_xml(app):

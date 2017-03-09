@@ -4,6 +4,7 @@ from builtins import bytes
 import glob
 import os
 import sys
+import multiprocessing
 
 import pytest
 
@@ -15,6 +16,13 @@ def get_my_compiler():
     if not my_compiler:
         my_compiler = "DEFAULT_CXX"
     return my_compiler
+
+
+def get_my_python():
+    return sys.executable.replace('/', '')
+
+
+# todo: remove the above dups from setup.py
 
 
 def get_proj_root():
@@ -40,7 +48,7 @@ def get_cmake_dir(prefix, cfg):
     """get directory setup.py builds stuff in, prefix is lib or temp"""
     version = '{}.{}'.format(sys.version_info.major, sys.version_info.minor)
     path = get_build_dir(cfg) + '/' + prefix + '*' + \
-        version + '-' + get_my_compiler()
+        version + '-' + get_my_python() + '-' + get_my_compiler()
     libdir = (glob.glob(path))
     if len(libdir) > 1:
         print('ERROR get_cmake_dir', path)
@@ -49,6 +57,7 @@ def get_cmake_dir(prefix, cfg):
     if libdir:
         return libdir[0]
     else:
+        print('cant find libdir', path)
         raise IOError
 
 
@@ -88,6 +97,14 @@ def which(program):
     return None
 
 
+def error(errcode):
+    print('build_utils.py: exiting with returncode', errcode)
+    with open('.ERROR', 'w') as out:
+        out.write(errcode)
+        out.write('\n')
+        sys.exit(errcode)
+
+
 def add_to_pypath(newpath):
     if isinstance(newpath, str):
         newpath = [newpath]
@@ -103,9 +120,11 @@ def add_to_pypath(newpath):
 
 def rebuild_setup_py_rif(cfg='Release'):
     proj_root = get_proj_root()
-    if os.system('cd ' + proj_root + '; ' + sys.executable +
-                 ' setup.py build --build-base=build_setup_py_' + cfg):
-        return -1
+    errcode = os.system('cd ' + proj_root + '; ' + sys.executable +
+                        ' setup.py build --build-base=build_setup_py_' + cfg)
+    print('setup.py returncode', errcode)
+    if errcode:
+        error(errcode)
 
 
 def rebuild_fast(target='rif_cpp', cfg='Release', redo_cmake=False):
@@ -115,11 +134,12 @@ def rebuild_fast(target='rif_cpp', cfg='Release', redo_cmake=False):
     # proj_root = get_proj_root()
     try:
         cmake_dir = get_cmake_dir('temp', cfg=cfg)
-    except:
+    except OSError:
         cmake_dir = None
     if not cmake_dir or redo_cmake:
-        if rebuild_setup_py_rif(cfg=cfg):
-            return -1
+        exitcode = rebuild_setup_py_rif(cfg=cfg)
+        if exitcode:
+            return exitcode
         cmake_dir = get_cmake_dir('temp', cfg=cfg)
 
     return os.system('cd ' + cmake_dir + '; ' + makeexe + ' -j8 ' + target)
@@ -129,7 +149,7 @@ def make_docs(kind='html', cfg='Release'):
     proj_root = get_proj_root()
     rebuild_setup_py_rif()
     add_to_pypath(get_cmake_dir('lib', cfg=cfg))
-    os.system('cd ' + proj_root + '/docs; make ' + kind)
+    return os.system('cd ' + proj_root + '/docs; make ' + kind)
 
 
 def rif_is_installed():
@@ -148,10 +168,6 @@ def is_devel_install():
     return proj_root + '/src' in sys.path
 
 
-def rif_is_installed():
-    raise NotImplemented
-
-
 def remove_installed_rif():
     if rif_is_installed():
         os.system('echo y | ' + sys.executable + ' -m pip uninstall rif')
@@ -166,11 +182,14 @@ def build_and_run_pytest(redo_cmake=False):
     build_dir = get_build_dir(cfg)
     print('calling rebuild_fast')
     if not os.path.exists(build_dir):
-        rebuild_setup_py_rif(cfg)
+        errcode = rebuild_setup_py_rif(cfg)
+    else:
+        errcode = rebuild_fast(target='rif_cpp gtest_all',
+                               cfg=cfg, redo_cmake=redo_cmake)
+    if errcode:
+        print('build_utils.py returned errorcode', errcode)
+        return errcode
     assert os.path.exists(build_dir)
-    if rebuild_fast(target='rif_cpp gtest_all',
-                    cfg=cfg, redo_cmake=redo_cmake):
-        sys.exit(-1)
     # TODO both here and in docs, this gets messed
     #      up when rif is actually installed
     libdir = os.path.abspath(get_cmake_dir('lib', cfg))
@@ -186,11 +205,26 @@ def build_and_run_pytest(redo_cmake=False):
         proj_root = bytes(proj_root, 'ascii')
     args = [x for x in sys.argv[1:] if x.endswith('.py') and
             os.path.basename(x).startswith('test')]
-    if not args: 
-        args = ['.', '-n4', '--ignore', 'build']
-    else: # running one file, don't scan
-        args += ['--ignore', 'build_setup_py_Release']
+    ncpu = multiprocessing.cpu_count()
+    if ncpu > 2:
+        ncpu = int(ncpu / 2)
+    if 'CI' in os.environ:
+        ncpu = 4
+        os.system('uname -a')
+        print('build_utils.py: multiprocessing.cpu_count() = ',
+              multiprocessing.cpu_count())
+    if not args:
+        args = '. --ignore build --cov=./src -n{}'.format(ncpu).split()
+    else:  # running one file, don't scan
+        args += '--ignore build_setup_py_Release'.split()
     for decoy in get_ignored_dirs(cfg):
         args += ['--ignore', decoy]
-    print('pytest.main(', ' '.join(args), ')')
-    pytest.main(args)
+    print('============== starting pytest', sys.executable,
+          '====================================')
+    print('============== pytest.main(', ' '.join(args), ')')
+    print('==================================================================================')
+    errcode = pytest.main(args)
+    if errcode:
+        error(errcode)
+        raise SystemError
+        return errcode

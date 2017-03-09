@@ -1,0 +1,211 @@
+# copied largely from boost hana and pybind11 .travis config
+
+language: cpp
+sudo: false
+
+
+default_sources: &sources
+  - ubuntu-toolchain-r-test
+  - george-edison55-precise-backports # cmake 3.2.3 / doxygen 1.8.3
+  - deadsnakes
+
+cache:
+  apt: true # this currently does nothing?
+  directories:
+    - $HOME/.ccache
+    # these seem to pingpong between py2 and py3
+    # but still faster with these lines?
+    - $HOME/.cache/pip
+    - $HOME/Library/Caches/pip
+    - ${TRAVIS_BUILD_DIR}/deps/cmake
+    - ${TRAVIS_BUILD_DIR}/deps/llvm-3.6.2
+    - ${TRAVIS_BUILD_DIR}/deps/llvm-3.7.1
+    - ${TRAVIS_BUILD_DIR}/deps/llvm-3.8.0
+    - ${TRAVIS_BUILD_DIR}/deps/llvm-3.9.0
+    - ${TRAVIS_BUILD_DIR}/deps/boost-1.59.0
+    - ${TRAVIS_BUILD_DIR}/deps/boost-1.60.0
+    - ${TRAVIS_BUILD_DIR}/deps/boost-1.61.0
+    - ${TRAVIS_BUILD_DIR}/deps/boost-1.62.0
+    - ${TRAVIS_BUILD_DIR}/deps/boost-1.63.0
+
+matrix:
+  include:
+############################ GCC 5/6 ###########################
+    - os: linux
+      dist: trusty
+      env: OS=LU14 UNIT=T GCC=5 PY=2 CACHE_NAME=LU14_GCC5_PY2
+      addons:
+        apt:
+          sources: *sources
+          packages: [g++-5, libboost-iostreams-dev, libboost-system-dev]
+    - os: linux
+      dist: trusty
+      env: OS=LU14 UNIT=T GCC=5 PY=3 CACHE_NAME=LU14_GCC5_PY3
+      addons:
+        apt:
+          sources: *sources
+          packages: [g++-5, libboost-iostreams-dev, libboost-system-dev]
+    - os: linux
+      dist: trusty
+      env: OS=LU14 UNIT=T GCC=6 PY=2 CACHE_NAME=LU14_GCC6_PY2
+      addons:
+        apt:
+          sources: *sources
+          packages: [g++-6, libboost-iostreams-dev, libboost-system-dev]
+    - os: linux
+      dist: trusty
+      env: OS=LU14 UNIT=T GCC=6 PY=3 CACHE_NAME=LU14_GCC6_PY3
+      addons:
+        apt:
+          sources: *sources
+          packages: [g++-6, libboost-iostreams-dev, libboost-system-dev, python3]
+
+############################ CLANG ###########################
+    - os:   linux
+      dist: trusty
+      env:  OS=LU14 UNIT=T LLVM=3.6.2 PY=2 CACHE_NAME=LU14_LLVM362_PY2
+      addons:
+        apt:
+          sources: *sources
+          packages: [g++-5, libboost-iostreams-dev, libboost-system-dev]
+    - os:   linux
+      dist: trusty
+      env:  OS=LU14 UNIT=T LLVM=3.6.2 PY=3 CACHE_NAME=LU14_LLVM362_PY3
+      addons:
+        apt:
+          sources: *sources
+          packages: [g++-5, libboost-iostreams-dev, libboost-system-dev, python3]
+    - os:   linux
+      dist: trusty
+      env:  OS=LU14 UNIT=T LLVM=3.7.1 PY=2 CACHE_NAME=LU14_LLVM371_PY2
+      addons:
+        apt:
+          sources: *sources
+          packages: [g++-5, libboost-iostreams-dev, libboost-system-dev]
+    - os:   linux
+      dist: trusty
+      env:  OS=LU14 UNIT=T LLVM=3.7.1 PY=3 CACHE_NAME=LU14_LLVM371_PY3
+      addons:
+        apt:
+          sources: *sources
+          packages: [g++-5, libboost-iostreams-dev, libboost-system-dev, python3]
+    - os:   linux
+      dist: trusty
+      env:  OS=LU14 UNIT=T LLVM=3.8.0 PY=2 CACHE_NAME=LU14_LLVM380_PY2
+      addons:
+        apt:
+          sources: *sources
+          packages: [g++-5, libboost-iostreams-dev, libboost-system-dev]
+    - os:   linux
+      dist: trusty
+      env:  OS=LU14 UNIT=T LLVM=3.8.0 PY=3 CACHE_NAME=LU14_LLVM380_PY3
+      addons:
+        apt:
+          sources: *sources
+          packages: [g++-5, libboost-iostreams-dev, libboost-system-dev, python3]
+    - os:   linux
+      dist: trusty
+      env:  OS=LU14 UNIT=T LLVM=3.9.0 PY=2 CACHE_NAME=LU14_LLVM390_PY2
+      addons:
+        apt:
+          sources: *sources
+          packages: [g++-5, libboost-iostreams-dev, libboost-system-dev]
+    - os:   linux
+      dist: trusty
+      env:  OS=LU14 UNIT=T LLVM=3.9.0 PY=3 CACHE_NAME=LU14_LLVM390_PY3
+      addons:
+        apt:
+          sources: *sources
+          packages: [g++-5, libboost-iostreams-dev, libboost-system-dev, python3]
+
+####################### 12.04 ####################################3
+  #  - os:   linux
+  #    sudo: true
+  #    env:  OS=LU12 UNIT=T GCC=5 BOOST=1.59.0 PY=2 CACHE_NAME=LU12_GCC5_BOOST159_PY2
+  #    addons:
+  #      apt:
+  #        sources: *sources
+  #        packages: [g++-5, python-numpy, python-pandas]
+  #  - os:  linux
+  #    sudo: true
+  #    env: OS=LU12 UNIT=T GCC=5 BOOST=1.59.0 PY=2 CACHE_NAME=LU12_GCC6_BOOST159_PY2
+  #    addons:
+  #      apt:
+  #        sources: *sources
+  #        packages: [g++-5, python-numpy, python-pandas]
+
+########################### OSX ##############################
+    - os: osx
+      env: OS=OSX6 UNIT=T PY=2 CACHE_NAME=OSX6_PY2
+      osx_image: xcode6
+    - os: osx
+      env: OS=OSX7 UNIT=T PY=2 CACHE_NAME=OSX7_PY3
+      osx_image: xcode7
+    - os: osx
+      env: OS=OSX8 UNIT=T PY=3 CACHE_NAME=OSX8_PY2
+      osx_image: xcode8
+
+before_install:
+  # - find . -name .is_built -exec rm {} \; # uncomment if llvm gets messed up
+  # these may be over-ridden in build_util.sh
+  - |
+    if [ ! -z ${CLANG+x} ]; then
+      export CC=clang   ;
+      export CXX=clang++ ;
+      export CXXFLAGS="-nostdinc++ -Wl,-L${LLVM_DIR}/install/lib -Wl,-lc++ -Wl,-lc++abi"
+    fi
+  - if [ ! -z ${GCC+x}   ]; then export CC=gcc-$GCC; export CXX=g++-$GCC; fi
+  - DEPS_DIR="${TRAVIS_BUILD_DIR}/deps"
+  - source tools/build_utils.sh
+  - if [[ $LLVM == T ]]; then LLVM=3.9.0; fi
+  - if [[ $BOOST == T ]]; then BOOST=1.63.0; fi
+  - if [[ $COMPILER != "" ]]; then export CXX=${COMPILER}; fi
+  - if [[ ! $PY ]]; then PY=2; fi
+  - export PATH=/usr/lib/ccache:$PATH
+  - if [[ $TRAVIS_OS_NAME == "osx" ]]; then export CC=clang; export CXX=clang++; fi
+  - rm -f ${TRAVIS_BUILD_DIR}/.ERROR
+
+install:
+  - travis_get_cmake $DEPS_DIR
+  - which cmake
+  - if [[ "$LLVM" ]]; then get_clang $DEPS_DIR $LLVM; fi
+  - if [[ "$BOOST" ]]; then get_boost $DEPS_DIR $BOOST; fi
+  - if [ ! -z ${DOCS+x} ]; then get_doxygen; fi
+  - |
+    if [[ $PY == "3" ]]; then
+      if [[ $TRAVIS_OS_NAME == "osx" ]]; then brew install python3; fi
+      python3 -m ensurepip
+      export PIP=$(which pip3)
+      export PYTHON=$(which python3)
+    else
+      export PIP=$(which pip)
+      export PYTHON=$(which python2)
+    fi
+  - echo "!!!!!! travis.yml install using pip $PIP"
+  - echo "!!!!!! travis.yml install using python $PYTHON"
+  - head $PIP
+  - $PIP install -rrequirements.txt codecov
+  - pip install jinja2
+  - pip2 install jinja2
+  - if [ $(which pip3) ]; then pip3 install jinja2; fi
+
+before_script:
+  - unset CCACHE_DISABLE
+  - export USE_CCACHE=1
+  - export CCACHE_SLOPPINESS=pch_defines,time_macros
+  - export CCACHE_COMPRESS=1
+  - export PATH=$(whereis -b ccache |grep -o '\\S*lib\\S*'):$PATH
+
+script:
+  - |
+    if [[ $UNIT == T ]]; then
+      (python$PY tools/cmake_build_and_run_pytest.py && codecov --required -X **gcov**)
+      if [ -f .ERROR ]; then exit 1; fi
+    elif [[ $DOSC == T ]]; then
+      (cd docs && make html)
+    else
+      echo "unknown config, nothing done"
+    fi
+
+after_script:
+  - ccache -s

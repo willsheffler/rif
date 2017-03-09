@@ -4,12 +4,19 @@ namespace py = pybind11;
 
 {{forward}}
 
+
 PYBIND11_PLUGIN(rif_cpp) {
     py::module rif("rif_cpp", R"pbdoc(
-        rif docs
-        -----------------------
+        docstring in rif.gen.cpp, **compiled on {{mydate}}**
+
+        rif_cpp docs
+        ------------
+
+        py\:currentmodule is:
 
         .. py:currentmodule:: rif_cpp
+
+        autosummary is:
 
         .. autosummary::
            :toctree: _generate

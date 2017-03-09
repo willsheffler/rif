@@ -7,10 +7,39 @@ import platform
 import subprocess
 import multiprocessing
 from glob import glob
+from collections import defaultdict
 
 from setuptools import setup, Extension, find_packages
 from setuptools.command.build_ext import build_ext
 from distutils.version import LooseVersion
+
+# todo: have these utility functions in a module... but how to import them
+# into setup.py...
+
+
+def get_my_compiler():
+    my_compiler = os.getenv('CXX', '').replace('/', '')
+    if not my_compiler:
+        my_compiler = "DEFAULT_CXX"
+    return my_compiler
+
+
+def get_my_python():
+    return sys.executable.replace('/', '')
+
+
+def my_getenv(name):
+    if name in os.environ:
+        return os.environ[name]
+    else:
+        return "DEFAULT_" + name
+
+
+def in_conda():
+    return ('Anaconda' in sys.version or
+            'Continuum Analytics' in sys.version or
+            'conda' in sys.executable
+            )
 
 
 def which(program):
@@ -33,17 +62,29 @@ def which(program):
     return None
 
 
-def get_my_compiler():
-    my_compiler = os.getenv('CXX', '').replace('/', '')
-    if not my_compiler:
-        my_compiler = "DEFAULT_CXX"
-    return my_compiler
-
-
 def infer_config_from_build_dirname(path):
     path = path.split('/')[0]
     if path.startswith('build_setup_py_'):
         return path.replace('build_setup_py_', '')
+
+
+_rif_setup_opts = defaultdict(list)
+_remove_from_sys_argv = list()
+for arg in sys.argv:
+    if arg.startswith('--rif_setup_opts_'):
+        flag, val = arg.split('=')
+        _rif_setup_opts[flag[17:]] = val.split(',')
+        _remove_from_sys_argv.append(arg)
+for arg in _remove_from_sys_argv:
+    sys.argv.remove(arg)
+print('setup.py: rif args:')
+for flag, val in _rif_setup_opts.items():
+    print('    ', flag, '=', val)
+
+print('setup.py: compiler:', get_my_compiler())
+print('setup.py: python:', get_my_python())
+for evar in "CC CXX CXXFLAGS".split():
+    print('sepup.py: env:', evar, my_getenv(evar))
 
 
 class CMakeExtension(Extension):
@@ -55,10 +96,13 @@ class CMakeExtension(Extension):
 
 class CMakeBuild(build_ext):
 
+    def __init__(self, *args, **kwargs):
+        build_ext.__init__(self, *args, **kwargs)
+        self.my_tag = get_my_python() + '-' + get_my_compiler()
+
     def run(self):
-        my_compiler = get_my_compiler()
-        if my_compiler and not self.build_temp.endswith(my_compiler):
-            self.build_temp += '-' + my_compiler
+        if not self.build_temp.endswith(self.my_tag):
+            self.build_temp += '-' + self.my_tag
         try:
             out = subprocess.check_output(['cmake', '--version'])
         except OSError:
@@ -76,11 +120,10 @@ class CMakeBuild(build_ext):
             self.build_extension(ext)
 
     def get_ext_fullpath(self, ext_name):
-        my_compiler = get_my_compiler()
         defaultname = build_ext.get_ext_fullpath(self, ext_name)
-        extra = '-' + my_compiler if my_compiler else ''
-        path = os.path.dirname(defaultname) + extra + \
-            '/' + os.path.basename(defaultname)
+        path = os.path.dirname(defaultname)
+        path += '-' + self.my_tag + '/'
+        path += os.path.basename(defaultname)
         return path, defaultname
 
     def build_extension(self, ext):
@@ -90,9 +133,26 @@ class CMakeBuild(build_ext):
         cmake_args = ['-DCMAKE_LIBRARY_OUTPUT_DIRECTORY=' + extdir,
                       '-DPYTHON_EXECUTABLE=' + sys.executable,
                       ]
+
+        # if 'CI' in os.environ:
+        #     print('checking for CMAKE_OPTIONS')
+        #     for k, v in os.environ.items():
+        #         print('ENV', k, '=', v)
+        #         if k is 'CMAKE_OPTIONS':
+        #             print('finding any *.so in local boost root')
+        #             os.system('find %s -name \*.so' %
+        #                       v.replace('-DBOOST_ROOT=', ''))
+        if 'CMAKE_OPTIONS' in os.environ:
+            print('setup.py add CMAKE_OPTIONS:', os.environ['CMAKE_OPTIONS'])
+            cmake_args += os.environ['CMAKE_OPTIONS'].split()
+        ncpu = multiprocessing.cpu_count()
+        if 'CI' in os.environ or 'READTHEDOCS' in os.environ:
+            ncpu = 4
+            os.system('uname -a')
+            print('setup.py: multiprocessing.cpu_count() is ',
+                  multiprocessing.cpu_count())
         if which('ninja'):
             cmake_args.append('-GNinja')
-
         cfg = infer_config_from_build_dirname(self.build_temp)
         if not cfg:
             cfg = 'Debug' if self.debug else 'Release'
@@ -103,26 +163,37 @@ class CMakeBuild(build_ext):
                 '-DCMAKE_LIBRARY_OUTPUT_DIRECTORY_{}={}'.format(cfg.upper(), extdir)]
             if sys.maxsize > 2**32:
                 cmake_args += ['-A', 'x64']
-            build_args += ['--', '/m']
+                build_args += ['--', '/m']
         else:
             cmake_args += ['-DCMAKE_BUILD_TYPE=' + cfg]
-            # build_args += ['--', '-j'+str(multiprocessing.cpu_count()),
-            # 'rif']
-            build_args += ['--', '-j' + str(multiprocessing.cpu_count())]
-        # probably best to build everythong
-        # build_args.append('rif_cpp')
+            build_args += ['--', '-j' + str(ncpu)]
+        cmake_args += _rif_setup_opts['cmake_args']
+        build_args += _rif_setup_opts['build_args']
+        cmake_args += ['-DPYTHON_EXECUTABLE:FILEPATH=' + sys.executable, ]
+
         env = os.environ.copy()
         env['CXXFLAGS'] = '{} -DVERSION_INFO=\\"{}\\"'.format(
-            env.get('CXXFLAGS', ''),
-            self.distribution.get_version())
+            env.get('CXXFLAGS', ''), self.distribution.get_version())
+        if in_conda():
+            condadir = os.path.dirname(sys.executable)[:-4]
+            env['CXXFLAGS'] = env['CXXFLAGS'] + ' -I' + condadir + '/include'
+            env['CXXFLAGS'] = env['CXXFLAGS'] + ' -L' + condadir + '/lib'
+            print('setup.py: adding -I/-L for conda', condadir)
         if not os.path.exists(self.build_temp):
             os.makedirs(self.build_temp)
-        subprocess.check_call(['cmake', ext.sourcedir] +
-                              cmake_args, cwd=self.build_temp, env=env)
-        subprocess.check_call(['cmake', '--build', '.'] +
-                              build_args, cwd=self.build_temp)
-        if not os.path.exists(defaultextdir):
-            os.symlink(extdir, defaultextdir)
+        try:
+            subprocess.check_call(
+                ['cmake', ext.sourcedir] + cmake_args, cwd=self.build_temp, env=env)
+            subprocess.check_call(
+                ['cmake', '--build', '.'] + build_args, cwd=self.build_temp)
+        except subprocess.CalledProcessError as e:
+            print('setup.py exiting with returncode', e.returncode)
+            sys.exit(e.returncode)
+            print('this should never happen')
+        if os.path.exists(defaultextdir):
+            os.remove(defaultextdir)
+        # TODO: figure out how to remove this, needed for tox
+        os.symlink(extdir, defaultextdir)
 
 
 setup(
