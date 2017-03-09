@@ -23,8 +23,11 @@ karney_index = pd.read_csv(StrIO(karney_index_str), sep='\s+')
 
 def quats_from_karney_file(fname):
     with gzip.open(fname) as input:
-        q, w = read_karney_orientation_data(input.read())
-    return q, w
+        if sys.version_info.major is 3:
+            quat, weight = read_karney_orientation_data(str(input.read(), 'utf-8'))
+        else:
+            quat, weight = read_karney_orientation_data(str(input.read()))
+    return quat, weight
 
 
 def karney_name_by_radius(cr):

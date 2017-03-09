@@ -8,6 +8,11 @@
 		},
 		{
 			"file_regex": "^[ ]*File \"(...*?)\", line ([0-9]*)",
+			"name": "py3_cmake_build_and_run_pytest",
+			"shell_cmd": "cd $folder && python3 tools/cmake_build_and_run_pytest.py 2>&1 | tee log/subl_build.log"
+		},
+		{
+			"file_regex": "^[ ]*File \"(...*?)\", line ([0-9]*)",
 			"name": "cmake_build_and_run_pytest_thisfile",
 			"shell_cmd": "cd $folder && python tools/cmake_build_and_run_pytest.py $file 2>&1 | tee log/subl_build.log"
 		},
