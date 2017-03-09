@@ -216,7 +216,7 @@ def build_and_run_pytest(redo_cmake=False):
     if not args:
         args = '. --ignore build --cov=./src -n{}'.format(ncpu).split()
     else:  # running one file, don't scan
-        args += '--ignore build_setup_py_Release'.split()
+        args += '--ignore build --ignore build_setup_py_Release'.split()
     for decoy in get_ignored_dirs(cfg):
         args += ['--ignore', decoy]
     print('============== starting pytest', sys.executable,
