@@ -5,6 +5,7 @@ import glob
 import os
 import sys
 import multiprocessing
+import re
 
 import pytest
 
@@ -175,6 +176,16 @@ def remove_installed_rif():
         print('uninstalled rif from ' + sys.executable)
 
 
+def get_gtests(args):
+    gtests = set()
+    for gtestfile in (x for x in args if x.endswith('.gtest.cpp')):
+        with open(gtestfile) as file:
+            contents = file.read()
+            for match in re.findall("TEST\(\s*(\S+?),\s*(\S+?)\s*\)", contents):
+                assert len(match) is 2
+                gtests.add(match[0])
+    return gtests;
+
 def build_and_run_pytest(redo_cmake=False):
     cfg = 'Release'
     # remove_installed_rif()
@@ -205,6 +216,11 @@ def build_and_run_pytest(redo_cmake=False):
         proj_root = bytes(proj_root, 'ascii')
     args = [x for x in sys.argv[1:] if x.endswith('.py') and
             os.path.basename(x).startswith('test')]
+    gtests = get_gtests(sys.argv[1:])
+    if gtests:
+        args.extend(['-k', ' or '.join(gtests)])
+    if args and not gtests:
+        args.extend(['--ignore', 'build_setup_py_Release'])
     ncpu = multiprocessing.cpu_count()
     if ncpu > 2:
         ncpu = int(ncpu / 2)
@@ -215,15 +231,13 @@ def build_and_run_pytest(redo_cmake=False):
               multiprocessing.cpu_count())
     if not args:
         args = '. --ignore build --cov=./src -n{}'.format(ncpu).split()
-    else:  # running one file, don't scan
-        args += '--ignore build --ignore build_setup_py_Release'.split()
     for decoy in get_ignored_dirs(cfg):
         args += ['--ignore', decoy]
     print('============== starting pytest', sys.executable,
           '====================================')
     print('============== pytest.main(', ' '.join(args), ')')
     print('==================================================================================')
-    errcode = pytest.main(args)
+    errcode = pytest.main(args=args)
     if errcode:
         error(errcode)
         raise SystemError

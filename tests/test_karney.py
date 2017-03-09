@@ -1,3 +1,4 @@
+import gzip
 from rif.test.test_numpy import np_array_info
 import numpy as np
 import rif.sampling.orientations as ori
@@ -8,9 +9,9 @@ def test_numpy_binding():
     np_array_info()
 
 
-def test_read_karney_orientation_file():
-    quat, weight = ori.read_karney_orientation_file(
-        "data/orientations/karney/c48u1.grid.gz")
+def test_read_karney_orientation_data():
+    with gzip.open("data/orientations/karney/c48u1.grid.gz") as input:
+        quat, weight = ori.read_karney_orientation_data(input.read())
     norms = np.linalg.norm(quat, axis=1)
     assert np.all(np.abs(1.0 - norms) < 0.0001)
     assert np.min(weight) == np.max(weight) == 1.0

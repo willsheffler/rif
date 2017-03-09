@@ -242,19 +242,11 @@ double pind(double ind, double delta, double sigma) {
   return (sigma == 0) ? ind * delta : sinh(sigma * ind * delta) / sigma;
 }
 
-auto read_karney_orientation_file(std::string fname) {
+auto read_karney_orientation_data(std::string file_content) {
   Eigen::MatrixX4d quats;
   Eigen::VectorXd cover;
 
-  std::ifstream file(fname.c_str(), std::ios_base::in | std::ios_base::binary);
-  if (!file.good()) {
-    std::cerr << "no file: " << fname << std::endl;
-    return std::make_tuple(quats, cover);
-  }
-  boost::iostreams::filtering_streambuf<boost::iostreams::input> fin;
-  fin.push(boost::iostreams::gzip_decompressor());
-  fin.push(file);
-  std::istream in(&fin);
+  std::istringstream in(file_content);
 
   bool euler = false;
   assert(in.good());

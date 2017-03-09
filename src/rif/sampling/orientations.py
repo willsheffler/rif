@@ -1,5 +1,6 @@
 import os
-from rif_cpp.sampling.orientations import read_karney_orientation_file
+import gzip
+from rif_cpp.sampling.orientations import read_karney_orientation_data
 import pandas as pd
 # import numpy as np
 
@@ -21,7 +22,8 @@ karney_index = pd.read_csv(StrIO(karney_index_str), sep='\s+')
 
 
 def quats_from_karney_file(fname):
-    q, w = read_karney_orientation_file(fname)
+    with gzip.open(fname) as input:
+        q, w = read_karney_orientation_data(input.read())
     return q, w
 
 

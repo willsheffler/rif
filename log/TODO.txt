@@ -1,3 +1,7 @@
+TODO hunt down and eradicate stochastic failures (OR make pytest-cpp do two tries?)
+TODO tox build docs
+TODO figure out where conda puts boost on readthedocs
+TODO remove crappy symlink to make tox work
  X   pytest doctests
 TODO visualize orientation sets
 TODO make cones from orientation sets, see what ~1500 gets you

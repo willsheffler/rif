@@ -89,8 +89,8 @@
 			},
 			"Linux":
 			{
-				"CC" : "clang-3.8",
-				"CXX" : "clang++-3.8",
+				// "CC" : "gcc",
+				// "CXX" : "g++",
 				// "CXXFLAGS": "-stdlib=libc++ -I/usr/include/libcxxabi",
 
 			}
