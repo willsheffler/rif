@@ -50,5 +50,5 @@ def quaternion_set_by_name(name):
 
 
 def filter_quaternion_set_axis_within(quats, axis, angle):
-    raise NotImplemented
+    raise NotImplementedError
     return quats

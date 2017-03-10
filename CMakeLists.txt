@@ -89,10 +89,17 @@ endfunction()
 
 function(build_python_bindings)
     message("-------------- CMAKE build_python_bindings ----------------------------------------")
-    make_any_missing__init__py_and_copy_py_to_liboutdir()
     set(SRCGEN ${CMAKE_SOURCE_DIR}/tools/pybind_source_gen.py)
-    add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/rif.gen.cpp COMMAND python ${SRCGEN} ${CMAKE_SOURCE_DIR}/src/rif ${CMAKE_CURRENT_BINARY_DIR} DEPENDS src/rif/rif.gen.cpp.jinja)
     FILE(GLOB_RECURSE PY_CPP "./src/rif/[0-9a-zA-Z_]*.pybind.cpp")
+    make_any_missing__init__py_and_copy_py_to_liboutdir()    
+    # execute_process(COMMAND python ${SRCGEN} ${CMAKE_SOURCE_DIR}/src/rif ${CMAKE_CURRENT_BINARY_DIR} )
+    # if(NOT "${STATUS}" STREQUAL "0")
+        # message(FATAL_ERROR "${SRCGEN} failed: ${STATUS}")
+    # endif()
+    add_custom_command(
+        OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/rif.gen.cpp 
+        COMMAND python ${SRCGEN} ${CMAKE_SOURCE_DIR}/src/rif ${CMAKE_CURRENT_BINARY_DIR} 
+        DEPENDS src/rif/rif.gen.cpp.jinja ${PY_CPP})
     pybind11_add_module(rif_cpp ${CMAKE_CURRENT_BINARY_DIR}/rif.gen.cpp ${PY_CPP})
     target_link_libraries( rif_cpp PRIVATE ${extra_libs} )
 endfunction()

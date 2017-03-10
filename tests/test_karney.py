@@ -13,7 +13,8 @@ def test_numpy_binding():
 def test_read_karney_orientation_data():
     with gzip.open("data/orientations/karney/c48u1.grid.gz") as input:
         if sys.version_info.major is 3:
-            quat, weight = ori.read_karney_orientation_data(str(input.read(), 'utf-8'))
+            quat, weight = ori.read_karney_orientation_data(
+                str(input.read(), 'utf-8'))
         else:
             quat, weight = ori.read_karney_orientation_data(str(input.read()))
     norms = np.linalg.norm(quat, axis=1)
@@ -55,10 +56,10 @@ def test_karney_by_covrad():
     assert ori.karney_name_by_radius(0) == 'c48u312831'
 
 
-@pytest.mark.skip('not implemented')
-def test_filter_by_axis():
-    q, w = ori.quaternion_set_with_covering_radius_degrees(100)
+# @pytest.mark.skip('not implemented')
+# def test_filter_by_axis():
+    # q, w = ori.quaternion_set_with_covering_radius_degrees(100)
     # print q.shape
-    q_filt = ori.filter_quaternion_set_axis_within(
-        q, np.array((1, 0, 0)), 90.0)
-    assert len(q_filt) < len(q)
+    # q_filt = ori.filter_quaternion_set_axis_within(
+    # q, np.array((1, 0, 0)), 90.0)
+    # assert len(q_filt) < len(q)

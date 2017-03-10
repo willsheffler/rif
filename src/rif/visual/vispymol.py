@@ -8,6 +8,7 @@ except ImportError:
 
 
 def launch_pymol(doit, args='-qei'):
+    raise NotImplementedError
     # pymol doesn't seem to get these args
     __main__.pymol_argv = ['pymol', args]
     pymol.finish_launching()

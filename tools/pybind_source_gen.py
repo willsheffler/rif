@@ -2,8 +2,8 @@
 
 from __future__ import print_function
 
-"""generate main rifgen.gen.cpp pybind file with modules organized based on file paths
-of *.pybind.cpp components"""
+"""generate main rifgen.gen.cpp pybind file with modules
+organized based on file paths of *.pybind.cpp components"""
 
 import subprocess
 import os
@@ -14,6 +14,7 @@ import sys
 
 try:
     import jinja2
+
 except ImportError as error:
     print('!!!!!!!!!!!!!! ' * 100)
     print('cant import jinja2')
@@ -39,9 +40,12 @@ def get_pybind_modules(srcpath):
             print("found pybind file", pybindfile)
             try:
                 # todo: replace this with python
-                grepped = subprocess.check_output(
-                    ['grep', '-H', 'RIFLIB_PYBIND_', pybindfile])
-                print('grepped', grepped)
+                try:
+                    grepped = subprocess.check_output(
+                        ['grep', '-H', 'RIFLIB_PYBIND_', pybindfile])
+                except subprocess.CalledProcessError:
+                    grepped = ''
+                # print('grepped', grepped)
             except OSError:
                 continue
             for line in grepped.splitlines():
@@ -64,10 +68,19 @@ def update_file_if_needed(destfile, newcontent):
         os.remove(testfile)
     with open(testfile, 'w') as out:
         out.write(newcontent)
-    diff = 1
+    diff = ''
     if os.path.exists(destfile):
         assert os.path.exists(testfile)
-        diff = subprocess.call(['diff', testfile, destfile])
+        try:
+            need to get actual diff from this
+            then figure out why pybind def_submodules are messed
+            then why can't make a SceneBase
+            diff = subprocess.call(['diff', testfile, destfile])
+        except subprocess.CalledProcessError:
+            pass
+        print('diff:', diff)
+        if len(diff.splitlines()) is 4 and 'compiled on' in diff:
+            diff = None
     if diff:
         print('pybind_source_gen.py: updating', destfile)
         if os.path.exists(destfile):
@@ -79,7 +92,8 @@ def update_file_if_needed(destfile, newcontent):
 
 
 def shitty_make_code(pymodules):
-    "todo: move the formatting into the jinja template, pass it the data not code!"
+    """todo: move the formatting into the jinja
+    template, pass it the data not code!"""
     code1 = ''
     code2 = ''
     for path in set(pymodules.values()):
@@ -140,6 +154,7 @@ def main(template_fname, srcdir, dstdir):
     update_file_if_needed(destfile, newcontent)
 
 if __name__ == '__main__':
+    print("== pybind_source_gen.py ==")
     import sys
     assert len(sys.argv) == 3
     srcdir = sys.argv[1]
