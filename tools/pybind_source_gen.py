@@ -16,10 +16,10 @@ try:
     import jinja2
 
 except ImportError as error:
-    print('!!!!!!!!!!!!!! ' * 100)
-    print('cant import jinja2')
-    print(sys.executable)
-    print('SYS.PATH')
+    print('    !!!!!!!!!!!!!! ' * 100)
+    print('    cant import jinja2')
+    print('    ' + sys.executable)
+    print('    SYS.PATH')
     for p in sys.path:
         print('   ', p)
         try:
@@ -27,7 +27,7 @@ except ImportError as error:
                 if 'jinja' in d:
                     print('       ', d)
         except OSError:
-            print('cant read', d)
+            print('    cant read', d)
     sys.exit(-1)
 
 
@@ -37,7 +37,7 @@ def get_pybind_modules(srcpath):
     for root, _, files in os.walk(srcpath):
         for basename in (x for x in files if x.endswith('.pybind.cpp')):
             pybindfile = root + '/' + basename
-            print("found pybind file", pybindfile)
+            print("    found pybind file", pybindfile)
             try:
                 # todo: replace this with python
                 try:
@@ -72,22 +72,22 @@ def update_file_if_needed(destfile, newcontent):
     if os.path.exists(destfile):
         assert os.path.exists(testfile)
         try:
-            need to get actual diff from this
-            then figure out why pybind def_submodules are messed
-            then why can't make a SceneBase
-            diff = subprocess.call(['diff', testfile, destfile])
-        except subprocess.CalledProcessError:
-            pass
-        print('diff:', diff)
+            # need to get actual diff from this
+            # then figure out why pybind def_submodules are messed
+            # then why can't make a SceneBase
+            diff = subprocess.check_output(['diff', testfile, destfile])
+        except subprocess.CalledProcessError as e:
+            diff = e.output
         if len(diff.splitlines()) is 4 and 'compiled on' in diff:
             diff = None
     if diff:
-        print('pybind_source_gen.py: updating', destfile)
+        print(diff)
+        print('    pybind_source_gen.py: updating', destfile)
         if os.path.exists(destfile):
             os.remove(destfile)
         os.rename(testfile, destfile)
     else:
-        print("pybind_source_gen.py: rif.pybind.cpp is up to date")
+        print("    pybind_source_gen.py: rif.pybind.cpp is up to date")
         os.remove(testfile)
 
 
@@ -115,12 +115,16 @@ def mkdir_if_necessary(path):
 
 def mkfile_if_necessary(path, content):
     if not os.path.exists(path):
-        print('pybind_source_gen.py MAKING:', path)
+        print('    pybind_source_gen.py MAKING:', path)
         with open(path, 'w') as out:
             out.write(content)
 
 
 def make_py_stencils(pymodules, srcdir):
+    """"""
+
+    why do I have this and gen__init__.py????????????????????
+
     mkdir_if_necessary(srcdir)
     mkfile_if_necessary(srcdir + "/__init__.py", 'from rif_cpp import *\n' +
                         'import rif_cpp\n' +
@@ -143,6 +147,7 @@ def make_py_stencils(pymodules, srcdir):
 
 def main(template_fname, srcdir, dstdir):
     "generate pybind sources"
+    print("== pybind_source_gen.py ==")
     destfile = dstdir + os.path.basename(template_fname.replace('.jinja', ''))
     pymodules = get_pybind_modules(srcdir)  # assume in top level project dir
     make_py_stencils(pymodules, srcdir)
@@ -154,7 +159,6 @@ def main(template_fname, srcdir, dstdir):
     update_file_if_needed(destfile, newcontent)
 
 if __name__ == '__main__':
-    print("== pybind_source_gen.py ==")
     import sys
     assert len(sys.argv) == 3
     srcdir = sys.argv[1]

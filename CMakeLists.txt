@@ -100,7 +100,7 @@ function(build_python_bindings)
         OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/rif.gen.cpp 
         COMMAND python ${SRCGEN} ${CMAKE_SOURCE_DIR}/src/rif ${CMAKE_CURRENT_BINARY_DIR} 
         DEPENDS src/rif/rif.gen.cpp.jinja ${PY_CPP})
-    pybind11_add_module(rif_cpp ${CMAKE_CURRENT_BINARY_DIR}/rif.gen.cpp ${PY_CPP})
+    pybind11_add_module(rif_cpp ${CMAKE_CURRENT_BINARY_DIR}/rif.gen.cpp ${PY_CPP} ${SRCGEN})
     target_link_libraries( rif_cpp PRIVATE ${extra_libs} )
 endfunction()
 
