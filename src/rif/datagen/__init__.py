@@ -1,2 +1,4 @@
-"""docstring for rif/datagen/__init__.py
 """
+docstring for rif.datagen
+"""
+

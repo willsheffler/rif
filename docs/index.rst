@@ -6,6 +6,8 @@ RIF Documentation
 
    readme_include
 
+   contributing_include
+
    intro
 
    rif

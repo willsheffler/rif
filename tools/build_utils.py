@@ -101,8 +101,7 @@ def which(program):
 def error(errcode):
     print('build_utils.py: exiting with returncode', errcode)
     with open('.ERROR', 'w') as out:
-        out.write(errcode)
-        out.write('\n')
+        out.write(str(errcode) + '\n')
         sys.exit(errcode)
 
 
@@ -137,13 +136,11 @@ def rebuild_fast(target='rif_cpp', cfg='Release', redo_cmake=False):
         cmake_dir = get_cmake_dir('temp', cfg=cfg)
     except OSError:
         cmake_dir = None
+    ncpu = multiprocessing.cpu_count()
     if not cmake_dir or redo_cmake:
-        exitcode = rebuild_setup_py_rif(cfg=cfg)
-        if exitcode:
-            return exitcode
-        cmake_dir = get_cmake_dir('temp', cfg=cfg)
-
-    return os.system('cd ' + cmake_dir + '; ' + makeexe + ' -j8 ' + target)
+        return rebuild_setup_py_rif(cfg=cfg)
+    else:
+        return os.system('cd ' + cmake_dir + '; ' + makeexe + ' -j%i ' % ncpu + target)
 
 
 def make_docs(kind='html', cfg='Release'):
@@ -176,31 +173,46 @@ def remove_installed_rif():
         print('uninstalled rif from ' + sys.executable)
 
 
+def get_ncpu():
+    ncpu = multiprocessing.cpu_count()
+    if ncpu > 4:
+        ncpu = int(ncpu / 2)
+    if 'CI' in os.environ:
+        ncpu = 4
+        os.system('uname -a')
+        print('build_utils.py: multiprocessing.cpu_count() = ',
+              multiprocessing.cpu_count())
+    return ncpu
+
+
 def get_gtests(args):
     gtests = set()
     for gtestfile in (x for x in args if x.endswith('.gtest.cpp')):
+        print("    get_gtests", gtestfile)
         with open(gtestfile) as file:
             contents = file.read()
             for match in re.findall("TEST\(\s*(\S+?),\s*(\S+?)\s*\)", contents):
                 assert len(match) is 2
                 gtests.add(match[0])
-    return gtests;
+    return gtests
 
-def build_and_run_pytest(redo_cmake=False):
+
+def build_and_test():
+    print("== build_and_test ==")
     cfg = 'Release'
-    # remove_installed_rif()
-    proj_root = get_proj_root()
-    build_dir = get_build_dir(cfg)
+    testfiles = [x for x in sys.argv[1:] if x.endswith('.py') and
+                 os.path.basename(x).startswith('test')]
+    pybindfiles = [x for x in sys.argv[1:] if x.endswith('.pybind.cpp')]
+    gtests = get_gtests(sys.argv[1:])
     print('calling rebuild_fast')
-    if not os.path.exists(build_dir):
-        errcode = rebuild_setup_py_rif(cfg)
-    else:
-        errcode = rebuild_fast(target='rif_cpp gtest_all',
-                               cfg=cfg, redo_cmake=redo_cmake)
+    no_xdist = len(testfiles) or len(gtests)
+    redo_cmake = len(pybindfiles) or not no_xdist
+    errcode = rebuild_fast(target='rif_cpp gtest_all',
+                           cfg=cfg, redo_cmake=redo_cmake)
     if errcode:
         print('build_utils.py returned errorcode', errcode)
         return errcode
-    assert os.path.exists(build_dir)
+
     # TODO both here and in docs, this gets messed
     #      up when rif is actually installed
     libdir = os.path.abspath(get_cmake_dir('lib', cfg))
@@ -208,36 +220,29 @@ def build_and_run_pytest(redo_cmake=False):
     assert os.path.exists(libdir)
     # need to use sys.path for this process
     sys.path.append(libdir)
-    # need to use PYTHONPATH env for xdist subprocessess
+    # need to use PYTHONPATH env for xdist subprocesses
     add_to_pypath(libdir)
     assert libdir in sys.path
     assert libdir in os.environ['PYTHONPATH'].split(':')
-    if sys.version_info.major is 2:
-        proj_root = bytes(proj_root, 'ascii')
-    args = [x for x in sys.argv[1:] if x.endswith('.py') and
-            os.path.basename(x).startswith('test')]
-    gtests = get_gtests(sys.argv[1:])
+
+    ncpu = get_ncpu()
+    args = testfiles
     if gtests:
         args.extend(['-k', ' or '.join(gtests)])
     if args and not gtests:
         args.extend(['--ignore', 'build_setup_py_Release'])
-    ncpu = multiprocessing.cpu_count()
-    if ncpu > 2:
-        ncpu = int(ncpu / 2)
-    if 'CI' in os.environ:
-        ncpu = 4
-        os.system('uname -a')
-        print('build_utils.py: multiprocessing.cpu_count() = ',
-              multiprocessing.cpu_count())
     if not args:
-        args = '. --ignore build --cov=./src -n{}'.format(ncpu).split()
+        args = '. --ignore build --cov=./src'.split()
     for decoy in get_ignored_dirs(cfg):
         args += ['--ignore', decoy]
-    print('============== starting pytest', sys.executable,
-          '====================================')
-    print('============== pytest.main(', ' '.join(args), ')')
+    no_xdist |= os.system('egrep "#.*cpp_files" pytest.ini') == 0
+    if not no_xdist:
+        args += '-n{}'.format(ncpu).split()
     print('==================================================================================')
-    errcode = pytest.main(args=args)
+    print('pytest', ' '.join(args))
+    print('==================================================================================')
+    sys.argv[1:] = args
+    errcode = pytest.main()
     if errcode:
         error(errcode)
         raise SystemError

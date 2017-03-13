@@ -1,1 +1,4 @@
-from . import biochem
+"""
+docstring for rif.chem
+"""
+

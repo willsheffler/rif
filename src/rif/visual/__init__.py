@@ -1,2 +1,4 @@
-"""docstring for rif/visual/__init__.py
 """
+docstring for rif.visual
+"""
+

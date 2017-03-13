@@ -72,13 +72,8 @@ function(print_config)
     message("PYTHON_EXECUTABLE: " ${PYTHON_EXECUTABLE})
 endfunction()
 
-function(make_any_missing__init__py_and_copy_py_to_liboutdir)
-    message("-------------- CMAKE make_any_missing__init__py_and_copy_py_to_liboutdir ----------")
-    execute_process(COMMAND python ${CMAKE_SOURCE_DIR}/tools/gen__init__.py src/rif
-        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR} RESULT_VARIABLE STATUS)
-    if(NOT "${STATUS}" STREQUAL "0")
-        message(FATAL_ERROR "gen__init__.py failed: ${STATUS}")
-    endif()
+function(copy_py_to_liboutdir)
+    message("-------------- CMAKE copy_py_to_liboutdir ----------")
     execute_process(COMMAND python ${CMAKE_SOURCE_DIR}/tools/cp_filtered.py .py
         ${CMAKE_SOURCE_DIR}/src/rif ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/rif
         RESULT_VARIABLE STATUS)
@@ -91,15 +86,15 @@ function(build_python_bindings)
     message("-------------- CMAKE build_python_bindings ----------------------------------------")
     set(SRCGEN ${CMAKE_SOURCE_DIR}/tools/pybind_source_gen.py)
     FILE(GLOB_RECURSE PY_CPP "./src/rif/[0-9a-zA-Z_]*.pybind.cpp")
-    make_any_missing__init__py_and_copy_py_to_liboutdir()    
+    copy_py_to_liboutdir()
     # execute_process(COMMAND python ${SRCGEN} ${CMAKE_SOURCE_DIR}/src/rif ${CMAKE_CURRENT_BINARY_DIR} )
     # if(NOT "${STATUS}" STREQUAL "0")
         # message(FATAL_ERROR "${SRCGEN} failed: ${STATUS}")
     # endif()
     add_custom_command(
-        OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/rif.gen.cpp 
-        COMMAND python ${SRCGEN} ${CMAKE_SOURCE_DIR}/src/rif ${CMAKE_CURRENT_BINARY_DIR} 
-        DEPENDS src/rif/rif.gen.cpp.jinja ${PY_CPP})
+        OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/rif.gen.cpp
+        COMMAND python ${SRCGEN} ${CMAKE_SOURCE_DIR}/src/rif ${CMAKE_CURRENT_BINARY_DIR}
+        DEPENDS src/rif/rif.gen.cpp.jinja ${PY_CPP} ${SRCGEN})
     pybind11_add_module(rif_cpp ${CMAKE_CURRENT_BINARY_DIR}/rif.gen.cpp ${PY_CPP} ${SRCGEN})
     target_link_libraries( rif_cpp PRIVATE ${extra_libs} )
 endfunction()

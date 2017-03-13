@@ -84,7 +84,7 @@ for flag, val in _rif_setup_opts.items():
 print('setup.py: compiler:', get_my_compiler())
 print('setup.py: python:', get_my_python())
 for evar in "CC CXX CXXFLAGS".split():
-    print('sepup.py: env:', evar, my_getenv(evar))
+    print('setup.py: env:', evar, my_getenv(evar))
 
 
 class CMakeExtension(Extension):

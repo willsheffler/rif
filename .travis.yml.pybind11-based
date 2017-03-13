@@ -99,7 +99,7 @@ install:
     export CMAKE_EXTRA_ARGS="${CMAKE_EXTRA_ARGS} -DCMAKE_INCLUDE_PATH=$PWD/eigen-eigen-26667be4f70b"
 
 script:
-- $SCRIPT_RUN_PREFIX python tools/cmake_build_and_run_pytest.py
+- $SCRIPT_RUN_PREFIX python tools/build_and_test.py
 after_failure: cat tests/test_cmake_build/*.log
 after_script:
 # - if [ -n "$DOCKER" ]; then docker stop "$containerid"; docker rm "$containerid"; fi

@@ -73,5 +73,5 @@ universal
 ~~~~~~~~~~
 
 pip install -rrequirements.txt
-python tools/cmake_build_and_run_pytest.py
+python tools/build_and_test.py
 
