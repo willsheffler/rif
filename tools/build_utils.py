@@ -55,11 +55,7 @@ def get_cmake_dir(prefix, cfg):
         print('ERROR get_cmake_dir', path)
         print(libdir)
         assert len(libdir) < 2
-    if libdir:
-        return libdir[0]
-    else:
-        print('cant find libdir', path)
-        raise IOError
+    return libdir[0]
 
 
 def get_ignored_dirs(cfg):
@@ -98,13 +94,6 @@ def which(program):
     return None
 
 
-def error(errcode):
-    print('build_utils.py: exiting with returncode', errcode)
-    with open('.ERROR', 'w') as out:
-        out.write(str(errcode) + '\n')
-        sys.exit(errcode)
-
-
 def add_to_pypath(newpath):
     if isinstance(newpath, str):
         newpath = [newpath]
@@ -120,27 +109,20 @@ def add_to_pypath(newpath):
 
 def rebuild_setup_py_rif(cfg='Release'):
     proj_root = get_proj_root()
-    errcode = os.system('cd ' + proj_root + '; ' + sys.executable +
-                        ' setup.py build --build-base=build_setup_py_' + cfg)
-    print('setup.py returncode', errcode)
-    if errcode:
-        error(errcode)
+    assert not os.system('cd ' + proj_root + '; ' + sys.executable +
+                         ' setup.py build --build-base=build_setup_py_' + cfg)
 
 
 def rebuild_fast(target='rif_cpp', cfg='Release', redo_cmake=False):
-    makeexe = 'ninja'
-    if not which('ninja'):
-        makeexe = 'make'
-    # proj_root = get_proj_root()
     try:
         cmake_dir = get_cmake_dir('temp', cfg=cfg)
-    except OSError:
-        cmake_dir = None
-    ncpu = multiprocessing.cpu_count()
-    if not cmake_dir or redo_cmake:
-        return rebuild_setup_py_rif(cfg=cfg)
-    else:
+        makeexe = 'ninja'
+        if not which('ninja'):
+            makeexe = 'make'
+        ncpu = multiprocessing.cpu_count()
         return os.system('cd ' + cmake_dir + '; ' + makeexe + ' -j%i ' % ncpu + target)
+    except Exception as e:
+        return rebuild_setup_py_rif(cfg=cfg)
 
 
 def make_docs(kind='html', cfg='Release'):
@@ -198,6 +180,7 @@ def get_gtests(args):
 
 
 def build_and_test():
+    assert os.path.exists('CMakeLists.txt') and os.path.exists('setup.py')
     print("== build_and_test ==")
     cfg = 'Release'
     testfiles = [x for x in sys.argv[1:] if x.endswith('.py') and
@@ -206,12 +189,10 @@ def build_and_test():
     gtests = get_gtests(sys.argv[1:])
     print('calling rebuild_fast')
     no_xdist = len(testfiles) or len(gtests)
+    no_xdist |= os.system('egrep "#.*cpp_files" pytest.ini') == 0
     redo_cmake = len(pybindfiles) or not no_xdist
-    errcode = rebuild_fast(target='rif_cpp gtest_all',
-                           cfg=cfg, redo_cmake=redo_cmake)
-    if errcode:
-        print('build_utils.py returned errorcode', errcode)
-        return errcode
+    rebuild_fast(target='rif_cpp gtest_all',
+                 cfg=cfg, redo_cmake=redo_cmake)
 
     # TODO both here and in docs, this gets messed
     #      up when rif is actually installed
@@ -226,24 +207,24 @@ def build_and_test():
     assert libdir in os.environ['PYTHONPATH'].split(':')
 
     ncpu = get_ncpu()
-    args = testfiles
+    args = list(testfiles)
+    if not (testfiles or gtests):
+        args = ['.']
+    if not no_xdist:
+        args.extend('--cov=./src -n{}'.format(ncpu).split())
     if gtests:
         args.extend(['-k', ' or '.join(gtests)])
-    if args and not gtests:
-        args.extend(['--ignore', 'build_setup_py_Release'])
-    if not args:
-        args = '. --ignore build --cov=./src'.split()
+    args.extend('--ignore build'.split())
+    if testfiles and not gtests:
+        args.extend('--ignore build_setup_py_Release'.split())
     for decoy in get_ignored_dirs(cfg):
         args += ['--ignore', decoy]
-    no_xdist |= os.system('egrep "#.*cpp_files" pytest.ini') == 0
-    if not no_xdist:
-        args += '-n{}'.format(ncpu).split()
     print('==================================================================================')
-    print('pytest', ' '.join(args))
-    print('==================================================================================')
+    sys.stdout.write('pytest ')
+    for arg in args:
+        if arg.startswith('-'):
+            sys.stdout.write('\n   ')
+        sys.stdout.write(' ' + arg)
+    print()
     sys.argv[1:] = args
-    errcode = pytest.main()
-    if errcode:
-        error(errcode)
-        raise SystemError
-        return errcode
+    assert not pytest.main()
