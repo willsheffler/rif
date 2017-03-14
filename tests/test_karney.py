@@ -6,7 +6,6 @@ import rif.sampling.orientations as ori
 import pytest
 
 
-@pytest.mark.skip()
 def test_numpy_binding():
     np_array_info()
 
@@ -23,13 +22,11 @@ def test_read_karney_orientation_data():
     assert np.min(weight) == np.max(weight) == 1.0
 
 
-@pytest.mark.skip()
 def test_karney_oddball():
     with pytest.raises(AssertionError):
         ori.quaternion_set_by_name('foobar')
 
 
-@pytest.mark.skip()
 def test_karney_10():
     quat, weight = ori.quaternion_set_with_covering_radius_degrees(10)
     assert len(quat) == 7416
@@ -37,7 +34,6 @@ def test_karney_10():
     assert abs(1.0 - weight.mean()) < 0.00001
 
 
-@pytest.mark.skip()
 def test_karney_lengths_weights():
     # only check smallest 20 for speed
     for name in ori.karney_index.name[:20]:
@@ -48,7 +44,6 @@ def test_karney_lengths_weights():
         assert np.all(np.abs(1.0 - norms) < 0.0001)
 
 
-@pytest.mark.skip()
 def test_karney_by_covrad():
     assert ori.karney_name_by_radius(100) == 'c48u1'
     assert ori.karney_name_by_radius(30) == 'c48u27'

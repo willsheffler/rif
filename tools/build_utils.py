@@ -94,14 +94,6 @@ def which(program):
     return None
 
 
-def error(errcode):
-    print('build_utils.py: exiting with returncode', errcode)
-    with open('.ERROR', 'w') as out:
-        out.write(errcode)
-        out.write('\n')
-        sys.exit(errcode)
-
-
 def add_to_pypath(newpath):
     if isinstance(newpath, str):
         newpath = [newpath]
