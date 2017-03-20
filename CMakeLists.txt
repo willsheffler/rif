@@ -28,7 +28,7 @@ else()
 endif()
 
 find_program(CCACHE_PROGRAM ccache)
-if(CCACHE_PROGRAM)
+if(${CCACHE_PROGRAM})
     message("cmake: using ccache ${CCACHE_PROGRAM}")
     set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE "${CCACHE_PROGRAM}")
 else()
@@ -123,7 +123,7 @@ endfunction()
 
 function(summary)
     message("-------------- CMAKE summary ------------------------------------------------------")
-    if(CCACHE_PROGRAM)
+    if(${CCACHE_PROGRAM})
         message("cmake: add_custom_target: ccache -s")
         add_custom_target(ccache_stats ALL
             COMMAND ${CCACHE_PROGRAM} -s

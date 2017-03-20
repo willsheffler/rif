@@ -6,6 +6,7 @@ import os
 import sys
 import multiprocessing
 import re
+import filecmp
 
 import pytest
 
@@ -113,18 +114,6 @@ def rebuild_setup_py_rif(cfg='Release'):
                          ' setup.py build --build-base=build_setup_py_' + cfg)
 
 
-def rebuild_fast(target='rif_cpp', cfg='Release', redo_cmake=False):
-    try:
-        cmake_dir = get_cmake_dir('temp', cfg=cfg)
-        makeexe = 'ninja'
-        if not which('ninja'):
-            makeexe = 'make'
-        ncpu = multiprocessing.cpu_count()
-        return os.system('cd ' + cmake_dir + '; ' + makeexe + ' -j%i ' % ncpu + target)
-    except Exception as e:
-        return rebuild_setup_py_rif(cfg=cfg)
-
-
 def make_docs(kind='html', cfg='Release'):
     proj_root = get_proj_root()
     rebuild_setup_py_rif()
@@ -179,6 +168,32 @@ def get_gtests(args):
     return gtests
 
 
+def src_dir_new_file():
+    fname = '.__build_utils_src_dir_contents'
+    ftemp = '.__build_utils_src_dir_contents_tmp'
+    os.system('find ./src -name \\*.cpp > ' + ftemp)
+    are_same = filecmp.cmp(fname, ftemp) if os.path.exists(fname) else False
+    if not are_same:
+        os.rename(ftemp, fname)
+    else:
+        os.remove(ftemp)
+    return not are_same
+
+
+def rebuild_fast(target='rif_cpp', cfg='Release', force_redo_cmake=False):
+    try:
+        if force_redo_cmake:
+            raise Exception
+        cmake_dir = get_cmake_dir('temp', cfg=cfg)
+        makeexe = 'ninja'
+        if not which('ninja'):
+            makeexe = 'make'
+        ncpu = multiprocessing.cpu_count()
+        return os.system('cd ' + cmake_dir + '; ' + makeexe + ' -j%i ' % ncpu + target)
+    except Exception as e:
+        return rebuild_setup_py_rif(cfg=cfg)
+
+
 def build_and_test():
     assert os.path.exists('CMakeLists.txt') and os.path.exists('setup.py')
     print("== build_and_test ==")
@@ -190,9 +205,9 @@ def build_and_test():
     print('calling rebuild_fast')
     no_xdist = len(testfiles) or len(gtests)
     no_xdist |= os.system('egrep "#.*cpp_files" pytest.ini') == 0
-    redo_cmake = len(pybindfiles) or not no_xdist
+    force_redo_cmake = len(pybindfiles) or not no_xdist or src_dir_new_file()
     rebuild_fast(target='rif_cpp gtest_all',
-                 cfg=cfg, redo_cmake=redo_cmake)
+                 cfg=cfg, force_redo_cmake=force_redo_cmake)
 
     # TODO both here and in docs, this gets messed
     #      up when rif is actually installed

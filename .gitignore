@@ -28,3 +28,4 @@ deps
 rif.egg-info
 log/*.log
 .ERROR
+._*

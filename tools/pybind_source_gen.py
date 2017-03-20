@@ -175,10 +175,6 @@ def make_py_stencils(cppmodules, srcdir):
             d = '/'.join(path.split('/')[:nprefix])
             directories.add(d)
             mkdir_if_necessary(srcdir + d)
-    # for path in directories:
-        # pyfile = srcdir + path + '/__init__.py'
-        # mkfile_if_necessary(pyfile, 'from rif_cpp.' +
-                            # path.replace('/', '.') + ' import *\n')
     for path in set(cppmodules.values()):
         if not os.path.exists(srcdir + path + '/__init__.py'):
             pyfile = srcdir + path + ".py"
