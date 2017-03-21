@@ -59,6 +59,20 @@ matrix:
         apt:
           sources: *sources
           packages: [g++-6, libboost-iostreams-dev, libboost-system-dev, python3]
+    - os: linux
+      dist: trusty
+      env: OS=LU14 UNIT=T GCC=5 PY=2 BOOST=1.61.0 CACHE_NAME=LU14_GCC6_PY3_BOOST_161
+      addons:
+        apt:
+          sources: *sources
+          packages: [g++-5]
+    - os: linux
+      dist: trusty
+      env: OS=LU14 UNIT=T GCC=5 PY=2 BOOST=1.63.0 CACHE_NAME=LU14_GCC6_PY3_BOOST_163
+      addons:
+        apt:
+          sources: *sources
+          packages: [g++-5]
 
 ############################ CLANG ###########################
     - os:   linux
