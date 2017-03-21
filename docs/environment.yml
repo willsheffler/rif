@@ -8,7 +8,7 @@ dependencies:
 - sphinx_rtd_theme==0.1.9
 #- doxygen
 - pip
-- boost
+- boost==1.58.0
 - cmake
 - pip:
   - breathe
