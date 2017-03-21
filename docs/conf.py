@@ -32,24 +32,22 @@ def build_rif_and_add_path():
     # shutil.rmtree('../build_docs')
     print('=' * 40, 'sphinx conf.py BUILDING RIF', '=' * 40)
     sys.stdout.flush()
-    for itry in range(5):
-        # try:
-        os.system('cd ..; python' + version +
-                  ' setup.py build --build-base=build_docs ' +
-                  '--rif_setup_opts_build_args=rif_cpp ')
-        rifpath = os.path.abspath(
-            glob.glob('../build_docs/lib.*' + version + '*')[0])
-        print('sphinx conf.py adding to sys.path:',
-              os.path.abspath(rifpath))
-        sys.path.insert(0, rifpath)
-        import rif
-        print("sphinx conf.py imported rif successfully")
 
-        break
+    assert not os.system('(cd .. && python' + version +
+                         ' setup.py build --build-base=build_docs ' +
+                         '--rif_setup_opts_build_args=rif_cpp )')
+    rifpath = os.path.abspath(
+        glob.glob('../build_docs/lib.*' + version + '*')[0])
+    print('sphinx conf.py adding to sys.path:',
+          os.path.abspath(rifpath))
+    sys.path.insert(0, rifpath)
+    import rif
+    print("sphinx conf.py imported rif successfully")
     print('=' * 40, 'sphinx conf.py DONE BUILDING RIF', '=' * 40)
 
 
 build_rif_and_add_path()
+
 
 # -- General configuration ------------------------------------------------
 

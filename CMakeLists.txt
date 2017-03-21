@@ -1,16 +1,16 @@
 cmake_minimum_required(VERSION 3.0)
 project(rif)
 
-message("============== CMAKE ==============================================================")
+message("============== CMAKE ===========================================")
 
 function(main)
-    message("-------------- CMAKE main ---------------------------------------------------------")
+    message("-------------- CMAKE main --------------------------------------")
     print_config()
     add_subdirectory(external/pybind11)
     # execute_process(COMMAND rm -f ${CMAKE_CURRENT_BINARY_DIR}/rif.gen.cpp)
     build_python_bindings("")
     build_gtests()
-    summary()
+    # summary()
 endfunction()
 
 
@@ -28,7 +28,7 @@ else()
 endif()
 
 find_program(CCACHE_PROGRAM ccache)
-if(${CCACHE_PROGRAM})
+if(CCACHE_PROGRAM)
     message("cmake: using ccache ${CCACHE_PROGRAM}")
     set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE "${CCACHE_PROGRAM}")
 else()
@@ -119,11 +119,18 @@ function(build_gtests)
 
     add_executable(gtest_wip src/rif/test/gtest_wip.cpp)
     target_link_libraries(gtest_wip rif_data ${extra_libs})
+
+    if(NOT EXISTS ${CMAKE_CURRENT_BINARY_DIR}/gtest_auto.gen.cpp)
+        message("!!!!! creating gtest_auto file")
+        execute_process(COMMAND cp ${CMAKE_SOURCE_DIR}/tools/empty.cpp.tplt ${CMAKE_CURRENT_BINARY_DIR}/gtest_auto.gen.cpp)
+    endif()
+    add_executable(gtest_auto ${CMAKE_CURRENT_BINARY_DIR}/gtest_auto.gen.cpp)
+    target_link_libraries(gtest_auto rif_data ${extra_libs})
 endfunction()
 
 function(summary)
     message("-------------- CMAKE summary ------------------------------------------------------")
-    if(${CCACHE_PROGRAM})
+    if(CCACHE_PROGRAM)
         message("cmake: add_custom_target: ccache -s")
         add_custom_target(ccache_stats ALL
             COMMAND ${CCACHE_PROGRAM} -s

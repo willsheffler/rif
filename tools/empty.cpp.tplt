@@ -1,0 +1,6 @@
+#include <iostream>
+
+int main(int argc, char const *argv[]) {
+  std::cout << "gtest_auto: no tests to run" << std::endl;
+  return 0;
+}

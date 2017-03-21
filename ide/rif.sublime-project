@@ -22,8 +22,8 @@
 			"file_regex": "^[ ]*File \"(...*?)\", line ([0-9]*)",
 		},
 		{
-			"name": "build_and_run_gtest_wip",
-			"shell_cmd": "cd $folder && python tools/build_and_run_gtest_wip.py 2>&1 | tee log/subl_build.log",
+			"name": "gtest_auto",
+			"shell_cmd": "cd $folder && python tools/build_and_run_gtest_auto.py $file 2>&1 | tee log/subl_build.log",
 			"file_regex": "^(..[^:]*):([0-9]+):?([0-9]+)?:? (.*)$",
 		},
 		{

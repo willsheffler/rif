@@ -85,7 +85,9 @@
 
 // #include "chem/stub.gtest.cpp"
 
+#include "numeric/Ray.gtest.cpp"
 #include "numeric/cube_to_sphere.gtest.cpp"
+
 // #include "sampling/orientations.gtest.cpp"
 
 // #include "numeric/rand_xform.gtest.cpp"

@@ -26,6 +26,9 @@ def get_my_python():
 
 # todo: remove the above dups from setup.py
 
+def in_ci_environment():
+    return 'CI' in os.environ or 'READTHEDOCS' in os.environ
+
 
 def get_proj_root():
     """find rood dir of this project by looking for .git and external"""
@@ -52,10 +55,8 @@ def get_cmake_dir(prefix, cfg):
     path = get_build_dir(cfg) + '/' + prefix + '*' + \
         version + '-' + get_my_python() + '-' + get_my_compiler()
     libdir = (glob.glob(path))
-    if len(libdir) > 1:
-        print('ERROR get_cmake_dir', path)
-        print(libdir)
-        assert len(libdir) < 2
+    assert len(libdir) == 1
+    assert os.path.exists(libdir[0])
     return libdir[0]
 
 
@@ -148,8 +149,8 @@ def get_ncpu():
     ncpu = multiprocessing.cpu_count()
     if ncpu > 4:
         ncpu = int(ncpu / 2)
-    if 'CI' in os.environ:
-        ncpu = 4
+    if in_ci_environment():
+        ncpu = min(ncpu, 4)
         os.system('uname -a')
         print('build_utils.py: multiprocessing.cpu_count() = ',
               multiprocessing.cpu_count())
@@ -157,6 +158,9 @@ def get_ncpu():
 
 
 def get_gtests(args):
+    args = set(args)
+    args.update(x.replace('.hpp', '.gtest.cpp') for x in args
+                if os.path.exists(x.replace('.hpp', '.gtest.cpp')))
     gtests = set()
     for gtestfile in (x for x in args if x.endswith('.gtest.cpp')):
         print("    get_gtests", gtestfile)
