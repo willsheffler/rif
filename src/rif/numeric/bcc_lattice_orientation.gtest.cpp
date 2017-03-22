@@ -30,8 +30,10 @@ using std::endl;
 void test_orientatin_coverage_4d(size_t Nside, int NSAMP) {
   typedef double F;
   typedef uint64_t S;
-  typedef util::SimpleArray<4, F> V;
-  typedef util::SimpleArray<4, S> I;
+  // typedef util::SimpleArray<4, F> V;
+  // typedef util::SimpleArray<4, S> I;
+  using V = Eigen::Matrix<F, 4, 1>;
+  using I = Eigen::Matrix<S, 4, 1>;
   std::mt19937 rng((unsigned int)time(0));
   std::normal_distribution<> rnorm;
   std::uniform_real_distribution<> runif;
@@ -82,10 +84,10 @@ void test_orientatin_coverage_4d(size_t Nside, int NSAMP) {
 void test_orientatin_coverage_3d_bt24(size_t Nside, int NSAMP) {
   typedef double F;
   typedef uint64_t S;
-  typedef util::SimpleArray<4, F> V;
-  typedef util::SimpleArray<4, S> I;
-  typedef util::SimpleArray<3, F> V3;
-  typedef util::SimpleArray<3, S> I3;
+  typedef Eigen::Matrix<F, 4, 1> V;
+  typedef Eigen::Matrix<S, 4, 1> I;
+  typedef Eigen::Matrix<F, 3, 1> V3;
+  typedef Eigen::Matrix<S, 3, 1> I3;
   std::mt19937 rng((unsigned int)time(0));
   // std::mt19937 rng((unsigned int)0);
   std::normal_distribution<> rnorm;

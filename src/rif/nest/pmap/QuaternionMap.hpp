@@ -44,9 +44,9 @@ struct QuaternionMap {
     Float const fnside = nside;
     Float const width = 2.0 / fnside;
     SignedIndices idxnear =
-        ((params - 0.5) * fnside).template cast<SignedIndex>();
+        ((params.array() - 0.5) * fnside).template cast<SignedIndex>();
     SignedIndices idxfar =
-        ((params)*fnside).template cast<SignedIndex>() - (nside >> 1);
+        ((params)*fnside).template cast<SignedIndex>().array() - (nside >> 1);
     for (size_t i = 0; i < DIM; ++i)
       idxfar[i] += (idxfar[i] != idxnear[i] ? 0 : (idxfar[i] < 0 ? -1 : 1));
     // idxfar = idxfar - (nside>>1)
@@ -60,7 +60,7 @@ struct QuaternionMap {
     if (lower_corner.squaredNorm() > 1.0 || upper_corner.squaredNorm() < 1.0)
       return false;
     // now normalize and "return"
-    Params norm = (params - 0.5);
+    Params norm = (params.array() - 0.5);
     norm = norm / norm.norm();
     for (size_t i = 0; i < DIM; ++i)
       get_quaternion_component(value, i) = norm[i];
@@ -88,7 +88,7 @@ struct QuaternionMap {
     for (size_t i = 0; i < DIM; ++i)
       params[i] = get_quaternion_component(value, i) / 2.0;
     if (params[0] < 0) params = -params;
-    params = params + 0.5;
+    params = params.array() + 0.5;
     for (size_t i = 0; i < DIM; ++i) assert(0.0 <= params[i]);
     for (size_t i = 1; i < DIM; ++i) assert(1.0 >= params[i]);
   }

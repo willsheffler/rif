@@ -14,8 +14,8 @@ namespace score {
 
 template <class Atom, class EtableInit>
 struct RosettaField {
-  typedef util::SimpleArray<3, int> I3;
-  typedef util::SimpleArray<3, float> F3;
+  typedef util::SimpleArrayLegacy<3, int> I3;
+  typedef util::SimpleArrayLegacy<3, float> F3;
 
   EtableParams<float> params;
   std::vector<Atom> atoms_;

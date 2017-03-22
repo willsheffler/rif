@@ -92,7 +92,7 @@ struct TetracontoctachoronMap {
     // std::cout << cell_index << " " << p << " " << p << std::endl;
     // static int count = 0; if( ++count > 30 ) std::exit(-1);
 
-    p = w * (p - 0.5);  // now |p| < sqrt(2)-1
+    p = w * (p.array() - 0.5);  // now |p| < sqrt(2)-1
 
     // if( resl > 3 ){
     Float corner_dist = fabs(p[0]) + fabs(p[1]) + fabs(p[2]);
@@ -145,7 +145,7 @@ struct TetracontoctachoronMap {
     params[1] = q.y() / q.w() / cell_width<Float>() + 0.5;
     params[2] = q.z() / q.w() / cell_width<Float>() + 0.5;
 
-    Indices ci = params * nside_;
+    Indices ci = (params.array() * nside_).template cast<Index>();
     cell_index = ci[0] + ci[1] * nside_ + ci[2] * nside_ * nside_;
 
     params = params * nside_ - ci.template cast<Float>();

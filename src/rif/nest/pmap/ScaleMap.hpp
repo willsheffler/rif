@@ -67,7 +67,8 @@ struct ScaleMap {
   }
   ///@brief construct with default lb, ub
   template <class I>
-  ScaleMap(I const &bs) : cell_sizes_(bs) {
+  ScaleMap(I const &bs) {
+    for (int i = 0; i < cell_sizes_.size(); ++i) cell_sizes_[i] = bs[i];
     lower_bound_.fill(0);
     upper_bound_.fill(1);
     init();
@@ -103,9 +104,9 @@ struct ScaleMap {
 
   template <class P, class I>
   void init(P const &lb, P const &ub, I const &bs) {
-    lower_bound_ = lb;
-    upper_bound_ = ub;
-    cell_sizes_ = bs;
+    lower_bound_.fill(lb);
+    upper_bound_.fill(ub);
+    cell_sizes_.fill(bs);
     init();
   }
 
@@ -113,7 +114,7 @@ struct ScaleMap {
   void init() {
     num_cells_ = cell_sizes_.prod();
     for (size_t i = 0; i < DIM; ++i) {
-      cell_sizes_pref_sum_[i] = cell_sizes_.prod(i);
+      cell_sizes_pref_sum_[i] = cell_sizes_.head(i).prod();
       cell_width_[i] =
           (upper_bound_[i] - lower_bound_[i]) / (Float)cell_sizes_[i];
       assert(upper_bound_[i] > lower_bound_[i]);
@@ -219,13 +220,14 @@ struct ScaleMap {
     Params params;
     value_to_params_for_cell(value, resl, params, 0);
     SignedIndex const BIG = 12345678;
-    SignedIndices lb = (params - param_delta + (Float)BIG)
+    SignedIndices lb = (params.array() - param_delta + (Float)BIG)
                            .max((Float)BIG)
-                           .template cast<SignedIndex>() -
+                           .template cast<SignedIndex>()
+                           .array() -
                        BIG;
-    SignedIndices ub = (params + param_delta)
+    SignedIndices ub = (params.array() + param_delta)
                            .template cast<Index>()
-                           .min(cell_sizes_ - (Index)1)
+                           .min(cell_sizes_.array() - (Index)1)
                            .template cast<SignedIndex>();
     // std::cout << "PM " << params.transpose() << std::endl;
     // std::cout << "DL " << delta_param.transpose() << std::endl;
@@ -240,10 +242,10 @@ struct ScaleMap {
   ///@brief aka covering radius max distance from bin center to any value within
   /// bin
   Float bin_circumradius(Index resl) const {
-    Params width =
-        (upper_bound_ - lower_bound_) / cell_sizes_.template cast<Float>();
+    Params width = (upper_bound_.array() - lower_bound_.array()) /
+                   cell_sizes_.template cast<Float>().array();
     return 0.5 / (Float)(1 << resl) *
-           sqrt((width * width).sum());  // squaredNorm
+           sqrt((width.array() * width.array()).sum());  // squaredNorm
   }
 
   ///@brief maximum distance from the bin center which must be within the bin

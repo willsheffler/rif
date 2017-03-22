@@ -24,10 +24,10 @@ TEST(QuaternionMap, test_cell_validity_check) {
   ASSERT_EQ((int)-1.5, -1);
   typedef QuaternionMap<4> MapType;
   typedef MapType::Params P;
-  BOOST_STATIC_ASSERT(
-      (util::meta::has_subscript_oper<P, double &, size_t>::value));
-  BOOST_STATIC_ASSERT(
-      (util::meta::has_const_subscript_oper<P, double const &, size_t>::value));
+  // BOOST_STATIC_ASSERT(
+  // (util::meta::has_subscript_oper<P, double &, size_t>::value));
+  // BOOST_STATIC_ASSERT(
+  // (util::meta::has_const_subscript_oper<P, double const &, size_t>::value));
 
   MapType qmap;
   MapType::ValueType val;

@@ -25,7 +25,7 @@ using std::endl;
 template <class K, class V, class GetMap, size_t SEG = 0>
 struct SegmentedMap {
   typedef typename GetMap::template apply<
-      K, util::SimpleArray<1 << SEG, V, true>>::type MAP;
+      K, util::SimpleArrayLegacy<1 << SEG, V, true>>::type MAP;
   typedef typename MAP::const_iterator const_iterator;
 
   MAP map;

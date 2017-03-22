@@ -89,17 +89,17 @@ TEST(ParamMap, UnitMap_get_neighboring_cells) {
 }
 
 TEST(ScaleMap, ScaleMap_cellindices) {
-  util::SimpleArray<1, size_t> bs(3);
+  util::SimpleArrayLegacy<1, size_t> bs(3);
   ScaleMap<1> m1(bs);
   for (size_t i = 0; i < 3; ++i)
     ASSERT_EQ(i, m1.indices_to_cellindex(m1.cellindex_to_indices(i)));
-  ScaleMap<2> m2(util::SimpleArray<2, size_t>(3, 4));
+  ScaleMap<2> m2(util::SimpleArrayLegacy<2, size_t>(3, 4));
   for (size_t i = 0; i < 3 * 4; ++i)
     ASSERT_EQ(i, m2.indices_to_cellindex(m2.cellindex_to_indices(i)));
-  ScaleMap<3> m3(util::SimpleArray<3, size_t>(3, 4, 8));
+  ScaleMap<3> m3(util::SimpleArrayLegacy<3, size_t>(3, 4, 8));
   for (size_t i = 0; i < 3 * 4 * 8; ++i)
     ASSERT_EQ(i, m3.indices_to_cellindex(m3.cellindex_to_indices(i)));
-  ScaleMap<4> m4(util::SimpleArray<4, size_t>(3, 4, 8, 17));
+  ScaleMap<4> m4(util::SimpleArrayLegacy<4, size_t>(3, 4, 8, 17));
   for (size_t i = 0; i < 3 * 4 * 8 * 17; ++i)
     ASSERT_EQ(i, m4.indices_to_cellindex(m4.cellindex_to_indices(i)));
 }
@@ -277,39 +277,40 @@ TEST(ScaleMap, ScaleMap_get_neighboring_cells_433) {
 
 TEST(ScaleMap, ScaleMap_get_neighboring_cells_433_m1) {
   typedef ScaleMap<4> MapType;
-  MapType umap(MapType::Params(0, 0, 0, 0) - 1.0,
-               MapType::Params(3, 3, 3, 3) - 1.0, MapType::Indices(3, 3, 3, 3));
+  MapType umap(MapType::Params(0, 0, 0, 0).array() - 1.0,
+               MapType::Params(3, 3, 3, 3).array() - 1.0,
+               MapType::Indices(3, 3, 3, 3));
   std::vector<size_t> cnb;
   std::back_insert_iterator<std::vector<size_t>> biter(cnb);
   int i;
 
   cnb.clear();
   i = 0;
-  umap.get_neighboring_cells(MapType::ValueType(1.5, 0.5, 0.5, 0.5) - 1.0, 0,
-                             0.4, biter);
+  umap.get_neighboring_cells(
+      MapType::ValueType(1.5, 0.5, 0.5, 0.5).array() - 1.0, 0, 0.4, biter);
   ASSERT_EQ(cnb.size(), 1);
   ASSERT_EQ(cnb[i++], 1);
 
   cnb.clear();
   i = 0;
-  umap.get_neighboring_cells(MapType::ValueType(1.3, 0.5, 0.5, 0.5) - 1.0, 0,
-                             0.4, biter);
+  umap.get_neighboring_cells(
+      MapType::ValueType(1.3, 0.5, 0.5, 0.5).array() - 1.0, 0, 0.4, biter);
   ASSERT_EQ(cnb.size(), 2);
   ASSERT_EQ(cnb[i++], 0);
   ASSERT_EQ(cnb[i++], 1);
 
   cnb.clear();
   i = 0;
-  umap.get_neighboring_cells(MapType::ValueType(1.3, 0.1, 0.1, 0.5) - 1.0, 0,
-                             0.4, biter);
+  umap.get_neighboring_cells(
+      MapType::ValueType(1.3, 0.1, 0.1, 0.5).array() - 1.0, 0, 0.4, biter);
   ASSERT_EQ(cnb.size(), 2);
   ASSERT_EQ(cnb[i++], 0);
   ASSERT_EQ(cnb[i++], 1);
 
   cnb.clear();
   i = 0;
-  umap.get_neighboring_cells(MapType::ValueType(1.3, 0.1, 0.1, 1.3) - 1.0, 0,
-                             0.4, biter);
+  umap.get_neighboring_cells(
+      MapType::ValueType(1.3, 0.1, 0.1, 1.3).array() - 1.0, 0, 0.4, biter);
   ASSERT_EQ(cnb.size(), 4);
   ASSERT_EQ(cnb[i++], 0);
   ASSERT_EQ(cnb[i++], 1);
@@ -318,8 +319,8 @@ TEST(ScaleMap, ScaleMap_get_neighboring_cells_433_m1) {
 
   cnb.clear();
   i = 0;
-  umap.get_neighboring_cells(MapType::ValueType(2.3, 1.8, 2.1, 1.8) - 1.0, 0,
-                             0.4, biter);
+  umap.get_neighboring_cells(
+      MapType::ValueType(2.3, 1.8, 2.1, 1.8).array() - 1.0, 0, 0.4, biter);
   ASSERT_EQ(cnb.size(), 16);
   ASSERT_EQ(cnb[i++], 40);
   ASSERT_EQ(cnb[i++], 41);
@@ -413,8 +414,8 @@ TEST(ScaleMap, ScaleMap_get_neighboring_cells_433_o2) {
 
 TEST(ScaleMap, ScaleMap_get_neighboring_cells_433_o5m1) {
   typedef ScaleMap<4> MapType;
-  MapType smap(MapType::Params(0, 0, 0, 0) / 5.0 - 1.0,
-               MapType::Params(3, 3, 3, 3) / 5.0 - 1.0,
+  MapType smap(MapType::Params(0, 0, 0, 0).array() / 5.0 - 1.0,
+               MapType::Params(3, 3, 3, 3).array() / 5.0 - 1.0,
                MapType::Indices(3, 3, 3, 3));
   std::vector<size_t> cnb;
   std::back_insert_iterator<std::vector<size_t>> biter(cnb);
@@ -422,31 +423,35 @@ TEST(ScaleMap, ScaleMap_get_neighboring_cells_433_o5m1) {
 
   cnb.clear();
   i = 0;
-  smap.get_neighboring_cells(MapType::ValueType(1.5, 0.5, 0.5, 0.5) / 5.0 - 1.0,
-                             0, 0.4, biter);
+  smap.get_neighboring_cells(
+      MapType::ValueType(1.5, 0.5, 0.5, 0.5).array() / 5.0 - 1.0, 0, 0.4,
+      biter);
   ASSERT_EQ(cnb.size(), 1);
   ASSERT_EQ(cnb[i++], 1);
 
   cnb.clear();
   i = 0;
-  smap.get_neighboring_cells(MapType::ValueType(1.3, 0.5, 0.5, 0.5) / 5.0 - 1.0,
-                             0, 0.4, biter);
+  smap.get_neighboring_cells(
+      MapType::ValueType(1.3, 0.5, 0.5, 0.5).array() / 5.0 - 1.0, 0, 0.4,
+      biter);
   ASSERT_EQ(cnb.size(), 2);
   ASSERT_EQ(cnb[i++], 0);
   ASSERT_EQ(cnb[i++], 1);
 
   cnb.clear();
   i = 0;
-  smap.get_neighboring_cells(MapType::ValueType(1.3, 0.1, 0.1, 0.5) / 5.0 - 1.0,
-                             0, 0.4, biter);
+  smap.get_neighboring_cells(
+      MapType::ValueType(1.3, 0.1, 0.1, 0.5).array() / 5.0 - 1.0, 0, 0.4,
+      biter);
   ASSERT_EQ(cnb.size(), 2);
   ASSERT_EQ(cnb[i++], 0);
   ASSERT_EQ(cnb[i++], 1);
 
   cnb.clear();
   i = 0;
-  smap.get_neighboring_cells(MapType::ValueType(1.3, 0.1, 0.1, 1.3) / 5.0 - 1.0,
-                             0, 0.4, biter);
+  smap.get_neighboring_cells(
+      MapType::ValueType(1.3, 0.1, 0.1, 1.3).array() / 5.0 - 1.0, 0, 0.4,
+      biter);
   ASSERT_EQ(cnb.size(), 4);
   ASSERT_EQ(cnb[i++], 0);
   ASSERT_EQ(cnb[i++], 1);
@@ -455,8 +460,9 @@ TEST(ScaleMap, ScaleMap_get_neighboring_cells_433_o5m1) {
 
   cnb.clear();
   i = 0;
-  smap.get_neighboring_cells(MapType::ValueType(2.3, 1.8, 2.1, 1.8) / 5.0 - 1.0,
-                             0, 0.4, biter);
+  smap.get_neighboring_cells(
+      MapType::ValueType(2.3, 1.8, 2.1, 1.8).array() / 5.0 - 1.0, 0, 0.4,
+      biter);
   ASSERT_EQ(cnb.size(), 16);
   ASSERT_EQ(cnb[i++], 40);
   ASSERT_EQ(cnb[i++], 41);

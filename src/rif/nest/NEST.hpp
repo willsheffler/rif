@@ -368,10 +368,12 @@ struct NEST :  // policy-based design, see Modern C++ Design
                      OutIter out) const {
     assert(resl <= MAX_RESL_ONE_CELL);  // not rigerous check if Ncells > 1
     // std::cout << indices.transpose() << std::endl;
-    SignedIndices lb = ((indices.template cast<SignedIndex>() - (SignedIndex)1)
-                            .max((SignedIndex)0));
-    SignedIndices ub = ((indices.template cast<SignedIndex>() + (SignedIndex)1)
-                            .min((SignedIndex)((1 << resl) - 1)));
+    SignedIndices lb =
+        ((indices.template cast<SignedIndex>().array() - (SignedIndex)1)
+             .max((SignedIndex)0));
+    SignedIndices ub =
+        ((indices.template cast<SignedIndex>().array() + (SignedIndex)1)
+             .min((SignedIndex)((1 << resl) - 1)));
     // std::cout << "IX " << indices.transpose() << " cell " << cell_index <<
     // std::endl;
     // std::cout << "LB " << lb.transpose() << std::endl;

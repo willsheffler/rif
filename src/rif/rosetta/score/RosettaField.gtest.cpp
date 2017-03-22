@@ -68,7 +68,7 @@ using std::endl;
 TEST(RosettaField, test_faster_atombin_calc) {
   int NITER = 100000;
 
-  typedef util::SimpleArray<3, float> F3;
+  typedef util::SimpleArrayLegacy<3, float> F3;
   typedef actor::Atom<F3> Atom;
   std::vector<Atom> atoms;
   F3 delta;
@@ -114,7 +114,7 @@ TEST(RosettaField, DISABLED_test_btn) {
   NITER *= 100;
 #endif
 
-  typedef util::SimpleArray<3, float> F3;
+  typedef util::SimpleArrayLegacy<3, float> F3;
   typedef actor::Atom<F3> Atom;
   std::vector<Atom> atoms;
   atoms.push_back(Atom(F3(0.696, -12.422, 3.375), 7));

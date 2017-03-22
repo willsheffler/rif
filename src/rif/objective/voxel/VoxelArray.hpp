@@ -24,8 +24,8 @@ struct VoxelArray : boost::multi_array<_Float, _DIM> {
   typedef VoxelArray<_DIM, _Float> THIS;
   static size_t const DIM = _DIM;
   typedef _Float Float;
-  typedef util::SimpleArray<DIM, typename BASE::size_type> Indices;
-  typedef util::SimpleArray<DIM, Float> Bounds;
+  typedef util::SimpleArrayLegacy<DIM, Float> Bounds;
+  typedef util::SimpleArrayLegacy<DIM, typename BASE::size_type> Indices;
   Bounds lb_, ub_, cs_;
 
   VoxelArray() {}

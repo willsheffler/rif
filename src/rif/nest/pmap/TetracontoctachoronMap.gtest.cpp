@@ -235,7 +235,8 @@ TEST(TetracontoctachoronMap, check_unit) {
 
   TetracontoctachoronMap<> map;
 
-  rif::util::SimpleArray<24, int> cellcount(0);
+  rif::util::SimpleArray<24, int> cellcount;
+  cellcount.fill(0);
 
   // std::ofstream out("bt24_unit.pdb");
   Vector3d lb(9e9, 9e9, 9e9), ub(-9e9, -9e9, -9e9);

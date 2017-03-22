@@ -76,7 +76,7 @@ TEST(EulerAnglesMap, shapes) {
     for (int i = 0; i < NITER; ++i) {
       util::SimpleArray<3, double> samp(uniform(rng), uniform(rng),
                                         uniform(rng));
-      samp = (samp - 0.5) * b;
+      samp = (samp.array() - 0.5) * b.array();
       if (samp.norm() > 0.5) {
         --i;
         continue;
@@ -93,7 +93,7 @@ TEST(EulerAnglesMap, shapes) {
     for (int i = 0; i < NITER; ++i) {
       util::SimpleArray<3, double> samp(uniform(rng), uniform(rng),
                                         uniform(rng));
-      samp = (samp - 0.5) * b;
+      samp = (samp.array() - 0.5) * b.array();
       avgdiff += samp.norm();
       maxdiff = std::max(samp.norm(), maxdiff);
     }
@@ -106,7 +106,7 @@ TEST(EulerAnglesMap, shapes) {
     for (int i = 0; i < NITER; ++i) {
       util::SimpleArray<3, double> samp(uniform(rng), uniform(rng),
                                         uniform(rng));
-      samp = (samp - 0.5) * b;
+      samp = (samp.array() - 0.5) * b.array();
       avgdiff += samp.norm();
       maxdiff = std::max(samp.norm(), maxdiff);
     }
@@ -119,7 +119,7 @@ TEST(EulerAnglesMap, shapes) {
     for (int i = 0; i < NITER; ++i) {
       util::SimpleArray<3, double> samp(uniform(rng), uniform(rng),
                                         uniform(rng));
-      samp = (samp - 0.5) * b;
+      samp = (samp.array() - 0.5) * b.array();
       if (samp.sum() < 0) {
         --i;
         continue;

@@ -85,8 +85,9 @@ TEST(Director, test_TreeDirector) {
 
   TreeDirector<numeric::X1dim> director(root);
 
-  nest::NEST<2, util::SimpleArray<2>, nest::pmap::ScaleMap> refnest(
-      util::SimpleArray<2>(20.0, 10.0), util::SimpleArray<2>(21.0, 12.0),
+  nest::NEST<2, util::SimpleArray<2, double>, nest::pmap::ScaleMap> refnest(
+      util::SimpleArray<2, double>(20.0, 10.0),
+      util::SimpleArray<2, double>(21.0, 12.0),
       util::SimpleArray<2, uint64_t>(1, 2));
 
   util::Timer<> t;
@@ -95,7 +96,7 @@ TEST(Director, test_TreeDirector) {
     // cout << "================== resl " << resl << " ======================"
     // << endl;
     for (uint64_t i = 0; i < director.size(resl); ++i) {
-      util::SimpleArray<2> tmp = refnest.set_and_get(i, resl);
+      util::SimpleArray<2, double> tmp = refnest.set_and_get(i, resl);
       // scene.set_position( 0, tmp[0] );
       // scene.set_position( 1, tmp[1] );
       director.set_scene(i, resl, scene);

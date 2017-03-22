@@ -120,7 +120,14 @@ TEST(Rotation1DMap, basic_test) {
     }
   }
   {
-    NEST<1, Matrix3d, Rotation1DMap> nest(0, M_PI, 1);
+    Eigen::Matrix<double, 1, 1> zero;
+    zero.fill(0);
+    Eigen::Matrix<double, 1, 1> pi;
+    pi.fill(M_PI);
+    Eigen::Matrix<uint64_t, 1, 1> one;
+    one.fill(1);
+
+    NEST<1, Matrix3d, Rotation1DMap> nest(zero, pi, one);
     Vector3d axis(1, 1, 1);
     nest.set_axis(axis);
     {

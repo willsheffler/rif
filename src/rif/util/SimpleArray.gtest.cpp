@@ -8,8 +8,8 @@ namespace util {
 using std::cout;
 using std::endl;
 
-TEST(SimpleArray, bounds_check) {
-  SimpleArray<3, int> a;
+TEST(SimpleArrayLegacy, bounds_check) {
+  SimpleArrayLegacy<3, int> a;
   a[3];  // non-bounds checked
 #ifndef NDEBUG
 #ifndef CXX14
@@ -18,8 +18,8 @@ TEST(SimpleArray, bounds_check) {
 #endif
 }
 
-TEST(SimpleArray, iteration) {
-  SimpleArray<3, int> a;
+TEST(SimpleArrayLegacy, iteration) {
+  SimpleArrayLegacy<3, int> a;
   int v;
   v = 0;
   BOOST_FOREACH (int &i, std::make_pair(a.begin(), a.end()))
@@ -30,7 +30,7 @@ TEST(SimpleArray, iteration) {
   v = 0;
   BOOST_FOREACH (int i, a)
     ASSERT_EQ(++v, i);
-  SimpleArray<3, int> const &r = a;
+  SimpleArrayLegacy<3, int> const &r = a;
   v = 0;
   BOOST_FOREACH (int i, std::make_pair(r.begin(), r.end()))
     ASSERT_EQ(++v, i);

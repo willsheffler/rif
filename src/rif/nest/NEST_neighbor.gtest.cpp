@@ -77,21 +77,21 @@ TEST(NEST_NEIGHBOR, unit_1d_boundary_1cell) {
   NEST<1>::ValueType val;
 
   neighbors.clear();
-  val = 1.1;
+  val = NEST<1>::ValueType::Constant(1.1);
   nest.get_neighbors_for_cell(val, r, 0, back_it);
   // BOOST_FOREACH(size_t i,neighbors){ cout << i << " " ; } cout << endl;
   ASSERT_EQ(neighbors.size(), 1);
   ASSERT_EQ(neighbors[0], 3);
 
   neighbors.clear();
-  val = 0.99;
+  val = NEST<1>::ValueType::Constant(0.99);
   nest.get_neighbors_for_cell(val, r, 0, back_it);
   ASSERT_EQ(neighbors.size(), 2);
   ASSERT_EQ(neighbors[0], 2);
   ASSERT_EQ(neighbors[1], 3);
 
   neighbors.clear();
-  val = 0.6;
+  val = NEST<1>::ValueType::Constant(0.6);
   nest.get_neighbors_for_cell(val, r, 0, back_it);
   ASSERT_EQ(neighbors.size(), 3);
   ASSERT_EQ(neighbors[0], 1);
@@ -330,7 +330,7 @@ TEST(NEST_NEIGHBOR, unitmap_neighbors_2d_boundary_20cell) {
 }
 
 TEST(NEST_NEIGHBOR, scalemap_neighbors_2d_boundary) {
-  typedef NEST<2, util::SimpleArray<2, double>, ScaleMap> NestType;
+  typedef NEST<2, util::SimpleArrayLegacy<2, double>, ScaleMap> NestType;
   typedef NestType::ValueType VAL;
   NestType nest(NestType::Params(0, 0), NestType::Params(4, 4),
                 NestType::Indices(4, 4));

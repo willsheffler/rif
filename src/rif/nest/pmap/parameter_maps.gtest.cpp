@@ -22,11 +22,11 @@ TEST(NEST_ScaleMap, particular_values) {
     typedef util::SimpleArray<1, double> VAL;
     VAL lb, ub;
     util::SimpleArray<1, size_t> bs;
-    lb = -16.0;
-    ub = 16.0;
-    bs = 1;
+    lb.fill(-16.0);
+    ub.fill(16.0);
+    bs.fill(1);
     NEST<1, VAL, ScaleMap> nest1(lb, ub, bs);
-    bs = 2;
+    bs.fill(2);
     NEST<1, VAL, ScaleMap> nest2(lb, ub, bs);
     ASSERT_EQ(nest1.set_and_get(0, 0)[0], 0.0);
     ASSERT_EQ(nest1.set_and_get(0, 1)[0], -8.0);
@@ -187,11 +187,12 @@ TEST(ScaleMap, value_to_params_for_cell) {
 template <int DIM>
 void test_index_lookup_scaled() {
   typedef util::SimpleArray<DIM, double> VAL;
-  util::SimpleArray<10, double> lb0(-1.3, 2.2, 0, -3, -5, -9.9, 1.3, 44, -13.3,
-                                    99);
-  util::SimpleArray<10, double> ub0(1.3, 4.2, 1, 10, -3, 9.9, 4.3, 44, 13.3,
-                                    199);
-  util::SimpleArray<10, size_t> bs0(2, 1, 2, 3, 4, 5, 6, 7, 8, 9);
+  util::SimpleArray<10, double> lb0;
+  lb0 << -1.3, 2.2, 0, -3, -5, -9.9, 1.3, 44, -13.3, 99;
+  util::SimpleArray<10, double> ub0;
+  ub0 << 1.3, 4.2, 1, 10, -3, 9.9, 4.3, 44, 13.3, 199;
+  util::SimpleArray<10, size_t> bs0;
+  bs0 << 2, 1, 2, 3, 4, 5, 6, 7, 8, 9;
 
   typedef util::SimpleArray<DIM, double> VAL;
   VAL lb, ub;
@@ -229,10 +230,11 @@ TEST(NEST_ScaleMap, index_lookup_scaled) {
 template <int DIM>
 void test_map_scale_bounds() {
   BOOST_STATIC_ASSERT((DIM < 10));
-  util::SimpleArray<10, double> lb0(-1.3, 2.2, 0, -3, -5, -9.9, 1.3, 44, -13.3,
-                                    99),
-      ub0(1.3, 4.2, 1, 10, -3, 9.9, 4.3, 44, 13.3, 199);
-  util::SimpleArray<10, size_t> bs0(1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
+  util::SimpleArray<10, double> lb0, ub0;
+  lb0 << -1.3, 2.2, 0, -3, -5, -9.9, 1.3, 44, -13.3, 99;
+  ub0 << 1.3, 4.2, 1, 10, -3, 9.9, 4.3, 44, 13.3, 199;
+  util::SimpleArray<10, size_t> bs0;
+  bs0 << 1, 2, 3, 4, 5, 6, 7, 8, 9, 10;
 
   typedef util::SimpleArray<DIM, double> VAL;
   VAL lb, ub;

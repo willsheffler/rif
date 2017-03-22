@@ -10,14 +10,15 @@
 #include "numeric/bcc_lattice.hpp"
 #include "util/Timer.hpp"
 
-#include <Eigen/Geometry>
-
 namespace rif {
 namespace numeric {
 namespace test {
 
 using std::cout;
 using std::endl;
+
+using V = Eigen::Matrix<double, 3, 1>;
+using I = Eigen::Matrix<uint64_t, 3, 1>;
 
 // TEST(TEMPORARY,gm_20140905){
 //  int NSAMP = 1000000;
@@ -54,8 +55,8 @@ using std::endl;
 // }
 
 TEST(bcc_lattice, centers_map) {
-  typedef util::SimpleArray<3, double> V;
-  typedef util::SimpleArray<3, uint64_t> I;
+  // typedef util::SimpleArray<3, double> V;
+  // typedef util::SimpleArray<3, uint64_t> I;
 
   // {
   //  BCC<3,double> bcc(I(2,2,2),V(0,0,0),V(1,1,1));
@@ -83,8 +84,6 @@ TEST(bcc_lattice, centers_map) {
 // double const R7approx = 0.882879;
 template <int N, class F, class S>
 F test_bcc_performance(size_t NSAMP, S const Nside, F const Width) {
-  typedef util::SimpleArray<N, F> V;
-  typedef util::SimpleArray<N, S> I;
   std::mt19937 rng((unsigned int)time(0));
   std::uniform_real_distribution<> runif;
   BCC<N, F, S> bcc(I(Nside), V(-Width / 2), V(Width / 2));
@@ -144,8 +143,6 @@ TEST(bcc_lattice, performance) {
 
 template <int N, class F, class S>
 F test_bcc_inradius() {
-  typedef util::SimpleArray<N, F> V;
-  typedef util::SimpleArray<N, S> I;
   std::mt19937 rng((unsigned int)time(0));
   std::uniform_real_distribution<> runif;
   std::normal_distribution<> rnorm;
@@ -153,7 +150,7 @@ F test_bcc_inradius() {
   BCC<N, F, S> bcc(I(5), V(-(F)Nside / 2.0), V((F)Nside / 2.0));
   BOOST_VERIFY(bcc[bcc[V(0.0)]] == V(0.0));
   BOOST_VERIFY(bcc.width_ == V(1.0));
-  S const i0 = bcc[V(0)];
+  S const i0 = bcc[V(0.0)];
 
   double const RNapprox[5] = {0.558099, 0.701687, 0.742306, 0.845359, 0.882879};
   double const Rapprox = RNapprox[N - 3];
@@ -184,8 +181,6 @@ TEST(bcc_lattice, inradius) {
 
 template <int N, class F, class S>
 F test_bcc_neighbors(size_t NSAMP) {
-  typedef util::SimpleArray<N, F> V;
-  typedef util::SimpleArray<N, S> I;
   std::mt19937 rng((unsigned int)time(0));
   std::uniform_real_distribution<> runif;
   std::normal_distribution<> rnorm;
@@ -193,7 +188,7 @@ F test_bcc_neighbors(size_t NSAMP) {
   BCC<N, F, S> bcc(I(5), V(-(F)Nside / 2.0), V((F)Nside / 2.0));
   BOOST_VERIFY(bcc[bcc[V(0.0)]] == V(0.0));
   BOOST_VERIFY(bcc.width_ == V(1.0));
-  S const i0 = bcc[V(0)];
+  S const i0 = bcc[V(0.0)];
   std::vector<size_t> nbrs, nbrs_we;
   bcc.neighbors(i0, std::back_inserter(nbrs), false);
   bcc.neighbors(i0, std::back_inserter(nbrs_we), true);
@@ -201,7 +196,7 @@ F test_bcc_neighbors(size_t NSAMP) {
   Cubic<N, F, S> cubic(I(5), V(-(F)Nside / 2.0), V((F)Nside / 2.0));
   BOOST_VERIFY(cubic[cubic[V(0.0)]] == V(0.0));
   BOOST_VERIFY(cubic.width_ == V(1.0));
-  S const i0cubic = cubic[V(0)];
+  S const i0cubic = cubic[V(0.0)];
   std::vector<size_t> nbrs_cubic;
   cubic.neighbors(i0cubic, std::back_inserter(nbrs_cubic));
 
@@ -327,8 +322,6 @@ TEST(bcc_lattice, neighbors) {
 // TEST(bcc_lattice,coverage_transform_7d){
 //  using namespace Eigen;
 //  typedef Transform<double,3,AffineCompact> Xform;
-//  typedef util::SimpleArray<7,double> V;
-//  typedef util::SimpleArray<7,size_t> I;
 //  typedef Matrix<double,7,1> Vector7d;
 //  std::mt19937 mt((unsigned int)time(0));
 //  std::normal_distribution<> rnorm;
@@ -382,8 +375,6 @@ TEST(bcc_lattice, neighbors) {
 
 template <int N, class F, class S>
 F test_bcc_children(size_t NSAMP) {
-  typedef util::SimpleArray<N, F> V;
-  typedef util::SimpleArray<N, S> I;
   std::mt19937 rng((unsigned int)time(0));
   std::uniform_real_distribution<> runif;
   std::normal_distribution<> rnorm;
@@ -392,7 +383,7 @@ F test_bcc_children(size_t NSAMP) {
   BCC<N, F, S> bcc(I(5), V(-(F)Nside / 2.0), V((F)Nside / 2.0));
   BOOST_VERIFY(bcc[bcc[V(0.0)]] == V(0.0));
   BOOST_VERIFY(bcc.width_ == V(1.0));
-  S const i0 = bcc[V(0)];
+  S const i0 = bcc[V(0.0)];
   std::vector<size_t> nbrs, nbrs_we;
   bcc.neighbors(i0, std::back_inserter(nbrs), false);
   bcc.neighbors(i0, std::back_inserter(nbrs_we), true);

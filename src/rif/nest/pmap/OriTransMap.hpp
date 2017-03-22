@@ -65,8 +65,8 @@ struct OriTransMap {
     Index const ncori = ori_map_.num_cells();
     Index const cori = cell_index % ncori;
     Index const ctrans = cell_index / ncori;
-    P3 pori(params, 0);    // offset 0
-    P3 ptrans(params, 3);  // offset 3
+    P3 pori(params.head(3));    // offset 0
+    P3 ptrans(params.tail(3));  // offset 3
     M m;
     V v;
     bool valid = ori_map_.params_to_value(pori, cori, resl, m);
