@@ -157,9 +157,9 @@ def get_ncpu():
     return ncpu
 
 
-def get_gtests(args):
-    args = set(args)
-    args.update(x.replace('.hpp', '.gtest.cpp') for x in args
+def get_gtests(args_in):
+    args = set(args_in)
+    args.update(x.replace('.hpp', '.gtest.cpp') for x in args_in
                 if os.path.exists(x.replace('.hpp', '.gtest.cpp')))
     gtests = set()
     for gtestfile in (x for x in args if x.endswith('.gtest.cpp')):
