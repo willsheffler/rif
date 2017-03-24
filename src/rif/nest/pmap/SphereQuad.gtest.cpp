@@ -209,7 +209,7 @@ TEST(SphereQuad, test_index_nesting_of_bincenters_various_valuetypes) {
 TEST(SphereQuad, test_coverage) {
   typedef NEST<2, RowVector3d, SphereQuad> NestType;
 
-  std::mt19937 rng((unsigned int)time(0));
+  std::mt19937 rng((unsigned int)time(0) + 56183);
   std::normal_distribution<> gaussian;
 
   size_t max_resl = 9;
