@@ -3,35 +3,36 @@
 namespace rif {
 namespace numeric {
 
-// assumes we are on the +Z face!!!!!  order Z,X,-Y,-X,Y,-Z
-template <class Vec>
-void cube_to_sphere(Vec &v) {
-  typedef typename Vec::Scalar Float;
-  double const xx = v.x() * v.x();
-  double const yy = v.y() * v.y();
-  double const zz = v.z() * v.z();
-  v.x() *= sqrt(1.0 - yy * 0.5 - zz * 0.5 + yy * zz / 3.0);
-  v.y() *= sqrt(1.0 - zz * 0.5 - xx * 0.5 + zz * xx / 3.0);
-  v.z() *= sqrt(1.0 - xx * 0.5 - yy * 0.5 + xx * yy / 3.0);
+template <class V>
+void cube_to_sphere(V &v) {
+  typedef typename V::Scalar Float;
+  double const xx = v[0] * v[0];
+  double const yy = v[1] * v[1];
+  double const zz = v[2] * v[2];
+  v[0] *= sqrt(fmax(0, 1.0 - yy * 0.5 - zz * 0.5 + yy * zz / 3.0));
+  v[1] *= sqrt(fmax(0, 1.0 - zz * 0.5 - xx * 0.5 + zz * xx / 3.0));
+  v[2] *= sqrt(fmax(0, 1.0 - xx * 0.5 - yy * 0.5 + xx * yy / 3.0));
   v.normalize();
 }
 
-template <class Vec>
-void sphere_to_cube_facenum0(Vec &v) {
-  typedef typename Vec::Scalar Float;
-  Float const x = v.x();
-  Float const y = v.y();
-  // Float const z = v.z();
-  Float &X(v.x());
-  Float &Y(v.y());
-  Float &Z(v.z());
+// assumes we are on the +Z face!!!!!
+template <class V>
+void sphere_to_cube_facenum0(V &v) {
+  typedef typename V::Scalar Float;
+  Float const x = v[0];
+  Float const y = v[1];
+  // Float const z = v[2];
+  Float &X(v[0]);
+  Float &Y(v[1]);
+  Float &Z(v[2]);
+  Float eps = std::sqrt(std::numeric_limits<Float>::epsilon());
   Float const INV_SQRT_2 = 0.70710676908493042;
   Float const a2 = x * x * 2.0;
   Float const b2 = y * y * 2.0;
   Float const inner = -a2 + b2 - 3.0;
   Float const innersqrt = -sqrt((inner * inner) - 12.0 * a2);
-  X = (fabs(x) < 0.000001) ? 0.0 : sqrt(innersqrt + a2 - b2 + 3.0) * INV_SQRT_2;
-  Y = (fabs(y) < 0.000001) ? 0.0 : sqrt(innersqrt - a2 + b2 + 3.0) * INV_SQRT_2;
+  X = (fabs(x) < eps) ? 0.0 : sqrt(innersqrt + a2 - b2 + 3.0) * INV_SQRT_2;
+  Y = (fabs(y) < eps) ? 0.0 : sqrt(innersqrt - a2 + b2 + 3.0) * INV_SQRT_2;
   Z = 1.0;  // not really necessary for lookups...
   X = x < 0.0 ? -X : X;
   Y = y < 0.0 ? -Y : Y;
@@ -39,8 +40,18 @@ void sphere_to_cube_facenum0(Vec &v) {
   // if(Y > 1.0) Y = 1.0; // shouldn't be necessary
 }
 
+/**
+ * @brief      move face0 to face (may be improper rotation)
+ *
+ * @param[in]  face   The face
+ * @param      x      { parameter_description }
+ * @param      y      { parameter_description }
+ * @param      z      { parameter_description }
+ *
+ * @tparam     Float  { description }
+ */
 template <class Float>
-void permute_cube_face_xyz(int face, Float &x, Float &y, Float &z) {
+void permute_cube_face(int face, Float &x, Float &y, Float &z) {
   Float X = x, Y = y, Z = z;
   switch (face) {
     case 0:
@@ -49,28 +60,28 @@ void permute_cube_face_xyz(int face, Float &x, Float &y, Float &z) {
       z = Z;
       break;
     case 1:
-      x = -Y;
-      y = Z;
-      z = -X;
+      x = Z;
+      y = X;
+      z = Y;
       break;
     case 2:
-      x = -Z;
-      y = -Y;
-      z = -X;
+      x = -Y;
+      y = -Z;
+      z = +X;
       break;
     case 3:
-      x = Y;
-      y = -Z;
-      z = -X;
+      x = -Z;
+      y = +X;
+      z = -Y;
       break;
     case 4:
-      x = Z;
-      y = Y;
-      z = -X;
+      x = Y;
+      y = Z;
+      z = X;
       break;
     case 5:
-      x = Y;
-      y = X;
+      x = -Y;
+      y = +X;
       z = -Z;
       break;
     default:
@@ -78,8 +89,18 @@ void permute_cube_face_xyz(int face, Float &x, Float &y, Float &z) {
   }
 }
 
+/**
+ * @brief      move face to face0 (may be improper rotation)
+ *
+ * @param[in]  face   The face
+ * @param      x      { parameter_description }
+ * @param      y      { parameter_description }
+ * @param      z      { parameter_description }
+ *
+ * @tparam     Float  { description }
+ */
 template <class Float>
-void inverse_permute_cube_face_xyz(int face, Float &x, Float &y, Float &z) {
+void permute_cube_face_inverse(int face, Float &x, Float &y, Float &z) {
   Float X = x, Y = y, Z = z;
   switch (face) {
     case 0:
@@ -88,46 +109,111 @@ void inverse_permute_cube_face_xyz(int face, Float &x, Float &y, Float &z) {
       z = Z;
       break;
     case 1:
-      x = -Z;
-      y = -X;
-      z = Y;
-      break;
-    case 2:
-      x = -Z;
-      y = -Y;
-      z = -X;
-      break;
-    case 3:
-      x = -Z;
-      y = X;
-      z = -Y;
-      break;
-    case 4:
-      x = -Z;
-      y = Y;
+      x = Y;
+      y = Z;
       z = X;
       break;
-    case 5:
-      x = Y;
+    case 2:
+      x = +Z;
+      y = -X;
+      z = -Y;
+      break;
+    case 3:
+      x = +Y;
+      y = -Z;
+      z = -X;
+      break;
+    case 4:
+      x = Z;
       y = X;
+      z = Y;
+      break;
+    case 5:
+      x = +Y;
+      y = -X;
       z = -Z;
       break;
     default:
       break;
   }
 }
-template <class Vec>
-uint64_t get_cube_facenum(Vec const &p) {
-  typedef typename Vec::Scalar Float;
-  Float const ax = fabs(p.x()), ay = fabs(p.y()), az = fabs(p.z());
+
+template <class V>
+void permute_cube_face(int face, V &v) {
+  permute_cube_face(face, v[0], v[1], v[2]);
+}
+template <class V>
+void permute_cube_face_inverse(int face, V &v) {
+  permute_cube_face_inverse(face, v[0], v[1], v[2]);
+}
+
+/**
+ * @brief      Gets the cube facenum, 0-5; order: Z,X,-Y,-X,Y,-Z
+ *
+ * @param      p     { parameter_description }
+ *
+ * @tparam     V  { description }
+ *
+ * @return     The cube facenum.
+ */
+template <class V>
+uint64_t get_cube_facenum(V p) {
+  typedef typename V::Scalar Float;
+  Float const ax = fabs(p[0]), ay = fabs(p[1]), az = fabs(p[2]);
   uint64_t facenum = 0;
   if (ax >= ay && ax >= az)
-    facenum = (p.x() > 0) ? 4 : 2;
+    facenum = (p[0] > 0) ? 1 : 3;
   else if (ay >= az && ay >= ax)
-    facenum = (p.y() > 0) ? 1 : 3;
+    facenum = (p[1] > 0) ? 4 : 2;
   else if (az >= ax && az >= ay)
-    facenum = (p.z() > 0) ? 0 : 5;
+    facenum = (p[2] > 0) ? 0 : 5;
   return facenum;
+}
+
+/**
+ * @brief      compute quadsphere coords from *unit* vector
+ *
+ * @param[in]  p     { parameter_description }
+ * @param      x     { parameter_description }
+ * @param      y     { parameter_description }
+ *
+ * @tparam     V     Vector of 3 floats type
+ * @tparam     S     Scalar type
+ *
+ * @return     The coordinates.
+ */
+template <class V, class S>
+uint64_t get_quadsphere_coords(V p, S &x, S &y) {
+  uint64_t face = get_cube_facenum(p);
+  permute_cube_face_inverse(face, p);
+  sphere_to_cube_facenum0(p);
+  x = p[0];
+  y = p[1];
+  assert(fabs(p[2] - 1) < 0.0001);
+  return face;
+}
+
+/**
+ * @brief      Gets the point from quadsphere coordinates.
+ *
+ * @param[in]  face  The face
+ * @param[in]  x     { parameter_description }
+ * @param[in]  y     { parameter_description }
+ * @param      out   The out
+ *
+ * @tparam     V     { description }
+ * @tparam     S     { description }
+ * @tparam     Int   { description }
+ */
+template <class V, class S, class Int>
+V get_point_from_quadsphere_coords(Int face, S x, S y) {
+  V out;
+  out[0] = x;
+  out[1] = y;
+  out[2] = 1;
+  permute_cube_face(face, out);
+  cube_to_sphere(out);
+  return out;
 }
 
 // old usage from rosetta branch sheffler/scheme/master
@@ -150,30 +236,30 @@ uint64_t get_cube_facenum(Vec const &p) {
 //  uint64_t const nside = (ONE<<resl);
 //  double const x = 2.0*((double)index1+0.5)/(double)nside-1.0;
 //  double const y = 2.0*((double)index2+0.5)/(double)nside-1.0;
-//  Vec psphere(x,y,1.0);
+//  V psphere(x,y,1.0);
 //  cube_to_sphere(psphere);
-//  debug_assert_msg( -1.0 <= psphere.x() && psphere.x() <= 1.0, "chi out of
+//  debug_assert_msg( -1.0 <= psphere[0] && psphere[0] <= 1.0, "chi out of
 // bounds" );
-//  debug_assert_msg( -1.0 <= psphere.y() && psphere.y() <= 1.0, "psi out of
+//  debug_assert_msg( -1.0 <= psphere[1] && psphere[1] <= 1.0, "psi out of
 // bounds" );
-//  debug_assert_msg( -1.0 <= psphere.z() && psphere.z() <= 1.0, "psi out of
+//  debug_assert_msg( -1.0 <= psphere[2] && psphere[2] <= 1.0, "psi out of
 // bounds" );
-//     permute_cube_face_xyz(facenum,psphere.x(),psphere.y(),psphere.z());
+//     permute_cube_face(facenum,psphere[0],psphere[1],psphere[2]);
 //  managed_xform_ptr_->t = psphere;
 //  }
-// uint64_t NestQSph::get_index( Xform const & position, uint64_t resl ) const {
-//  Vec p = position.t.normalized();
+// uint64_t NestQSph::get_index( Xform position, uint64_t resl ) const {
+//  V p = position.t.normalized();
 //  uint64_t const facenum = get_cube_facenum(p);
 //  // cout << "get_index face " << facenum << endl;
 
 //  // cout << facenum << endl;
-//  inverse_permute_cube_face_xyz(facenum,p.x(),p.y(),p.z()); // move to
+//  inverse_permute_cube_face(facenum,p[0],p[1],p[2]); // move to
 // face 0
 //  sphere_to_cube_facenum0(p);
 
 //  uint64_t const nside = (ONE<<resl);
-//  double const delta0 = p.x()/2.0 + 0.5;
-//  double const delta1 = p.y()/2.0 + 0.5;
+//  double const delta0 = p[0]/2.0 + 0.5;
+//  double const delta1 = p[1]/2.0 + 0.5;
 //  uint64_t const index0unbound = delta0 * (double)nside;
 //  uint64_t const index1unbound = delta1 * (double)nside;
 //  uint64_t const index0 = std::min(index0unbound,nside-ONE);

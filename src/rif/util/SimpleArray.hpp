@@ -237,6 +237,13 @@ struct SimpleArray {
     for (int i = 0; i < N; ++i) n += D[i] * D[i];
     return n;
   }
+  template <class THAT>
+  bool isApprox(THAT const &that) const {
+    bool r = true;
+    static F eps = sqrt(NL::epsilon());
+    for (int i = 0; i < N; ++i) r &= abs(D[i] - that.D[i]) < eps;
+    return r;
+  }
   F norm() const { return std::sqrt(squaredNorm()); }
   void normalize() { *this /= norm(); }
   void fill(F v) {
@@ -418,6 +425,9 @@ SimpleArray<N, uint64_t> operator<(SimpleArray<N, F> const &a,
   for (int i = 0; i < N; ++i) r[i] = a[i] < b[i];
   return r;
 }
+
+template <int N, class F = double, bool init0 = false>
+using SimpleArrayLegacy = SimpleArray<N, F, init0>;
 }
 }
 

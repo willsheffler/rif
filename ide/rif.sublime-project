@@ -22,11 +22,6 @@
 			"file_regex": "^[ ]*File \"(...*?)\", line ([0-9]*)",
 		},
 		{
-			"name": "gtest_auto",
-			"shell_cmd": "cd $folder && python tools/build_and_run_gtest_auto.py $file 2>&1 | tee log/subl_build.log",
-			"file_regex": "^(..[^:]*):([0-9]+):?([0-9]+)?:? (.*)$",
-		},
-		{
 			"name": "build_docs",
 			"shell_cmd": "cd $folder/docs && make html 2>&1 | tee ../log/subl_build.log && google-chrome _build/html/index.html &> /dev/null"
 		},

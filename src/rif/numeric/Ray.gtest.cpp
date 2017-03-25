@@ -6,6 +6,9 @@ namespace rif {
 namespace numeric {
 namespace test_numeric_Ray {
 
+using V = V3<float>;
+using X = X3<float>;
+
 TEST(Ray, ray_basic_tests) {
   Ray<> r;
   ASSERT_FLOAT_EQ(r.direction.norm(), 1.0);

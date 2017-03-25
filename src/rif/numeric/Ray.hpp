@@ -15,6 +15,8 @@ namespace numeric {
  */
 template <class F = float>
 struct Ray {
+  using Scalar = F;
+  using V = V3<F>;
   V3<F> origin;
   V3<F> direction;
   Ray() : origin(0, 0, 0), direction(1, 0, 0) {}

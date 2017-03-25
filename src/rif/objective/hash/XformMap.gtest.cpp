@@ -152,7 +152,7 @@ TEST(XformMap, insert_sphere) {
        << (float)n_within / NSAMP2 << endl;
 
   ASSERT_LT((float)n_cart_fail / NSAMP2, 0.03);
-  ASSERT_LT((float)n_rot_fail / NSAMP2, 0.04);
+  ASSERT_LT((float)n_rot_fail / NSAMP2, 0.05);
   ASSERT_LT((float)n_both_fail / NSAMP2, 0.01);
   ASSERT_LT((float)n_lever_false_pos / n_without, 0.30);
   ASSERT_LT((float)n_lever_false_neg / n_within, 0.015);

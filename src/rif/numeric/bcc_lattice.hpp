@@ -9,31 +9,40 @@
 namespace rif {
 namespace numeric {
 
-template <int DIM, class Float = double, class Index = uint64_t>
+/**
+ * @brief      n-dimensional BCC lattice
+ *
+ * @tparam     DIM     { description }
+ * @tparam     _Float  { description }
+ * @detail     will hit lower bound but not upper... for example
+ *      if range is 0..1 and 2 cells, x values could be 0, 0.25, 0.5 and 0.75
+ * ((not 1.0!!))
+ */
+template <int DIM, class _Float = double, class _Index = uint64_t>
 struct BCC {
-  typedef util::SimpleArray<DIM, Index> Indices;
-  typedef util::SimpleArray<DIM, Float> Floats;
+  using Float = _Float;
+  using Index = _Index;
+  using Indices = util::SimpleArray<DIM, Index>;
+  using Floats = util::SimpleArray<DIM, Float>;
   BOOST_STATIC_ASSERT((DIM > 2));
 
   Indices nside_, nside_prefsum_;
   Floats lower_, width_, lower_cen_, half_width_;
 
-  bool operator!=(BCC<DIM, Float, Index> const &o) const {
-    return !(*this == o);
-  }
-  bool operator==(BCC<DIM, Float, Index> const &o) const {
+  bool operator!=(BCC<DIM, Float, Index> o) const { return !(*this == o); }
+  bool operator==(BCC<DIM, Float, Index> o) const {
     return nside_ == o.nside_ && lower_ == o.lower_ && width_ == o.width_;
   }
 
   BCC() {}
 
   template <class Sizes>
-  BCC(Sizes const &sizes, Floats lower = Floats(0), Floats upper = Floats(1)) {
+  BCC(Sizes sizes, Floats lower = Floats(0), Floats upper = Floats(1)) {
     init(sizes, lower, upper);
   }
 
   template <class Sizes>
-  void init(Sizes const &sizes, Floats lower, Floats upper) {
+  void init(Sizes sizes, Floats lower, Floats upper) {
     nside_ = sizes;
     lower_ = lower;
     for (size_t i = 0; i < DIM; ++i) nside_prefsum_[i] = nside_.prod(i);
@@ -50,7 +59,7 @@ struct BCC {
     return this->get_center(indices, odd);
   }
 
-  Floats get_center(Indices const &indices, bool const &odd) const {
+  Floats get_center(Indices indices, bool odd) const {
     return lower_cen_ + width_ * indices.template cast<Float>() +
            (odd ? half_width_ : 0);
   }
@@ -59,12 +68,12 @@ struct BCC {
     value = (value - lower_) / width_;
     Indices const indices = value.template cast<Index>();
     value = value - indices.template cast<Float>() - 0.5;
-    Indices const corner_indices = indices - (value < 0);
+    Indices const corner_indices = indices - (value < 0).template cast<Index>();
     odd = (0.25 * DIM) < fabs((value.sign() * value).sum());
     return odd ? corner_indices : indices;
   }
 
-  Index operator[](Floats const &value) const {
+  Index operator[](Floats value) const {
     bool odd;
     Indices indices = get_indices(value, odd);
     Index index = (nside_prefsum_ * indices).sum();
@@ -129,7 +138,7 @@ struct BCC {
 };
 
 template <int DIM, class Float, class Index>
-std::ostream &operator<<(std::ostream &out, BCC<DIM, Float, Index> const &bcc) {
+std::ostream &operator<<(std::ostream &out, BCC<DIM, Float, Index> bcc) {
   return out << "lb " << bcc.lower_ << " w " << bcc.width_;
 }
 
@@ -145,14 +154,12 @@ struct Cubic {
   Cubic() {}
 
   template <class Sizes>
-  Cubic(Sizes const &sizes, Floats lower = Floats(0),
-        Floats upper = Floats(1)) {
+  Cubic(Sizes sizes, Floats lower = Floats(0), Floats upper = Floats(1)) {
     init(sizes, lower, upper);
   }
 
   template <class Sizes>
-  void init(Sizes const &sizes, Floats lower = Floats(0),
-            Floats upper = Floats(1)) {
+  void init(Sizes sizes, Floats lower = Floats(0), Floats upper = Floats(1)) {
     nside_ = sizes;
     lower_ = lower;
     for (size_t i = 0; i < DIM; ++i) nside_prefsum_[i] = nside_.prod(i);
@@ -168,7 +175,7 @@ struct Cubic {
     return get_center(indices);
   }
 
-  Floats get_center(Indices const &indices) const {
+  Floats get_center(Indices indices) const {
     return lower_cen_ + width_ * indices.template cast<Float>();
   }
 
@@ -177,7 +184,7 @@ struct Cubic {
     return value.template cast<Index>();
   }
 
-  Index operator[](Floats const &value) const {
+  Index operator[](Floats value) const {
     Indices indices = get_indices(value);
     return (nside_prefsum_ * indices).sum();
   }

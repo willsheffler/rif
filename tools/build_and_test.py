@@ -4,7 +4,7 @@ from __future__ import print_function
 
 import sys
 import os
-from build_utils import build_and_test
+from build_utils import build_and_test, build_and_run_gtest_auto
 
 if __name__ == '__main__':
     print('== build_and_test.py start ==')
@@ -16,4 +16,7 @@ if __name__ == '__main__':
             with open('.ERROR', 'w') as out:
                 out.write(str(e))
     else:
-        build_and_test()
+        try:
+            build_and_run_gtest_auto()
+        except NotImplementedError:
+            build_and_test()

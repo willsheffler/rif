@@ -11,6 +11,7 @@
 #include "util/Timer.hpp"
 
 #include <Eigen/Geometry>
+#include <set>
 
 namespace rif {
 namespace numeric {
@@ -52,6 +53,30 @@ using std::endl;
 //  dis = dis / (double)NSAMP * 100;
 //  cout << dis << endl;
 // }
+
+TEST(bcc_lattice, bounds) {
+  BCC<3, float> bcc(2, 0, 1);
+  std::set<float> xs, ys, zs;
+  float mn = 9e9, mx = -9e9;
+  for (int i = 0; i < bcc.size(); ++i) {
+    auto xyz = bcc[i];
+    xs.insert(xyz[0]);
+    ys.insert(xyz[1]);
+    zs.insert(xyz[2]);
+    mn = std::min(mn, xyz[0]);
+    mx = std::max(mx, xyz[0]);
+  }
+  // for (auto x : xs) std::cout << x << ' ';
+  // std::cout << std::endl;
+  // for (auto y : ys) std::cout << y << ' ';
+  // std::cout << std::endl;
+  // for (auto z : zs) std::cout << z << ' ';
+  // std::cout << std::endl;
+  ASSERT_EQ(xs.size(), ys.size());
+  ASSERT_EQ(xs.size(), zs.size());
+  ASSERT_EQ(mn, 0.25);
+  ASSERT_EQ(mx, 1.00);
+}
 
 TEST(bcc_lattice, centers_map) {
   typedef util::SimpleArray<3, double> V;

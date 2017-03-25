@@ -1,3 +1,9 @@
 PYTHON BINDING STUFF:
 
 to add pybind submodules, see rif.pytest.cpp and example.pytest.cpp
+
+
+unit area hex radius = 0.621
+unit area square radius = sqrt(2)/2.0
+sr/hr = 1.13865826278027
+
