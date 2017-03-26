@@ -238,7 +238,7 @@ def build_and_test():
         args.extend('--ignore build_setup_py_Release'.split())
     for decoy in get_ignored_dirs(cfg):
         args += ['--ignore', decoy]
-    print('==================================================================================')
+    print('==========================================================================')
     sys.stdout.write('pytest ')
     for arg in args:
         if arg.startswith('-'):
@@ -247,8 +247,6 @@ def build_and_test():
     print()
     sys.argv[1:] = args
     assert not pytest.main()
-
-
 
 
 def make_gtest_auto_cpp(files, cmake_dir):
@@ -269,9 +267,7 @@ int main(int argc, char **argv) {
             out.write(code)
 
 
-
 def build_and_run_gtest_auto():
-
     try:
         cmake_dir = get_cmake_dir('temp', cfg='Release')
     except AssertionError:
@@ -281,7 +277,7 @@ def build_and_run_gtest_auto():
     files.extend(x.replace('.hpp', '.gtest.cpp') for x in sys.argv
                  if x.endswith('.hpp') and
                  os.path.exists(x.replace('.hpp', '.gtest.cpp')))
-    if len(files) + 1 is not len(sys.argv):
+    if not len(files) or len(files) + 1 is not len(sys.argv):
         raise NotImplementedError
     make_gtest_auto_cpp(files, cmake_dir)
     assert not os.system('cd ' + cmake_dir + ' && ninja gtest_auto')

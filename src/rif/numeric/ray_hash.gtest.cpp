@@ -37,7 +37,7 @@ TEST(ray_hash, ray_ray_hash_bins_of_centers) {
 }
 
 TEST(ray_hash, ray_hash_bins_of_centers) {
-  RayBins<> rh(0.25, 1.0, 1.0);
+  RayBins<> rh(0.33, 1.0, 1.0);
   double nerr = 0;
   for (int key = 0; key < rh.size(); ++key) {
     auto cen = rh.get_center(key);
@@ -58,7 +58,7 @@ TEST(ray_hash, ray_ray_hash_cart_ori_spacing) {
 }
 
 TEST(ray_hash, ray_hash_cart_ori_spacing) {
-  RayBins<> rh(0.25, 1.0, 0.3);
+  RayBins<> rh(0.4, 1.0, 0.5);
   A2<float> nbr_sp = brute_maxmin_nbr(rh, 1);
   std::cout << "rh.size " << rh.size() << ", cart " << rh.size_cart()
             << ", qsph " << rh.size_qsph()
