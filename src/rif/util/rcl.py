@@ -24,7 +24,12 @@ try:
     ROSETTA_DB = pyrosetta._rosetta_database_from_env()
     HAVE_PYROSETTA = True
 except ImportError as e:
+    import mock
     HAVE_PYROSETTA = False
+    pyrosetta = mock.MagicMock()
+    rosetta = mock.MagicMock()
+
+
 
 
 class Error(Exception):

@@ -105,6 +105,7 @@ def add_to_pypath(newpath):
     if 'PYTHONPATH' in os.environ:
         current = os.environ['PYTHONPATH']
     os.environ['PYTHONPATH'] = ':'.join(os.path.abspath(p) for p in newpath)
+    print('== added to PYTHONPATH:', os.environ['PYTHONPATH'], '==')
     if current:
         os.environ['PYTHONPATH'] += ':' + current
 
@@ -203,7 +204,13 @@ def build_and_test():
     print("== build_and_test ==")
     cfg = 'Release'
     testfiles = [x for x in sys.argv[1:] if x.endswith('.py') and
-                 os.path.basename(x).startswith('test')]
+                 os.path.basename(x).startswith('test') or x.endswith('test.py')]
+    testfiles.extend(x.replace('.py', '_test.py') for x in sys.argv[1:]
+                     if x.endswith('.py') and
+                     os.path.exists(x.replace('.py', '_test.py')))
+    testfiles.extend(x.replace('.pybind.cpp', '_test.py') for x in sys.argv[1:]
+                     if x.endswith('.pybind.cpp') and
+                     os.path.exists(x.replace('.pybind.cpp', '_test.py')))
     pybindfiles = [x for x in sys.argv[1:] if x.endswith('.pybind.cpp')]
     gtests = get_gtests(sys.argv[1:])
     print('calling rebuild_fast')
@@ -216,7 +223,7 @@ def build_and_test():
     # TODO both here and in docs, this gets messed
     #      up when rif is actually installed
     libdir = os.path.abspath(get_cmake_dir('lib', cfg))
-    print('adding to python path:', libdir)
+    print('== adding to python path:', libdir, '==')
     assert os.path.exists(libdir)
     # need to use sys.path for this process
     sys.path.append(libdir)
@@ -230,7 +237,8 @@ def build_and_test():
     if not (testfiles or gtests):
         args = ['.']
     if not no_xdist:
-        args.extend('--cov=./src -n{}'.format(ncpu).split())
+        # args.extend('--cov=./src -n{}'.format(ncpu).split())
+        args.extend('-n{}'.format(ncpu).split())
     if gtests:
         args.extend(['-k', ' or '.join(gtests)])
     args.extend('--ignore build'.split())

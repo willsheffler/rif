@@ -11,4 +11,5 @@ pytest-sugar
 pytest-xdist
 sphinx_rtd_theme
 enum34
+mock
 -e external/hacked_packages/pytest-cpp-0.4

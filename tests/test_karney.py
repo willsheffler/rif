@@ -1,13 +1,8 @@
 import sys
 import gzip
-from rif.test.test_numpy import np_array_info
 import numpy as np
 import rif.sampling.orientations as ori
 import pytest
-
-
-def test_numpy_binding():
-    np_array_info()
 
 
 def test_read_karney_orientation_data():
@@ -56,10 +51,9 @@ def test_karney_by_covrad():
     assert ori.karney_name_by_radius(0) == 'c48u312831'
 
 
-# @pytest.mark.skip('not implemented')
 # def test_filter_by_axis():
-    # q, w = ori.quaternion_set_with_covering_radius_degrees(100)
-    # print q.shape
-    # q_filt = ori.filter_quaternion_set_axis_within(
-    # q, np.array((1, 0, 0)), 90.0)
-    # assert len(q_filt) < len(q)
+#     q, w = ori.quaternion_set_with_covering_radius_degrees(100)
+#     print q.shape
+#     q_filt = ori.filter_quaternion_set_axis_within(
+#     q, np.array((1, 0, 0)), 90.0)
+#     assert len(q_filt) < len(q)

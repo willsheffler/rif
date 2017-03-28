@@ -114,10 +114,10 @@ function(build_gtests)
     add_library(rif_data ${LIB_CPP})
 
     file(GLOB_RECURSE TEST_CPP "src/rif/[0-9a-zA-Z_]*.gtest.cpp")
-    add_executable(gtest_all src/rif/test/gtest_all.cpp ${TEST_CPP})
+    add_executable(gtest_all src/test/gtest_all.cpp ${TEST_CPP})
     target_link_libraries(gtest_all rif_data ${extra_libs})
 
-    add_executable(gtest_wip src/rif/test/gtest_wip.cpp)
+    add_executable(gtest_wip src/test/gtest_wip.cpp)
     target_link_libraries(gtest_wip rif_data ${extra_libs})
 
     if(NOT EXISTS ${CMAKE_CURRENT_BINARY_DIR}/gtest_auto.gen.cpp)
