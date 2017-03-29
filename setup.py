@@ -9,6 +9,8 @@ import multiprocessing
 from glob import glob
 from collections import defaultdict
 
+import numpy
+
 from setuptools import setup, Extension, find_packages
 from setuptools.command.build_ext import build_ext
 from distutils.version import LooseVersion
@@ -174,6 +176,7 @@ class CMakeBuild(build_ext):
         env = os.environ.copy()
         env['CXXFLAGS'] = '{} -DVERSION_INFO=\\"{}\\"'.format(
             env.get('CXXFLAGS', ''), self.distribution.get_version())
+        env['CXXFLAGS'] += ' -I' + numpy.get_include()
         if in_conda():
             condadir = os.path.dirname(sys.executable)[:-4]
             env['CXXFLAGS'] = env['CXXFLAGS'] + ' -I' + condadir + '/include'
