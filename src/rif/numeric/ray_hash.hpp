@@ -1,11 +1,11 @@
 #ifndef INCLUDED_numeric_ray_hash_HH
 #define INCLUDED_numeric_ray_hash_HH
 
+#include <eigen_types.hpp>
 #include <iostream>
 #include <numeric/Ray.hpp>
 #include <numeric/bcc_lattice.hpp>
 #include <numeric/cube_to_sphere.hpp>
-#include <numeric/types.hpp>
 #include <util/SimpleArray.hpp>
 
 namespace rif {

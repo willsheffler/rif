@@ -29,3 +29,4 @@ rif.egg-info
 log/*.log
 .ERROR
 ._*
+*.log

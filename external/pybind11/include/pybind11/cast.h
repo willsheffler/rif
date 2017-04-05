@@ -25,6 +25,7 @@ inline PyTypeObject *make_default_metaclass();
 struct type_info {
     PyTypeObject *type;
     size_t type_size;
+    void *(*operator_new)(size_t);
     void (*init_holder)(PyObject *, const void *);
     void (*dealloc)(PyObject *);
     std::vector<PyObject *(*)(PyObject *, PyTypeObject *)> implicit_conversions;
@@ -469,6 +470,7 @@ public:
     public: \
         static PYBIND11_DESCR name() { return type_descr(py_name); } \
         static handle cast(const type *src, return_value_policy policy, handle parent) { \
+            if (!src) return none().release(); \
             return cast(*src, policy, parent); \
         } \
         operator type*() { return &value; } \
@@ -641,19 +643,18 @@ struct type_caster<std::basic_string<CharT, Traits, Allocator>, enable_if_t<is_s
     static_assert(!std::is_same<CharT, wchar_t>::value || sizeof(CharT) == 2 || sizeof(CharT) == 4,
             "Unsupported wchar_t size != 2/4");
     static constexpr size_t UTF_N = 8 * sizeof(CharT);
-    static constexpr const char *encoding = UTF_N == 8 ? "utf8" : UTF_N == 16 ? "utf16" : "utf32";
 
     using StringType = std::basic_string<CharT, Traits, Allocator>;
 
     bool load(handle src, bool) {
-#if PY_VERSION_MAJOR < 3
+#if PY_MAJOR_VERSION < 3
         object temp;
 #endif
         handle load_src = src;
         if (!src) {
             return false;
         } else if (!PyUnicode_Check(load_src.ptr())) {
-#if PY_VERSION_MAJOR >= 3
+#if PY_MAJOR_VERSION >= 3
             return false;
             // The below is a guaranteed failure in Python 3 when PyUnicode_Check returns false
 #else
@@ -666,7 +667,7 @@ struct type_caster<std::basic_string<CharT, Traits, Allocator>, enable_if_t<is_s
         }
 
         object utfNbytes = reinterpret_steal<object>(PyUnicode_AsEncodedString(
-            load_src.ptr(), encoding, nullptr));
+            load_src.ptr(), UTF_N == 8 ? "utf-8" : UTF_N == 16 ? "utf-16" : "utf-32", nullptr));
         if (!utfNbytes) { PyErr_Clear(); return false; }
 
         const CharT *buffer = reinterpret_cast<const CharT *>(PYBIND11_BYTES_AS_STRING(utfNbytes.ptr()));
@@ -679,12 +680,28 @@ struct type_caster<std::basic_string<CharT, Traits, Allocator>, enable_if_t<is_s
     static handle cast(const StringType &src, return_value_policy /* policy */, handle /* parent */) {
         const char *buffer = reinterpret_cast<const char *>(src.c_str());
         ssize_t nbytes = ssize_t(src.size() * sizeof(CharT));
-        handle s = PyUnicode_Decode(buffer, nbytes, encoding, nullptr);
+        handle s = decode_utfN(buffer, nbytes);
         if (!s) throw error_already_set();
         return s;
     }
 
     PYBIND11_TYPE_CASTER(StringType, _(PYBIND11_STRING_NAME));
+
+private:
+    static handle decode_utfN(const char *buffer, ssize_t nbytes) {
+#if !defined(PYPY_VERSION)
+        return
+            UTF_N == 8  ? PyUnicode_DecodeUTF8(buffer, nbytes, nullptr) :
+            UTF_N == 16 ? PyUnicode_DecodeUTF16(buffer, nbytes, nullptr, nullptr) :
+                          PyUnicode_DecodeUTF32(buffer, nbytes, nullptr, nullptr);
+#else
+        // PyPy seems to have multiple problems related to PyUnicode_UTF*: the UTF8 version
+        // sometimes segfaults for unknown reasons, while the UTF16 and 32 versions require a
+        // non-const char * arguments, which is also a nuissance, so bypass the whole thing by just
+        // passing the encoding as a string value, which works properly:
+        return PyUnicode_Decode(buffer, nbytes, UTF_N == 8 ? "utf-8" : UTF_N == 16 ? "utf-16" : "utf-32", nullptr);
+#endif
+    }
 };
 
 // Type caster for C-style strings.  We basically use a std::string type caster, but also add the
@@ -902,6 +919,9 @@ public:
             value = nullptr;
             return true;
         }
+
+        if (typeinfo->default_holder)
+            throw cast_error("Unable to load a custom holder type from a default-holder instance");
 
         if (typeinfo->simple_type) { /* Case 1: no multiple inheritance etc. involved */
             /* Check if we can safely perform a reinterpret-style cast */
@@ -1363,14 +1383,14 @@ public:
         return load_impl_sequence(call, indices{});
     }
 
-    template <typename Return, typename Func>
+    template <typename Return, typename Guard, typename Func>
     enable_if_t<!std::is_void<Return>::value, Return> call(Func &&f) {
-        return call_impl<Return>(std::forward<Func>(f), indices{});
+        return call_impl<Return>(std::forward<Func>(f), indices{}, Guard{});
     }
 
-    template <typename Return, typename Func>
+    template <typename Return, typename Guard, typename Func>
     enable_if_t<std::is_void<Return>::value, void_type> call(Func &&f) {
-        call_impl<Return>(std::forward<Func>(f), indices{});
+        call_impl<Return>(std::forward<Func>(f), indices{}, Guard{});
         return void_type();
     }
 
@@ -1386,8 +1406,8 @@ private:
         return true;
     }
 
-    template <typename Return, typename Func, size_t... Is>
-    Return call_impl(Func &&f, index_sequence<Is...>) {
+    template <typename Return, typename Func, size_t... Is, typename Guard>
+    Return call_impl(Func &&f, index_sequence<Is...>, Guard &&) {
         return std::forward<Func>(f)(cast_op<Args>(std::get<Is>(value))...);
     }
 

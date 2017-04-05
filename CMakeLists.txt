@@ -51,6 +51,7 @@ endif()
 
 include_directories("external/include")
 include_directories("src/rif")
+include_directories("src")
 include_directories("/usr/local/include")
 include_directories("/opt/local/include")
 link_directories("/usr/local/lib")
@@ -108,8 +109,7 @@ function(build_gtests)
 
     # shitty "data" files to compile faster TODO: remove these
     list(APPEND LIB_CPP src/rif/rosetta/score/EtableParams_init.lib.cpp
-                        src/rif/rosetta/atype_map.lib.cpp
-                        src/rif/chem/ligand_factory.lib.cpp)
+                        src/rif/rosetta/atype_map.lib.cpp)
     set_source_files_properties(${LIB_CPP} PROPERTIES COMPILE_FLAGS -O0)
     add_library(rif_data ${LIB_CPP})
 

@@ -359,9 +359,9 @@ def generate_doxygen_xml(app):
         subprocess.call(['doxygen', '--version'])
         retcode = subprocess.call(['doxygen'])
         if retcode < 0:
-            sys.stderr.write("doxygen error code: {}\n".format(-retcode))
+            sys.stderr.write(("doxygen error code: {} " + os.linesep).format(-retcode))
     except OSError as e:
-        sys.stderr.write("doxygen execution failed: {}\n".format(e))
+        sys.stderr.write(("doxygen execution failed: {} " + os.linesep).format(e))
 
 
 def setup(app):

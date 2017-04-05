@@ -57,6 +57,8 @@ inline PyTypeObject *make_static_property_type() {
     if (PyType_Ready(type) < 0)
         pybind11_fail("make_static_property_type(): failure in PyType_Ready()!");
 
+    setattr((PyObject *) type, "__module__", str("pybind11_builtins"));
+
     return type;
 }
 
@@ -170,6 +172,8 @@ inline PyTypeObject* make_default_metaclass() {
     if (PyType_Ready(type) < 0)
         pybind11_fail("make_default_metaclass(): failure in PyType_Ready()!");
 
+    setattr((PyObject *) type, "__module__", str("pybind11_builtins"));
+
     return type;
 }
 
@@ -179,7 +183,7 @@ extern "C" inline PyObject *pybind11_object_new(PyTypeObject *type, PyObject *, 
     PyObject *self = type->tp_alloc(type, 0);
     auto instance = (instance_essentials<void> *) self;
     auto tinfo = get_type_info(type);
-    instance->value = ::operator new(tinfo->type_size);
+    instance->value = tinfo->operator_new(tinfo->type_size);
     instance->owned = true;
     instance->holder_constructed = false;
     get_internals().registered_instances.emplace(instance->value, self);
@@ -269,6 +273,8 @@ inline PyObject *make_object_base_type(size_t instance_size) {
 
     if (PyType_Ready(type) < 0)
         pybind11_fail("PyType_Ready failed in make_object_base_type():" + error_string());
+
+    setattr((PyObject *) type, "__module__", str("pybind11_builtins"));
 
     assert(!PyType_HasFeature(type, Py_TPFLAGS_HAVE_GC));
     return (PyObject *) heap_type;

@@ -28,6 +28,33 @@
 #  endif
 #endif
 
+// Compiler version assertions
+#if defined(__INTEL_COMPILER)
+#  if __INTEL_COMPILER < 1500
+#    error pybind11 requires Intel C++ compiler v15 or newer
+#  endif
+#elif defined(__clang__) && !defined(__apple_build_version__)
+#  if __clang_major__ < 3 || (__clang_major__ == 3 && __clang_minor__ < 3)
+#    error pybind11 requires clang 3.3 or newer
+#  endif
+#elif defined(__clang__)
+// Apple changes clang version macros to its Xcode version; the first Xcode release based on
+// (upstream) clang 3.3 was Xcode 5:
+#  if __clang_major__ < 5
+#    error pybind11 requires Xcode/clang 5.0 or newer
+#  endif
+#elif defined(__GNUG__)
+#  if __GNUC__ < 4 || (__GNUC__ == 4 && __GNUC_MINOR__ < 8)
+#    error pybind11 requires gcc 4.8 or newer
+#  endif
+#elif defined(_MSC_VER)
+// Pybind hits various compiler bugs in 2015u2 and earlier, and also makes use of some stl features
+// (e.g. std::negation) added in 2015u3:
+#  if _MSC_FULL_VER < 190024210
+#    error pybind11 requires MSVC 2015 update 3 or newer
+#  endif
+#endif
+
 #if !defined(PYBIND11_EXPORT)
 #  if defined(WIN32) || defined(_WIN32)
 #    define PYBIND11_EXPORT __declspec(dllexport)
@@ -53,7 +80,7 @@
 #endif
 
 #define PYBIND11_VERSION_MAJOR 2
-#define PYBIND11_VERSION_MINOR 1
+#define PYBIND11_VERSION_MINOR 2
 #define PYBIND11_VERSION_PATCH dev0
 
 /// Include Python header, disable linking to pythonX_d.lib on Windows in debug mode
@@ -396,16 +423,15 @@ template<size_t ...S> struct make_index_sequence_impl <0, S...> { typedef index_
 template<size_t N> using make_index_sequence = typename make_index_sequence_impl<N>::type;
 #endif
 
-#if defined(PYBIND11_CPP17) || defined(_MSC_VER)
-using std::bool_constant;
-using std::negation;
-#else
+/// Backports of std::bool_constant and std::negation to accomodate older compilers
 template <bool B> using bool_constant = std::integral_constant<bool, B>;
-template <class T> using negation = bool_constant<!T::value>;
-#endif
+template <typename T> struct negation : bool_constant<!T::value> { };
+
+template <typename...> struct void_t_impl { using type = void; };
+template <typename... Ts> using void_t = typename void_t_impl<Ts...>::type;
 
 /// Compile-time all/any/none of that check the boolean value of all template types
-#ifdef PYBIND11_CPP17
+#ifdef __cpp_fold_expressions
 template <class... Ts> using all_of = bool_constant<(Ts::value && ...)>;
 template <class... Ts> using any_of = bool_constant<(Ts::value || ...)>;
 #elif !defined(_MSC_VER)
@@ -448,9 +474,13 @@ struct void_type { };
 template <typename...> struct type_list { };
 
 /// Compile-time integer sum
+#ifdef __cpp_fold_expressions
+template <typename... Ts> constexpr size_t constexpr_sum(Ts... ns) { return (0 + ... + size_t{ns}); }
+#else
 constexpr size_t constexpr_sum() { return 0; }
 template <typename T, typename... Ts>
 constexpr size_t constexpr_sum(T n, Ts... ns) { return size_t{n} + constexpr_sum(ns...); }
+#endif
 
 NAMESPACE_BEGIN(constexpr_impl)
 /// Implementation details for constexpr functions
@@ -472,20 +502,27 @@ constexpr int constexpr_first() { return constexpr_impl::first(0, Predicate<Ts>:
 template <template<typename> class Predicate, typename... Ts>
 constexpr int constexpr_last() { return constexpr_impl::last(0, -1, Predicate<Ts>::value...); }
 
-// Extracts the first type from the template parameter pack matching the predicate, or Default if none match.
-template <template<class> class Predicate, class Default, class... Ts> struct first_of;
-template <template<class> class Predicate, class Default> struct first_of<Predicate, Default> {
-    using type = Default;
+/// Return the Nth element from the parameter pack
+template <size_t N, typename T, typename... Ts>
+struct pack_element { using type = typename pack_element<N - 1, Ts...>::type; };
+template <typename T, typename... Ts>
+struct pack_element<0, T, Ts...> { using type = T; };
+
+/// Return the one and only type which matches the predicate, or Default if none match.
+/// If more than one type matches the predicate, fail at compile-time.
+template <template<typename> class Predicate, typename Default, typename... Ts>
+struct exactly_one {
+    static constexpr auto found = constexpr_sum(Predicate<Ts>::value...);
+    static_assert(found <= 1, "Found more than one type matching the predicate");
+
+    static constexpr auto index = found ? constexpr_first<Predicate, Ts...>() : 0;
+    using type = conditional_t<found, typename pack_element<index, Ts...>::type, Default>;
 };
-template <template<class> class Predicate, class Default, class T, class... Ts>
-struct first_of<Predicate, Default, T, Ts...> {
-    using type = typename std::conditional<
-        Predicate<T>::value,
-        T,
-        typename first_of<Predicate, Default, Ts...>::type
-    >::type;
-};
-template <template<class> class Predicate, class Default, class... T> using first_of_t = typename first_of<Predicate, Default, T...>::type;
+template <template<typename> class P, typename Default>
+struct exactly_one<P, Default> { using type = Default; };
+
+template <template<typename> class Predicate, typename Default, typename... Ts>
+using exactly_one_t = typename exactly_one<Predicate, Default, Ts...>::type;
 
 /// Defer the evaluation of type T until types Us are instantiated
 template <typename T, typename... /*Us*/> struct deferred_type { using type = T; };
@@ -506,9 +543,15 @@ using is_template_base_of = decltype(is_template_base_of_impl<Base>::check((remo
 struct is_template_base_of : decltype(is_template_base_of_impl<Base>::check((remove_cv_t<T>*)nullptr)) { };
 #endif
 
+/// Check if T is an instantiation of the template `Class`. For example:
+/// `is_instantiation<shared_ptr, T>` is true if `T == shared_ptr<U>` where U can be anything.
+template <template<typename...> class Class, typename T>
+struct is_instantiation : std::false_type { };
+template <template<typename...> class Class, typename... Us>
+struct is_instantiation<Class, Class<Us...>> : std::true_type { };
+
 /// Check if T is std::shared_ptr<U> where U can be anything
-template <typename T> struct is_shared_ptr : std::false_type { };
-template <typename U> struct is_shared_ptr<std::shared_ptr<U>> : std::true_type { };
+template <typename T> using is_shared_ptr = is_instantiation<std::shared_ptr, T>;
 
 /// Ignore that a variable is unused in compiler warnings
 inline void ignore_unused(const int *) { }
@@ -567,6 +610,9 @@ public:
     /// Clear the held Python error state (the C++ `what()` message remains intact)
     void clear() { restore(); PyErr_Clear(); }
 
+    /// Check if the trapped exception matches a given Python exception class
+    bool matches(PyObject *ex) const { return PyErr_GivenExceptionMatches(ex, type); }
+
 private:
     PyObject *type, *value, *trace;
 };
@@ -623,6 +669,24 @@ template <typename T> struct format_descriptor<T, detail::enable_if_t<detail::is
 template <typename T> constexpr const char format_descriptor<
     T, detail::enable_if_t<detail::is_fmt_numeric<T>::value>>::value[2];
 
+NAMESPACE_BEGIN(detail)
+
+template <typename T, typename SFINAE = void> struct compare_buffer_info {
+    static bool compare(const buffer_info& b) {
+        return b.format == format_descriptor<T>::format() && b.itemsize == sizeof(T);
+    }
+};
+
+template <typename T> struct compare_buffer_info<T, detail::enable_if_t<std::is_integral<T>::value>> {
+    static bool compare(const buffer_info& b) {
+        return b.itemsize == sizeof(T) && (b.format == format_descriptor<T>::value ||
+            ((sizeof(T) == sizeof(long)) && b.format == (std::is_unsigned<T>::value ? "L" : "l")) ||
+            ((sizeof(T) == sizeof(size_t)) && b.format == (std::is_unsigned<T>::value ? "N" : "n")));
+    }
+};
+
+NAMESPACE_END(detail)
+
 /// RAII wrapper that temporarily clears any Python error state
 struct error_scope {
     PyObject *type, *value, *trace;
@@ -633,8 +697,8 @@ struct error_scope {
 /// Dummy destructor wrapper that can be used to expose classes with a private destructor
 struct nodelete { template <typename T> void operator()(T*) { } };
 
-// overload_cast requires variable templates: C++14 or MSVC 2015 Update 2
-#if defined(PYBIND11_CPP14) || _MSC_FULL_VER >= 190023918
+// overload_cast requires variable templates: C++14 or MSVC
+#if defined(PYBIND11_CPP14) || defined(_MSC_VER)
 #define PYBIND11_OVERLOAD_CAST 1
 
 NAMESPACE_BEGIN(detail)

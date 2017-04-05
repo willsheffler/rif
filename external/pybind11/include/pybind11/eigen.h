@@ -79,11 +79,17 @@ template <bool EigenRowMajor> struct EigenConformable {
                EigenRowMajor ? cstride : rstride /* inner stride */)
         {}
     // Vector type:
-    EigenConformable(EigenIndex r, EigenIndex c, EigenIndex stride) : EigenConformable(r, c, r == 1 ? c*stride : stride, c == 1 ? r : r*stride) {}
+    EigenConformable(EigenIndex r, EigenIndex c, EigenIndex stride)
+        : EigenConformable(r, c, r == 1 ? c*stride : stride, c == 1 ? r : r*stride) {}
+
     template <typename props> bool stride_compatible() const {
+        // To have compatible strides, we need (on both dimensions) one of fully dynamic strides,
+        // matching strides, or a dimension size of 1 (in which case the stride value is irrelevant)
         return
-            (props::inner_stride == Eigen::Dynamic || props::inner_stride == stride.inner()) &&
-            (props::outer_stride == Eigen::Dynamic || props::outer_stride == stride.outer());
+            (props::inner_stride == Eigen::Dynamic || props::inner_stride == stride.inner() ||
+                (EigenRowMajor ? cols : rows) == 1) &&
+            (props::outer_stride == Eigen::Dynamic || props::outer_stride == stride.outer() ||
+                (EigenRowMajor ? rows : cols) == 1);
     }
     operator bool() const { return conformable; }
 };
@@ -229,7 +235,7 @@ handle eigen_ref_array(Type &src, handle parent = none()) {
 // not the Type of the pointer given is const.
 template <typename props, typename Type, typename = enable_if_t<is_eigen_dense_plain<Type>::value>>
 handle eigen_encapsulate(Type *src) {
-    capsule base(src, [](PyObject *o) { delete static_cast<Type *>(PyCapsule_GetPointer(o, nullptr)); });
+    capsule base(src, [](void *o) { delete static_cast<Type *>(o); });
     return eigen_ref_array<props>(*src, base);
 }
 
@@ -435,7 +441,7 @@ public:
             fits = props::conformable(copy);
             if (!fits || !fits.template stride_compatible<props>())
                 return false;
-            copy_or_ref = copy;
+            copy_or_ref = std::move(copy);
         }
 
         ref.reset();

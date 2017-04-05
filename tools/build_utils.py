@@ -213,6 +213,8 @@ def build_and_test():
                      os.path.exists(x.replace('.pybind.cpp', '_test.py')))
     pybindfiles = [x for x in sys.argv[1:] if x.endswith('.pybind.cpp')]
     gtests = get_gtests(sys.argv[1:])
+    apps = [x for x in sys.argv[1:] if '/rif/apps/' in x]
+    tests = [x for x in sys.argv[1:] if '/rif/apps/' not in x]
     print('calling rebuild_fast')
     no_xdist = len(testfiles) or len(gtests)
     no_xdist |= os.system('egrep "#.*cpp_files" pytest.ini') == 0
@@ -232,33 +234,41 @@ def build_and_test():
     assert libdir in sys.path
     assert libdir in os.environ['PYTHONPATH'].split(':')
 
-    ncpu = get_ncpu()
-    args = list(testfiles)
-    if not (testfiles or gtests):
-        args = ['.']
-    if not no_xdist:
-        # args.extend('--cov=./src -n{}'.format(ncpu).split())
-        args.extend('-n{}'.format(ncpu).split())
-    if gtests:
-        args.extend(['-k', ' or '.join(gtests)])
-    args.extend('--ignore build'.split())
-    if testfiles and not gtests:
-        args.extend('--ignore build_setup_py_Release'.split())
-    for decoy in get_ignored_dirs(cfg):
-        args += ['--ignore', decoy]
-    print('==========================================================================')
-    sys.stdout.write('pytest ')
-    for arg in args:
-        if arg.startswith('-'):
-            sys.stdout.write('\n   ')
-        sys.stdout.write(' ' + arg)
-    print()
-    sys.argv[1:] = args
-    assert not pytest.main()
+    if apps:
+        for app in apps:
+            sys.stdout.write('===== running:' + app + '=====' + os.linesep)
+            sys.stdout.flush()
+            os.system(sys.executable + ' ' + app)
+            sys.stdout.write('===== done: ' + app + ' ======' + os.linesep)
+            sys.stdout.flush()
+    if tests or not apps:
+        ncpu = get_ncpu()
+        args = list(testfiles)
+        if not (testfiles or gtests):
+            args = ['.']
+        if not no_xdist:
+            # args.extend('--cov=./src -n{}'.format(ncpu).split())
+            args.extend('-n{}'.format(ncpu).split())
+        if gtests:
+            args.extend(['-k', ' or '.join(gtests)])
+        args.extend('--ignore build'.split())
+        if testfiles and not gtests:
+            args.extend('--ignore build_setup_py_Release'.split())
+        for decoy in get_ignored_dirs(cfg):
+            args += ['--ignore', decoy]
+        print('==========================================================================')
+        sys.stdout.write('pytest ')
+        for arg in args:
+            if arg.startswith('-'):
+                sys.stdout.write(os.linesep + '   ')
+            sys.stdout.write(' ' + arg)
+        print()
+        sys.argv[1:] = args
+        assert not pytest.main()
 
 
 def make_gtest_auto_cpp(files, cmake_dir):
-    includes = "\n".join("#include <%s>" % f for f in files)
+    includes = os.linesep.join("#include <%s>" % f for f in files)
     code = """#include "test/gtest_util.hpp"
 %s
 int main(int argc, char **argv) {

@@ -51,9 +51,14 @@ public:
     }
 
     /// Construct a cpp_function from a lambda function (possibly with internal state)
-    template <typename Func, typename... Extra,
-             typename FuncType = typename detail::remove_class<decltype(&std::remove_reference<Func>::type::operator())>::type>
+    template <typename Func, typename... Extra, typename = detail::enable_if_t<
+        detail::satisfies_none_of<
+            typename std::remove_reference<Func>::type,
+            std::is_function, std::is_pointer, std::is_member_pointer
+        >::value>
+    >
     cpp_function(Func &&f, const Extra&... extra) {
+        using FuncType = typename detail::remove_class<decltype(&std::remove_reference<Func>::type::operator())>::type;
         initialize(std::forward<Func>(f),
                    (FuncType *) nullptr, extra...);
     }
@@ -117,7 +122,7 @@ protected:
         >;
 
         static_assert(detail::expected_num_args<Extra...>(sizeof...(Args), cast_in::has_args, cast_in::has_kwargs),
-                      "The number of named arguments does not match the function signature");
+                      "The number of argument annotations does not match the number of function arguments");
 
         /* Dispatch code which converts function arguments and performs the actual function call */
         rec->impl = [](detail::function_call &call) -> handle {
@@ -138,8 +143,11 @@ protected:
             /* Override policy for rvalues -- usually to enforce rvp::move on an rvalue */
             const auto policy = detail::return_value_policy_override<Return>::policy(call.func.policy);
 
+            /* Function scope guard -- defaults to the compile-to-nothing `void_type` */
+            using Guard = detail::extract_guard_t<Extra...>;
+
             /* Perform the function call */
-            handle result = cast_out::cast(args_converter.template call<Return>(cap->f),
+            handle result = cast_out::cast(args_converter.template call<Return, Guard>(cap->f),
                                            policy, call.parent);
 
             /* Invoke call policy post-call hook */
@@ -289,8 +297,8 @@ protected:
             rec->def->ml_meth = reinterpret_cast<PyCFunction>(*dispatcher);
             rec->def->ml_flags = METH_VARARGS | METH_KEYWORDS;
 
-            capsule rec_capsule(rec, [](PyObject *o) {
-                destruct((detail::function_record *) PyCapsule_GetPointer(o, nullptr));
+            capsule rec_capsule(rec, [](void *ptr) {
+                destruct((detail::function_record *) ptr);
             });
 
             object scope_module;
@@ -326,8 +334,10 @@ protected:
             signatures += "Overloaded function.\n\n";
         }
         // Then specific overload signatures
+        bool first_user_def = true;
         for (auto it = chain_start; it != nullptr; it = it->next) {
             if (options::show_function_signatures()) {
+                if (index > 0) signatures += "\n";
                 if (chain)
                     signatures += std::to_string(++index) + ". ";
                 signatures += rec->name;
@@ -335,12 +345,16 @@ protected:
                 signatures += "\n";
             }
             if (it->doc && strlen(it->doc) > 0 && options::show_user_defined_docstrings()) {
+                // If we're appending another docstring, and aren't printing function signatures, we
+                // need to append a newline first:
+                if (!options::show_function_signatures()) {
+                    if (first_user_def) first_user_def = false;
+                    else signatures += "\n";
+                }
                 if (options::show_function_signatures()) signatures += "\n";
                 signatures += it->doc;
                 if (options::show_function_signatures()) signatures += "\n";
             }
-            if (it->next)
-                signatures += "\n";
         }
 
         /* Install docstring */
@@ -760,13 +774,12 @@ public:
     //
     // overwrite should almost always be false: attempting to overwrite objects that pybind11 has
     // established will, in most cases, break things.
-    PYBIND11_NOINLINE void add_object(const char *name, object &obj, bool overwrite = false) {
+    PYBIND11_NOINLINE void add_object(const char *name, handle obj, bool overwrite = false) {
         if (!overwrite && hasattr(*this, name))
             pybind11_fail("Error during initialization: multiple incompatible definitions with name \"" +
                     std::string(name) + "\"");
 
-        obj.inc_ref(); // PyModule_AddObject() steals a reference
-        PyModule_AddObject(ptr(), name, obj.ptr());
+        PyModule_AddObject(ptr(), name, obj.inc_ref().ptr() /* steals a reference */);
     }
 };
 
@@ -792,6 +805,7 @@ protected:
         auto *tinfo = new detail::type_info();
         tinfo->type = (PyTypeObject *) m_ptr;
         tinfo->type_size = rec.type_size;
+        tinfo->operator_new = rec.operator_new;
         tinfo->init_holder = rec.init_holder;
         tinfo->dealloc = rec.dealloc;
 
@@ -849,6 +863,18 @@ protected:
     }
 };
 
+/// Set the pointer to operator new if it exists. The cast is needed because it can be overloaded.
+template <typename T, typename = void_t<decltype(static_cast<void *(*)(size_t)>(T::operator new))>>
+void set_operator_new(type_record *r) { r->operator_new = &T::operator new; }
+
+template <typename> void set_operator_new(...) { }
+
+/// Call class-specific delete if it exists or global otherwise. Can also be an overload set.
+template <typename T, typename = void_t<decltype(static_cast<void (*)(void *)>(T::operator delete))>>
+void call_operator_delete(T *p) { T::operator delete(p); }
+
+inline void call_operator_delete(void *p) { ::operator delete(p); }
+
 NAMESPACE_END(detail)
 
 template <typename type_, typename... options>
@@ -862,9 +888,9 @@ class class_ : public detail::generic_type {
 
 public:
     using type = type_;
-    using type_alias = detail::first_of_t<is_subtype, void, options...>;
+    using type_alias = detail::exactly_one_t<is_subtype, void, options...>;
     constexpr static bool has_alias = !std::is_void<type_alias>::value;
-    using holder_type = detail::first_of_t<is_holder, std::unique_ptr<type>, options...>;
+    using holder_type = detail::exactly_one_t<is_holder, std::unique_ptr<type>, options...>;
     using instance_type = detail::instance<type, holder_type>;
 
     static_assert(detail::all_of<is_valid_class_option<options>...>::value,
@@ -874,27 +900,39 @@ public:
 
     template <typename... Extra>
     class_(handle scope, const char *name, const Extra &... extra) {
-        detail::type_record record;
+        using namespace detail;
+
+        // MI can only be specified via class_ template options, not constructor parameters
+        static_assert(
+            none_of<is_pyobject<Extra>...>::value || // no base class arguments, or:
+            (   constexpr_sum(is_pyobject<Extra>::value...) == 1 && // Exactly one base
+                constexpr_sum(is_base<options>::value...)   == 0 && // no template option bases
+                none_of<std::is_same<multiple_inheritance, Extra>...>::value), // no multiple_inheritance attr
+            "Error: multiple inheritance bases must be specified via class_ template options");
+
+        type_record record;
         record.scope = scope;
         record.name = name;
         record.type = &typeid(type);
-        record.type_size = sizeof(detail::conditional_t<has_alias, type_alias, type>);
+        record.type_size = sizeof(conditional_t<has_alias, type_alias, type>);
         record.instance_size = sizeof(instance_type);
         record.init_holder = init_holder;
         record.dealloc = dealloc;
         record.default_holder = std::is_same<holder_type, std::unique_ptr<type>>::value;
+
+        set_operator_new<type>(&record);
 
         /* Register base classes specified via template arguments to class_, if any */
         bool unused[] = { (add_base<options>(record), false)..., false };
         (void) unused;
 
         /* Process optional arguments, if any */
-        detail::process_attributes<Extra...>::init(extra..., &record);
+        process_attributes<Extra...>::init(extra..., &record);
 
-        detail::generic_type::initialize(record);
+        generic_type::initialize(record);
 
         if (has_alias) {
-            auto &instances = pybind11::detail::get_internals().registered_types_cpp;
+            auto &instances = get_internals().registered_types_cpp;
             instances[std::type_index(typeid(type_alias))] = instances[std::type_index(typeid(type))];
         }
     }
@@ -918,7 +956,9 @@ public:
     }
 
     template <typename Func, typename... Extra> class_ &
-    def_static(const char *name_, Func f, const Extra&... extra) {
+    def_static(const char *name_, Func &&f, const Extra&... extra) {
+        static_assert(!std::is_member_function_pointer<Func>::value,
+                "def_static(...) called with a non-static member function pointer");
         cpp_function cf(std::forward<Func>(f), name(name_), scope(*this),
                         sibling(getattr(*this, name_, none())), extra...);
         attr(cf.name()) = cf;
@@ -1102,7 +1142,7 @@ private:
         if (inst->holder_constructed)
             inst->holder.~holder_type();
         else if (inst->owned)
-            ::operator delete(inst->value);
+            detail::call_operator_delete(inst->value);
     }
 
     static detail::function_record *get_function_record(handle h) {
@@ -1116,26 +1156,30 @@ private:
 template <typename Type> class enum_ : public class_<Type> {
 public:
     using class_<Type>::def;
+    using class_<Type>::def_property_readonly_static;
     using Scalar = typename std::underlying_type<Type>::type;
-    template <typename T> using arithmetic_tag = std::is_same<T, arithmetic>;
 
     template <typename... Extra>
     enum_(const handle &scope, const char *name, const Extra&... extra)
-      : class_<Type>(scope, name, extra...), m_parent(scope) {
+      : class_<Type>(scope, name, extra...), m_entries(), m_parent(scope) {
 
-        constexpr bool is_arithmetic =
-            !std::is_same<detail::first_of_t<arithmetic_tag, void, Extra...>,
-                          void>::value;
+        constexpr bool is_arithmetic = detail::any_of<std::is_same<arithmetic, Extra>...>::value;
 
-        auto entries = new std::unordered_map<Scalar, const char *>();
-        def("__repr__", [name, entries](Type value) -> std::string {
-            auto it = entries->find((Scalar) value);
-            return std::string(name) + "." +
-                ((it == entries->end()) ? std::string("???")
-                                        : std::string(it->second));
+        auto m_entries_ptr = m_entries.inc_ref().ptr();
+        def("__repr__", [name, m_entries_ptr](Type value) -> pybind11::str {
+            for (const auto &kv : reinterpret_borrow<dict>(m_entries_ptr)) {
+                if (pybind11::cast<Type>(kv.second) == value)
+                    return pybind11::str("{}.{}").format(name, kv.first);
+            }
+            return pybind11::str("{}.???").format(name);
         });
+        def_property_readonly_static("__members__", [m_entries_ptr](object /* self */) {
+            dict m;
+            for (const auto &kv : reinterpret_borrow<dict>(m_entries_ptr))
+                m[kv.first] = kv.second;
+            return m;
+        }, return_value_policy::copy);
         def("__init__", [](Type& value, Scalar i) { value = (Type)i; });
-        def("__init__", [](Type& value, Scalar i) { new (&value) Type((Type) i); });
         def("__int__", [](Type value) { return (Scalar) value; });
         def("__eq__", [](const Type &value, Type *value2) { return value2 && value == *value2; });
         def("__ne__", [](const Type &value, Type *value2) { return !value2 || value != *value2; });
@@ -1172,26 +1216,25 @@ public:
         // Pickling and unpickling -- needed for use with the 'multiprocessing' module
         def("__getstate__", [](const Type &value) { return pybind11::make_tuple((Scalar) value); });
         def("__setstate__", [](Type &p, tuple t) { new (&p) Type((Type) t[0].cast<Scalar>()); });
-        m_entries = entries;
     }
 
     /// Export enumeration entries into the parent scope
-    enum_ &export_values() {
-        for (auto item : reinterpret_borrow<dict>(((PyTypeObject *) this->m_ptr)->tp_dict)) {
-            if (isinstance(item.second, this->m_ptr))
-                m_parent.attr(item.first) = item.second;
-        }
+    enum_& export_values() {
+        for (const auto &kv : m_entries)
+            m_parent.attr(kv.first) = kv.second;
         return *this;
     }
 
     /// Add an enumeration entry
     enum_& value(char const* name, Type value) {
-        this->attr(name) = pybind11::cast(value, return_value_policy::copy);
-        (*m_entries)[(Scalar) value] = name;
+        auto v = pybind11::cast(value, return_value_policy::copy);
+        this->attr(name) = v;
+        m_entries[pybind11::str(name)] = v;
         return *this;
     }
+
 private:
-    std::unordered_map<Scalar, const char *> *m_entries;
+    dict m_entries;
     handle m_parent;
 };
 
@@ -1272,6 +1315,7 @@ NAMESPACE_END(detail)
 template <typename... Args> detail::init<Args...> init() { return detail::init<Args...>(); }
 template <typename... Args> detail::init_alias<Args...> init_alias() { return detail::init_alias<Args...>(); }
 
+/// Makes a python iterator from a first and past-the-end C++ InputIterator.
 template <return_value_policy Policy = return_value_policy::reference_internal,
           typename Iterator,
           typename Sentinel,
@@ -1297,6 +1341,8 @@ iterator make_iterator(Iterator first, Sentinel last, Extra &&... extra) {
     return (iterator) cast(state { first, last, true });
 }
 
+/// Makes an python iterator over the keys (`.first`) of a iterator over pairs from a
+/// first and past-the-end InputIterator.
 template <return_value_policy Policy = return_value_policy::reference_internal,
           typename Iterator,
           typename Sentinel,
@@ -1322,11 +1368,15 @@ iterator make_key_iterator(Iterator first, Sentinel last, Extra &&... extra) {
     return (iterator) cast(state { first, last, true });
 }
 
+/// Makes an iterator over values of an stl container or other container supporting
+/// `std::begin()`/`std::end()`
 template <return_value_policy Policy = return_value_policy::reference_internal,
           typename Type, typename... Extra> iterator make_iterator(Type &value, Extra&&... extra) {
     return make_iterator<Policy>(std::begin(value), std::end(value), extra...);
 }
 
+/// Makes an iterator over the keys (`.first`) of a stl map-like container supporting
+/// `std::begin()`/`std::end()`
 template <return_value_policy Policy = return_value_policy::reference_internal,
           typename Type, typename... Extra> iterator make_key_iterator(Type &value, Extra&&... extra) {
     return make_key_iterator<Policy>(std::begin(value), std::end(value), extra...);

@@ -30,8 +30,6 @@ except ImportError as e:
     rosetta = mock.MagicMock()
 
 
-
-
 class Error(Exception):
     """Rosetta Compatibility Exception"""
 
@@ -117,9 +115,9 @@ def add_residue_types_to_rosettaDB(newfiles, comment="## RIF added restypes",
                 update_needed.append(newfile)
     if update_needed:
         with open(mypath, 'a') as f:
-            f.write("\n\n" + comment + '\n')
+            f.write(os.linesep * 2 + comment + os.linesep)
             for newline in update_needed:
-                f.write(newline + '\n')
+                f.write(newline + os.linesep)
         print('modified rosettaDB:', mypath)
     else:
         print('nochange rosettaDB:', mypath)

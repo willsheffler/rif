@@ -9,7 +9,7 @@ namespace test {
 using std::cout;
 using std::endl;
 
-TEST(IO, dum_pdb_atom) {
+TEST(IO, dump_pdb_atom) {
   AtomData a;
   std::ostringstream oss1, oss2;
   dump_pdb_atom(oss1, 0, 0, 0, a);

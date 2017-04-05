@@ -66,10 +66,12 @@ using std::endl;
 // ATOM  C3  CH1   X   0.06
 
 TEST(RosettaField, test_faster_atombin_calc) {
-  int NITER = 100000;
-
+  int NITER = 1000;
+#ifdef SCHEME_BENCHMARK
+  NITER = 100000;
+#endif
   typedef util::SimpleArray<3, float> F3;
-  typedef actor::Atom<F3> Atom;
+  typedef actor::AtomWithData<F3> Atom;
   std::vector<Atom> atoms;
   F3 delta;
   for (delta[0] = -18; delta[0] <= 18; delta[0] += 6.0) {
@@ -109,13 +111,13 @@ TEST(RosettaField, test_faster_atombin_calc) {
 }
 
 TEST(RosettaField, DISABLED_test_btn) {
-  int NITER = 50;
+  int NITER = 10;
 #ifdef SCHEME_BENCHMARK
   NITER *= 100;
 #endif
 
   typedef util::SimpleArray<3, float> F3;
-  typedef actor::Atom<F3> Atom;
+  typedef actor::AtomWithData<F3> Atom;
   std::vector<Atom> atoms;
   atoms.push_back(Atom(F3(0.696, -12.422, 3.375), 7));
   atoms.push_back(Atom(F3(0.576, -9.666, 5.336), 17));

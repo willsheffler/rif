@@ -99,7 +99,6 @@ namespace impl {
 template <class _Atom>
 struct Rotamer {
   typedef _Atom Atom;
-  // typedef struct { typename Atom::Position position; int32_t type; } AtomPT;
   std::string resname_;
   size_t n_proton_chi_;
   std::vector<float> chi_;

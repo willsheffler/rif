@@ -69,9 +69,10 @@ def gen__init__(srcdir):
                 ppath = '.' + p.replace(srcdir, '').replace('/', '.')
                 if ppath == '.':
                     ppath = ''
-                out.write('"""\ndocstring for rif' + ppath + '\n"""\n\n')
+                out.write(os.linesep + '"""docstring for rif' +
+                          ppath + os.linesep + '"""' + os.linesep * 2)
                 if p in rif_cpp:
-                    out.write('from rif_cpp' + ppath + ' import *\n')
+                    out.write('from rif_cpp' + ppath + ' import *' + os.linesep)
 
 
 def get_pybind_modules(srcpath):
@@ -79,7 +80,7 @@ def get_pybind_modules(srcpath):
     cppmodules = OrderedDict()
     for root, _, files in os.walk(srcpath):
         for basename in (x for x in files if x.endswith('.pybind.cpp')):
-            pybindfile = root + '/' + basename
+            pybindfile = root.rstrip('/') + '/' + basename
             print("    found pybind file", pybindfile)
             try:
                 # todo: replace this with python
@@ -143,12 +144,12 @@ def shitty_make_code(cppmodules):
         code2 += ('    py::module ' + path.replace('/', '__') +
                   ' = rif.def_submodule("' +
                   '").def_submodule("'.join(path.split('/')) +
-                  '");\n')
-    code2 += '\n'
+                  '");' + os.linesep)
+    code2 += os.linesep
     for func, path in list(cppmodules.items()):
-        code1 += 'void RIFLIB_PYBIND_' + func + '(py::module & m);\n'
+        code1 += 'void RIFLIB_PYBIND_' + func + '(py::module & m);' + os.linesep
         code2 += '    RIFLIB_PYBIND_' + func + \
-            '(' + path.replace('/', '__') + ');\n'
+            '(' + path.replace('/', '__') + ');' + os.linesep
     return code1, code2
 
 
@@ -166,9 +167,9 @@ def mkfile_if_necessary(path, content):
 def make_py_stencils(cppmodules, srcdir):
     """makes __init__.py files where necersary"""
     mkdir_if_necessary(srcdir)
-    mkfile_if_necessary(srcdir + "/__init__.py", 'from rif_cpp import *\n' +
-                        'import rif_cpp\n' +
-                        '__version__ = rif_cpp.__version__\n')
+    mkfile_if_necessary(srcdir + "/__init__.py", 'from rif_cpp import *' + os.linesep +
+                        'import rif_cpp' + os.linesep +
+                        '__version__ = rif_cpp.__version__' + os.linesep)
     directories = set()
     for path in set(cppmodules.values()):
         for nprefix in range(1, len(path.split('/'))):
@@ -179,7 +180,7 @@ def make_py_stencils(cppmodules, srcdir):
         if not os.path.exists(srcdir + path + '/__init__.py'):
             pyfile = srcdir + path + ".py"
             mkfile_if_necessary(pyfile, 'from rif_cpp.' +
-                                path.replace('/', '.') + ' import *\n')
+                                path.replace('/', '.') + ' import *' + os.linesep)
 
 
 def main(template_fname, srcdir, dstdir):

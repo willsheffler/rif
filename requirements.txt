@@ -5,6 +5,7 @@ hypothesis
 jinja2
 numpy
 pandas
+xarray
 pytest
 pytest-cov
 pytest-sugar

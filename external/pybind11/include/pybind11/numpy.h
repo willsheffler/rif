@@ -35,6 +35,9 @@
 static_assert(sizeof(size_t) == sizeof(Py_intptr_t), "size_t != Py_intptr_t");
 
 NAMESPACE_BEGIN(pybind11)
+
+class array; // Forward declaration
+
 NAMESPACE_BEGIN(detail)
 template <typename type, typename SFINAE = void> struct npy_format_descriptor;
 
@@ -231,6 +234,118 @@ template <typename T> using is_pod_struct = all_of<
     std::is_pod<T>, // since we're accessing directly in memory we need a POD type
     satisfies_none_of<T, std::is_reference, std::is_array, is_std_array, std::is_arithmetic, is_complex, std::is_enum>
 >;
+
+template <size_t Dim = 0, typename Strides> size_t byte_offset_unsafe(const Strides &) { return 0; }
+template <size_t Dim = 0, typename Strides, typename... Ix>
+size_t byte_offset_unsafe(const Strides &strides, size_t i, Ix... index) {
+    return i * strides[Dim] + byte_offset_unsafe<Dim + 1>(strides, index...);
+}
+
+/** Proxy class providing unsafe, unchecked const access to array data.  This is constructed through
+ * the `unchecked<T, N>()` method of `array` or the `unchecked<N>()` method of `array_t<T>`.  `Dims`
+ * will be -1 for dimensions determined at runtime.
+ */
+template <typename T, ssize_t Dims>
+class unchecked_reference {
+protected:
+    static constexpr bool Dynamic = Dims < 0;
+    const unsigned char *data_;
+    // Storing the shape & strides in local variables (i.e. these arrays) allows the compiler to
+    // make large performance gains on big, nested loops, but requires compile-time dimensions
+    conditional_t<Dynamic, const size_t *, std::array<size_t, (size_t) Dims>>
+        shape_, strides_;
+    const size_t dims_;
+
+    friend class pybind11::array;
+    // Constructor for compile-time dimensions:
+    template <bool Dyn = Dynamic>
+    unchecked_reference(const void *data, const size_t *shape, const size_t *strides, enable_if_t<!Dyn, size_t>)
+    : data_{reinterpret_cast<const unsigned char *>(data)}, dims_{Dims} {
+        for (size_t i = 0; i < dims_; i++) {
+            shape_[i] = shape[i];
+            strides_[i] = strides[i];
+        }
+    }
+    // Constructor for runtime dimensions:
+    template <bool Dyn = Dynamic>
+    unchecked_reference(const void *data, const size_t *shape, const size_t *strides, enable_if_t<Dyn, size_t> dims)
+    : data_{reinterpret_cast<const unsigned char *>(data)}, shape_{shape}, strides_{strides}, dims_{dims} {}
+
+public:
+    /** Unchecked const reference access to data at the given indices.  For a compile-time known
+     * number of dimensions, this requires the correct number of arguments; for run-time
+     * dimensionality, this is not checked (and so is up to the caller to use safely).
+     */
+    template <typename... Ix> const T &operator()(Ix... index) const {
+        static_assert(sizeof...(Ix) == Dims || Dynamic,
+                "Invalid number of indices for unchecked array reference");
+        return *reinterpret_cast<const T *>(data_ + byte_offset_unsafe(strides_, size_t(index)...));
+    }
+    /** Unchecked const reference access to data; this operator only participates if the reference
+     * is to a 1-dimensional array.  When present, this is exactly equivalent to `obj(index)`.
+     */
+    template <size_t D = Dims, typename = enable_if_t<D == 1 || Dynamic>>
+    const T &operator[](size_t index) const { return operator()(index); }
+
+    /// Pointer access to the data at the given indices.
+    template <typename... Ix> const T *data(Ix... ix) const { return &operator()(size_t(ix)...); }
+
+    /// Returns the item size, i.e. sizeof(T)
+    constexpr static size_t itemsize() { return sizeof(T); }
+
+    /// Returns the shape (i.e. size) of dimension `dim`
+    size_t shape(size_t dim) const { return shape_[dim]; }
+
+    /// Returns the number of dimensions of the array
+    size_t ndim() const { return dims_; }
+
+    /// Returns the total number of elements in the referenced array, i.e. the product of the shapes
+    template <bool Dyn = Dynamic>
+    enable_if_t<!Dyn, size_t> size() const {
+        return std::accumulate(shape_.begin(), shape_.end(), (size_t) 1, std::multiplies<size_t>());
+    }
+    template <bool Dyn = Dynamic>
+    enable_if_t<Dyn, size_t> size() const {
+        return std::accumulate(shape_, shape_ + ndim(), (size_t) 1, std::multiplies<size_t>());
+    }
+
+    /// Returns the total number of bytes used by the referenced data.  Note that the actual span in
+    /// memory may be larger if the referenced array has non-contiguous strides (e.g. for a slice).
+    size_t nbytes() const {
+        return size() * itemsize();
+    }
+};
+
+template <typename T, ssize_t Dims>
+class unchecked_mutable_reference : public unchecked_reference<T, Dims> {
+    friend class pybind11::array;
+    using ConstBase = unchecked_reference<T, Dims>;
+    using ConstBase::ConstBase;
+    using ConstBase::Dynamic;
+public:
+    /// Mutable, unchecked access to data at the given indices.
+    template <typename... Ix> T& operator()(Ix... index) {
+        static_assert(sizeof...(Ix) == Dims || Dynamic,
+                "Invalid number of indices for unchecked array reference");
+        return const_cast<T &>(ConstBase::operator()(index...));
+    }
+    /** Mutable, unchecked access data at the given index; this operator only participates if the
+     * reference is to a 1-dimensional array (or has runtime dimensions).  When present, this is
+     * exactly equivalent to `obj(index)`.
+     */
+    template <size_t D = Dims, typename = enable_if_t<D == 1 || Dynamic>>
+    T &operator[](size_t index) { return operator()(index); }
+
+    /// Mutable pointer access to the data at the given indices.
+    template <typename... Ix> T *mutable_data(Ix... ix) { return &operator()(size_t(ix)...); }
+};
+
+template <typename T, ssize_t Dim>
+struct type_caster<unchecked_reference<T, Dim>> {
+    static_assert(Dim == 0 && Dim > 0 /* always fail */, "unchecked array proxy object is not castable");
+};
+template <typename T, ssize_t Dim>
+struct type_caster<unchecked_mutable_reference<T, Dim>> : type_caster<unchecked_reference<T, Dim>> {};
 
 NAMESPACE_END(detail)
 
@@ -500,6 +615,31 @@ public:
         return offset_at(index...) / itemsize();
     }
 
+    /** Returns a proxy object that provides access to the array's data without bounds or
+     * dimensionality checking.  Will throw if the array is missing the `writeable` flag.  Use with
+     * care: the array must not be destroyed or reshaped for the duration of the returned object,
+     * and the caller must take care not to access invalid dimensions or dimension indices.
+     */
+    template <typename T, ssize_t Dims = -1> detail::unchecked_mutable_reference<T, Dims> mutable_unchecked() {
+        if (Dims >= 0 && ndim() != (size_t) Dims)
+            throw std::domain_error("array has incorrect number of dimensions: " + std::to_string(ndim()) +
+                    "; expected " + std::to_string(Dims));
+        return detail::unchecked_mutable_reference<T, Dims>(mutable_data(), shape(), strides(), ndim());
+    }
+
+    /** Returns a proxy object that provides const access to the array's data without bounds or
+     * dimensionality checking.  Unlike `mutable_unchecked()`, this does not require that the
+     * underlying array have the `writable` flag.  Use with care: the array must not be destroyed or
+     * reshaped for the duration of the returned object, and the caller must take care not to access
+     * invalid dimensions or dimension indices.
+     */
+    template <typename T, ssize_t Dims = -1> detail::unchecked_reference<T, Dims> unchecked() const {
+        if (Dims >= 0 && ndim() != (size_t) Dims)
+            throw std::domain_error("array has incorrect number of dimensions: " + std::to_string(ndim()) +
+                    "; expected " + std::to_string(Dims));
+        return detail::unchecked_reference<T, Dims>(data(), shape(), strides(), ndim());
+    }
+
     /// Return a new view with all of the dimensions of length 1 removed
     array squeeze() {
         auto& api = detail::npy_api::get();
@@ -525,14 +665,8 @@ protected:
 
     template<typename... Ix> size_t byte_offset(Ix... index) const {
         check_dimensions(index...);
-        return byte_offset_unsafe(index...);
+        return detail::byte_offset_unsafe(strides(), size_t(index)...);
     }
-
-    template<size_t dim = 0, typename... Ix> size_t byte_offset_unsafe(size_t i, Ix... index) const {
-        return i * strides()[dim] + byte_offset_unsafe<dim + 1>(index...);
-    }
-
-    template<size_t dim = 0> size_t byte_offset_unsafe() const { return 0; }
 
     void check_writeable() const {
         if (!writeable())
@@ -577,17 +711,19 @@ protected:
 
 template <typename T, int ExtraFlags = array::forcecast> class array_t : public array {
 public:
+    using value_type = T;
+
     array_t() : array(0, static_cast<const T *>(nullptr)) {}
-    array_t(handle h, borrowed_t) : array(h, borrowed) { }
-    array_t(handle h, stolen_t) : array(h, stolen) { }
+    array_t(handle h, borrowed_t) : array(h, borrowed_t{}) { }
+    array_t(handle h, stolen_t) : array(h, stolen_t{}) { }
 
     PYBIND11_DEPRECATED("Use array_t<T>::ensure() instead")
-    array_t(handle h, bool is_borrowed) : array(raw_array_t(h.ptr()), stolen) {
+    array_t(handle h, bool is_borrowed) : array(raw_array_t(h.ptr()), stolen_t{}) {
         if (!m_ptr) PyErr_Clear();
         if (!is_borrowed) Py_XDECREF(h.ptr());
     }
 
-    array_t(const object &o) : array(raw_array_t(o.ptr()), stolen) {
+    array_t(const object &o) : array(raw_array_t(o.ptr()), stolen_t{}) {
         if (!m_ptr) throw error_already_set();
     }
 
@@ -633,6 +769,25 @@ public:
         if (sizeof...(index) != ndim())
             fail_dim_check(sizeof...(index), "index dimension mismatch");
         return *(static_cast<T*>(array::mutable_data()) + byte_offset(size_t(index)...) / itemsize());
+    }
+
+    /** Returns a proxy object that provides access to the array's data without bounds or
+     * dimensionality checking.  Will throw if the array is missing the `writeable` flag.  Use with
+     * care: the array must not be destroyed or reshaped for the duration of the returned object,
+     * and the caller must take care not to access invalid dimensions or dimension indices.
+     */
+    template <ssize_t Dims = -1> detail::unchecked_mutable_reference<T, Dims> mutable_unchecked() {
+        return array::mutable_unchecked<T, Dims>();
+    }
+
+    /** Returns a proxy object that provides const access to the array's data without bounds or
+     * dimensionality checking.  Unlike `unchecked()`, this does not require that the underlying
+     * array have the `writable` flag.  Use with care: the array must not be destroyed or reshaped
+     * for the duration of the returned object, and the caller must take care not to access invalid
+     * dimensions or dimension indices.
+     */
+    template <ssize_t Dims = -1> detail::unchecked_reference<T, Dims> unchecked() const {
+        return array::unchecked<T, Dims>();
     }
 
     /// Ensure that the argument is a NumPy array of the correct dtype (and if not, try to convert
@@ -688,7 +843,9 @@ template <typename T, int ExtraFlags>
 struct pyobject_caster<array_t<T, ExtraFlags>> {
     using type = array_t<T, ExtraFlags>;
 
-    bool load(handle src, bool /* convert */) {
+    bool load(handle src, bool convert) {
+        if (!convert && !type::check_(src))
+            return false;
         value = type::ensure(src);
         return static_cast<bool>(value);
     }
@@ -697,6 +854,13 @@ struct pyobject_caster<array_t<T, ExtraFlags>> {
         return src.inc_ref();
     }
     PYBIND11_TYPE_CASTER(type, handle_type_name<type>::name());
+};
+
+template <typename T>
+struct compare_buffer_info<T, detail::enable_if_t<detail::is_pod_struct<T>::value>> {
+    static bool compare(const buffer_info& b) {
+        return npy_api::get().PyArray_EquivTypes_(dtype::of<T>().ptr(), dtype(b).ptr());
+    }
 };
 
 template <typename T> struct npy_format_descriptor<T, enable_if_t<satisfies_any_of<T, std::is_arithmetic, is_complex>::value>> {
@@ -731,7 +895,7 @@ public:
     template <typename T2 = T, enable_if_t<is_complex<T2>::value, int> = 0>
     static PYBIND11_DESCR name() {
         return _<std::is_same<typename T2::value_type, float>::value || std::is_same<typename T2::value_type, double>::value>(
-                _("complex") + _<sizeof(T2::value_type)*16>(), _("longcomplex"));
+                _("complex") + _<sizeof(typename T2::value_type)*16>(), _("longcomplex"));
     }
 };
 
@@ -820,7 +984,7 @@ inline PYBIND11_NOINLINE void register_structured_dtype(
 template <typename T, typename SFINAE> struct npy_format_descriptor {
     static_assert(is_pod_struct<T>::value, "Attempt to use a non-POD or unimplemented POD type as a numpy dtype");
 
-    static PYBIND11_DESCR name() { return _("struct"); }
+    static PYBIND11_DESCR name() { return make_caster<T>::name(); }
 
     static pybind11::dtype dtype() {
         return reinterpret_borrow<pybind11::dtype>(dtype_ptr());
@@ -1041,87 +1205,146 @@ private:
     std::array<common_iter, N> m_common_iterator;
 };
 
+enum class broadcast_trivial { non_trivial, c_trivial, f_trivial };
+
+// Populates the shape and number of dimensions for the set of buffers.  Returns a broadcast_trivial
+// enum value indicating whether the broadcast is "trivial"--that is, has each buffer being either a
+// singleton or a full-size, C-contiguous (`c_trivial`) or Fortran-contiguous (`f_trivial`) storage
+// buffer; returns `non_trivial` otherwise.
 template <size_t N>
-bool broadcast(const std::array<buffer_info, N>& buffers, size_t& ndim, std::vector<size_t>& shape) {
+broadcast_trivial broadcast(const std::array<buffer_info, N> &buffers, size_t &ndim, std::vector<size_t> &shape) {
     ndim = std::accumulate(buffers.begin(), buffers.end(), size_t(0), [](size_t res, const buffer_info& buf) {
         return std::max(res, buf.ndim);
     });
 
-    shape = std::vector<size_t>(ndim, 1);
-    bool trivial_broadcast = true;
+    shape.clear();
+    shape.resize(ndim, 1);
+
+    // Figure out the output size, and make sure all input arrays conform (i.e. are either size 1 or
+    // the full size).
     for (size_t i = 0; i < N; ++i) {
         auto res_iter = shape.rbegin();
-        bool i_trivial_broadcast = (buffers[i].size == 1) || (buffers[i].ndim == ndim);
-        for (auto shape_iter = buffers[i].shape.rbegin();
-             shape_iter != buffers[i].shape.rend(); ++shape_iter, ++res_iter) {
+        auto end = buffers[i].shape.rend();
+        for (auto shape_iter = buffers[i].shape.rbegin(); shape_iter != end; ++shape_iter, ++res_iter) {
+            const auto &dim_size_in = *shape_iter;
+            auto &dim_size_out = *res_iter;
 
-            if (*res_iter == 1)
-                *res_iter = *shape_iter;
-            else if ((*shape_iter != 1) && (*res_iter != *shape_iter))
+            // Each input dimension can either be 1 or `n`, but `n` values must match across buffers
+            if (dim_size_out == 1)
+                dim_size_out = dim_size_in;
+            else if (dim_size_in != 1 && dim_size_in != dim_size_out)
                 pybind11_fail("pybind11::vectorize: incompatible size/dimension of inputs!");
-
-            i_trivial_broadcast = i_trivial_broadcast && (*res_iter == *shape_iter);
         }
-        trivial_broadcast = trivial_broadcast && i_trivial_broadcast;
     }
-    return trivial_broadcast;
+
+    bool trivial_broadcast_c = true;
+    bool trivial_broadcast_f = true;
+    for (size_t i = 0; i < N && (trivial_broadcast_c || trivial_broadcast_f); ++i) {
+        if (buffers[i].size == 1)
+            continue;
+
+        // Require the same number of dimensions:
+        if (buffers[i].ndim != ndim)
+            return broadcast_trivial::non_trivial;
+
+        // Require all dimensions be full-size:
+        if (!std::equal(buffers[i].shape.cbegin(), buffers[i].shape.cend(), shape.cbegin()))
+            return broadcast_trivial::non_trivial;
+
+        // Check for C contiguity (but only if previous inputs were also C contiguous)
+        if (trivial_broadcast_c) {
+            size_t expect_stride = buffers[i].itemsize;
+            auto end = buffers[i].shape.crend();
+            for (auto shape_iter = buffers[i].shape.crbegin(), stride_iter = buffers[i].strides.crbegin();
+                    trivial_broadcast_c && shape_iter != end; ++shape_iter, ++stride_iter) {
+                if (expect_stride == *stride_iter)
+                    expect_stride *= *shape_iter;
+                else
+                    trivial_broadcast_c = false;
+            }
+        }
+
+        // Check for Fortran contiguity (if previous inputs were also F contiguous)
+        if (trivial_broadcast_f) {
+            size_t expect_stride = buffers[i].itemsize;
+            auto end = buffers[i].shape.cend();
+            for (auto shape_iter = buffers[i].shape.cbegin(), stride_iter = buffers[i].strides.cbegin();
+                    trivial_broadcast_f && shape_iter != end; ++shape_iter, ++stride_iter) {
+                if (expect_stride == *stride_iter)
+                    expect_stride *= *shape_iter;
+                else
+                    trivial_broadcast_f = false;
+            }
+        }
+    }
+
+    return
+        trivial_broadcast_c ? broadcast_trivial::c_trivial :
+        trivial_broadcast_f ? broadcast_trivial::f_trivial :
+        broadcast_trivial::non_trivial;
 }
 
 template <typename Func, typename Return, typename... Args>
 struct vectorize_helper {
     typename std::remove_reference<Func>::type f;
+    static constexpr size_t N = sizeof...(Args);
 
     template <typename T>
     explicit vectorize_helper(T&&f) : f(std::forward<T>(f)) { }
 
-    object operator()(array_t<Args, array::c_style | array::forcecast>... args) {
-        return run(args..., make_index_sequence<sizeof...(Args)>());
+    object operator()(array_t<Args, array::forcecast>... args) {
+        return run(args..., make_index_sequence<N>());
     }
 
-    template <size_t ... Index> object run(array_t<Args, array::c_style | array::forcecast>&... args, index_sequence<Index...> index) {
+    template <size_t ... Index> object run(array_t<Args, array::forcecast>&... args, index_sequence<Index...> index) {
         /* Request buffers from all parameters */
-        const size_t N = sizeof...(Args);
-
         std::array<buffer_info, N> buffers {{ args.request()... }};
 
         /* Determine dimensions parameters of output array */
         size_t ndim = 0;
         std::vector<size_t> shape(0);
-        bool trivial_broadcast = broadcast(buffers, ndim, shape);
+        auto trivial = broadcast(buffers, ndim, shape);
 
         size_t size = 1;
         std::vector<size_t> strides(ndim);
         if (ndim > 0) {
-            strides[ndim-1] = sizeof(Return);
-            for (size_t i = ndim - 1; i > 0; --i) {
-                strides[i - 1] = strides[i] * shape[i];
-                size *= shape[i];
+            if (trivial == broadcast_trivial::f_trivial) {
+                strides[0] = sizeof(Return);
+                for (size_t i = 1; i < ndim; ++i) {
+                    strides[i] = strides[i - 1] * shape[i - 1];
+                    size *= shape[i - 1];
+                }
+                size *= shape[ndim - 1];
             }
-            size *= shape[0];
+            else {
+                strides[ndim-1] = sizeof(Return);
+                for (size_t i = ndim - 1; i > 0; --i) {
+                    strides[i - 1] = strides[i] * shape[i];
+                    size *= shape[i];
+                }
+                size *= shape[0];
+            }
         }
 
         if (size == 1)
-            return cast(f(*((Args *) buffers[Index].ptr)...));
+            return cast(f(*reinterpret_cast<Args *>(buffers[Index].ptr)...));
 
         array_t<Return> result(shape, strides);
         auto buf = result.request();
         auto output = (Return *) buf.ptr;
 
-        if (trivial_broadcast) {
-            /* Call the function */
-            for (size_t i = 0; i < size; ++i) {
-                output[i] = f((buffers[Index].size == 1
-                               ? *((Args *) buffers[Index].ptr)
-                               : ((Args *) buffers[Index].ptr)[i])...);
-            }
+        /* Call the function */
+        if (trivial == broadcast_trivial::non_trivial) {
+            apply_broadcast<Index...>(buffers, buf, index);
         } else {
-            apply_broadcast<N, Index...>(buffers, buf, index);
+            for (size_t i = 0; i < size; ++i)
+                output[i] = f((reinterpret_cast<Args *>(buffers[Index].ptr)[buffers[Index].size == 1 ? 0 : i])...);
         }
 
         return result;
     }
 
-    template <size_t N, size_t... Index>
+    template <size_t... Index>
     void apply_broadcast(const std::array<buffer_info, N> &buffers,
                          buffer_info &output, index_sequence<Index...>) {
         using input_iterator = multi_array_iterator<N>;
@@ -1138,7 +1361,9 @@ struct vectorize_helper {
 };
 
 template <typename T, int Flags> struct handle_type_name<array_t<T, Flags>> {
-    static PYBIND11_DESCR name() { return _("numpy.ndarray[") + make_caster<T>::name() + _("]"); }
+    static PYBIND11_DESCR name() {
+        return _("numpy.ndarray[") + npy_format_descriptor<T>::name() + _("]");
+    }
 };
 
 NAMESPACE_END(detail)

@@ -1,8 +1,8 @@
 #pragma once
 
 #include <Eigen/Dense>
+#include <eigen_types.hpp>
 #include <iostream>
-#include <numeric/types.hpp>
 #include <random>
 
 namespace rif {
