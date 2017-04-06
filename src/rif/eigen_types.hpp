@@ -7,7 +7,7 @@ namespace rif {
 template <class F>
 using V3 = Eigen::Matrix<F, 3, 1>;
 template <class F>
-using M3 = Eigen::Matrix<F, 3, 3>;
+using M3 = Eigen::Matrix<F, 3, 3, Eigen::RowMajor>;  // to match numpy (??)
 template <class F>
 using X3 = Eigen::Transform<F, 3, Eigen::Affine>;
 

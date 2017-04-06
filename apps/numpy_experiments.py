@@ -3,6 +3,16 @@ import numpy as np
 import pandas as pd
 import xarray as xr
 
+from rif.actor import atom_t
+
+
+def numpy_array_dtype():
+    x = np.zeros(2, dtype='(4,4)f4')
+    p = np.zeros(2, dtype='(4,)f4')
+    print(x[1])
+    print('x.shape', x.shape)
+    print('xp')
+
 
 def make_ray():
     r = np.random.randn(2, 4).astype('f4') * 3
@@ -62,7 +72,8 @@ def xr_attempt1():
 
 
 def main():
-    xr_attempt2()
+    # xr_attempt2()
+    numpy_array_dtype()
 
 if __name__ == '__main__':
     main()

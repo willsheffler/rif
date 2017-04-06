@@ -12,51 +12,55 @@ namespace actor {
 
 template <class _Position>
 struct Atom {
-  typedef _Position Position;
+  using Position = _Position;
+  using This = Atom<Position>;
 
-  Atom() : position_(0, 0, 0), type_(0) {}
+  Atom() : pos(0, 0, 0), atype(-1), rtype(-1), anum(-1) {}
 
   template <class P>
-  Atom(P const &p, int16_t type = 0, int8_t restype = 0, int8_t atomnum = 0)
-      : position_(p[0], p[1], p[2]),
-        type_(type),
-        restype_(restype),
-        atomnum_(atomnum) {}
+  Atom(P p, int16_t type = -1, int8_t restype = -1, int8_t atomnum = -1)
+      : pos(p[0], p[1], p[2]), atype(type), rtype(restype), anum(atomnum) {}
 
   template <class Xform>
-  Atom(Atom const &a, Xform const &moveby) {
-    position_ = moveby * a.position();
-    type_ = a.type_;
-    restype_ = a.restype_;
-    atomnum_ = a.atomnum_;
+  Atom(Atom a, Xform moveby) {
+    pos = moveby * a.position();
+    atype = a.atype;
+    rtype = a.rtype;
+    anum = a.anum;
   }
 
-  int type() const { return type_; }
-  int restype() const { return restype_; }
-  int atomnum() const { return atomnum_; }
-  void set_type(int16_t i) { type_ = i; }
-  void set_restype(int8_t i) { restype_ = i; }
-  void set_atomnum(int8_t i) { atomnum_ = i; }
+  Atom(Position p, Atom a) {
+    pos = p + a.pos;
+    atype = a.atype;
+    rtype = a.rtype;
+    anum = a.anum;
+  }
 
-  Position const &position() const { return position_; }
+  int type() const { return atype; }
+  int restype() const { return rtype; }
+  int atomnum() const { return anum; }
+  void set_type(int16_t i) { atype = i; }
+  void set_restype(int8_t i) { rtype = i; }
+  void set_atomnum(int8_t i) { anum = i; }
+
+  Position position() const { return pos; }
 
   template <class P>
   void set_position(P const &pos) {
-    position_[0] = pos[0];
-    position_[1] = pos[1];
-    position_[2] = pos[2];
+    pos[0] = pos[0];
+    pos[1] = pos[1];
+    pos[2] = pos[2];
   }
 
-  bool operator==(Atom<Position> const &o) const {
-    return numeric::approx_eq(o.position_, position_) && o.type_ == type_ &&
-           o.restype_ == restype_ && o.atomnum_ == atomnum_;
+  bool operator==(Atom<Position> o) const {
+    return numeric::approx_eq(o.pos, pos) && o.atype == atype &&
+           o.rtype == rtype && o.anum == anum;
   }
 
- private:
-  Position position_;
-  int16_t type_;
-  int8_t restype_;
-  int8_t atomnum_;
+  Position pos;
+  int16_t atype;
+  int8_t rtype;
+  int8_t anum;
 };
 
 template <class P>
@@ -77,7 +81,7 @@ struct AtomWithData {
   typedef _Position Position;
 
   AtomWithData()
-      : position_(0, 0, 0), type_(0), data_(rif::make_shared<AtomData>()) {}
+      : pos(0, 0, 0), atype(0), data_(rif::make_shared<AtomData>()) {}
   // data_(new AtomData) {}
 
   template <class P>
@@ -91,8 +95,8 @@ struct AtomWithData {
                bool ishet = AtomData::default_ishet(),
                float occ = AtomData::default_occ(),
                float bfac = AtomData::default_bfac())
-      : position_(p[0], p[1], p[2]),
-        type_(type),
+      : pos(p[0], p[1], p[2]),
+        atype(type),
         data_(rif::make_shared<AtomData>(  // TODO: why do I need rif:: here?
             // data_(new AtomData(
             atomname, resname, chain, resnum, atomnum, elem, ishet, occ,
@@ -103,35 +107,35 @@ struct AtomWithData {
 
   template <class Xform>
   AtomWithData(AtomWithData const &a, Xform const &moveby) {
-    position_ = moveby * a.position();
-    type_ = a.type_;
+    pos = moveby * a.position();
+    atype = a.atype;
     data_ = a.data_;
   }
 
-  int type() const { return type_; }
-  void set_type(int i) { type_ = i; }
+  int type() const { return atype; }
+  void set_type(int i) { atype = i; }
   AtomData const &data() const { return *data_; }
   AtomData &nonconst_data() { return *data_; }
 
-  Position const &position() const { return position_; }
+  Position const &position() const { return pos; }
 
   template <class P>
   void set_position(P const &pos) {
-    position_[0] = pos[0];
-    position_[1] = pos[1];
-    position_[2] = pos[2];
+    pos[0] = pos[0];
+    pos[1] = pos[1];
+    pos[2] = pos[2];
   }
 
   bool operator==(AtomWithData<Position> const &o) const {
-    return numeric::approx_eq(o.position_, position_) && o.type_ == type_ &&
+    return numeric::approx_eq(o.pos, pos) && o.atype == atype &&
            o.data_ == data_;
   }
 
  private:
-  int type_;
+  int atype;
   shared_ptr<AtomData> data_;
   // AtomData *data_;
-  Position position_;
+  Position pos;
 };
 
 template <class P>

@@ -281,7 +281,7 @@ int main(int argc, char **argv) {
 """ % includes
     if includes:
         print('build_and_run_gtest_auto.py: making gtest_auto.gen.cpp')
-        with open(cmake_dir + '/gtest_auto.gen.cpp', 'wb') as out:
+        with open(cmake_dir + '/gtest_auto.gen.cpp', 'w') as out:
             out.write(code)
 
 

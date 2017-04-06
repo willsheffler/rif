@@ -12,6 +12,8 @@ import datetime
 from collections import OrderedDict
 import sys
 
+DBG = False
+
 try:
     import jinja2
 
@@ -40,7 +42,8 @@ def all_parent_dirs(path, prefix):
 
 def gen__init__(srcdir):
     """make __init__.py files"""
-    print('    == pybind_source_gen.gen__init__ ==')
+    if DBG:
+        print('    == pybind_source_gen.gen__init__ ==')
     packages = set()
     rif_cpp = set()
     rif_cpp.add(srcdir)
@@ -54,17 +57,18 @@ def gen__init__(srcdir):
             if fname.endswith('.pybind.cpp'):
                 rif_cpp.update(all_parent_dirs(root + '/dummy', srcdir))
             # if fname == '__init__.py':
-                # print('        removing', root + '/' + fname)
+                # if DBG: print('        removing', root + '/' + fname)
                 # os.remove(root + '/' + fname)
-    # print("RIF_CPP:")
+    # if DBG: print("RIF_CPP:")
     # for fn in rif_cpp:
-        # print('   ', fn)
-    # print("PACKAGES")
+        # if DBG: print('   ', fn)
+    # if DBG: print("PACKAGES")
     # for fn in packages:
-        # print('   ', fn)
+        # if DBG: print('   ', fn)
     for p in packages:
         if not os.path.exists(p + '/__init__.py'):
-            print('        creating', p + '/__init__.py')
+            if DBG:
+                print('        creating', p + '/__init__.py')
             with open(p + '/__init__.py', 'w') as out:
                 ppath = '.' + p.replace(srcdir, '').replace('/', '.')
                 if ppath == '.':
@@ -81,7 +85,8 @@ def get_pybind_modules(srcpath):
     for root, _, files in os.walk(srcpath):
         for basename in (x for x in files if x.endswith('.pybind.cpp')):
             pybindfile = root.rstrip('/') + '/' + basename
-            print("    found pybind file", pybindfile)
+            if DBG:
+                print("    found pybind file", pybindfile)
             try:
                 # todo: replace this with python
                 try:
@@ -123,8 +128,10 @@ def update_file_if_needed(destfile, newcontent):
         if len(diff.splitlines()) is 4 and 'compiled on' in diff:
             diff = None
     if diff:
-        print('    DIFF:')
-        print(diff)
+        if DBG:
+            print('    DIFF:')
+        if DBG:
+            print(diff)
         print('    pybind_source_gen.py: updating', destfile)
         if os.path.exists(destfile):
             os.remove(destfile)
@@ -159,7 +166,8 @@ def mkdir_if_necessary(path):
 
 def mkfile_if_necessary(path, content):
     if not os.path.exists(path):
-        print('    pybind_source_gen.py MAKING:', path)
+        if DBG:
+            print('    pybind_source_gen.py MAKING:', path)
         with open(path, 'w') as out:
             out.write(content)
 
@@ -185,12 +193,14 @@ def make_py_stencils(cppmodules, srcdir):
 
 def main(template_fname, srcdir, dstdir):
     "generate pybind sources"
-    print("== pybind_source_gen.py ==")
+    if DBG:
+        print("== pybind_source_gen.py ==")
     destfile = dstdir + os.path.basename(template_fname.replace('.jinja', ''))
     cppmodules = get_pybind_modules(srcdir)  # assume in top level project dir
-    print('    cppmodules:')
-    for k, v in cppmodules.items():
-        print('       ', k, v)
+    if DBG:
+        print('    cppmodules:')
+        for k, v in cppmodules.items():
+            print('       ', k, v)
     gen__init__(srcdir)
     make_py_stencils(cppmodules, srcdir)
     forward, code = shitty_make_code(cppmodules)
