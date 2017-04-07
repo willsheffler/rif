@@ -30,7 +30,7 @@ struct Atom {
   }
 
   Atom(Position p, Atom a) {
-    pos = p + a.pos;
+    pos = p;
     atype = a.atype;
     rtype = a.rtype;
     anum = a.anum;

@@ -18,17 +18,33 @@ npy_rif_op2map[str(v3f_t), str(v3f_t), 'add'] = rif.eigen_types.add_v3f
 npy_rif_op2map[str(v3f_t), str(v3f_t), 'subtract'] = rif.eigen_types.sub_v3f
 npy_rif_op2map[str(v3f_t), str(v3f_t), 'multiply'] = rif.eigen_types.mul_v3f
 npy_rif_op2map[str(m3f_t), str(m3f_t), 'add'] = rif.eigen_types.add_m3f
+npy_rif_op2map[str(v3f_t), '', 'multiply'] = rif.eigen_types.mul_v3f_f
+npy_rif_op2map[str(v3f_t), '', 'divide'] = rif.eigen_types.div_v3f_f
+npy_rif_op2map['', str(v3f_t), 'multiply'] = rif.eigen_types.mul_f_v3f
+npy_rif_op2map[str(m3f_t), '', 'multiply'] = rif.eigen_types.mul_m3f_f
+npy_rif_op2map[str(m3f_t), '', 'divide'] = rif.eigen_types.div_m3f_f
+npy_rif_op2map['', str(m3f_t), 'multiply'] = rif.eigen_types.mul_f_m3f
 npy_rif_op2map[str(m3f_t), str(m3f_t), 'subtract'] = rif.eigen_types.sub_m3f
 npy_rif_op2map[str(m3f_t), str(m3f_t), 'multiply'] = rif.eigen_types.mul_m3f
 npy_rif_op2map[str(m3f_t), str(v3f_t), 'multiply'] = rif.eigen_types.mul_m3f_v3f
 npy_rif_op2map[str(atom_t), str(v3f_t), 'add'] = rif.actor.add_atom_v3f
 npy_rif_op2map[str(v3f_t), str(atom_t), 'add'] = rif.actor.add_v3f_atom
+npy_rif_op2map[str(atom_t), str(v3f_t), 'subtract'] = rif.actor.sub_atom_v3f
+npy_rif_op2map[str(v3f_t), str(atom_t), 'subtract'] = rif.actor.sub_v3f_atom
+
+
+def get_type(t):
+    try:
+        return str(t.dtype)
+    except AttributeError:
+        return ''  # scalar
 
 
 def override1(name):
     def ufunc(x):
         try:
-            r = npy_rif_op1map[str(x.dtype), name](x)
+            t = get_type(x)
+            r = npy_rif_op1map[t, name](x)
             return r
         except (AttributeError, KeyError):
             r = getattr(np, name)(x)
@@ -39,7 +55,9 @@ def override1(name):
 def override2(name):
     def ufunc(x, y):
         try:
-            r = npy_rif_op2map[str(x.dtype), str(y.dtype), name](x, y)
+            t1 = get_type(x)
+            t2 = get_type(y)
+            r = npy_rif_op2map[t1, t2, name](x, y)
             return r
         except (AttributeError, KeyError):
             r = getattr(np, name)(x, y)

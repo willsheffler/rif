@@ -9,29 +9,30 @@ from numpy.testing import assert_almost_equal
 @pytest.mark.skipif('sys.version_info.major is 2')
 def test_eigen_v3f_dtype():
     with rif_ops():
-        a = np.zeros(10, dtype=v3f_t)
+        a = np.ones(10, dtype=v3f_t)
         a['crd'] = np.random.rand(10, 3)
-        b = np.zeros(10, dtype=v3f_t)
+        b = np.ones(10, dtype=v3f_t)
         assert a.shape == (10, )
         assert a['crd'].shape == (10, 3)
         assert_almost_equal(a['crd'] + b['crd'], (a + b)['crd'], 5)
         assert_almost_equal(a['crd'] - b['crd'], (a - b)['crd'], 5)
         assert all(np.arange(10) + np.arange(10) == np.arange(0, 20, 2))
-        c = a + b
-        assert_almost_equal(abs(a + b), abs(c))
+        c = a + 2 * b
+        assert_almost_equal(abs(a + 2 * b), abs(c))
         d = a[:, np.newaxis] * b
+        assert np.all((2 * b)['crd'] == [2.0, 2, 2])
 
 
 @pytest.mark.skipif('sys.version_info.major is 2')
 def test_eigen_m3f_dtype():
     with rif_ops():
-        a = np.zeros(10, dtype=m3f_t)
+        a = np.ones(10, dtype=m3f_t)
         a['crd'] = np.random.rand(10, 3, 3)
-        b = np.zeros(10, dtype=m3f_t)
+        b = np.ones(10, dtype=m3f_t)
         assert a.shape == (10, )
         assert a['crd'].shape == (10, 3, 3)
-        assert_almost_equal(a['crd'] + b['crd'], (a + b)['crd'], 5)
-        assert_almost_equal(a['crd'] - b['crd'], (a - b)['crd'], 5)
+        assert_almost_equal(a['crd'] + 2 * b['crd'], (a + 2 * b)['crd'], 5)
+        assert_almost_equal(a['crd'] - 2 * b['crd'], (a - 2 * b)['crd'], 5)
         assert all(np.arange(10) + np.arange(10) == np.arange(0, 20, 2))
         c = a + b
         assert_almost_equal(abs(a + b), abs(c))

@@ -18,6 +18,14 @@ float abs_m3f(M3f a) { return a.norm(); }
 V3f mul_m3f_v3f(M3f a, V3f b) { return a * b; }
 V3f mul_x3f_v3f(X3f a, V3f b) { return a * b; }
 
+V3f mul_v3f_f(V3f v, float f) { return v * f; }
+V3f div_v3f_f(V3f v, float f) { return v / f; }
+V3f mul_f_v3f(float f, V3f v) { return f * v; }
+
+M3f mul_m3f_f(M3f m, float f) { return m * f; }
+M3f div_m3f_f(M3f m, float f) { return m / f; }
+M3f mul_f_m3f(float f, M3f m) { return f * m; }
+
 struct test {
   V3f a;
   float f;
@@ -49,4 +57,11 @@ void RIFLIB_PYBIND_eigen_types(py::module& m) {
   m.def("sub_m3f", py::vectorize(sub_m3f));
   m.def("mul_m3f", py::vectorize(mul_m3f));
   m.def("mul_m3f_v3f", py::vectorize(mul_m3f_v3f));
+
+  m.def("mul_v3f_f", py::vectorize(mul_v3f_f));
+  m.def("div_v3f_f", py::vectorize(div_v3f_f));
+  m.def("mul_f_v3f", py::vectorize(mul_f_v3f));
+  m.def("mul_m3f_f", py::vectorize(mul_m3f_f));
+  m.def("div_m3f_f", py::vectorize(div_m3f_f));
+  m.def("mul_f_m3f", py::vectorize(mul_f_m3f));
 }

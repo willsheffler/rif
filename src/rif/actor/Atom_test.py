@@ -18,8 +18,13 @@ def test_atom_dtype():
 def test_atom_math():
     v = np.ones(2, dtype=v3f_t)
     a = np.zeros(2, dtype=atom_t)
+    a['atype'] = [3, 4]
+    a['rtype'] = [12, 6]
+    a['anum'] = [1, 2]
     print('v', v)
     print('a', a)
     with rif_ops():
-        assert np.all((a + v)['pos']['crd'] == 1)
-        assert np.all((v + a + v + v)['pos']['crd'] == 3)
+        assert np.all(1 == (a + v)['pos']['crd'])
+        assert np.all(3 == (v + a + v + v)['pos']['crd'])
+        assert np.all(-1 == (a - v)['pos']['crd'])
+        assert np.all(3 == (3 * v - a + v - v)['pos']['crd'])
