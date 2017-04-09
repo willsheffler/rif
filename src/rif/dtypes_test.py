@@ -15,7 +15,7 @@ def test_dtype_hash():
         rif.dtypes.v3f_t.__hash__()
 
 
-def tes_with_rif_ops():
+def test_with_rif_ops():
     x = np.ones(3, dtype=rif.dtypes.v3f_t)
     with pytest.raises(TypeError):
         x + x
@@ -24,3 +24,7 @@ def tes_with_rif_ops():
     with pytest.raises(TypeError):
         x * x
     assert np.all(np.arange(3) + np.arange(3) == np.arange(0, 6, 2))
+
+
+def test_rif_ops_overhead():
+    pass

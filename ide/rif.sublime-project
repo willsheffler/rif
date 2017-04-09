@@ -2,34 +2,34 @@
 	"build_systems":
 	[
 		{
+			"file_regex": "^[ ]*File \"(...*?)\", line ([0-9]*)",
 			"name": "py2_build_and_test",
-			"shell_cmd": "cd $folder && python2 tools/build_and_test.py $file 2>&1 | tee log/subl_build.log",
-			"file_regex": "^[ ]*File \"(...*?)\", line ([0-9]*)",
+			"shell_cmd": "cd $folder && python2 tools/build_and_test.py $file 2>&1 | tee log/subl_build.log"
 		},
 		{
+			"file_regex": "^[ ]*File \"(...*?)\", line ([0-9]*)",
 			"name": "py3_build_and_test",
-			"shell_cmd": "cd $folder && python3 tools/build_and_test.py $file 2>&1 | tee log/subl_build.log",
-			"file_regex": "^[ ]*File \"(...*?)\", line ([0-9]*)",
+			"shell_cmd": "cd $folder && python3 tools/build_and_test.py $file 2>&1 | tee log/subl_build.log"
 		},
 		{
+			"file_regex": "^[ ]*File \"(...*?)\", line ([0-9]*)",
 			"name": "build_and_test_noargs",
-			"shell_cmd": "cd $folder && python tools/build_and_test.py 2>&1 | tee log/subl_build.log",
-			"file_regex": "^[ ]*File \"(...*?)\", line ([0-9]*)",
+			"shell_cmd": "cd $folder && python tools/build_and_test.py 2>&1 | tee log/subl_build.log"
 		},
 		{
-			"name": "run_tox",
-			"shell_cmd": "cd $folder && tox 2>&1 | tee log/subl_build.log",
 			"file_regex": "^[ ]*File \"(...*?)\", line ([0-9]*)",
+			"name": "run_tox",
+			"shell_cmd": "cd $folder && tox 2>&1 | tee log/subl_build.log"
 		},
 		{
 			"name": "build_docs",
 			"shell_cmd": "cd $folder/docs && make html 2>&1 | tee ../log/subl_build.log && google-chrome _build/html/index.html &> /dev/null"
 		},
 		{
-			"name": "Anaconda Python Builder",
-			"shell_cmd": "\"/usr/bin/python\" -u \"$file\"",
 			"file_regex": "^[ ]*File \"(...*?)\", line ([0-9]*)",
+			"name": "Anaconda Python Builder",
 			"selector": "source.python",
+			"shell_cmd": "\"/usr/bin/python\" -u \"$file\""
 		}
 	],
 	"folders":
@@ -65,29 +65,26 @@
 				"external/googletest",
 				"external/include",
 				"external/pybind11",
-				"deps",
+				"deps"
 			],
 			"path": ".."
 		}
 	],
 	"settings":
 	{
-		"tab_size": 4,
-		"translate_tabs_to_spaces": true,
-	    "env":
-	    {
-			"Windows":
-			{
-			},
+		"env":
+		{
 			"Darwin":
 			{
 			},
 			"Linux":
 			{
-				// "CC" : "gcc",
-				// "CXX" : "g++",
-				// "CXXFLAGS": "-stdlib=libc++ -I/usr/include/libcxxabi",
+			},
+			"Windows":
+			{
 			}
-	    },
-	},
+		},
+		"tab_size": 4,
+		"translate_tabs_to_spaces": true
+	}
 }

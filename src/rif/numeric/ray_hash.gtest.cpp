@@ -1,5 +1,6 @@
 #include <gtest/gtest.h>
 
+#include "numeric/global_rng.hpp"
 #include "numeric/ray_hash.hpp"
 
 namespace rif {
@@ -10,10 +11,10 @@ using std::cout;
 using std::endl;
 
 TEST(ray_hash, align_ray_pair) {
-  std::mt19937 rng((unsigned int)time(0) + 267943);
+  // std::mt19937 rng((unsigned int)time(0) + 267943);
   for (int i = 0; i < 100; ++i) {
-    auto a1 = rand_ray_gaussian(rng);
-    auto a2 = rand_ray_gaussian(rng);
+    auto a1 = rand_ray_gaussian(/*rng*/);
+    auto a2 = rand_ray_gaussian(/*rng*/);
     auto b1 = Ray<>(V3f(0, 0, 0), V3f(1, 0, 0));
     auto b2 = align_ray_pair(a1, a2);
     ASSERT_LT(fabs(b2.orig[2]), 0.001f);
@@ -24,8 +25,8 @@ TEST(ray_hash, align_ray_pair) {
   }
 }
 
-TEST(ray_hash, ray_ray_hash_bins_of_centers) {
-  RayRayBins<> rh(0.25, 1.0, 1.0);
+TEST(ray_hash, ray_to_ray_hash_bins_of_centers) {
+  RayToRayBinner4D<> rh(0.25, 1.0, 1.0);
   double nerr = 0;
   for (int key = 0; key < rh.size(); ++key) {
     auto cen = rh.get_center(key);
@@ -37,7 +38,7 @@ TEST(ray_hash, ray_ray_hash_bins_of_centers) {
 }
 
 TEST(ray_hash, ray_hash_bins_of_centers) {
-  RayBins<> rh(0.33, 1.0, 1.0);
+  RayBinner5D<> rh(0.33, 1.0, 1.0);
   double nerr = 0;
   for (int key = 0; key < rh.size(); ++key) {
     auto cen = rh.get_center(key);
@@ -48,8 +49,22 @@ TEST(ray_hash, ray_hash_bins_of_centers) {
   ASSERT_LT(nerr / rh.size(), 0.001);
 }
 
+TEST(ray_hash, two_ray_hash_bins_of_centers) {
+  RayRayBinner10D<> rh(0.33, 1.0, 1.0);
+  double nerr = 0;
+  // std::cout << rh.size() << std::endl;
+  uint64_t step = sqrt(rh.size());
+  for (uint64_t key = 0; key < rh.size(); key += step) {
+    auto cen = rh.get_center(key);
+    auto cen_key = rh.get_key(cen);
+    nerr += key != cen_key;
+    ASSERT_EQ(key, cen_key);
+  }
+  ASSERT_LT(nerr / rh.size(), 0.001);
+}
+
 TEST(ray_hash, ray_ray_hash_cart_ori_spacing) {
-  RayRayBins<> rh(0.25, 1.0, 0.3);
+  RayToRayBinner4D<> rh(0.25, 1.0, 0.3);
   A2<float> nbr_sp = brute_maxmin_nbr(rh, 1);
   // std::cout << "rh.size " << rh.size() << ", cart " << rh.size_cart()
   // << ", qsph " << rh.size_qsph()
@@ -58,7 +73,7 @@ TEST(ray_hash, ray_ray_hash_cart_ori_spacing) {
 }
 
 TEST(ray_hash, ray_hash_cart_ori_spacing) {
-  RayBins<> rh(0.4, 1.0, 0.5);
+  RayBinner5D<> rh(0.4, 1.0, 0.5);
   A2<float> nbr_sp = brute_maxmin_nbr(rh, 1);
   std::cout << "rh.size " << rh.size() << ", cart " << rh.size_cart()
             << ", qsph " << rh.size_qsph()

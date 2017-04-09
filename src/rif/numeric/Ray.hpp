@@ -3,7 +3,7 @@
 #include <Eigen/Dense>
 #include <eigen_types.hpp>
 #include <iostream>
-#include <random>
+#include "global_rng.hpp"
 
 namespace rif {
 namespace numeric {
@@ -49,8 +49,8 @@ Ray<F2> operator*(M3<F1> const& m, Ray<F2> const& r) {
  *
  * @return     { description_of_the_return_value }
  */
-template <class RNG, class F = float>
-Ray<F> rand_ray_gaussian(RNG& rng, float sd = 10.0) {
+template <class F = float>
+Ray<F> rand_ray_gaussian_rng(std::mt19937& rng, float sd = 10.0) {
   Ray<F> r;
   std::normal_distribution<> gaussian;
   r.dirn[0] = gaussian(rng);
@@ -61,6 +61,11 @@ Ray<F> rand_ray_gaussian(RNG& rng, float sd = 10.0) {
   r.orig[1] = gaussian(rng) * sd;
   r.orig[2] = gaussian(rng) * sd;
   return r;
+}
+template <class F = float>
+Ray<F> rand_ray_gaussian(float sd = 10.0) {
+  auto& rng(global_rng());
+  return rand_ray_gaussian_rng(rng, sd);
 }
 }
 }
