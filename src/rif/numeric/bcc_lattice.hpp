@@ -49,22 +49,28 @@ struct BCC {
     width_ = (upper - lower_) / nside_.template cast<Float>();
     half_width_ = width_ / 2.0;
     lower_cen_ = lower_ + half_width_;
+    uint64_t totsize = 2;
+    for (size_t i = 0; i < DIM; ++i) {
+      if (totsize * nside_[i] < totsize)
+        throw std::invalid_argument("Index Type is too narrow");
+      totsize *= nside_[i];
+    }
   }
 
-  Index size() const { return nside_.prod() * 2; }
+  Index size() const noexcept { return nside_.prod() * 2; }
 
-  Floats operator[](Index index) const {
+  Floats operator[](Index index) const noexcept {
     bool odd = index & 1;
     Indices indices = ((index >> 1) / nside_prefsum_) % nside_;
     return this->get_center(indices, odd);
   }
 
-  Floats get_center(Indices indices, bool odd) const {
+  Floats get_center(Indices indices, bool odd) const noexcept {
     return lower_cen_ + width_ * indices.template cast<Float>() +
            (odd ? half_width_ : 0);
   }
 
-  Indices get_indices(Floats value, bool &odd) const {
+  Indices get_indices(Floats value, bool &odd) const noexcept {
     value = (value - lower_) / width_;
     Indices const indices = value.template cast<Index>();
     value = value - indices.template cast<Float>() - 0.5;
@@ -73,7 +79,7 @@ struct BCC {
     return odd ? corner_indices : indices;
   }
 
-  Index operator[](Floats value) const {
+  Index operator[](Floats value) const noexcept {
     bool odd;
     Indices indices = get_indices(value, odd);
     Index index = (nside_prefsum_ * indices).sum();
@@ -82,7 +88,7 @@ struct BCC {
 
   template <class Iiter>
   void neighbors(Index index, Iiter iter, bool edges = false,
-                 bool edges2 = false) const {
+                 bool edges2 = false) const noexcept {
     *iter++ = index;
     bool odd = index & 1;
     Indices indices = ((index >> 1) / nside_prefsum_) % nside_;
@@ -168,29 +174,29 @@ struct Cubic {
     lower_cen_ = lower_ + half_width_;
   }
 
-  Index size() const { return nside_.prod(); }
+  Index size() const noexcept { return nside_.prod(); }
 
-  Floats operator[](Index index) const {
+  Floats operator[](Index index) const noexcept {
     Indices indices = (index / nside_prefsum_) % nside_;
     return get_center(indices);
   }
 
-  Floats get_center(Indices indices) const {
+  Floats get_center(Indices indices) const noexcept {
     return lower_cen_ + width_ * indices.template cast<Float>();
   }
 
-  Indices get_indices(Floats value) const {
+  Indices get_indices(Floats value) const noexcept {
     value = (value - lower_) / width_;
     return value.template cast<Index>();
   }
 
-  Index operator[](Floats value) const {
+  Index operator[](Floats value) const noexcept {
     Indices indices = get_indices(value);
     return (nside_prefsum_ * indices).sum();
   }
 
   template <class Iiter>
-  void neighbors(Index index, Iiter iter, bool = false) const {
+  void neighbors(Index index, Iiter iter, bool = false) const noexcept {
     Indices idx0 = (index / nside_prefsum_) % nside_;
     Indices threes(1);
     for (int d = 1; d < DIM; ++d) threes[d] = 3 * threes[d - 1];

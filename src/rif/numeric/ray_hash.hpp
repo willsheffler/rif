@@ -103,8 +103,8 @@ struct RayToRayBinner4D {
             Fs(-bound, -bound, -qs_bound(resl, lever), -qs_bound(resl, lever)),
             Fs(+bound, +bound, +qs_bound(resl, lever),
                +qs_bound(resl, lever)))) {}
-  K get_key(R a, R b) const { return get_key(align_ray_pair(a, b)); }
-  K get_key(R r) const {
+  K get_key(R a, R b) const noexcept { return get_key(align_ray_pair(a, b)); }
+  K get_key(R r) const noexcept {
     assert(fabs(r.orig[2]) < 0.001);
     // std::cout << "get_key: " << r << std::endl;
     F qsx, qsy;
@@ -115,7 +115,7 @@ struct RayToRayBinner4D {
     // std::cout << "get_key: " << face << " " << bcc_key << std::endl;
     return face * bcc_[face].size() + bcc_key;
   }
-  R get_center(K k) const {
+  R get_center(K k) const noexcept {
     K face = k / bcc_[face].size();
     K bcc_key = k % bcc_[face].size();
     // std::cout << "get_cen: " << face << " " << bcc_key << std::endl;
@@ -125,9 +125,9 @@ struct RayToRayBinner4D {
     R r(V(bcrd[0], bcrd[1], 0.0), dir);
     return r;
   }
-  uint size() const { return 6 * bcc_[0].size(); }
-  uint size_cart() const { return bcc_[0].nside_[0]; }
-  uint size_qsph() const { return bcc_[0].nside_[2]; }
+  uint size() const noexcept { return 6 * bcc_[0].size(); }
+  uint size_cart() const noexcept { return bcc_[0].nside_[0]; }
+  uint size_qsph() const noexcept { return bcc_[0].nside_[2]; }
 };
 
 /**
@@ -153,7 +153,7 @@ struct RayBinner5D {
                      -qs_bound(resl, lever)),
                   Fs(+bound, +bound, +bound, +qs_bound(resl, lever),
                      +qs_bound(resl, lever)))) {}
-  K get_key(R r) const {
+  K get_key(R r) const noexcept {
     // std::cout << "get_key: " << r << std::endl;
     F qsx, qsy;
     K face = get_quadsphere_coords(r.dirn, qsx, qsy);
@@ -163,7 +163,7 @@ struct RayBinner5D {
     // std::cout << "get_key: " << face << " " << bcc_key << std::endl;
     return face * bcc_[face].size() + bcc_key;
   }
-  R get_center(K k) const {
+  R get_center(K k) const noexcept {
     K face = k / bcc_[0].size();
     K bcc_key = k % bcc_[0].size();
     // std::cout << "get_cen: " << face << " " << bcc_key << std::endl;
@@ -174,9 +174,9 @@ struct RayBinner5D {
     R r(V(bcrd[0], bcrd[1], bcrd[2]), dir);
     return r;
   }
-  uint size() const { return 6 * bcc_[0].size(); }
-  uint size_cart() const { return bcc_[0].nside_[0]; }
-  uint size_qsph() const { return bcc_[0].nside_[3]; }
+  uint size() const noexcept { return 6 * bcc_[0].size(); }
+  uint size_cart() const noexcept { return bcc_[0].nside_[0]; }
+  uint size_qsph() const noexcept { return bcc_[0].nside_[3]; }
 };
 
 /**
@@ -206,7 +206,7 @@ struct RayRayBinner10D {
                   Fs(+bound, +bound, +bound, +qs_bound(resl, lever),
                      +qs_bound(resl, lever), +bound, +bound, +bound,
                      +qs_bound(resl, lever), +qs_bound(resl, lever)))) {}
-  K get_key(R r, R s) const {
+  K get_key(R r, R s) const noexcept {
     // std::cout << "get_key: " << r << std::endl;
     F qsx1, qsy1;
     F qsx2, qsy2;
@@ -220,7 +220,9 @@ struct RayRayBinner10D {
     // std::cout << "get_key: " << face << " " << bcc_key << std::endl;
     return face12 * bcc_[0].size() + bcc_key;
   }
-  K get_key(std::pair<R, R> p) const { return get_key(p.first, p.second); }
+  K get_key(std::pair<R, R> p) const noexcept {
+    return get_key(p.first, p.second);
+  }
   std::pair<R, R> get_center(K k) const {
     K face12 = k / bcc_[0].size();
     K face1 = face12 / 6;  // !!!!!!!!!!!!! 1/2 swap
@@ -236,9 +238,9 @@ struct RayRayBinner10D {
     R s(V(bcrd[5], bcrd[6], bcrd[7]), dir2);
     return std::make_pair(r, s);
   }
-  uint size() const { return 36 * bcc_[0].size(); }
-  uint size_cart() const { return bcc_[0].nside_[0]; }
-  uint size_qsph() const { return bcc_[0].nside_[3]; }
+  uint size() const noexcept { return 36 * bcc_[0].size(); }
+  uint size_cart() const noexcept { return bcc_[0].nside_[0]; }
+  uint size_qsph() const noexcept { return bcc_[0].nside_[3]; }
 };
 }
 }

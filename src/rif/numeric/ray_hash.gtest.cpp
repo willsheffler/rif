@@ -63,9 +63,11 @@ TEST(ray_hash, two_ray_hash_bins_of_centers) {
   ASSERT_LT(nerr / rh.size(), 0.001);
 }
 
+TEST(ray_hash, ray_hash_covering_radius) { RayBinner5D<> rh(0.1, 3.0); }
+
 TEST(ray_hash, ray_ray_hash_cart_ori_spacing) {
   RayToRayBinner4D<> rh(0.25, 1.0, 0.3);
-  A2<float> nbr_sp = brute_maxmin_nbr(rh, 1);
+  A2f nbr_sp = brute_maxmin_nbr(rh, 1);
   // std::cout << "rh.size " << rh.size() << ", cart " << rh.size_cart()
   // << ", qsph " << rh.size_qsph()
   // << ", closest: " << nbr_sp.transpose() << std::endl;
@@ -74,7 +76,7 @@ TEST(ray_hash, ray_ray_hash_cart_ori_spacing) {
 
 TEST(ray_hash, ray_hash_cart_ori_spacing) {
   RayBinner5D<> rh(0.4, 1.0, 0.5);
-  A2<float> nbr_sp = brute_maxmin_nbr(rh, 1);
+  A2f nbr_sp = brute_maxmin_nbr(rh, 1);
   std::cout << "rh.size " << rh.size() << ", cart " << rh.size_cart()
             << ", qsph " << rh.size_qsph()
             << ", closest: " << nbr_sp.transpose() << std::endl;

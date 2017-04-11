@@ -56,8 +56,8 @@ struct npy_format_descriptor<Eigen::Matrix<Scalar, NROW, NCOL, OPTS>> {
   }
 
   static void register_dtype() {
-    const std::type_info& tinfo = typeid(T);
-    auto& numpy_internals = get_numpy_internals();
+    const std::type_info &tinfo = typeid(T);
+    auto &numpy_internals = get_numpy_internals();
     if (numpy_internals.get_type_info(tinfo, false))
       pybind11_fail("NumPy: dtype is already registered");
 
@@ -84,7 +84,7 @@ struct npy_format_descriptor<Eigen::Matrix<Scalar, NROW, NCOL, OPTS>> {
     // std::cout << "    dtype_str: '" << dtype_str << "'" << std::endl;
     // std::cout << "    format_str: '" << format_str << "'" << std::endl;
 
-    auto& api = npy_api::get();
+    auto &api = npy_api::get();
     auto arr = array(buffer_info(nullptr, sizeof(T), format_str, 1));
     if (!api.PyArray_EquivTypes_(dtype_ptr, arr.dtype().ptr()))
       pybind11_fail("NumPy: invalid buffer descriptor!");
@@ -95,21 +95,21 @@ struct npy_format_descriptor<Eigen::Matrix<Scalar, NROW, NCOL, OPTS>> {
   }
 
  private:
-  static PyObject* dtype_ptr() {
+  static PyObject *dtype_ptr() {
     // std::cout << "eigen dtype_ptr Matrix(" << sizeof(Scalar) * 8 << "bit "
     // << NROW << " " << NCOL << ")" << std::endl;
-    static PyObject* ptr =
+    static PyObject *ptr =
         get_numpy_internals().get_type_info<T>(true)->dtype_ptr;
     return ptr;
   }
 
-  static bool direct_converter(PyObject* obj, void*& value) {
-    auto& api = npy_api::get();
+  static bool direct_converter(PyObject *obj, void *&value) {
+    auto &api = npy_api::get();
     if (!PyObject_TypeCheck(obj, api.PyVoidArrType_Type_)) return false;
     if (auto descr =
             reinterpret_steal<object>(api.PyArray_DescrFromScalar_(obj))) {
       if (api.PyArray_EquivTypes_(dtype_ptr(), descr.ptr())) {
-        value = ((PyVoidScalarObject_Proxy*)obj)->obval;
+        value = ((PyVoidScalarObject_Proxy *)obj)->obval;
         return true;
       }
     }
