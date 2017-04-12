@@ -1,5 +1,4 @@
-#ifndef INCLUDED_numeric_bcc_lattice_HH
-#define INCLUDED_numeric_bcc_lattice_HH
+#pragma once
 
 #include "util/SimpleArray.hpp"
 #include "util/template_loop.hpp"
@@ -211,5 +210,3 @@ struct Cubic {
 };
 }
 }
-
-#endif

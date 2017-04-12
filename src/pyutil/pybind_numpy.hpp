@@ -1,44 +1,16 @@
+#pragma once
+
 #include <Eigen/Geometry>
 #include <iostream>
+#include <util/str.hpp>
 #include "pybind11/numpy.h"
 #include "pybind11/pybind11.h"
 
-#define PYBIND11_FIELD_DESCRIPTOR_OFFSET(T, Ftype, Name, Offset)               \
-  ::pybind11::detail::field_descriptor {                                       \
-    #Name, Offset,                                                             \
-        sizeof(Ftype),                                                         \
-               alignof(                                                        \
-                   Ftype),                                                     \
-                   ::pybind11::format_descriptor < Ftype >                     \
-                       ::format(), ::pybind11::detail::npy_format_descriptor < \
-                                       Ftype > ::dtype()                       \
-  }
-
-#ifdef _MSC_VER
-#define PYBIND11_MAP3_LIST_NEXT1(test, next) \
-  PYBIND11_EVAL0(PYBIND11_MAP_NEXT0(test, PYBIND11_MAP_COMMA next, 0))
-#else
-#define PYBIND11_MAP3_LIST_NEXT1(test, next) \
-  PYBIND11_MAP_NEXT0(test, PYBIND11_MAP_COMMA next, 0)
-#endif
-#define PYBIND11_MAP3_LIST_NEXT(test, next) \
-  PYBIND11_MAP3_LIST_NEXT1(PYBIND11_MAP_GET_END test, next)
-#define PYBIND11_MAP3_LIST0(f, t, x1, x2, x3, peek, ...)               \
-  f(t, x1, x2, x3) PYBIND11_MAP3_LIST_NEXT(peek, PYBIND11_MAP3_LIST1)( \
-      f, t, peek, __VA_ARGS__)
-#define PYBIND11_MAP3_LIST1(f, t, x1, x2, x3, peek, ...)               \
-  f(t, x1, x2, x3) PYBIND11_MAP3_LIST_NEXT(peek, PYBIND11_MAP3_LIST0)( \
-      f, t, peek, __VA_ARGS__)
-#define PYBIND11_MAP3_LIST(f, t, ...) \
-  PYBIND11_EVAL(PYBIND11_MAP3_LIST1(f, t, __VA_ARGS__, (), 0))
-
-#define PYBIND11_NUMPY_DTYPE_OFFSET(Type, ...)                     \
-  ::pybind11::detail::npy_format_descriptor<Type>::register_dtype( \
-      {PYBIND11_MAP3_LIST(PYBIND11_FIELD_DESCRIPTOR_OFFSET, Type,  \
-                          __VA_ARGS__)})
-
 namespace pybind11 {
 namespace detail {
+
+using rif::util::str;
+using rif::util::cpp_repr;
 
 template <class Scalar, int NROW, int NCOL, int OPTS>
 struct npy_format_descriptor<Eigen::Matrix<Scalar, NROW, NCOL, OPTS>> {
@@ -57,9 +29,14 @@ struct npy_format_descriptor<Eigen::Matrix<Scalar, NROW, NCOL, OPTS>> {
 
   static void register_dtype() {
     const std::type_info &tinfo = typeid(T);
+    auto tindex = std::type_index(tinfo);
+
     auto &numpy_internals = get_numpy_internals();
     if (numpy_internals.get_type_info(tinfo, false))
-      pybind11_fail("NumPy: dtype is already registered");
+      pybind11_fail("NumPy: dtype is already registered:\n    Eigen::Matrix<" +
+                    cpp_repr<Scalar>() + ", " + str(NROW) + ", " + str(NCOL) +
+                    ", " + str(OPTS) + ">\n    hash_code: " +
+                    str(tindex.hash_code()));
 
     std::ostringstream oss;
     std::string scalar_fmt = format_descriptor<Scalar>::format();
@@ -89,7 +66,6 @@ struct npy_format_descriptor<Eigen::Matrix<Scalar, NROW, NCOL, OPTS>> {
     if (!api.PyArray_EquivTypes_(dtype_ptr, arr.dtype().ptr()))
       pybind11_fail("NumPy: invalid buffer descriptor!");
 
-    auto tindex = std::type_index(tinfo);
     numpy_internals.registered_dtypes[tindex] = {dtype_ptr, format_str};
     get_internals().direct_conversions[tindex].push_back(direct_converter);
   }

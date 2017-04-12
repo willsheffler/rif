@@ -1,4 +1,4 @@
-#include "util/pybind_numpy.hpp"
+#include "pyutil/pybind_numpy.hpp"
 
 #include <Eigen/Dense>
 #include "actor/Atom.hpp"

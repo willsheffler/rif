@@ -1,4 +1,4 @@
-#include "util/pybind_numpy.hpp"
+#include "pyutil/pybind_numpy.hpp"
 
 #include "eigen_types.hpp"
 
@@ -41,6 +41,7 @@ void RIFLIB_PYBIND_eigen_types(py::module& m) {
   py::detail::npy_format_descriptor<V3f>::register_dtype();
   py::detail::npy_format_descriptor<M3f>::register_dtype();
   py::detail::npy_format_descriptor<V3<int32_t>>::register_dtype();
+
   PYBIND11_NUMPY_DTYPE(test, a, i, f, b);
 
   m.attr("v3f_t") = py::dtype::of<V3f>();

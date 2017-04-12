@@ -19,3 +19,10 @@ def test_SimpleArray_translation():
     out = echo_SimpleArray_3_int(np.array([1, 2, 3, 4, 5, 6])[1::2])
     assert out.shape == (3,)
     assert np.all(out == [2, 4, 6])
+
+
+def test_SimpleArray_ref_translation():
+    x = SATest()
+    x.member()[0] = 3
+    print(x.member())
+    assert x.member()[0] == 3
