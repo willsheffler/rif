@@ -17,12 +17,14 @@ namespace numeric {
  *      if range is 0..1 and 2 cells, x values could be 0, 0.25, 0.5 and 0.75
  * ((not 1.0!!))
  */
-template <int DIM, class _Float = double, class _Index = uint64_t>
+template <int _DIM, class _Float = double, class _Index = uint64_t>
 struct BCC {
+  static const int DIM = _DIM;
   using Float = _Float;
   using Index = _Index;
   using Indices = util::SimpleArray<DIM, Index>;
   using Floats = util::SimpleArray<DIM, Float>;
+
   BOOST_STATIC_ASSERT((DIM > 2));
 
   Indices nside_, nside_prefsum_;
@@ -57,6 +59,7 @@ struct BCC {
   }
 
   Index size() const noexcept { return nside_.prod() * 2; }
+  int dim() const noexcept { return DIM; }
 
   Floats operator[](Index index) const noexcept {
     bool odd = index & 1;

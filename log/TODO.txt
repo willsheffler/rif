@@ -1,13 +1,15 @@
+ X   wrap simpleatom struct with numpy dtype
+
 TODO hunt down and eradicate stochastic failures (OR make pytest-cpp do two tries?)
-TODO tox build docs
-TODO figure out where conda puts boost on readthedocs
+ X   tox build docs
+ X   figure out where conda puts boost on readthedocs
 TODO remove crappy symlink to make tox work
  X   pytest doctests
 TODO visualize orientation sets
 TODO make cones from orientation sets, see what ~1500 gets you
 TODO visualize bcc lattice
 TODO visualize rays in 6x4D bcc lattice cubefaces
-TODO set pytest.ini stuff from scipts -- _thisfile no cpp,xdist
+ X   set pytest.ini stuff from scipts -- _thisfile no cpp,xdist
  X   tox
  X   auto-pep8 somehow
  X   build system run one file
