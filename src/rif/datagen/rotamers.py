@@ -3,9 +3,7 @@ from rif.util import rcl
 from rif.util.rcl import pyrosetta, rosetta
 from rif.chem.biochem import aa_name3s
 
-import numpy as np
 import pandas as pd
-import xarray as xr
 
 
 def get_rotamer_index():
@@ -28,3 +26,16 @@ def get_polar_heads():
     atoms = list()
     rayxforms = list()
     raise NotImplementedError
+
+
+richardson_rots = pd.DataFrame(
+    [
+        ('asn', 'p10', 60, 62, 0, 8, 20, -90, 0),
+        ('asn', 'p30', 100, 62, 60, 6, 20, 0, 90),
+        ('asn', 't20', 100, -174, -30, 5, 20, -120, 0),
+        ('asn', 't30', 228, -177, 30, 14, 15, 0, 80),
+        ('asn', 'm20', 580, -65, -20, 10, 20, -60, 10),
+        ('asn', 'm80', 118, -65, -75, 10, 10, -100, -60),
+        ('asn', 'm120', 58, -65, 120, 10, 18, 60, 100),
+    ], columns='aa rot count chi1 chi2 sd1 sd2 lb2 ub2'.split()
+)
