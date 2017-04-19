@@ -1,3 +1,5 @@
+TODO FIX ANACONDA BUILD!
+
  X   wrap simpleatom struct with numpy dtype
 
 TODO hunt down and eradicate stochastic failures (OR make pytest-cpp do two tries?)
@@ -9,7 +11,7 @@ TODO visualize orientation sets
 TODO make cones from orientation sets, see what ~1500 gets you
 TODO visualize bcc lattice
 TODO visualize rays in 6x4D bcc lattice cubefaces
- X   set pytest.ini stuff from scipts -- _thisfile no cpp,xdist
+ X    set pytest.ini stuff from scipts -- _thisfile no cpp,xdist
  X   tox
  X   auto-pep8 somehow
  X   build system run one file

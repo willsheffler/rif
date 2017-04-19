@@ -3,7 +3,7 @@
 #include <Eigen/Dense>
 #include <eigen_types.hpp>
 #include <iostream>
-#include "global_rng.hpp"
+#include "rif/global_rng.hpp"
 
 namespace rif {
 namespace numeric {

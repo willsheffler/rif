@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 
-#include "numeric/global_rng.hpp"
-#include "numeric/ray_hash.hpp"
+#include "rif/global_rng.hpp"
+#include "rif/numeric/ray_hash.hpp"
 
 namespace rif {
 namespace numeric {

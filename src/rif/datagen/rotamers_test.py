@@ -7,7 +7,7 @@ import numpy as np
 # @pytest.mark.skip('not implemented')
 # @pytest.mark.skipif('not rcl.HAVE_PYROSETTA')
 
-
+@pytest.mark.skip('richardson rots not implemented yet')
 def test_rotamers():
     print(rr)
     assert rr.shape[0] == 7
