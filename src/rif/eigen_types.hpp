@@ -113,4 +113,9 @@ static I10 makeI10(uint64_t a, uint64_t b, uint64_t c, uint64_t d, uint64_t e,
   r << a, b, c, d, e, f, g, h, i, j;
   return r;
 }
+
+template <class F>
+F epsilon2() {
+  return std::sqrt(std::numeric_limits<F>::epsilon());
+}
 }

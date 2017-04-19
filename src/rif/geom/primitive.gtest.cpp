@@ -16,7 +16,7 @@ void geom_primitive_sphere_test(int niter) {
     Vec p2 = Vec::Random();
     Vec p3 = Vec::Random();
     Vec p4 = Vec::Random();
-    F const eps = Sph::epsilon;
+    F const eps = rif::epsilon2<F>();
     Sph s1(p1);
     Sph s2(p1, p2);
     Sph s3(p1, p2, p3);
@@ -53,6 +53,7 @@ void geom_primitive_welzl_test(size_t Ntest, size_t Npoints) {
   using Sph = Sphere<F>;
   using Vec = V3<F>;
   srand(global_rng()());
+  F const eps = std::sqrt(std::numeric_limits<F>::epsilon());
   F avgvolratio = 0;
   for (size_t i = 0; i < Ntest; ++i) {
     std::vector<Vec> points;
@@ -63,8 +64,8 @@ void geom_primitive_welzl_test(size_t Ntest, size_t Npoints) {
     F ratio = aprox_bv.radius / welzl_bv.radius;
     avgvolratio += ratio * ratio * ratio;
     for (size_t k = 0; k < points.size(); ++k) {
-      ASSERT_LE(welzl_bv.signdis2(points[k]), Sph::epsilon);
-      ASSERT_LE(aprox_bv.signdis2(points[k]), Sph::epsilon);
+      ASSERT_LE(welzl_bv.signdis2(points[k]), eps);
+      ASSERT_LE(aprox_bv.signdis2(points[k]), eps);
     }
   }
   std::cout << "             average welzl sphere volume improvement over COM: "

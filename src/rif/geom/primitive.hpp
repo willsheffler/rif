@@ -20,16 +20,13 @@ class Sphere {
   Vec3 center;
   F radius;
 
-  constexpr static const F epsilon =
-      std::sqrt(std::numeric_limits<F>::epsilon());
-
   Sphere() : center(0, 0, 0), radius(1) {}
   Sphere(Vec3 c, F r) : center(c), radius(r) {}
-  Sphere(Vec3 O) : center(O), radius(epsilon) {}
+  Sphere(Vec3 O) : center(O), radius(epsilon2<F>()) {}
   Sphere(Vec3 O, Vec3 A) {
     Vec3 a = A - O;
     Vec3 o = 0.5 * a;
-    radius = o.norm() + epsilon;
+    radius = o.norm() + epsilon2<F>();
     center = O + o;
   }
   Sphere(Vec3 O, Vec3 A, Vec3 B) {
@@ -38,7 +35,7 @@ class Sphere {
     Vec3 o = (b.dot(b) * ((a.cross(b)).cross(a)) +
               a.dot(a) * (b.cross(a.cross(b)))) /
              det_2;
-    radius = o.norm() + epsilon;
+    radius = o.norm() + epsilon2<F>();
     center = O + o;
   }
   Sphere(Vec3 O, Vec3 A, Vec3 B, Vec3 C) {
@@ -51,7 +48,7 @@ class Sphere {
     Vec3 o = (c.dot(c) * a.cross(b) + b.dot(b) * c.cross(a) +
               a.dot(a) * b.cross(c)) /
              det_2;
-    radius = o.norm() + epsilon;
+    radius = o.norm() + epsilon2<F>();
     center = O + o;
   }
   template <class Ary>
@@ -77,9 +74,6 @@ class Sphere {
     return (center - pt).squaredNorm() < radius * radius;
   }
 };
-
-template <class F>
-constexpr F Sphere<F>::epsilon;
 
 template <class F>
 std::ostream& operator<<(std::ostream& out, Sphere<F> const& s) {
@@ -138,6 +132,7 @@ auto central_bounding_sphere(Ary const& points) noexcept {
   using Pt = typename Ary::value_type;
   using F = typename Pt::Scalar;
   using Sph = Sphere<F>;
+  F const eps = epsilon2<F>();
   Pt center;
   F radius = -1;
   if (points.size() > 0) {
@@ -149,7 +144,7 @@ auto central_bounding_sphere(Ary const& points) noexcept {
       F d2 = (points[i] - center).squaredNorm();
       if (d2 > radius) radius = d2;
     }
-    radius = sqrt(radius) + Sph::epsilon;
+    radius = sqrt(radius) + eps;
   }
   return Sph(center, radius);
 }
