@@ -51,9 +51,15 @@ class Sphere {
     radius = o.norm() + epsilon2<F>();
     center = O + o;
   }
-  template <class Ary>
-  Sphere(Ary const& pts) {
-    *this = welzl_bounding_sphere(pts);
+
+  Sphere<F> merged(Sphere<F> that) const {
+    if (this->contains(that)) return *this;
+    if (that.contains(*this)) return that;
+    F d = radius + that.radius + (center - that.center).norm();
+    // std::cout << d << std::endl;
+    auto dir = (that.center - center).normalized();
+    auto c = center + dir * (d / 2 - this->radius);
+    return Sphere<F>(c, d / 2 + epsilon2<F>() / 2.0);
   }
 
   // Distance from p to boundary of the Sphere
@@ -61,23 +67,36 @@ class Sphere {
   F signdis2(Vec3 P) const {  // NOT square of signdis!
     return (center - P).squaredNorm() - radius * radius;
   }
-
-  bool intersect(Sphere other) const {
-    F rtot = radius + other.radius;
-    return (center - other.center).squaredNorm() <= rtot;
+  F signdis(Sphere<F> s) const {
+    return (center - s.center).norm() - radius - s.radius;
   }
-  bool contact(Sphere other, F contact_dis) const {
-    F rtot = radius + other.radius + contact_dis;
-    return (center - other.center).squaredNorm() <= rtot * rtot;
+  bool intersect(Sphere that) const {
+    F rtot = radius + that.radius;
+    return (center - that.center).squaredNorm() <= rtot;
+  }
+  bool contact(Sphere that, F contact_dis) const {
+    F rtot = radius + that.radius + contact_dis;
+    return (center - that.center).squaredNorm() <= rtot * rtot;
   }
   bool contains(Vec3 pt) const {
     return (center - pt).squaredNorm() < radius * radius;
   }
+  bool contains(Sphere<F> that) const {
+    auto d = (center - that.center).norm();
+    return d + that.radius <= radius;
+  }
+  bool operator==(Sphere<F> that) const {
+    return center.isApprox(that.center) &&
+           fabs(radius - that.radius) < epsilon2<F>();
+  }
 };
+
+typedef Sphere<float> Spheref;
+typedef Sphere<double> Sphered;
 
 template <class F>
 std::ostream& operator<<(std::ostream& out, Sphere<F> const& s) {
-  out << s.center << " " << s.radius;
+  out << "Sphere( " << s.center.transpose() << ", " << s.radius << ")";
   return out;
 }
 
@@ -93,7 +112,7 @@ auto welzl_bounding_sphere_impl(Ary const& points, size_t index,
   if (index == 0) {
     switch (numsos) {
       case 0:
-        return Sph();
+        return Sph(Pt(0, 0, 0), 0);
       case 1:
         return Sph(sos[0]);
       case 2:

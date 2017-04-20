@@ -10,6 +10,16 @@ template <class F>
 void geom_primitive_sphere_test(int niter) {
   using Sph = Sphere<F>;
   using Vec = V3<F>;
+  using S = Sph;
+  using V = Vec;
+  ASSERT_TRUE(S(V(0, 0, 0), 10).contains(S(V(0, 0, 0), 9.99)));
+  ASSERT_TRUE(S(V(0, 0, 0), 10).contains(S(V(8, 0, 0), 1.99)));
+  ASSERT_FALSE(S(V(0, 0, 0), 10).contains(S(V(8, 0, 0), 2.01)));
+  ASSERT_EQ(S(V(0, 0, 0), 1).merged(S(V(2, 0, 0), 1)), S(V(1, 0, 0), 2));
+  ASSERT_EQ(S(V(0, 0, 0), 5).merged(S(V(2, 0, 0), 3)), S(V(0, 0, 0), 5));
+  ASSERT_EQ(S(V(0, 0, 0), 5).merged(S(V(5, 0, 0), 2)), S(V(1, 0, 0), 6));
+  ASSERT_EQ(S(V(3, 0, 0), 5).merged(S(V(3, 0, 0), 3)), S(V(3, 0, 0), 5));
+  ASSERT_EQ(S(V(-2, 0, 0), 2).merged(S(V(-2, 0, 0), 3)), S(V(-2, 0, 0), 3));
   srand(global_rng()());
   for (int iter = 0; iter < niter; ++iter) {
     Vec p1 = Vec::Random();
@@ -36,10 +46,20 @@ void geom_primitive_sphere_test(int niter) {
     ASSERT_LE(fabs(s3.signdis(p2)), eps);
     ASSERT_LE(fabs(s3.signdis(p3)), eps);
 
-    ASSERT_LE(fabs(s4.signdis(p1)), (sizeof(F) == 4 ? 100 : 1) * eps);
-    ASSERT_LE(fabs(s4.signdis(p2)), (sizeof(F) == 4 ? 100 : 1) * eps);
-    ASSERT_LE(fabs(s4.signdis(p3)), (sizeof(F) == 4 ? 100 : 1) * eps);
-    ASSERT_LE(fabs(s4.signdis(p4)), (sizeof(F) == 4 ? 100 : 1) * eps);
+    ASSERT_LE(fabs(s4.signdis(p1)), (sizeof(F) == 4 ? 100 : 2) * eps);
+    ASSERT_LE(fabs(s4.signdis(p2)), (sizeof(F) == 4 ? 100 : 2) * eps);
+    ASSERT_LE(fabs(s4.signdis(p3)), (sizeof(F) == 4 ? 100 : 2) * eps);
+    ASSERT_LE(fabs(s4.signdis(p4)), (sizeof(F) == 4 ? 100 : 2) * eps);
+
+    if (sizeof(F) > 4) {
+      auto sm = s4.merged(s3);
+      ASSERT_EQ(s3.merged(s4), s4.merged(s3));
+      ASSERT_TRUE(sm.contains(s3));
+      ASSERT_TRUE(sm.contains(s4));
+      V dir = (s4.center - s3.center).normalized();
+      ASSERT_FALSE(sm.contains(s4.center + dir * (s4.radius + 0.01)));
+      ASSERT_FALSE(sm.contains(s3.center - dir * (s4.radius + 0.01)));
+    }
   }
 }
 
@@ -59,7 +79,7 @@ void geom_primitive_welzl_test(size_t Ntest, size_t Npoints) {
     std::vector<Vec> points;
     for (size_t k = 0; k < Npoints; ++k) points.push_back(10 * Vec::Random());
     Sph aprox_bv = central_bounding_sphere(points);
-    Sph welzl_bv = Sph(points);
+    Sph welzl_bv = welzl_bounding_sphere(points);
     ASSERT_GE(aprox_bv.radius, welzl_bv.radius);
     F ratio = aprox_bv.radius / welzl_bv.radius;
     avgvolratio += ratio * ratio * ratio;
