@@ -94,6 +94,11 @@ class Sphere {
 typedef Sphere<float> Spheref;
 typedef Sphere<double> Sphered;
 
+template <class F>
+Sphere<F> operator*(X3<F> x, Sphere<F> s) {
+  return Sphere<F>(x * s.center, s.radius);
+}
+
 template <class Scalar>
 std::ostream& operator<<(std::ostream& out, Sphere<Scalar> const& s) {
   out << "Sphere( " << s.center.transpose() << ", " << s.radius << ")";

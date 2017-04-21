@@ -3,9 +3,9 @@
 #include <random>
 
 #include <rif/geom/bvh.hpp>
-#include "rif/eigen_types.hpp"
 #include "rif/geom/primitive.hpp"
 #include "rif/global_rng.hpp"
+#include "rif/numeric/rand_xform.hpp"
 #include "util/Timer.hpp"
 
 using namespace Eigen;
@@ -24,50 +24,27 @@ namespace rif_test_bvh_eigen_bvh {
 
 struct PPMin {
   typedef F Scalar;
+  using Xform = X3<F>;
+  PPMin(Xform x = Xform::Identity()) : bXa(x) {}
   Scalar minimumOnVolumeVolume(Sphere<Scalar> r1, Sphere<Scalar> r2) {
     ++calls;
-    return r1.signdis(r2);
+    return r1.signdis(bXa * r2);
   }
   Scalar minimumOnVolumeObject(Sphere<Scalar> r, V3d v) {
     ++calls;
-    return r.signdis(v);
+    return r.signdis(bXa * v);
   }
   Scalar minimumOnObjectVolume(V3d v, Sphere<Scalar> r) {
     ++calls;
-    return r.signdis(v);
+    return (bXa * r).signdis(v);
   }
   Scalar minimumOnObjectObject(V3d v1, V3d v2) {
     ++calls;
-    return (v1 - v2).norm();
+    return (v1 - bXa * v2).norm();
   }
   int calls = 0;
-  X3f x = X3f::Identity();
-};
-
-struct PPIsect {
-  typedef F Scalar;
-  bool intersectVolumeVolume(Sphere<Scalar> r1, Sphere<Scalar> r2) {
-    ++calls;
-    return r1.signdis(r2) < radius;
-  }
-  bool intersectVolumeObject(Sphere<Scalar> r, V3d v) {
-    ++calls;
-    return r.signdis(v) < radius;
-  }
-  bool intersectObjectVolume(V3d v, Sphere<Scalar> r) {
-    ++calls;
-    return r.signdis(v) < radius;
-  }
-  bool intersectObjectObject(V3d v1, V3d v2) {
-    ++calls;
-    bool isect = (v1 - v2).norm() < radius;
-    result |= isect;
-    return isect;
-  }
-  int calls = 0;
-  F radius = 0.1;
-  bool result = false;
-  X3f x = X3f::Identity();
+  Xform bXa = Xform::Identity();
+  void reset() { calls = 0; }
 };
 
 TEST(eigen_bvh, test_min) {
@@ -95,13 +72,18 @@ TEST(eigen_bvh, test_min) {
     int brutecalls = minimizer.calls;
 
     // bvh
-    minimizer.calls = 0;
+    // move Pa by random X, set bXa in minimizer
+    auto X = rif::numeric::rand_xform(F(999));
+    for (auto& p : ptsA) p = X * p;
+    minimizer.bXa = X;
+
+    minimizer.reset();
     auto tcreate = Timer("tc");
-    KdBVH3Sph<double, V3d> redTree(ptsA.begin(), ptsA.end()),
-        blueTree(ptsB.begin(), ptsB.end());  // construct the trees
+    WelzlBVH<double, V3d> bvhA(ptsA.begin(), ptsA.end()),
+        bvhB(ptsB.begin(), ptsB.end());  // construct the trees
     tcreate.stop();
     auto tvbh = Timer("tbvh");
-    F bvhmin = BVMinimize(redTree, blueTree, minimizer);
+    F bvhmin = BVMinimize(bvhA, bvhB, minimizer);
     tvbh.stop();
     int bvhcalls = minimizer.calls;
 
@@ -113,22 +95,56 @@ TEST(eigen_bvh, test_min) {
               << tbrute << " " << tcreate << std::endl;
   }
 }
+
+struct PPIsect {
+  using Scalar = F;
+  using Xform = X3<F>;
+  PPIsect(F r, Xform x = Xform::Identity()) : radius(r), bXa(x) {}
+  bool intersectVolumeVolume(Sphere<Scalar> r1, Sphere<Scalar> r2) {
+    ++calls;
+    return r1.signdis(bXa * r2) < radius;
+  }
+  bool intersectVolumeObject(Sphere<Scalar> r, V3d v) {
+    ++calls;
+    return r.signdis(bXa * v) < radius;
+  }
+  bool intersectObjectVolume(V3d v, Sphere<Scalar> r) {
+    ++calls;
+    return (bXa * r).signdis(v) < radius;
+  }
+  bool intersectObjectObject(V3d v1, V3d v2) {
+    ++calls;
+    bool isect = (v1 - bXa * v2).norm() < radius;
+    result |= isect;
+    return isect;
+  }
+  void reset() {
+    calls = 0;
+    result = false;
+  }
+  int calls = 0;
+  F radius = 0.0;
+  bool result = false;
+  Xform bXa = Xform::Identity();
+};
+
 TEST(eigen_bvh, test_isect) {
   typedef std::vector<V3d, aligned_allocator<V3d> > StdVectorOfVector3d;
   std::uniform_real_distribution<> r(0, 1);
   std::mt19937& g(global_rng());
   double avg_ratio = 0.0;
   int niter = 0;
-  for (double dx = 0.001 + 0.0; dx < 2; dx += 0.05) {
+  for (double dx = 0.001 + 0.95; dx < 1.05; dx += 0.005) {
     ++niter;
+
     StdVectorOfVector3d ptsA, ptsB;
-    for (int i = 0; i < 1000; ++i) {
+    for (int i = 0; i < 100; ++i) {
       ptsA.push_back(V3d(r(g), r(g), r(g)));
       ptsB.push_back(V3d(r(g), r(g), r(g)) + V3d(dx, 0, 0));
     }
+    PPIsect query(0.1);
 
     // brute force
-    PPIsect query;
     bool bruteisect = false;
     // brute force to find closest red-blue pair
     auto tbrute = Timer("tb");
@@ -145,20 +161,28 @@ TEST(eigen_bvh, test_isect) {
     tbrute.stop();
 
     // bvh
-    query.calls = 0;
+
+    query.reset();
+
+    // WTF??? this does not cause the test to fail...
+    auto X = rif::numeric::rand_xform(F(999));
+    for (auto& p : ptsA) p = X * p;
+    query.bXa = X;  // commenting this out should fail
 
     auto tcreate = Timer("tc");
-    KdBVH3Sph<double, V3d> redTree(ptsA.begin(), ptsA.end()),
-        blueTree(ptsB.begin(), ptsB.end());  // construct the trees
+    WelzlBVH<double, V3d> bvhA(ptsA.begin(), ptsA.end()),
+        bvhB(ptsB.begin(), ptsB.end());
     tcreate.stop();
+    // std::cout << bvhA.vols[0] << std::endl;
+    // std::cout << bvhB.vols[0] << std::endl;
 
     auto tbvh = Timer("tbvh");
-    BVIntersect(redTree, blueTree, query);
+    BVIntersect(bvhA, bvhB, query);
     tbvh.stop();
     bool bvhisect = query.result;
     int bvhcalls = query.calls;
 
-    ASSERT_FLOAT_EQ(bruteisect, bvhisect);
+    ASSERT_EQ(bruteisect, bvhisect);
 
     float ratio = 1. * brutecalls / bvhcalls;
     avg_ratio += ratio;

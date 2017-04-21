@@ -1,9 +1,10 @@
-#ifndef INCLUDED_numeric_rand_xform_HH
-#define INCLUDED_numeric_rand_xform_HH
+#pragma once
 
 #include <Eigen/Geometry>
 #include <random>
-#include "numeric/util.hpp"
+#include "rif/eigen_types.hpp"
+#include "rif/global_rng.hpp"
+#include "rif/numeric/util.hpp"
 
 namespace rif {
 namespace numeric {
@@ -43,6 +44,13 @@ void rand_xform(std::mt19937 &rng,
   x.data()[9] = runif(rng) * cart_bound - cart_bound / 2.0;
   x.data()[10] = runif(rng) * cart_bound - cart_bound / 2.0;
   x.data()[11] = runif(rng) * cart_bound - cart_bound / 2.0;
+}
+
+template <class F>
+X3<F> rand_xform(F cart_bound = 512.0) {
+  X3<F> x;
+  rand_xform(global_rng(), x, cart_bound);
+  return x;
 }
 
 template <class X>
@@ -131,5 +139,3 @@ void rand_xform_sphere(std::mt19937 &rng,
 }
 }
 }
-
-#endif

@@ -64,7 +64,7 @@ auto p1range(RAiter a, RAiter b) {
 }
 
 template <typename _Scalar, typename _Object>
-class KdBVH3Sph {
+class WelzlBVH {
  public:
   static int const Dim = 3;
   typedef _Object Object;
@@ -84,15 +84,15 @@ class KdBVH3Sph {
   Vols vols;
   Objs objs;
 
-  KdBVH3Sph() {}
+  WelzlBVH() {}
 
   template <typename Iter>
-  KdBVH3Sph(Iter begin, Iter end) {
+  WelzlBVH(Iter begin, Iter end) {
     init(begin, end, 0, 0);
   }  // int is recognized by init as not being an iterator type
 
   template <typename OIter, typename BIter>
-  KdBVH3Sph(OIter begin, OIter end, BIter sphbeg, BIter sphend) {
+  WelzlBVH(OIter begin, OIter end, BIter sphbeg, BIter sphend) {
     init(begin, end, sphbeg, sphend);
   }
 
@@ -243,28 +243,30 @@ class KdBVH3Sph {
       child.push_back(from + (int)objs.size());
     } else if (to - from == 3) {
       int mid = from + 2;
-      auto subtreeobjrange = p1range(ocen.begin() + from, ocen.begin() + to);
-      nth_element(
-          ocen.begin() + from, ocen.begin() + mid, ocen.begin() + to,
-          DotComparator(most_separated_points_on_AABB(subtreeobjrange)));
+      auto subtree_objs = p1range(ocen.begin() + from, ocen.begin() + to);
+      nth_element(ocen.begin() + from, ocen.begin() + mid, ocen.begin() + to,
+                  DotComparator(most_separated_points_on_AABB(subtree_objs)));
       // AxisComparator(dim));
       build(ocen, from, mid, ovol, (dim + 1) % Dim);
       int idx1 = (int)vols.size() - 1;
-      vols.push_back(welzl_bounding_sphere(subtreeobjrange));
+      auto merge = vols[idx1].merged(ovol[ocen[mid].second]);
+      auto welzl = welzl_bounding_sphere(subtree_objs);
+      vols.push_back(welzl.radius < merge.radius ? welzl : merge);
       child.push_back(idx1);
       child.push_back(mid + (int)objs.size() - 1);
     } else {
       int mid = from + (to - from) / 2;
-      auto subtreeobjrange = p1range(ocen.begin() + from, ocen.begin() + to);
-      nth_element(
-          ocen.begin() + from, ocen.begin() + mid, ocen.begin() + to,
-          DotComparator(most_separated_points_on_AABB(subtreeobjrange)));
+      auto subtree_objs = p1range(ocen.begin() + from, ocen.begin() + to);
+      nth_element(ocen.begin() + from, ocen.begin() + mid, ocen.begin() + to,
+                  DotComparator(most_separated_points_on_AABB(subtree_objs)));
       // AxisComparator(dim));
       build(ocen, from, mid, ovol, (dim + 1) % Dim);
       int idx1 = (int)vols.size() - 1;
       build(ocen, mid, to, ovol, (dim + 1) % Dim);
       int idx2 = (int)vols.size() - 1;
-      vols.push_back(welzl_bounding_sphere(subtreeobjrange));
+      auto merge = vols[idx1].merged(vols[idx2]);
+      auto welzl = welzl_bounding_sphere(subtree_objs);
+      vols.push_back(welzl.radius < merge.radius ? welzl : merge);
       child.push_back(idx1);
       child.push_back(idx2);
     }

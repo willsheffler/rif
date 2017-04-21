@@ -1,6 +1,7 @@
 #pragma once
 
 #include <Eigen/Geometry>
+#include <iostream>
 
 namespace rif {
 
@@ -117,5 +118,12 @@ static I10 makeI10(uint64_t a, uint64_t b, uint64_t c, uint64_t d, uint64_t e,
 template <class F>
 F epsilon2() {
   return std::sqrt(std::numeric_limits<F>::epsilon());
+}
+
+template <class F>
+std::ostream& operator<<(std::ostream& out, X3<F> x) {
+  out << x.rotation() << std::endl;
+  out << x.translation().transpose();
+  return out;
 }
 }
