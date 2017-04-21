@@ -94,8 +94,8 @@ class Sphere {
 typedef Sphere<float> Spheref;
 typedef Sphere<double> Sphered;
 
-template <class F>
-std::ostream& operator<<(std::ostream& out, Sphere<F> const& s) {
+template <class Scalar>
+std::ostream& operator<<(std::ostream& out, Sphere<Scalar> const& s) {
   out << "Sphere( " << s.center.transpose() << ", " << s.radius << ")";
   return out;
 }
@@ -105,8 +105,8 @@ auto welzl_bounding_sphere_impl(Ary const& points, size_t index,
                                 std::vector<typename Ary::value_type>& sos,
                                 size_t numsos) noexcept {
   using Pt = typename Ary::value_type;
-  using F = typename Pt::Scalar;
-  using Sph = Sphere<F>;
+  using Scalar = typename Pt::Scalar;
+  using Sph = Sphere<Scalar>;
   // if no input points, the recursion has bottomed out. Now compute an
   // exact sphere based on points in set of support (zero through four points)
   if (index == 0) {
@@ -140,8 +140,8 @@ auto welzl_bounding_sphere_impl(Ary const& points, size_t index,
 template <class Ary>
 auto welzl_bounding_sphere(Ary const& points) noexcept {
   using Pt = typename Ary::value_type;
-  using F = typename Pt::Scalar;
-  using Sph = Sphere<F>;
+  using Scalar = typename Pt::Scalar;
+  using Sph = Sphere<Scalar>;
   std::vector<Pt> sos(4);
   return welzl_bounding_sphere_impl(points, points.size(), sos, 0);
 }
@@ -149,23 +149,60 @@ auto welzl_bounding_sphere(Ary const& points) noexcept {
 template <class Ary>
 auto central_bounding_sphere(Ary const& points) noexcept {
   using Pt = typename Ary::value_type;
-  using F = typename Pt::Scalar;
-  using Sph = Sphere<F>;
-  F const eps = epsilon2<F>();
+  using Scalar = typename Pt::Scalar;
+  using Sph = Sphere<Scalar>;
+  Scalar const eps = epsilon2<Scalar>();
   Pt center;
-  F radius = -1;
+  Scalar radius = -1;
   if (points.size() > 0) {
     center = Pt(0, 0, 0);
     for (size_t i = 0; i < points.size(); i++) center += points[i];
-    center /= (F)points.size();
+    center /= (Scalar)points.size();
 
     for (size_t i = 0; i < points.size(); i++) {
-      F d2 = (points[i] - center).squaredNorm();
+      Scalar d2 = (points[i] - center).squaredNorm();
       if (d2 > radius) radius = d2;
     }
     radius = sqrt(radius) + eps;
   }
   return Sph(center, radius);
+}
+
+/**
+ * @brief      Compute indices to the two most separated points of the (up to)
+ * six points defining the AABB encompassing the point set. Return these as min
+ * and max.
+ */
+template <class Ary>
+auto most_separated_points_on_AABB(Ary const& pt) {
+  using Pt = typename Ary::value_type;
+  using Scalar = typename Pt::Scalar;
+  // First find most extreme points along principal axes
+  size_t mnx = 0, mxx = 0, mny = 0, mxy = 0, mnz = 0, mxz = 0;
+  for (size_t i = 1; i < pt.size(); i++) {
+    if (pt[i][0] < pt[mnx][0]) mnx = i;
+    if (pt[i][0] > pt[mxx][0]) mxx = i;
+    if (pt[i][1] < pt[mny][1]) mny = i;
+    if (pt[i][1] > pt[mxy][1]) mxy = i;
+    if (pt[i][2] < pt[mnz][2]) mnz = i;
+    if (pt[i][2] > pt[mxz][2]) mxz = i;
+  }
+  // Compute the squared distances for the three pairs of points
+  Scalar dist2x = (pt[mxx] - pt[mnx]).dot(pt[mxx] - pt[mnx]);
+  Scalar dist2y = (pt[mxy] - pt[mny]).dot(pt[mxy] - pt[mny]);
+  Scalar dist2z = (pt[mxz] - pt[mnz]).dot(pt[mxz] - pt[mnz]);
+  // Pick the pair (mn,mx) of points most distant
+  auto mn = mnx;
+  auto mx = mxx;
+  if (dist2y > dist2x && dist2y > dist2z) {
+    mx = mxy;
+    mn = mny;
+  }
+  if (dist2z > dist2x && dist2z > dist2y) {
+    mx = mxz;
+    mn = mnz;
+  }
+  return std::make_pair(pt[mn], pt[mx]);
 }
 }
 }

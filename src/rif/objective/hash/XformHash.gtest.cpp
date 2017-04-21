@@ -325,7 +325,7 @@ void test_xform_hash_perf(double cart_resl, double ang_resl,
 
   for (int i = 0; i < N2; ++i) numeric::rand_xform(rng, samples[i]);
 
-  util::Timer<> tk;
+  util::Timer tk;
   std::vector<uint64_t> keys(N2);
   for (int i = 0; i < N2; ++i) {
     keys[i] = xh.get_key(samples[i]);
@@ -334,7 +334,7 @@ void test_xform_hash_perf(double cart_resl, double ang_resl,
   }
   time_key += (double)tk.elapsed_nano();
 
-  util::Timer<> tc;
+  util::Timer tc;
   for (int i = 0; i < N2; ++i) centers[i] = xh.get_center(keys[i]);
   time_cen += (double)tc.elapsed_nano();
 

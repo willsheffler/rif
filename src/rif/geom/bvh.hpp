@@ -20,6 +20,8 @@ namespace bvh {
 // alignment
 template <class F>
 struct V3intPair {
+  using first_type = V3<F>;
+  using secont_type = int;
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW_IF_VECTORIZABLE_FIXED_SIZE(F, 3)
   V3intPair(const V3<F> &v, int i) : first(v), second(i) {}
   V3<F> first;
@@ -44,6 +46,22 @@ struct get_bvols_helper<Objs, Vols, int> {
       out.push_back(bounding_vol(objs[i]));
   }
 };
+
+template <class RAiter>
+struct P1Range {
+  using value_type = typename RAiter::value_type::first_type;
+  RAiter a, b;
+  auto const &operator[](size_t i) const { return (a + i)->first; }
+  auto &operator[](size_t i) { return (a + i)->first; }
+  size_t size() const { return b - a; }
+};
+template <class RAiter>
+auto p1range(RAiter a, RAiter b) {
+  P1Range<RAiter> r;
+  r.a = a;
+  r.b = b;
+  return r;
+}
 
 template <typename _Scalar, typename _Object>
 class KdBVH3Sph {
@@ -101,26 +119,24 @@ class KdBVH3Sph {
     // if we have at most one object, we don't need any internal nodes
     if (n < 2) return;
 
-    Vols objvols;
+    Vols ovol;
     VIPairs ocen;
 
     // compute the bounding vols depending on BIter type
-    get_bvols_helper<Objs, Vols, BIter>()(objs, sphbeg, sphend, objvols);
+    get_bvols_helper<Objs, Vols, BIter>()(objs, sphbeg, sphend, ovol);
 
     ocen.reserve(n);
     vols.reserve(n - 1);
     child.reserve(2 * n - 2);
 
-    for (int i = 0; i < n; ++i) ocen.push_back(VIPair(objvols[i].center, i));
+    for (int i = 0; i < n; ++i) ocen.push_back(VIPair(ovol[i].center, i));
 
     // the recursive part of the algorithm
-    build(ocen, 0, n, objvols, 0);
+    build(ocen, 0, n, ovol, 0);
 
     Objs tmp(n);
     tmp.swap(objs);
     for (int i = 0; i < n; ++i) objs[i] = tmp[ocen[i].second];
-
-    welzlize_vols(ocen);
   }
 
   /** \returns the index of the root of the hierarchy */
@@ -171,75 +187,84 @@ class KdBVH3Sph {
   typedef std::vector<VIPair, Eigen::aligned_allocator<VIPair> > VIPairs;
   typedef Eigen::Matrix<Scalar, Dim, 1> VectorType;
 
-  template <class Oiter>
-  void get_subtree_leaves(Index idx, Oiter out) {
-    VolumeIterator vbeg = nullptr, vend = nullptr;
-    ObjectIterator obeg = nullptr, oend = nullptr;
-    getChildren(idx, vbeg, vend, obeg, oend);
-    // std::cout << "gco " << idx << " range: " << vend - vbeg << " vals";
-    // for (auto i = vbeg; i != vend; ++i) std::cout << " " << *i;
-    // std::cout << std::endl;
-    for (auto i = vbeg; i != vend; ++i) get_subtree_leaves(*i, out);
-    for (auto i = obeg; i != oend; ++i) ++out = *i;
-  }
+  // template <class Oiter>
+  // void get_subtree_leaves(Index idx, Oiter out) {
+  //   VolumeIterator vbeg = nullptr, vend = nullptr;
+  //   ObjectIterator obeg = nullptr, oend = nullptr;
+  //   getChildren(idx, vbeg, vend, obeg, oend);
+  //   // std::cout << "gco " << idx << " range: " << vend - vbeg << " vals";
+  //   // for (auto i = vbeg; i != vend; ++i) std::cout << " " << *i;
+  //   // std::cout << std::endl;
+  //   for (auto i = vbeg; i != vend; ++i) get_subtree_leaves(*i, out);
+  //   for (auto i = obeg; i != oend; ++i) ++out = *i;
+  // }
 
-  // todo: more efficient to build welzl sets in coodinated way?
-  void welzlize_vols(VIPairs const &ocen) {
-    std::vector<Object> subleaf;
-    for (int i = 0; i < vols.size(); ++i) {
-      subleaf.clear();
-      get_subtree_leaves(i, std::back_inserter(subleaf));
-      if (subleaf.size() > 2) {
-        auto welzl = welzl_bounding_sphere(subleaf);
-        // few pathological cases w/n=3
-        if (welzl.radius < vols[i].radius) vols[i] = welzl;
-      }
-    }
-  }
+  // // todo: more efficient to build welzl sets in coodinated way?
+  // void welzlize_vols(VIPairs const &ocen) {
+  //   std::vector<Object> subleaf;
+  //   for (int i = 0; i < vols.size(); ++i) {
+  //     subleaf.clear();
+  //     get_subtree_leaves(i, std::back_inserter(subleaf));
+  //     if (subleaf.size() > 2) {
+  //       auto welzl = welzl_bounding_sphere(subleaf);
+  //       // few pathological cases w/n=3
+  //       if (welzl.radius < vols[i].radius) vols[i] = welzl;
+  //     }
+  //   }
+  // }
 
-  struct VectorComparator  // compares vectors, or, more specifically, VIPairs
-                           // along a particular dimension
-  {
-    VectorComparator(int inDim) : dim(inDim) {}
+  struct AxisComparator {
+    int dim;
+    AxisComparator(int inDim) : dim(inDim) {}
     inline bool operator()(const VIPair &v1, const VIPair &v2) const {
       return v1.first[dim] < v2.first[dim];
     }
-    int dim;
+  };
+  struct DotComparator {
+    V3<Scalar> normal;
+    DotComparator(V3<Scalar> n) : normal(n) {}
+    template <class Pair>
+    DotComparator(Pair p) : normal(p.second - p.first) {}
+    inline bool operator()(const VIPair &v1, const VIPair &v2) const {
+      return v1.first.dot(normal) < v2.first.dot(normal);
+    }
   };
 
   // Build the part of the tree between objs[from] and objs[to] (not
   // including objs[to]). This routine partitions the ocen in [from, to) along
   // the dimension dim, recursively constructs the two halves, and adds their
   // parent node.  TODO: a cache-friendlier layout
-  void build(VIPairs &ocen, int from, int to, Vols const &objvols, int dim) {
+  void build(VIPairs &ocen, int from, int to, Vols const &ovol, int dim) {
     eigen_assert(to - from > 1);
     if (to - from == 2) {
-      auto merge =
-          objvols[ocen[from].second].merged(objvols[ocen[from + 1].second]);
+      auto merge = ovol[ocen[from].second].merged(ovol[ocen[from + 1].second]);
       vols.push_back(merge);
       child.push_back(from + (int)objs.size() - 1);
       child.push_back(from + (int)objs.size());
     } else if (to - from == 3) {
       int mid = from + 2;
-      std::nth_element(ocen.begin() + from, ocen.begin() + mid,
-                       ocen.begin() + to,
-                       VectorComparator(dim));  // partition
-      build(ocen, from, mid, objvols, (dim + 1) % Dim);
+      auto subtreeobjrange = p1range(ocen.begin() + from, ocen.begin() + to);
+      nth_element(
+          ocen.begin() + from, ocen.begin() + mid, ocen.begin() + to,
+          DotComparator(most_separated_points_on_AABB(subtreeobjrange)));
+      // AxisComparator(dim));
+      build(ocen, from, mid, ovol, (dim + 1) % Dim);
       int idx1 = (int)vols.size() - 1;
-      auto merge = vols[idx1].merged(objvols[ocen[mid].second]);
-      vols.push_back(merge);
+      vols.push_back(welzl_bounding_sphere(subtreeobjrange));
       child.push_back(idx1);
       child.push_back(mid + (int)objs.size() - 1);
     } else {
       int mid = from + (to - from) / 2;
-      nth_element(ocen.begin() + from, ocen.begin() + mid, ocen.begin() + to,
-                  VectorComparator(dim));  // partition
-      build(ocen, from, mid, objvols, (dim + 1) % Dim);
+      auto subtreeobjrange = p1range(ocen.begin() + from, ocen.begin() + to);
+      nth_element(
+          ocen.begin() + from, ocen.begin() + mid, ocen.begin() + to,
+          DotComparator(most_separated_points_on_AABB(subtreeobjrange)));
+      // AxisComparator(dim));
+      build(ocen, from, mid, ovol, (dim + 1) % Dim);
       int idx1 = (int)vols.size() - 1;
-      build(ocen, mid, to, objvols, (dim + 1) % Dim);
+      build(ocen, mid, to, ovol, (dim + 1) % Dim);
       int idx2 = (int)vols.size() - 1;
-      auto merge = vols[idx1].merged(vols[idx2]);
-      vols.push_back(merge);
+      vols.push_back(welzl_bounding_sphere(subtreeobjrange));
       child.push_back(idx1);
       child.push_back(idx2);
     }

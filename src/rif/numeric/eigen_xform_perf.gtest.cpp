@@ -32,7 +32,7 @@ void test_xform_perf() {
 
   double mintime = 9e9, tottime = 0;
   for (int iter = 0; iter < 10; ++iter) {
-    util::Timer<> t;
+    util::Timer t;
     for (int i = 0; i < NSAMP; ++i) {
       sum = sum * x;
     }

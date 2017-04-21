@@ -59,7 +59,7 @@ void test_map(Map *hp, int64_t MAXIDX, int64_t NSAMP) {
   std::uniform_int_distribution<int64_t> randindex(0, MAXIDX);
   // h.resize(NFILL/2);
 
-  util::Timer<> t;
+  util::Timer t;
   size_t count = 0;
   for (size_t i = 0; i < NSAMP; ++i) {
     size_t ri = randindex(rng);
@@ -110,7 +110,7 @@ void fill_and_test_map(Map *hp) {
 
   std::mt19937 rng2((uint64_t)0);
 
-  util::Timer<> t;
+  util::Timer t;
   size_t count = 0;
   for (size_t i = 0; i < NSAMP; ++i) {
     size_t ri = randindex(rng2);
@@ -186,7 +186,7 @@ void test_2map(MAP1 &m, std::string lm, MAP2 &n, std::string ln) {
   std::vector<size_t> ridx;
   for (size_t i = 0; i < NSAMP; ++i) ridx.push_back(randindex(rng));
 
-  util::Timer<> tm;
+  util::Timer tm;
   size_t mcount = 0;
   BOOST_FOREACH (size_t ri, ridx) {
     for (size_t j = 0; j < NROW; ++j) {
@@ -195,7 +195,7 @@ void test_2map(MAP1 &m, std::string lm, MAP2 &n, std::string ln) {
   }
   cout << lm << " rate " << tm.elapsed_nano() / NSAMP * NROW << "ns" << endl;
 
-  util::Timer<> tn;
+  util::Timer tn;
   size_t ncount = 0;
   BOOST_FOREACH (size_t ri, ridx) {
     for (size_t j = 0; j < NROW; ++j) {

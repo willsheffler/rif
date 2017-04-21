@@ -89,7 +89,7 @@ TEST(Director, test_TreeDirector) {
       util::SimpleArray<2>(20.0, 10.0), util::SimpleArray<2>(21.0, 12.0),
       util::SimpleArray<2, uint64_t>(1, 2));
 
-  util::Timer<> t;
+  util::Timer t;
   int count = 0;
   for (int resl = 0; resl < 8; ++resl) {
     // cout << "================== resl " << resl << " ======================"

@@ -60,7 +60,7 @@ void fill_map(Map &h, int64_t MAXIDX, int64_t sparsity = 100ll) {
   std::uniform_int_distribution<int64_t> randindex(0, MAXIDX);
   // h.resize(NFILL/2);
 
-  util::Timer<> t;
+  util::Timer t;
   for (int64_t i = 0; i < NFILL; ++i) h[randindex(rng)] = i;
   cout << "done fill " << (double)h.size() / 1000000 << "M  entries, "
        << (double)h.bucket_count() / 1000000000 *
@@ -84,7 +84,7 @@ void test_map(Map *hp, double *runtime, int64_t MAXIDX, int64_t NITER,
 
   // h.resize(NFILL/2);
 
-  util::Timer<> t;
+  util::Timer t;
   size_t count = 0;
   for (size_t i = 0; i < NITER; ++i) {
     size_t ri = randindex(rng);
@@ -184,7 +184,7 @@ void test_array(float const *const h, double *runtime, size_t N, int64_t NITER,
   std::uniform_int_distribution<int64_t> randindex(0, N);
   // h.resize(NFILL/2);
 
-  util::Timer<> t;
+  util::Timer t;
   float count = 0;
   for (size_t i = 0; i < NITER; ++i) {
     size_t ri = randindex(*rng);
@@ -250,7 +250,7 @@ void test_multiarray(boost::multi_array<float, 1> const *hp, double *runtime,
   std::uniform_int_distribution<int64_t> randindex(0, hp->shape()[0]);
   // h.resize(NFILL/2);
 
-  util::Timer<> t;
+  util::Timer t;
   float count = 0;
   for (size_t i = 0; i < NITER; ++i) {
     size_t ri = randindex(*rng);

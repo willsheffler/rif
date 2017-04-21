@@ -64,7 +64,7 @@ TEST(euler_angles, performance) {
     samp[i] = m;
   }
 
-  util::Timer<> t;
+  util::Timer t;
   for (int i = 0; i < NSAMP; ++i) {
     euler_angles(samp[i], euler[i]);
   }

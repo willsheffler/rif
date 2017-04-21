@@ -63,14 +63,14 @@ TEST(geom_4d, tetracontoctachoron_cell_lookup) {
   }
   // V4 const quat_pos = quat.cwiseAbs();
 
-  util::Timer<> naive;
+  util::Timer naive;
   for (int i = 0; i < NITER; ++i) {
     // (t24*samp[i]).cwiseAbs().maxCoeff(&cell[i]);
     (t24 * samp[i]).maxCoeff(&cell[i]);
   }
   cout << "bt24 naive rate:  " << (Float)NITER / naive.elapsed_nano() << endl;
 
-  util::Timer<> clever;
+  util::Timer clever;
   for (int i = 0; i < NITER; ++i) {
     numeric::get_cell_48cell(samp[i], cell2[i]);
     // this is slower !?!
@@ -137,14 +137,14 @@ TEST(geom_4d, tetracontoctachoron_half_cell_lookup) {
   }
   // V4 const quat_pos = quat.cwiseAbs();
 
-  util::Timer<> naive;
+  util::Timer naive;
   for (int i = 0; i < NITER; ++i) {
     // (t24h*samp[i]).cwiseAbs().maxCoeff(&cell[i]);
     (t24h * samp[i]).cwiseAbs().maxCoeff(&cell[i]);
   }
   cout << "hbt24 naive rate:  " << (Float)NITER / naive.elapsed_nano() << endl;
 
-  util::Timer<> clever;
+  util::Timer clever;
   for (int i = 0; i < NITER; ++i) {
     numeric::get_cell_48cell_half(samp[i], cell2[i]);
   }

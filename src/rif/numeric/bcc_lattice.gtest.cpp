@@ -121,14 +121,14 @@ F test_bcc_performance(size_t NSAMP, S const Nside, F const Width) {
       samples[i][j] = runif(rng) * 9.0 - 4.5;
 
   std::vector<size_t> indices(NSAMP);
-  util::Timer<> lookup_time;
+  util::Timer lookup_time;
   for (int i = 0; i < NSAMP; ++i) indices[i] = bcc[samples[i]];
   cout << "BCC DIM " << N
        << " lookup rate: " << (double)NSAMP / lookup_time.elapsed()
        << " sec / ";
 
   std::vector<V> centers(NSAMP);
-  util::Timer<> getval_time;
+  util::Timer getval_time;
   for (int i = 0; i < NSAMP; ++i) centers[i] = bcc[indices[i]];
   cout << " getval rate: " << (double)NSAMP / getval_time.elapsed() << " sec"
        << endl;
@@ -390,14 +390,14 @@ TEST(bcc_lattice, neighbors) {
 //    cout << endl;
 
 // //   std::vector<size_t> indices(NSAMP);
-// //   util::Timer<> lookup_time;
+// //   util::Timer lookup_time;
 // //   for(int i = 0; i < NSAMP; ++i)
 // //     indices[i] = bcc[samples[i]];
 // //   cout << N << " lookup: " << (double)NSAMP / lookup_time.elapsed() <<
 // " sec" << endl;
 
 // //   std::vector<V> centers(NSAMP);
-// //   util::Timer<> getval_time;
+// //   util::Timer getval_time;
 // //   for(int i = 0; i < NSAMP; ++i)
 // //     centers[i] = bcc[indices[i]];
 

@@ -40,7 +40,7 @@ TEST(XformMap, stores_correctly) {
 
   XformMap<Xform, double> const &xmap_test(xmap);
 
-  util::Timer<> t;
+  util::Timer t;
 
   for (int i = 0; i < dat.size(); ++i) {
     Xform const &x = dat[i].first;

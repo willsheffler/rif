@@ -115,7 +115,7 @@ TEST(bloom, bloom_filter_example) {
   // }
 
   {
-    util::Timer<> timer;
+    util::Timer timer;
     int nfalse = 0;
     for (uint64_t i = 0; i < NTEST; ++i) {
       nfalse += filter.contains(randindex(rng));
@@ -125,7 +125,7 @@ TEST(bloom, bloom_filter_example) {
     cout << "BLOOM: " << NTEST / t / 1000000.0 << "M/s" << endl;
   }
   {
-    util::Timer<> timer;
+    util::Timer timer;
     int nfalse = 0;
     for (uint64_t i = 0; i < NTEST; ++i) {
       nfalse += inserted.find(randindex(rng)) != inserted.end();
