@@ -213,7 +213,7 @@ before_script:
 script:
   - |
     if [[ $UNIT == T ]]; then
-      (python$PY tools/build_and_test.py && codecov --required -X **gcov**)
+      (python$PY tools/build_and_test.py --inplace && codecov --required -X **gcov**)
       if [ -f .ERROR ]; then exit 1; fi
     elif [[ $DOSC == T ]]; then
       (cd docs && make html)

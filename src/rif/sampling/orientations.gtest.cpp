@@ -24,7 +24,7 @@ TEST(Orientation, read_karney_datasets) {
   // std::string s;
   // while(in >> s) std::cout << s << endl;
   // todo: assuming run from project root dir
-  auto tuple = read_karney_orientation_data(str);
+  auto tuple = read_karney_orientations(str);
   Eigen::MatrixXd quats = std::get<0>(tuple);
   Eigen::VectorXd cover = std::get<1>(tuple);
 

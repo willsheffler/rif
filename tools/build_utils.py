@@ -222,17 +222,16 @@ def build_and_test():
     rebuild_fast(target='rif_cpp gtest_all',
                  cfg=cfg, force_redo_cmake=force_redo_cmake)
 
-    # TODO both here and in docs, this gets messed
-    #      up when rif is actually installed
-    libdir = os.path.abspath(get_cmake_dir('lib', cfg))
-    print('== adding to python path:', libdir, '==')
-    assert os.path.exists(libdir)
-    # need to use sys.path for this process
-    sys.path.append(libdir)
-    # need to use PYTHONPATH env for xdist subprocesses
-    add_to_pypath(libdir)
-    assert libdir in sys.path
-    assert libdir in os.environ['PYTHONPATH'].split(':')
+    if '--inplace' in sys.argv:
+        libdir = os.path.abspath(get_cmake_dir('lib', cfg))
+        print('== adding to python path:', libdir, '==')
+        assert os.path.exists(libdir)
+        # need to use sys.path for this process
+        sys.path.append(libdir)
+        # need to use PYTHONPATH env for xdist subprocesses
+        add_to_pypath(libdir)
+        assert libdir in sys.path
+        assert libdir in os.environ['PYTHONPATH'].split(':')
 
     if apps:
         for app in apps:
@@ -256,13 +255,13 @@ def build_and_test():
             args.extend('--ignore build_setup_py_Release'.split())
         for decoy in get_ignored_dirs(cfg):
             args += ['--ignore', decoy]
-        print('==========================================================================')
-        sys.stdout.write('pytest ')
-        for arg in args:
-            if arg.startswith('-'):
-                sys.stdout.write(os.linesep + '   ')
-            sys.stdout.write(' ' + arg)
-        print()
+        # print('==========================================================================')
+        # sys.stdout.write('pytest')
+        # for arg in args:
+            # if arg.startswith('-'):
+            # sys.stdout.write(os.linesep + '   ')
+            # sys.stdout.write(' ' + arg)
+        # print()
         sys.argv[1:] = args
         assert not pytest.main()
 

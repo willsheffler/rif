@@ -100,11 +100,14 @@ FIRST_SIDECHAIN_ATOM ALL
 
 
 def identity(x): return x
+
+
 def square(x): return x * x
 
 
 class EtableSpec(object):
     """metadata for an Etable"""
+
     def __init__(self, mn=0.0, mx=6.0, n=32, step=None,
                  map=(identity, identity), label='beta_nov15'):
         if not n:
@@ -203,7 +206,7 @@ if __name__ == '__main__':
     rcl.init_check()
     mock_atom = 'mock'
     patch_database_with_single_atom_params_files(mock_atom=mock_atom)
-    spec = EtableSpec(mn=0.0, mx=6, n=64, label='beta_nov15', map=(square,sqrt))
+    spec = EtableSpec(mn=0.0, mx=6, n=64, label='beta_nov15', map=(square, sqrt))
     # print(spec.dists)
     # sys.exit(0)
     sfunc = rcl.create_score_function(spec.label)
@@ -211,7 +214,7 @@ if __name__ == '__main__':
     # atypes1='CH3 Hapo'.split(),
     # atypes2='CH3 OOC Nbb Hpol Hapo Haro HNbb'.split())
     print('made eframe', eframe.shape)
-    path = rif.resources.locate_resource_file('rosetta_score_data.h5')
+    path = rif.resources.resource_path('rosetta_score_data.h5')
     h5path = '/eframes/' + mock_atom + '_dsq' + '/beta_nov15/eframe'
     print('save to', path, ':', h5path)
     store = pd.HDFStore(path)

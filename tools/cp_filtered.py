@@ -8,14 +8,14 @@ import shutil
 
 
 def main():
-    ext = sys.argv[1]
-    src = sys.argv[2]
-    dst = sys.argv[3]
-    assert ext
+    src = sys.argv[1]
+    dst = sys.argv[2]
+    exts = sys.argv[3:]
+    assert exts
     assert src != dst
     for root, dirs, files in os.walk(src):
         for file in files:
-            if file.endswith(ext):
+            if any(file.endswith(ext) for ext in exts):
                 newfile = root.replace(src, dst) + '/' + file
                 os.system('mkdir -p ' + os.path.dirname(newfile))
                 shutil.copy(root + '/' + file, newfile)

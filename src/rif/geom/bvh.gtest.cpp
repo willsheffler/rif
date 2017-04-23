@@ -2,7 +2,7 @@
 #include <iostream>
 #include <random>
 
-#include <rif/geom/bvh.hpp>
+#include "rif/geom/bvh.hpp"
 #include "rif/geom/primitive.hpp"
 #include "rif/global_rng.hpp"
 #include "rif/numeric/rand_xform.hpp"

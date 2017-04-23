@@ -79,14 +79,15 @@ for arg in sys.argv:
         _remove_from_sys_argv.append(arg)
 for arg in _remove_from_sys_argv:
     sys.argv.remove(arg)
-print('setup.py: rif args:')
-for flag, val in _rif_setup_opts.items():
-    print('    ', flag, '=', val)
+if _rif_setup_opts:
+    print('setup.py: rif args:')
+    for flag, val in _rif_setup_opts.items():
+        print('    ', flag, '=', val)
 
-print('setup.py: compiler:', get_my_compiler())
-print('setup.py: python:', get_my_python())
-for evar in "CC CXX CXXFLAGS".split():
-    print('setup.py: env:', evar, my_getenv(evar))
+# print('setup.py: compiler:', get_my_compiler())
+# print('setup.py: python:', get_my_python())
+# for evar in "CC CXX CXXFLAGS".split():
+    # print('setup.py: env:', evar, my_getenv(evar))
 
 
 class CMakeExtension(Extension):
@@ -195,11 +196,26 @@ class CMakeBuild(build_ext):
             print('setup.py exiting with returncode', e.returncode)
             sys.exit(e.returncode)
             print('this should never happen')
+        # TODO: figure out how to remove this, needed for tox
         if os.path.exists(defaultextdir):
             os.remove(defaultextdir)
-        # TODO: figure out how to remove this, needed for tox
         os.symlink(extdir, defaultextdir)
 
+
+# took these out... goal: have cmake manage everything
+# def isdatfile(f):
+#     return f.endswith('.gz') or f.endswith('csv') or f.endswith('.dat')
+
+
+# def marshal_package_data():
+#     pdat = list()
+#     for root, dirs, files in os.walk('src/rif'):
+#         d = root.replace('src/rif/', '')
+#         datfiles = [os.path.join(d, f) for f in files if isdatfile(f)]
+#         if datfiles:
+#             print('marshaling datfiles:', d)
+#             pdat.extend(datfiles)
+#     return pdat
 
 setup(
     name='rif',
@@ -213,7 +229,10 @@ setup(
     cmdclass=dict(build_ext=CMakeBuild),
     zip_safe=False,
     setup_requires=['wheel', 'pytest-runner'],
-    tests_require=['pytest', 'pytest-xdist', 'tox',
-                   'hypothesis', 'colorama', 'pytest_cpp', 'jinja2'],
+    tests_require=['pytest', 'pytest-xdist', 'hypothesis', 'colorama',
+                   'pytest_cpp', 'jinja2'],
     test_suite='pytest',
+    # packages=['rif'],
+    # package_dir={'rif': 'src/rif'},
+    # package_data={'rif': marshal_package_data()}
 )

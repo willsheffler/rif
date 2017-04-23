@@ -83,7 +83,7 @@ TEST(rand_xform, rand_xform_sphere) {
     maxrad = std::max(maxrad, thisrad);
     maxang = std::max(maxang, thisang);
     ASSERT_LE(thisrad, radius_bound);
-    ASSERT_LE(thisang, degrees_bound);
+    ASSERT_LE(thisang, degrees_bound + 0.0001);
   }
   ASSERT_LE(radius_bound * 0.98f, maxrad);
   ASSERT_LE(degrees_bound * 0.98f, maxang);

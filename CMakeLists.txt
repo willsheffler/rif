@@ -1,10 +1,10 @@
 cmake_minimum_required(VERSION 3.0)
 project(rif)
 
-message("============== CMAKE ===========================================")
+# message("============== CMAKE ===========================================")
 
 function(main)
-    message("-------------- CMAKE main --------------------------------------")
+    # message("-------------- CMAKE main --------------------------------------")
     print_config()
     add_subdirectory(external/pybind11)
     # execute_process(COMMAND rm -f ${CMAKE_CURRENT_BINARY_DIR}/rif.gen.cpp)
@@ -60,7 +60,7 @@ list(APPEND extra_libs boost_system)
 list(APPEND extra_libs boost_iostreams)
 
 function(print_config)
-    message("-------------- CMAKE print_config -------------------------------------------------")
+    # message("-------------- CMAKE print_config -------------------------------------------------")
     message("cmake: CC:  " $ENV{CC})
     message("cmake: CXX: " $ENV{CXX})
     message("cmake: CXXFLAGS: " $ENV{CXXFLAGS})
@@ -74,9 +74,9 @@ function(print_config)
 endfunction()
 
 function(copy_py_to_liboutdir)
-    message("-------------- CMAKE copy_py_to_liboutdir ----------")
-    execute_process(COMMAND python ${CMAKE_SOURCE_DIR}/tools/cp_filtered.py .py
-        ${CMAKE_SOURCE_DIR}/src/rif ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/rif
+    # message("-------------- CMAKE copy_py_to_liboutdir ----------")
+    execute_process(COMMAND python ${CMAKE_SOURCE_DIR}/tools/cp_filtered.py
+        ${CMAKE_SOURCE_DIR}/src/rif ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/rif .py .gz .dat .csv
         RESULT_VARIABLE STATUS)
     if(NOT "${STATUS}" STREQUAL "0")
         message(FATAL_ERROR "cp_filtered.py failed: ${STATUS}")
@@ -84,7 +84,7 @@ function(copy_py_to_liboutdir)
 endfunction()
 
 function(build_python_bindings)
-    message("-------------- CMAKE build_python_bindings ----------------------------------------")
+    # message("-------------- CMAKE build_python_bindings ----------------------------------------")
     set(SRCGEN ${CMAKE_SOURCE_DIR}/tools/pybind_source_gen.py)
     FILE(GLOB_RECURSE PY_CPP "./src/rif/[0-9a-zA-Z_]*.pybind.cpp")
     copy_py_to_liboutdir()
@@ -102,7 +102,7 @@ endfunction()
 
 
 function(build_gtests)
-    message("-------------- CMAKE build_gtests -------------------------------------------------")
+    # message("-------------- CMAKE build_gtests -------------------------------------------------")
     add_subdirectory(external/googletest)
     include_directories("external/googletest/include")
     list(APPEND extra_libs gtest)
@@ -129,7 +129,7 @@ function(build_gtests)
 endfunction()
 
 function(summary)
-    message("-------------- CMAKE summary ------------------------------------------------------")
+    # message("-------------- CMAKE summary ------------------------------------------------------")
     if(CCACHE_PROGRAM)
         message("cmake: add_custom_target: ccache -s")
         add_custom_target(ccache_stats ALL
@@ -144,4 +144,4 @@ endfunction()
 main()
 
 
-message("============== CMAKE DONE =========================================================")
+# message("============== CMAKE DONE =========================================================")

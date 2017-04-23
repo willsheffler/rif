@@ -4,17 +4,17 @@
 		{
 			"file_regex": "^[ ]*File \"(...*?)\", line ([0-9]*)",
 			"name": "py2_build_and_test",
-			"shell_cmd": "cd $folder && python2 tools/build_and_test.py $file 2>&1 | tee log/subl_build.log"
+			"shell_cmd": "cd $folder && python2 tools/build_and_test.py $file --inplace 2>&1 | tee log/subl_build.log"
 		},
 		{
 			"file_regex": "^[ ]*File \"(...*?)\", line ([0-9]*)",
 			"name": "py3_build_and_test",
-			"shell_cmd": "cd $folder && python3 tools/build_and_test.py $file 2>&1 | tee log/subl_build.log"
+			"shell_cmd": "cd $folder && python3 tools/build_and_test.py $file --inplace 2>&1 | tee log/subl_build.log"
 		},
 		{
 			"file_regex": "^[ ]*File \"(...*?)\", line ([0-9]*)",
 			"name": "build_and_test_noargs",
-			"shell_cmd": "cd $folder && python tools/build_and_test.py 2>&1 | tee log/subl_build.log"
+			"shell_cmd": "cd $folder && python tools/build_and_test.py --inplace 2>&1 | tee log/subl_build.log"
 		},
 		{
 			"file_regex": "^[ ]*File \"(...*?)\", line ([0-9]*)",

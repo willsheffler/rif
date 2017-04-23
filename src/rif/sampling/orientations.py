@@ -1,6 +1,8 @@
+from __future__ import print_function
 import os
+from os.path import join
 import gzip
-from rif_cpp.sampling.orientations import read_karney_orientation_data
+from rif_cpp.sampling.orientations import read_karney_orientations
 import pandas as pd
 # import numpy as np
 
@@ -14,38 +16,44 @@ else:
     StrIO = StringIO
 
 
-DATA_PATH = 'data/orientations/karney/'
+_KARNEY_PATH = os.path.join(os.path.dirname(__file__), 'data', 'karney')
 
-with open(DATA_PATH + 'index.dat') as fin:
+with open(os.path.join(_KARNEY_PATH, 'index.dat')) as fin:
     karney_index_str = fin.read()
-karney_index = pd.read_csv(StrIO(karney_index_str), sep='\s+')
+_karney_index = pd.read_csv(StrIO(karney_index_str), sep='\s+')
+
+
+def karney_data_path(fname):
+    print('_KARKEY_PATH:', _KARNEY_PATH)
+    return join(_KARNEY_PATH, fname)
 
 
 def quats_from_karney_file(fname):
     with gzip.open(fname) as input:
         if sys.version_info.major is 3:
-            quat, weight = read_karney_orientation_data(str(input.read(), 'utf-8'))
+            quat, weight = read_karney_orientations(str(input.read(), 'utf-8'))
         else:
-            quat, weight = read_karney_orientation_data(str(input.read()))
+            quat, weight = read_karney_orientations(str(input.read()))
     return quat, weight
 
 
 def karney_name_by_radius(cr):
-    i = sum(karney_index.radius > cr)
-    if i == karney_index.shape[0]:
+    i = sum(_karney_index.radius > cr)
+    if i == _karney_index.shape[0]:
         i -= 1
-    return karney_index.iloc[i, 0]
+    return _karney_index.iloc[i, 0]
 
 
 def quaternion_set_with_covering_radius_degrees(cr=63):
     print(os.getcwd())
-    fname = DATA_PATH + karney_name_by_radius(cr) + '.grid.gz'
+    fname = karney_data_path(karney_name_by_radius(cr) + '.grid.gz')
     return quats_from_karney_file(fname)
 
 
 def quaternion_set_by_name(name):
-    fname = DATA_PATH + name + '.grid.gz'
-    assert name in karney_index.name.values
+    fname = karney_data_path(name + '.grid.gz')
+    if name not in _karney_index.name.values:
+        raise IOError('unknown karney file ' + name)
     return quats_from_karney_file(fname)
 
 

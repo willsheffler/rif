@@ -7,7 +7,7 @@
 namespace py = pybind11;
 
 void RIFLIB_PYBIND_sampling_orientations(py::module &m) {
-  m.def("read_karney_orientation_data", &read_karney_orientation_data, R"pbdoc(
+  m.def("read_karney_orientations", &read_karney_orientations, R"pbdoc(
         docstring in sampling/orientations.pybind.cpp
     )pbdoc");
 }

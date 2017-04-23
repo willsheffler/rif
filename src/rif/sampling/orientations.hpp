@@ -242,7 +242,7 @@ double pind(double ind, double delta, double sigma) {
   return (sigma == 0) ? ind * delta : sinh(sigma * ind * delta) / sigma;
 }
 
-auto read_karney_orientation_data(std::string file_content) {
+auto read_karney_orientations(std::string file_content) {
   Eigen::MatrixX4d quats;
   Eigen::VectorXd cover;
 

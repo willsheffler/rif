@@ -5,20 +5,20 @@ import rif.sampling.orientations as ori
 import pytest
 
 
-def test_read_karney_orientation_data():
-    with gzip.open("data/orientations/karney/c48u1.grid.gz") as input:
+def test_read_karney_orientations():
+    with gzip.open(ori.karney_data_path('c48u1.grid.gz')) as input:
         if sys.version_info.major is 3:
-            quat, weight = ori.read_karney_orientation_data(
+            quat, weight = ori.read_karney_orientations(
                 str(input.read(), 'utf-8'))
         else:
-            quat, weight = ori.read_karney_orientation_data(str(input.read()))
+            quat, weight = ori.read_karney_orientations(str(input.read()))
     norms = np.linalg.norm(quat, axis=1)
     assert np.all(np.abs(1.0 - norms) < 0.0001)
     assert np.min(weight) == np.max(weight) == 1.0
 
 
 def test_karney_oddball():
-    with pytest.raises(AssertionError):
+    with pytest.raises(IOError):
         ori.quaternion_set_by_name('foobar')
 
 
@@ -31,7 +31,7 @@ def test_karney_10():
 
 def test_karney_lengths_weights():
     # only check smallest 20 for speed
-    for name in ori.karney_index.name[:20]:
+    for name in ori._karney_index.name[:20]:
         quat, weight = ori.quaternion_set_by_name(name)
         assert len(weight)
         assert abs(1.0 - weight.mean()) < 1e-6

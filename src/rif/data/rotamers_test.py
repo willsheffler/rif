@@ -1,11 +1,12 @@
 from __future__ import print_function
 import pytest
-from rif.datagen.rotamers import richardson_rots as rr
+from rif.data.rotamers import richardson_rots as rr
 from rif.util import rcl
 import numpy as np
 
 # @pytest.mark.skip('not implemented')
 # @pytest.mark.skipif('not rcl.HAVE_PYROSETTA')
+
 
 @pytest.mark.skip('richardson rots not implemented yet')
 def test_rotamers():
