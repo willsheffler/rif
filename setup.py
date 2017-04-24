@@ -15,59 +15,8 @@ from setuptools import setup, Extension, find_packages
 from setuptools.command.build_ext import build_ext
 from distutils.version import LooseVersion
 
-# todo: have these utility functions in a module... but how to import them
-# into setup.py...
-
-
-def get_my_compiler():
-    my_compiler = os.getenv('CXX', '').replace('/', '')
-    if not my_compiler:
-        my_compiler = "DEFAULT_CXX"
-    return my_compiler
-
-
-def get_my_python():
-    return sys.executable.replace('/', '')
-
-
-def my_getenv(name):
-    if name in os.environ:
-        return os.environ[name]
-    else:
-        return "DEFAULT_" + name
-
-
-def in_conda():
-    return ('Anaconda' in sys.version or
-            'Continuum Analytics' in sys.version or
-            'conda' in sys.executable
-            )
-
-
-def which(program):
-    import os
-
-    def is_exe(fpath):
-        return os.path.isfile(fpath) and os.access(fpath, os.X_OK)
-
-    fpath, fname = os.path.split(program)
-    if fpath:
-        if is_exe(program):
-            return program
-    else:
-        for path in os.environ["PATH"].split(os.pathsep):
-            path = path.strip('"')
-            exe_file = os.path.join(path, program)
-            if is_exe(exe_file):
-                return exe_file
-
-    return None
-
-
-def infer_config_from_build_dirname(path):
-    path = path.split('/')[0]
-    if path.startswith('build_setup_py_'):
-        return path.replace('build_setup_py_', '')
+from tools.build_utils import (get_my_compiler, get_my_python, my_getenv,
+                               in_conda, which, infer_config_from_build_dirname)
 
 
 _rif_setup_opts = defaultdict(list)

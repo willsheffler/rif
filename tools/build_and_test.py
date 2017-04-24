@@ -4,6 +4,7 @@ from __future__ import print_function
 
 import sys
 import os
+sys.path.append(os.path.dirname(__file__))  # not sure why sometimes necessary
 from build_utils import build_and_test, build_and_run_gtest_auto
 
 

@@ -8,7 +8,7 @@ import numpy as np
 # @pytest.mark.skipif('not rcl.HAVE_PYROSETTA')
 
 
-@pytest.mark.skip('richardson rots not implemented yet')
+@pytest.mark.skip(reason='richardson rots not implemented yet')
 def test_rotamers():
     print(rr)
     assert rr.shape[0] == 7
@@ -21,4 +21,4 @@ def test_rotamers():
     for i in range(rr.shape[0]):
         for chi2 in np.arange(rr.lb2[i], rr.ub2[i], 20.0):
             print('chi1/2', rr.chi1[i], chi2)
-    assert 0
+    # assert 0

@@ -1,0 +1,2 @@
+# list any files which should be excluded from the distributed rif package
+- do_not_package.yml

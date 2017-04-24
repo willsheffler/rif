@@ -79,8 +79,8 @@
 			},
 			"Linux":
 			{
-				"CC" : "clang",
-				"CXX" : "clang++",
+				"CC" : "gcc-5",
+				"CXX" : "g++-5",
 			},
 			"Windows":
 			{

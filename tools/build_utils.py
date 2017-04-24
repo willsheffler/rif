@@ -16,15 +16,65 @@ import pytest
 def get_my_compiler():
     my_compiler = os.getenv('CXX', '').replace('/', '')
     if not my_compiler:
-        my_compiler = "DEFAULT_CXX"
+        my_compiler = "CXX"
+    my_compiler = my_compiler.replace('usrbin', 'UB')
     return my_compiler
 
 
 def get_my_python():
-    return sys.executable.replace('/', '')
+    home = os.environ['HOME'] if 'HOME' in os.environ else "HOME"
+    my_python = sys.executable
+    my_python = my_python.replace('/usr/bin', 'UB')
+    my_python = my_python.replace('/bin', 'B')
+    my_python = my_python.replace('.tox', 'T')
+    my_python = my_python.replace('anaconda', 'A')
+    my_python = my_python.replace(home, 'H')
+    my_python = my_python.replace('python', 'PY')
+    my_python = my_python.replace('rif', 'R')
+    my_python = my_python.replace('/', '')
+    return my_python
 
 
-# todo: remove the above dups from setup.py
+def my_getenv(name):
+    if name in os.environ:
+        return os.environ[name]
+    else:
+        return "DEFAULT_" + name
+
+
+def in_conda():
+    return ('Anaconda' in sys.version or
+            'Continuum Analytics' in sys.version or
+            'conda' in sys.executable
+            )
+
+
+def which(program):
+    import os
+
+    def is_exe(fpath):
+        return os.path.isfile(fpath) and os.access(fpath, os.X_OK)
+
+    fpath, fname = os.path.split(program)
+    if fpath:
+        if is_exe(program):
+            return program
+    else:
+        for path in os.environ["PATH"].split(os.pathsep):
+            path = path.strip('"')
+            exe_file = os.path.join(path, program)
+            if is_exe(exe_file):
+                return exe_file
+
+    return None
+
+
+def infer_config_from_build_dirname(path):
+    path = os.path.basename(os.path.dirname(path))
+    if path.startswith('build_'):
+        return path.replace('build_', '')
+    return 'Release'
+
 
 def in_ci_environment():
     return 'CI' in os.environ or 'READTHEDOCS' in os.environ
@@ -45,15 +95,17 @@ def get_proj_root():
 
 
 def get_build_dir(cfg='Release'):
-    path = get_proj_root() + '/build_setup_py_' + cfg
-    return path
+    d = 'build_' + cfg
+    return os.path.join(get_proj_root(), d)
 
 
 def get_cmake_dir(prefix, cfg):
     """get directory setup.py builds stuff in, prefix is lib or temp"""
     version = '{}.{}'.format(sys.version_info.major, sys.version_info.minor)
-    path = get_build_dir(cfg) + '/' + prefix + '*' + \
-        version + '-' + get_my_python() + '-' + get_my_compiler()
+    path = os.path.join(get_build_dir(cfg), prefix + '*' +
+                        version + '-' + get_my_python() + '-' +
+                        get_my_compiler())
+    print('path:', path)
     libdir = (glob.glob(path))
     assert len(libdir) == 1
     assert os.path.exists(libdir[0])
@@ -61,6 +113,7 @@ def get_cmake_dir(prefix, cfg):
 
 
 def get_ignored_dirs(cfg):
+    d, lib = os.path.split(get_cmake_dir('lib', cfg))
     d, tgt = os.path.split(get_cmake_dir('temp', cfg))
     path = get_build_dir(cfg)
     decoys = os.listdir(path)
@@ -68,11 +121,13 @@ def get_ignored_dirs(cfg):
     # print(x)
     # print('tgt', tgt)
     assert tgt in decoys
+    assert lib in decoys
     # print(len(decoys))
     decoys.remove(tgt)
+    decoys.remove(lib)
     # print(len(decoys))
     assert not tgt in decoys
-    return [d + '/' + x for x in decoys]
+    return [os.path.join(d, x) for x in decoys]
 
 
 def which(program):
@@ -110,15 +165,15 @@ def add_to_pypath(newpath):
         os.environ['PYTHONPATH'] += ':' + current
 
 
-def rebuild_setup_py_rif(cfg='Release'):
+def rebuild_rif(cfg='Release'):
     proj_root = get_proj_root()
     assert not os.system('cd ' + proj_root + '; ' + sys.executable +
-                         ' setup.py build --build-base=build_setup_py_' + cfg)
+                         ' setup.py build --build-base=build_' + cfg)
 
 
 def make_docs(kind='html', cfg='Release'):
     proj_root = get_proj_root()
-    rebuild_setup_py_rif()
+    rebuild_rif()
     add_to_pypath(get_cmake_dir('lib', cfg=cfg))
     return os.system('cd ' + proj_root + '/docs; make ' + kind)
 
@@ -196,18 +251,24 @@ def rebuild_fast(target='rif_cpp', cfg='Release', force_redo_cmake=False):
         ncpu = multiprocessing.cpu_count()
         return os.system('cd ' + cmake_dir + '; ' + makeexe + ' -j%i ' % ncpu + target)
     except Exception as e:
-        return rebuild_setup_py_rif(cfg=cfg)
+        return rebuild_rif(cfg=cfg)
 
 
 def build_and_test():
     assert os.path.exists('CMakeLists.txt') and os.path.exists('setup.py')
     print("== build_and_test ==")
     cfg = 'Release'
+    libdir = os.path.abspath(get_cmake_dir('lib', cfg))
+    builddir = os.path.dirname(libdir)
+    srcdir = os.path.abspath('src')
     testfiles = [x for x in sys.argv[1:] if x.endswith('.py') and
                  os.path.basename(x).startswith('test') or x.endswith('test.py')]
     testfiles.extend(x.replace('.py', '_test.py') for x in sys.argv[1:]
                      if x.endswith('.py') and
                      os.path.exists(x.replace('.py', '_test.py')))
+    testfiles = [f.replace(srcdir, libdir) for f in testfiles]
+    # print(testfiles)
+    # sys.exit(-1)
     testfiles.extend(x.replace('.pybind.cpp', '_test.py') for x in sys.argv[1:]
                      if x.endswith('.pybind.cpp') and
                      os.path.exists(x.replace('.pybind.cpp', '_test.py')))
@@ -223,7 +284,6 @@ def build_and_test():
                  cfg=cfg, force_redo_cmake=force_redo_cmake)
 
     if '--inplace' in sys.argv:
-        libdir = os.path.abspath(get_cmake_dir('lib', cfg))
         print('== adding to python path:', libdir, '==')
         assert os.path.exists(libdir)
         # need to use sys.path for this process
@@ -244,24 +304,25 @@ def build_and_test():
         ncpu = get_ncpu()
         args = list(testfiles)
         if not (testfiles or gtests):
-            args = ['.']
+            args = ['.', '--pyargs', 'rif']
+        args.extend(['--ignore', 'build'])
+        args.extend(['--ignore', 'src'])
         if not no_xdist:
             # args.extend('--cov=./src -n{}'.format(ncpu).split())
             args.extend('-n{}'.format(ncpu).split())
         if gtests:
             args.extend(['-k', ' or '.join(gtests)])
-        args.extend('--ignore build'.split())
         if testfiles and not gtests:
-            args.extend('--ignore build_setup_py_Release'.split())
+            args.extend(['--ignore', builddir])
         for decoy in get_ignored_dirs(cfg):
             args += ['--ignore', decoy]
-        # print('==========================================================================')
-        # sys.stdout.write('pytest')
-        # for arg in args:
-            # if arg.startswith('-'):
-            # sys.stdout.write(os.linesep + '   ')
-            # sys.stdout.write(' ' + arg)
-        # print()
+        print('==============================================================')
+        sys.stdout.write('pytest' + os.linesep + '   ')
+        for arg in args:
+            if arg.startswith('-'):
+                sys.stdout.write(os.linesep + '   ')
+            sys.stdout.write(' ' + arg)
+        print()
         sys.argv[1:] = args
         assert not pytest.main()
 
