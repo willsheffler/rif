@@ -15,10 +15,11 @@ if __name__ == '__main__':
             sys.exit(build_and_test())
         except Exception as e:
             t, v, tb = sys.exc_info()
-            print("error running build_and_test")
-            print(t)
-            print(v)
-            print(tb)
+            print('==========================================================')
+            print("error running build_and_test, traceback:")
+            print('==========================================================')
+            print(e)
+            tb.print_tb()
             with open('.ERROR', 'w') as out:
                 out.write(str(e))
     else:
