@@ -47,7 +47,7 @@ struct PPMin {
   void reset() { calls = 0; }
 };
 
-TEST(eigen_bvh, test_min) {
+TEST(bvh, test_min) {
   typedef std::vector<V3d, aligned_allocator<V3d> > StdVectorOfVector3d;
   StdVectorOfVector3d ptsA, ptsB;
   std::uniform_real_distribution<> r(0, 1);
@@ -128,7 +128,7 @@ struct PPIsect {
   Xform bXa = Xform::Identity();
 };
 
-TEST(eigen_bvh, test_isect) {
+TEST(bvh, test_isect) {
   typedef std::vector<V3d, aligned_allocator<V3d> > StdVectorOfVector3d;
   std::uniform_real_distribution<> r(0, 1);
   std::mt19937& g(global_rng());

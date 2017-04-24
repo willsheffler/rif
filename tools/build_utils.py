@@ -105,9 +105,12 @@ def get_cmake_dir(prefix, cfg):
     path = os.path.join(get_build_dir(cfg), prefix + '*' +
                         version + '-' + get_my_python() + '-' +
                         get_my_compiler())
-    print('path:', path)
-    libdir = (glob.glob(path))
-    assert len(libdir) == 1
+    libdir = glob.glob(path)
+    if not libdir:
+        return None
+    if len(libdir) is not 1:
+        print('    libdir:', libdir)
+    assert len(libdir) is 1
     assert os.path.exists(libdir[0])
     return libdir[0]
 
@@ -258,15 +261,12 @@ def build_and_test():
     assert os.path.exists('CMakeLists.txt') and os.path.exists('setup.py')
     print("== build_and_test ==")
     cfg = 'Release'
-    libdir = os.path.abspath(get_cmake_dir('lib', cfg))
-    builddir = os.path.dirname(libdir)
     srcdir = os.path.abspath('src')
     testfiles = [x for x in sys.argv[1:] if x.endswith('.py') and
                  os.path.basename(x).startswith('test') or x.endswith('test.py')]
     testfiles.extend(x.replace('.py', '_test.py') for x in sys.argv[1:]
                      if x.endswith('.py') and
                      os.path.exists(x.replace('.py', '_test.py')))
-    testfiles = [f.replace(srcdir, libdir) for f in testfiles]
     # print(testfiles)
     # sys.exit(-1)
     testfiles.extend(x.replace('.pybind.cpp', '_test.py') for x in sys.argv[1:]
@@ -276,18 +276,21 @@ def build_and_test():
     gtests = get_gtests(sys.argv[1:])
     apps = [x for x in sys.argv[1:] if '/rif/apps/' in x]
     tests = [x for x in sys.argv[1:] if '/rif/apps/' not in x]
-    print('calling rebuild_fast')
+    # print('== calling rebuild_fast ==')
     no_xdist = len(testfiles) or len(gtests)
     no_xdist |= os.system('egrep "#.*cpp_files" pytest.ini') == 0
     force_redo_cmake = len(pybindfiles) or not no_xdist or src_dir_new_file()
     rebuild_fast(target='rif_cpp gtest_all',
                  cfg=cfg, force_redo_cmake=force_redo_cmake)
+    libdir = os.path.abspath(get_cmake_dir('lib', cfg))
+    builddir = os.path.dirname(libdir)
+    testfiles = [f.replace(srcdir, libdir) for f in testfiles]
 
     if '--inplace' in sys.argv:
         print('== adding to python path:', libdir, '==')
         assert os.path.exists(libdir)
         # need to use sys.path for this process
-        sys.path.append(libdir)
+        sys.path.insert(0, libdir)
         # need to use PYTHONPATH env for xdist subprocesses
         add_to_pypath(libdir)
         assert libdir in sys.path
@@ -310,12 +313,14 @@ def build_and_test():
         if not no_xdist:
             # args.extend('--cov=./src -n{}'.format(ncpu).split())
             args.extend('-n{}'.format(ncpu).split())
+            pass
         if gtests:
             args.extend(['-k', ' or '.join(gtests)])
         if testfiles and not gtests:
             args.extend(['--ignore', builddir])
         for decoy in get_ignored_dirs(cfg):
             args += ['--ignore', decoy]
+
         print('==============================================================')
         sys.stdout.write('pytest' + os.linesep + '   ')
         for arg in args:
@@ -323,11 +328,18 @@ def build_and_test():
                 sys.stdout.write(os.linesep + '   ')
             sys.stdout.write(' ' + arg)
         print()
+        if in_ci_environment():
+            print('    sys.path:')
+            for p in sys.path:
+                print('       ', p)
+            print('    cwd:', os.getcwd())
+            # sys.argv[0] = 'py.test'
         sys.argv[1:] = args
         assert not pytest.main()
 
 
 def make_gtest_auto_cpp(files, cmake_dir):
+    # print('make_gtest_auto_cpp!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
     includes = os.linesep.join("#include <%s>" % f for f in files)
     code = """#include "test/gtest_util.hpp"
 %s
@@ -346,6 +358,7 @@ int main(int argc, char **argv) {
 
 
 def build_and_run_gtest_auto():
+    # print('build_and_run_gtest_auto !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
     try:
         cmake_dir = get_cmake_dir('temp', cfg='Release')
     except AssertionError:
@@ -355,7 +368,9 @@ def build_and_run_gtest_auto():
     files.extend(x.replace('.hpp', '.gtest.cpp') for x in sys.argv
                  if x.endswith('.hpp') and
                  os.path.exists(x.replace('.hpp', '.gtest.cpp')))
-    if not len(files) or len(files) + 1 is not len(sys.argv):
+    # print('    files:', files)
+    # nargs = len([x for x in sys.argv if not x.startswith('-')])
+    if not len(files): #  or len(files) + 1 != nargs:
         raise NotImplementedError
     make_gtest_auto_cpp(files, cmake_dir)
     assert not os.system('cd ' + cmake_dir + ' && ninja gtest_auto')
