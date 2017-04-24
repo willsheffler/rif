@@ -1,3 +1,4 @@
+PyYAML
 breathe
 colorama
 future
@@ -13,5 +14,4 @@ pytest-xdist
 sphinx_rtd_theme
 enum34
 mock
-pyyaml
 -e external/hacked_packages/pytest-cpp-0.4

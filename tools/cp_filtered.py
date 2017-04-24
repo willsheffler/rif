@@ -4,7 +4,11 @@ from __future__ import print_function
 import os
 import sys
 import shutil
-import yaml
+try:
+    import yaml
+    _have_yaml = True
+except ImportError:
+    _have_yaml = False
 
 
 def main():
@@ -13,7 +17,10 @@ def main():
     exts = sys.argv[3:]
     assert exts
     assert src != dst
-    exclude = set(yaml.load(os.path.join(src, 'do_not_package.yml')))
+    if _have_yaml:
+        exclude = set(yaml.load(os.path.join(src, 'do_not_package.yml')))
+    else:
+        exclude = []
     for root, dirs, files in os.walk(src):
         for file in files:
             if file in exclude or os.path.basename(file) in exclude:

@@ -19,7 +19,6 @@ if __name__ == '__main__':
             t, v, tb = sys.exc_info()
             with open('.ERROR', 'w') as out:
                 out.write(str(e))
-                out.write(traceback.print_tb(tb))
             print('==========================================================')
             print("error running build_and_test, traceback:")
             print('==========================================================')
