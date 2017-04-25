@@ -65,7 +65,9 @@
 				"external/googletest",
 				"external/include",
 				"external/pybind11",
-				"deps"
+				"deps",
+				"dist",
+				"*.egg-info",
 			],
 			"path": ".."
 		}

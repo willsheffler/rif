@@ -3,8 +3,10 @@ from builtins import bytes
 
 import glob
 import os
+from os.path import join, abspath, dirname, basename, exists
 import sys
 import multiprocessing
+import shutil
 import re
 import filecmp
 
@@ -62,7 +64,7 @@ def which(program):
     else:
         for path in os.environ["PATH"].split(os.pathsep):
             path = path.strip('"')
-            exe_file = os.path.join(path, program)
+            exe_file = join(path, program)
             if is_exe(exe_file):
                 return exe_file
 
@@ -70,7 +72,7 @@ def which(program):
 
 
 def infer_config_from_build_dirname(path):
-    path = os.path.basename(os.path.dirname(path))
+    path = basename(dirname(path))
     if path.startswith('build_'):
         return path.replace('build_', '')
     return 'Release'
@@ -82,10 +84,10 @@ def in_ci_environment():
 
 def get_proj_root():
     """find rood dir of this project by looking for .git and external"""
-    proj_root = os.path.abspath('.')
+    proj_root = abspath('.')
     while proj_root != '/':
-        if (not os.path.exists(proj_root + '/.git') and
-                not os.path.exists(proj_root + '/external')):
+        if (not exists(proj_root + '/.git') and
+                not exists(proj_root + '/external')):
             proj_root = '/'.join(proj_root.split('/')[:-1])
         else:
             break
@@ -96,13 +98,13 @@ def get_proj_root():
 
 def get_build_dir(cfg='Release'):
     d = 'build_' + cfg
-    return os.path.join(get_proj_root(), d)
+    return join(get_proj_root(), d)
 
 
 def get_cmake_dir(prefix, cfg):
     """get directory setup.py builds stuff in, prefix is lib or temp"""
     version = '{}.{}'.format(sys.version_info.major, sys.version_info.minor)
-    path = os.path.join(get_build_dir(cfg), prefix + '*' +
+    path = join(get_build_dir(cfg), prefix + '*' +
                         version + '-' + get_my_python() + '-' +
                         get_my_compiler())
     libdir = glob.glob(path)
@@ -111,7 +113,7 @@ def get_cmake_dir(prefix, cfg):
     if len(libdir) is not 1:
         print('    libdir:', libdir)
     assert len(libdir) is 1
-    assert os.path.exists(libdir[0])
+    assert exists(libdir[0])
     return libdir[0]
 
 
@@ -130,7 +132,7 @@ def get_ignored_dirs(cfg):
     decoys.remove(lib)
     # print(len(decoys))
     assert not tgt in decoys
-    return [os.path.join(d, x) for x in decoys]
+    return [join(d, x) for x in decoys]
 
 
 def which(program):
@@ -147,7 +149,7 @@ def which(program):
     else:
         for path in os.environ["PATH"].split(os.pathsep):
             path = path.strip('"')
-            exe_file = os.path.join(path, program)
+            exe_file = join(path, program)
             if is_exe(exe_file):
                 return exe_file
 
@@ -162,7 +164,7 @@ def add_to_pypath(newpath):
     current = None
     if 'PYTHONPATH' in os.environ:
         current = os.environ['PYTHONPATH']
-    os.environ['PYTHONPATH'] = ':'.join(os.path.abspath(p) for p in newpath)
+    os.environ['PYTHONPATH'] = ':'.join(abspath(p) for p in newpath)
     print('== added to PYTHONPATH:', os.environ['PYTHONPATH'], '==')
     if current:
         os.environ['PYTHONPATH'] += ':' + current
@@ -219,7 +221,7 @@ def get_ncpu():
 def get_gtests(args_in):
     args = set(args_in)
     args.update(x.replace('.hpp', '.gtest.cpp') for x in args_in
-                if os.path.exists(x.replace('.hpp', '.gtest.cpp')))
+                if exists(x.replace('.hpp', '.gtest.cpp')))
     gtests = set()
     for gtestfile in (x for x in args if x.endswith('.gtest.cpp')):
         print("    get_gtests", gtestfile)
@@ -235,7 +237,7 @@ def src_dir_new_file():
     fname = '.__build_utils_src_dir_contents'
     ftemp = '.__build_utils_src_dir_contents_tmp'
     os.system('find ./src -name \\*.cpp > ' + ftemp)
-    are_same = filecmp.cmp(fname, ftemp) if os.path.exists(fname) else False
+    are_same = filecmp.cmp(fname, ftemp) if exists(fname) else False
     if not are_same:
         os.rename(ftemp, fname)
     else:
@@ -254,24 +256,27 @@ def rebuild_fast(target='rif_cpp', cfg='Release', force_redo_cmake=False):
         ncpu = multiprocessing.cpu_count()
         return os.system('cd ' + cmake_dir + '; ' + makeexe + ' -j%i ' % ncpu + target)
     except Exception as e:
+        print('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
+        print(type(e))
+        print('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
         return rebuild_rif(cfg=cfg)
 
 
 def build_and_test():
-    assert os.path.exists('CMakeLists.txt') and os.path.exists('setup.py')
+    assert exists('CMakeLists.txt') and exists('setup.py')
     print("== build_and_test ==")
     cfg = 'Release'
-    srcdir = os.path.abspath('src')
+    srcdir = abspath('src')
     testfiles = [x for x in sys.argv[1:] if x.endswith('.py') and
-                 os.path.basename(x).startswith('test') or x.endswith('test.py')]
+                 basename(x).startswith('test') or x.endswith('test.py')]
     testfiles.extend(x.replace('.py', '_test.py') for x in sys.argv[1:]
                      if x.endswith('.py') and
-                     os.path.exists(x.replace('.py', '_test.py')))
+                     exists(x.replace('.py', '_test.py')))
     # print(testfiles)
     # sys.exit(-1)
     testfiles.extend(x.replace('.pybind.cpp', '_test.py') for x in sys.argv[1:]
                      if x.endswith('.pybind.cpp') and
-                     os.path.exists(x.replace('.pybind.cpp', '_test.py')))
+                     exists(x.replace('.pybind.cpp', '_test.py')))
     pybindfiles = [x for x in sys.argv[1:] if x.endswith('.pybind.cpp')]
     gtests = get_gtests(sys.argv[1:])
     apps = [x for x in sys.argv[1:] if '/rif/apps/' in x]
@@ -282,13 +287,18 @@ def build_and_test():
     force_redo_cmake = len(pybindfiles) or not no_xdist or src_dir_new_file()
     rebuild_fast(target='rif_cpp gtest_all',
                  cfg=cfg, force_redo_cmake=force_redo_cmake)
-    libdir = os.path.abspath(get_cmake_dir('lib', cfg))
-    builddir = os.path.dirname(libdir)
-    testfiles = [f.replace(srcdir, libdir) for f in testfiles]
+    libdir = abspath(get_cmake_dir('lib', cfg))
+    builddir = dirname(libdir)
+    testfiles_in_lib = [f.replace(srcdir, libdir) for f in testfiles]
+    for a, b in zip(testfiles, testfiles_in_lib):
+        shutil.copyfile(a, b)
+        shutil.copyfile(a.replace('_test.py', '.py'), b.replace('_test.py', '.py'))
+    shutil.copy(join(srcdir, 'rif', 'conftest.py'), join(libdir, 'rif', 'conftest.py'))
+    testfiles = testfiles_in_lib
 
     if '--inplace' in sys.argv:
         print('== adding to python path:', libdir, '==')
-        assert os.path.exists(libdir)
+        assert exists(libdir)
         # need to use sys.path for this process
         sys.path.insert(0, libdir)
         # need to use PYTHONPATH env for xdist subprocesses
@@ -367,7 +377,7 @@ def build_and_run_gtest_auto():
     files = [x for x in sys.argv[1:] if x.endswith('.gtest.cpp')]
     files.extend(x.replace('.hpp', '.gtest.cpp') for x in sys.argv
                  if x.endswith('.hpp') and
-                 os.path.exists(x.replace('.hpp', '.gtest.cpp')))
+                 exists(x.replace('.hpp', '.gtest.cpp')))
     # print('    files:', files)
     # nargs = len([x for x in sys.argv if not x.startswith('-')])
     if not len(files): #  or len(files) + 1 != nargs:

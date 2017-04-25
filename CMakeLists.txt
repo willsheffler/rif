@@ -76,7 +76,7 @@ endfunction()
 function(copy_py_to_liboutdir)
     # message("-------------- CMAKE copy_py_to_liboutdir ----------")
     execute_process(COMMAND python ${CMAKE_SOURCE_DIR}/tools/cp_filtered.py
-        ${CMAKE_SOURCE_DIR}/src/rif ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/rif .py .gz .dat .csv .txt
+        ${CMAKE_SOURCE_DIR}/src/rif ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/rif .py .gz .dat .csv .txt .pdb
         RESULT_VARIABLE STATUS)
     if(NOT "${STATUS}" STREQUAL "0")
         message(FATAL_ERROR "cp_filtered.py failed: ${STATUS}")
