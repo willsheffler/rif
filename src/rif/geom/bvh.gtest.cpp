@@ -11,7 +11,6 @@
 using namespace Eigen;
 using namespace rif;
 using namespace rif::geom;
-using namespace rif::geom::bvh;
 
 using F = double;
 using Timer = util::Timer;
@@ -20,7 +19,7 @@ namespace Eigen {
 auto bounding_vol(V3d v) { return Sphered(v); }
 }
 
-namespace rif_test_bvh_eigen_bvh {
+namespace rif_geom_bvh_test {
 
 struct PPMin {
   typedef F Scalar;

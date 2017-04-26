@@ -8,13 +8,12 @@
 #include <algorithm>
 #include <queue>
 
-#include <unsupported/Eigen/src/BVH/BVAlgorithms.h>
+#include "bvh_algo.hpp"
 
 #include "rif/geom/primitive.hpp"
 
 namespace rif {
 namespace geom {
-namespace bvh {
 
 // internal pair class for the BVH--used instead of std::pair because of
 // alignment
@@ -272,6 +271,5 @@ class WelzlBVH {
     }
   }
 };
-}
 }
 }

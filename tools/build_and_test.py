@@ -6,12 +6,12 @@ import sys
 import os
 import traceback
 sys.path.append(os.path.dirname(__file__))  # not sure why sometimes necessary
-from build_utils import build_and_test, build_and_run_gtest_auto
+from build_utils import build_and_test, build_and_run_gtest_auto, _VERBOSE
 
 
 if __name__ == '__main__':
-    print('== build_and_test.py start ==')
-    if 'CI' in os.environ:
+    if _VERBOSE:
+        print('== build_and_test.py start ==')
         print('== in ci ==')
         try:
             sys.exit(build_and_test())

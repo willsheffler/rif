@@ -12,8 +12,6 @@ import filecmp
 
 import pytest
 
-# todo this is a dup from setup.py....
-
 
 def get_my_compiler():
     my_compiler = os.getenv('CXX', '').replace('/', '')
@@ -52,8 +50,6 @@ def in_conda():
 
 
 def which(program):
-    import os
-
     def is_exe(fpath):
         return os.path.isfile(fpath) and os.access(fpath, os.X_OK)
 
@@ -67,7 +63,6 @@ def which(program):
             exe_file = join(path, program)
             if is_exe(exe_file):
                 return exe_file
-
     return None
 
 
@@ -78,8 +73,11 @@ def infer_config_from_build_dirname(path):
     return 'Release'
 
 
-def in_ci_environment():
+def in_CI_environment():
     return 'CI' in os.environ or 'READTHEDOCS' in os.environ
+
+
+_VERBOSE = in_CI_environment()
 
 
 def get_proj_root():
@@ -104,9 +102,8 @@ def get_build_dir(cfg='Release'):
 def get_cmake_dir(prefix, cfg):
     """get directory setup.py builds stuff in, prefix is lib or temp"""
     version = '{}.{}'.format(sys.version_info.major, sys.version_info.minor)
-    path = join(get_build_dir(cfg), prefix + '*' +
-                        version + '-' + get_my_python() + '-' +
-                        get_my_compiler())
+    path = join(get_build_dir(cfg), prefix + '*' + version + '-' +
+                get_my_python() + '-' + get_my_compiler())
     libdir = glob.glob(path)
     if not libdir:
         return None
@@ -131,29 +128,8 @@ def get_ignored_dirs(cfg):
     decoys.remove(tgt)
     decoys.remove(lib)
     # print(len(decoys))
-    assert not tgt in decoys
+    assert tgt not in decoys
     return [join(d, x) for x in decoys]
-
-
-def which(program):
-    """like linux which"""
-    import os
-
-    def is_exe(fpath):
-        return os.path.isfile(fpath) and os.access(fpath, os.X_OK)
-
-    fpath, fname = os.path.split(program)
-    if fpath:
-        if is_exe(program):
-            return program
-    else:
-        for path in os.environ["PATH"].split(os.pathsep):
-            path = path.strip('"')
-            exe_file = join(path, program)
-            if is_exe(exe_file):
-                return exe_file
-
-    return None
 
 
 def add_to_pypath(newpath):
@@ -165,7 +141,8 @@ def add_to_pypath(newpath):
     if 'PYTHONPATH' in os.environ:
         current = os.environ['PYTHONPATH']
     os.environ['PYTHONPATH'] = ':'.join(abspath(p) for p in newpath)
-    print('== added to PYTHONPATH:', os.environ['PYTHONPATH'], '==')
+    if _VERBOSE:
+        print('== added to PYTHONPATH:', os.environ['PYTHONPATH'], '==')
     if current:
         os.environ['PYTHONPATH'] += ':' + current
 
@@ -210,7 +187,7 @@ def get_ncpu():
     ncpu = multiprocessing.cpu_count()
     if ncpu > 4:
         ncpu = int(ncpu / 2)
-    if in_ci_environment():
+    if in_CI_environment():
         ncpu = min(ncpu, 4)
         os.system('uname -a')
         print('build_utils.py: multiprocessing.cpu_count() = ',
@@ -224,7 +201,8 @@ def get_gtests(args_in):
                 if exists(x.replace('.hpp', '.gtest.cpp')))
     gtests = set()
     for gtestfile in (x for x in args if x.endswith('.gtest.cpp')):
-        print("    get_gtests", gtestfile)
+        if _VERBOSE:
+            print("    get_gtests", gtestfile)
         with open(gtestfile) as file:
             contents = file.read()
             for match in re.findall("TEST\(\s*(\S+?),\s*(\S+?)\s*\)", contents):
@@ -245,26 +223,28 @@ def src_dir_new_file():
     return not are_same
 
 
+def filter_testfiles(testfiles):
+    testfiles = [x for x in testfiles if '/tools/' not in x]
+    return testfiles
+
+
 def rebuild_fast(target='rif_cpp', cfg='Release', force_redo_cmake=False):
     try:
         if force_redo_cmake:
-            raise Exception
+            raise OSError
         cmake_dir = get_cmake_dir('temp', cfg=cfg)
         makeexe = 'ninja'
         if not which('ninja'):
             makeexe = 'make'
         ncpu = multiprocessing.cpu_count()
         return os.system('cd ' + cmake_dir + '; ' + makeexe + ' -j%i ' % ncpu + target)
-    except Exception as e:
-        print('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
-        print(type(e))
-        print('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
+    except OSError:
         return rebuild_rif(cfg=cfg)
 
 
 def build_and_test():
     assert exists('CMakeLists.txt') and exists('setup.py')
-    print("== build_and_test ==")
+    # print("== build_and_test ==")
     cfg = 'Release'
     srcdir = abspath('src')
     testfiles = [x for x in sys.argv[1:] if x.endswith('.py') and
@@ -289,6 +269,7 @@ def build_and_test():
                  cfg=cfg, force_redo_cmake=force_redo_cmake)
     libdir = abspath(get_cmake_dir('lib', cfg))
     builddir = dirname(libdir)
+    testfiles = filter_testfiles(testfiles)
     testfiles_in_lib = [f.replace(srcdir, libdir) for f in testfiles]
     for a, b in zip(testfiles, testfiles_in_lib):
         shutil.copyfile(a, b)
@@ -297,7 +278,8 @@ def build_and_test():
     testfiles = testfiles_in_lib
 
     if '--inplace' in sys.argv:
-        print('== adding to python path:', libdir, '==')
+        if _VERBOSE:
+            print('== adding to python path:', libdir, '==')
         assert exists(libdir)
         # need to use sys.path for this process
         sys.path.insert(0, libdir)
@@ -330,15 +312,14 @@ def build_and_test():
             args.extend(['--ignore', builddir])
         for decoy in get_ignored_dirs(cfg):
             args += ['--ignore', decoy]
-
-        print('==============================================================')
-        sys.stdout.write('pytest' + os.linesep + '   ')
-        for arg in args:
-            if arg.startswith('-'):
-                sys.stdout.write(os.linesep + '   ')
-            sys.stdout.write(' ' + arg)
-        print()
-        if in_ci_environment():
+        if _VERBOSE:
+            print('==============================================================')
+            sys.stdout.write('pytest' + os.linesep + '   ')
+            for arg in args:
+                if arg.startswith('-'):
+                    sys.stdout.write(os.linesep + '   ')
+                sys.stdout.write(' ' + arg)
+            print()
             print('    sys.path:')
             for p in sys.path:
                 print('       ', p)
@@ -356,31 +337,38 @@ def make_gtest_auto_cpp(files, cmake_dir):
 int main(int argc, char **argv) {
   std::vector<std::string> args;
   for (int i = 0; i < argc; ++i) args.push_back(std::string(argv[i]));
-  std::cout << "int main(int argc, char **argv) FROM " << __FILE__ << std::endl;
+  // std::cout << "int main(int argc, char **argv) FROM " << __FILE__ << std::endl;
   init_gtest_tests(args);
   return run_gtest_tests();
 }
 """ % includes
     if includes:
-        print('build_and_run_gtest_auto.py: making gtest_auto.gen.cpp')
+        if _VERBOSE:
+            print('build_and_run_gtest_auto.py: making gtest_auto.gen.cpp')
         with open(cmake_dir + '/gtest_auto.gen.cpp', 'w') as out:
             out.write(code)
 
 
 def build_and_run_gtest_auto():
-    # print('build_and_run_gtest_auto !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
     try:
         cmake_dir = get_cmake_dir('temp', cfg='Release')
     except AssertionError:
         rebuild_fast('gtest_wip')
         cmake_dir = get_cmake_dir('temp', cfg='Release')
     files = [x for x in sys.argv[1:] if x.endswith('.gtest.cpp')]
-    files.extend(x.replace('.hpp', '.gtest.cpp') for x in sys.argv
-                 if x.endswith('.hpp') and
-                 exists(x.replace('.hpp', '.gtest.cpp')))
+    for x in sys.argv[1:]:
+        if x.endswith('.hpp'):
+            x = x.replace('.hpp', '.gtest.cpp')
+            candidates = [x]
+            for i in range(x.count('_')):
+                candidates.append('_'.join(x.split('_')[:i + 1]) + '.gtest.cpp')
+            for f in candidates:
+                if exists(f):
+                    files.append(f)
+    files = set(files)
     # print('    files:', files)
     # nargs = len([x for x in sys.argv if not x.startswith('-')])
-    if not len(files): #  or len(files) + 1 != nargs:
+    if not len(files):  # or len(files) + 1 != nargs:
         raise NotImplementedError
     make_gtest_auto_cpp(files, cmake_dir)
     assert not os.system('cd ' + cmake_dir + ' && ninja gtest_auto')
