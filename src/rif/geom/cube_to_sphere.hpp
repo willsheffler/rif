@@ -1,7 +1,7 @@
 #include <math.h>
 
 namespace rif {
-namespace numeric {
+namespace geom {
 
 template <class V>
 void cube_to_sphere(V &v) {

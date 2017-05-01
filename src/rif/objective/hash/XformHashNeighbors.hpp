@@ -1,7 +1,7 @@
 #ifndef INCLUDED_objective_hash_XformHashNeighbors_HH
 #define INCLUDED_objective_hash_XformHashNeighbors_HH
 
-#include "numeric/rand_xform.hpp"
+#include "geom/rand_geom.hpp"
 #include "util/SimpleArray.hpp"
 #include "util/dilated_int.hpp"
 
@@ -205,7 +205,7 @@ struct XformHashNeighbors {
         std::set<Key> keys;
         for (int i = 0; i < nsamp_; ++i) {
           Xform p;
-          numeric::rand_xform_quat(rng, p, cart_bound_, quat_bound_);
+          geom::rand_xform_quat(rng, p, cart_bound_, quat_bound_);
           p.translation()[0] = p.translation()[1] = p.translation()[2] = 0;
           Key nbkey = hasher_.get_key(p * c) & XformHash::ORI_MASK;
           // assert( ( nbkey & ~XformHash::ORI_MASK ) == 0 );

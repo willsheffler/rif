@@ -17,7 +17,7 @@
 
 // #include "numeric/euler_angles.gtest.cpp"
 // #include "numeric/FixedPoint.gtest.cpp"
-// #include "numeric/rand_xform.gtest.cpp"
+// #include "geom/rand_geom.gtest.cpp"
 // #include "dock/fftdock.gtest.cpp"
 
 // #include "nest/NEST.gtest.cpp" // 4.479 vs. 3.0 wo Eigen
@@ -85,12 +85,12 @@
 
 // #include "chem/stub.gtest.cpp"
 
-#include "numeric/Ray.gtest.cpp"
-#include "numeric/cube_to_sphere.gtest.cpp"
+#include "geom/Ray.gtest.cpp"
+#include "geom/cube_to_sphere.gtest.cpp"
 
 // #include "sampling/orientations.gtest.cpp"
 
-// #include "numeric/rand_xform.gtest.cpp"
+// #include "geom/rand_geom.gtest.cpp"
 
 int main(int argc, char **argv) {
   std::cout << int(1.6 * 1) << std::endl;

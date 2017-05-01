@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 
 #include <Eigen/Geometry>
-#include "numeric/rand_xform.hpp"
+#include "geom/rand_geom.hpp"
 #include "objective/hash/XformMap.hpp"
 
 #include <random>
@@ -31,7 +31,7 @@ int get_num_ori_cells(int ori_nside, double &xcov) {
     int NSAMP = std::max(1000000, 500 * ori_nside * ori_nside * ori_nside);
     Xform x;
     for (int i = 0; i < NSAMP; ++i) {
-      numeric::rand_xform(rng, x);
+      geom::rand_xform(rng, x);
       x.translation()[0] = x.translation()[1] = x.translation()[2] = 0;
       idx_seen.insert(xh.get_key(x));
     }
@@ -323,7 +323,7 @@ void test_xform_hash_perf(double cart_resl, double ang_resl,
 
   std::vector<Xform> samples(N2), centers(N2);
 
-  for (int i = 0; i < N2; ++i) numeric::rand_xform(rng, samples[i]);
+  for (int i = 0; i < N2; ++i) geom::rand_xform(rng, samples[i]);
 
   util::Timer tk;
   std::vector<uint64_t> keys(N2);

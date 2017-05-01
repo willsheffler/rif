@@ -112,7 +112,8 @@ class CMakeBuild(build_ext):
 
         if platform.system() == "Windows":
             cmake_args += [
-                '-DCMAKE_LIBRARY_OUTPUT_DIRECTORY_{}={}'.format(cfg.upper(), extdir)]
+                '-DCMAKE_LIBRARY_OUTPUT_DIRECTORY_{}={}'.format(cfg.upper(),
+                                                                extdir)]
             if sys.maxsize > 2**32:
                 cmake_args += ['-A', 'x64']
                 build_args += ['--', '/m']
@@ -128,14 +129,21 @@ class CMakeBuild(build_ext):
             env.get('CXXFLAGS', ''), self.distribution.get_version())
         env['CXXFLAGS'] += ' -I' + numpy.get_include()
         if in_conda():
-            condadir = os.path.dirname(sys.executable)[:-4]
+            condadir = os.path.dirname(sys.executable)[:-4]  # /bin
             env['CXXFLAGS'] = env['CXXFLAGS'] + ' -I' + condadir + '/include'
-            env['CXXFLAGS'] = env['CXXFLAGS'] + ' -L' + condadir + '/lib'
+            # this causes build failure....
+            # env['CXXFLAGS'] = env['CXXFLAGS'] + ' -L' + condadir + '/lib'
             print('setup.py: adding -I/-L for conda', condadir)
         if not os.path.exists(self.build_temp):
             os.makedirs(self.build_temp)
         try:
-            print("setup.py: cmake", " ".join(cmake_args))
+            with open('log/cmake_cmd.log', 'w') as out:
+                out.writelines([
+                    'setup.py: ' + os.linesep,
+                    'CXXFLAGS: ' + env['CXXFLAGS'],
+                    'cmake ' + ext.sourcedir + ' ' + ' '.join(cmake_args),
+                    'cmake --build . ' + ' '.join(build_args),
+                ])
             subprocess.check_call(
                 ['cmake', ext.sourcedir] + cmake_args, cwd=self.build_temp, env=env)
             print("setup.py: cmake --build", " ".join(cmake_args))

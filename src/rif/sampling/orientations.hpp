@@ -52,19 +52,15 @@
 //
 // The weights are normalized such that sum weight = ntot.
 
+#include <Eigen/Dense>
 #include <cassert>
 #include <cmath>
+#include <fstream>
 #include <iomanip>
 #include <iostream>
 #include <limits>
 #include <string>
 #include <vector>
-
-#include <boost/iostreams/filter/gzip.hpp>
-#include <boost/iostreams/filtering_streambuf.hpp>
-#include <fstream>
-
-#include <Eigen/Dense>
 // todo: wrap and adapt this code to make numpy array of quats
 
 // Windows doesn't define M_PI in the standard header?

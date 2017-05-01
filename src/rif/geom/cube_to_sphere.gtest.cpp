@@ -2,11 +2,11 @@
 
 #include <random>
 
-#include "numeric/cube_to_sphere.hpp"
+#include "geom/cube_to_sphere.hpp"
 #include "util/SimpleArray.hpp"
 
 namespace rif {
-namespace numeric {
+namespace geom {
 namespace cube_to_sphere_test {
 
 using V3 = util::SimpleArrayLegacy<3, float>;

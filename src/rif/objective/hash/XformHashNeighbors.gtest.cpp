@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include "numeric/rand_xform.hpp"
+#include "geom/rand_geom.hpp"
 #include "objective/hash/XformHash.hpp"
 #include "objective/hash/XformHashNeighbors.hpp"
 
@@ -29,7 +29,7 @@ void get_neighbors_ref(XH const &xh, Xform const &x, double cart_bound,
   std::mt19937 rng((unsigned int)time(0) + 9384756);
   Xform xrand;
   for (int i = 0; i < NSAMP; ++i) {
-    numeric::rand_xform_quat(rng, xrand, cart_bound, quat_bound);
+    geom::rand_xform_quat(rng, xrand, cart_bound, quat_bound);
     nbrs.insert(xh.get_key(xrand * x));
   }
 }
@@ -184,9 +184,9 @@ TEST(XformHashNeighbors, Quat_BCC7_Zorder_key_symmetry) {
                                          runif(rng) * 400 + 10.0);
     for (int i = 0; i < NSAMP; ++i) {
       Xform x;
-      numeric::rand_xform(rng, x);
+      geom::rand_xform(rng, x);
       // while( fabs(Quaternion<Float>(x.rotation()).w()) > 0.01 )
-      // numeric::rand_xform(rng,x);
+      // geom::rand_xform(rng,x);
       Key key = xh.get_key(x);
       Key akey, ksym;
       akey = xh.asym_key(key, ksym);
@@ -277,7 +277,7 @@ TEST(XformHashNeighbors, Quat_BCC7_Zorder_key_symmetry) {
 
 //    for(int i = 0; i < NSAMP; ++i){
 //      // cout << "TEST ITER " << i << endl;
-//      Xform x0; numeric::rand_xform(rng,x0,10.0);
+//      Xform x0; geom::rand_xform(rng,x0,10.0);
 //      Key key0 = xh.get_key(x0);
 //      Xform cen0 = xh.get_center(key0);
 //      ASSERT_EQ( xh.get_key(cen0), key0 );
@@ -357,7 +357,7 @@ TEST(XformHashNeighbors, Quat_BCC7_Zorder_key_symmetry) {
 //      int nfail=0;
 //      for(int j = 0; j < 1000*NSAMP; ++j){
 //        Xform p;
-// numeric::rand_xform_quat(rng,p,cart_bound,0.0);
+// geom::rand_xform_quat(rng,p,cart_bound,0.0);
 //        Key nk = xh.get_key( p*cen0 );
 //        vsamp.push_back( xh.get_center(nk).translation()
 // );
@@ -449,7 +449,7 @@ TEST(XformHashNeighbors, Quat_BCC7_Zorder_check_ori_neighbors) {
     for (int i = 0; i < NSAMP; ++i) {
       // cout << "TEST ITER " << i << endl;
       Xform x;
-      numeric::rand_xform(rng, x);
+      geom::rand_xform(rng, x);
       x.translation()[0] = x.translation()[1] = x.translation()[2] = 0.0;
       Key key = xh.get_key(x);
       Xform c = xh.get_center(key);
@@ -464,7 +464,7 @@ TEST(XformHashNeighbors, Quat_BCC7_Zorder_check_ori_neighbors) {
       std::vector<Key> fails, passes;
       for (int j = 0; j < 300 * NSAMP; ++j) {
         Xform p;
-        numeric::rand_xform_quat(rng, p, cart_bound, quat_bound);
+        geom::rand_xform_quat(rng, p, cart_bound, quat_bound);
         p.translation()[0] = p.translation()[1] = p.translation()[2] = 0.0;
         Key nk = xh.get_key(p * c) & xh.ORI_MASK;
         // nk = nk | (Key)1; // debug... this makes it correct much more of the
@@ -538,7 +538,7 @@ TEST(XformHashNeighbors, Quat_BCC7_Zorder_check_general_neighbors) {
 
     for (int iter2 = 0; iter2 < NSAMP; ++iter2) {
       Xform x;
-      numeric::rand_xform(rng, x);
+      geom::rand_xform(rng, x);
       Key key = xh.get_key(x);
       Xform c = xh.get_center(key);
       // xh.print_key(key);
@@ -584,7 +584,7 @@ TEST(XformHashNeighbors, Quat_BCC7_Zorder_check_general_neighbors) {
       int nfail = 0;
       for (int j = 0; j < 300 * NSAMP; ++j) {
         Xform p;
-        numeric::rand_xform_quat(rng, p, cart_bound, quat_bound);
+        geom::rand_xform_quat(rng, p, cart_bound, quat_bound);
         Key nk = xh.get_key(c * p);
         // Xform ncen = xh.get_center( nk );
         bool fail = nbrs_set.find(nk) == nbrs_set.end();

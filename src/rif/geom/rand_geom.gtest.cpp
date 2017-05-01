@@ -1,12 +1,12 @@
 #include <gtest/gtest.h>
 
 #include <map>
+#include "geom/rand_geom.hpp"
 #include "numeric/bcc_lattice.hpp"
-#include "numeric/rand_xform.hpp"
 #include "numeric/util.hpp"
 
 namespace rif {
-namespace numeric {
+namespace geom {
 namespace rand_xfrom_test {
 
 using std::cout;

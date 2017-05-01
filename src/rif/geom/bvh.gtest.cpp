@@ -4,8 +4,8 @@
 
 #include "rif/geom/bvh.hpp"
 #include "rif/geom/primitive.hpp"
+#include "rif/geom/rand_geom.hpp"
 #include "rif/global_rng.hpp"
-#include "rif/numeric/rand_xform.hpp"
 #include "util/Timer.hpp"
 
 using namespace Eigen;
@@ -72,7 +72,7 @@ TEST(bvh, test_min) {
 
     // bvh
     // move Pa by random X, set bXa in minimizer
-    auto X = rif::numeric::rand_xform(F(999));
+    auto X = rand_xform(F(999));
     for (auto& p : ptsA) p = X * p;
     minimizer.bXa = X;
 
@@ -164,7 +164,7 @@ TEST(bvh, test_isect) {
     query.reset();
 
     // WTF??? this does not cause the test to fail...
-    auto X = rif::numeric::rand_xform(F(999));
+    auto X = rand_xform(F(999));
     for (auto& p : ptsA) p = X * p;
     query.bXa = X;  // commenting this out should fail
 

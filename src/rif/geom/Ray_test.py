@@ -1,5 +1,5 @@
 import numpy as np
-from rif.numeric import rand_ray_gaussian
+from rif.geom import rand_ray_gaussian
 
 
 def test_Ray():

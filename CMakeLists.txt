@@ -96,7 +96,7 @@ function(build_python_bindings)
         OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/rif.gen.cpp
         COMMAND python ${SRCGEN} ${CMAKE_SOURCE_DIR}/src/rif ${CMAKE_CURRENT_BINARY_DIR}
         DEPENDS src/rif/rif.gen.cpp.jinja ${PY_CPP} ${SRCGEN})
-    pybind11_add_module(rif_cpp ${CMAKE_CURRENT_BINARY_DIR}/rif.gen.cpp ${PY_CPP} ${SRCGEN})
+    pybind11_add_module(rif_cpp ${CMAKE_CURRENT_BINARY_DIR}/rif.gen.cpp ${PY_CPP} ${SRCGEN} NO_EXTRAS)
     target_link_libraries( rif_cpp PRIVATE ${extra_libs} )
 endfunction()
 
@@ -117,8 +117,8 @@ function(build_gtests)
     add_executable(gtest_all src/test/gtest_all.cpp ${TEST_CPP})
     target_link_libraries(gtest_all rif_data ${extra_libs})
 
-    add_executable(gtest_wip src/test/gtest_wip.cpp)
-    target_link_libraries(gtest_wip rif_data ${extra_libs})
+    # add_executable(gtest_wip src/test/gtest_wip.cpp)
+    # target_link_libraries(gtest_wip rif_data ${extra_libs})
 
     if(NOT EXISTS ${CMAKE_CURRENT_BINARY_DIR}/gtest_auto.gen.cpp)
         message("!!!!! creating gtest_auto file")

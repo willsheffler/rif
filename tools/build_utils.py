@@ -238,7 +238,7 @@ def rebuild_fast(target='rif_cpp', cfg='Release', force_redo_cmake=False):
             makeexe = 'make'
         ncpu = multiprocessing.cpu_count()
         return os.system('cd ' + cmake_dir + '; ' + makeexe + ' -j%i ' % ncpu + target)
-    except OSError:
+    except (OSError, TypeError):
         return rebuild_rif(cfg=cfg)
 
 
@@ -264,6 +264,7 @@ def build_and_test():
     # print('== calling rebuild_fast ==')
     no_xdist = len(testfiles) or len(gtests)
     no_xdist |= os.system('egrep "#.*cpp_files" pytest.ini') == 0
+    no_xdist |= sys.version_info.major is 3 and sys.version_info.minor is 6
     force_redo_cmake = len(pybindfiles) or not no_xdist or src_dir_new_file()
     rebuild_fast(target='rif_cpp gtest_all',
                  cfg=cfg, force_redo_cmake=force_redo_cmake)
@@ -273,8 +274,11 @@ def build_and_test():
     testfiles_in_lib = [f.replace(srcdir, libdir) for f in testfiles]
     for a, b in zip(testfiles, testfiles_in_lib):
         shutil.copyfile(a, b)
-        shutil.copyfile(a.replace('_test.py', '.py'), b.replace('_test.py', '.py'))
-    shutil.copy(join(srcdir, 'rif', 'conftest.py'), join(libdir, 'rif', 'conftest.py'))
+        if exists(a.replace('_test.py', '.py')):
+            shutil.copyfile(a.replace('_test.py', '.py'),
+                            b.replace('_test.py', '.py'))
+    shutil.copy(join(srcdir, 'rif', 'conftest.py'),
+                join(libdir, 'rif', 'conftest.py'))
     testfiles = testfiles_in_lib
 
     if '--inplace' in sys.argv:
@@ -361,7 +365,8 @@ def build_and_run_gtest_auto():
             x = x.replace('.hpp', '.gtest.cpp')
             candidates = [x]
             for i in range(x.count('_')):
-                candidates.append('_'.join(x.split('_')[:i + 1]) + '.gtest.cpp')
+                candidates.append(
+                    '_'.join(x.split('_')[:i + 1]) + '.gtest.cpp')
             for f in candidates:
                 if exists(f):
                     files.append(f)

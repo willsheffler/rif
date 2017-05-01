@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 
 #include <Eigen/Geometry>
-#include "numeric/rand_xform.hpp"
+#include "geom/rand_geom.hpp"
 #include "objective/hash/XformMap.hpp"
 
 #include <sparsehash/dense_hash_set>
@@ -32,7 +32,7 @@ TEST(XformMap, stores_correctly) {
   std::vector<std::pair<Xform, double>> dat;
   for (int i = 0; i < NSAMP; ++i) {
     Xform x;
-    numeric::rand_xform(rng, x, 256.0);
+    geom::rand_xform(rng, x, 256.0);
     double val = runif(rng);
     xmap.insert(x, val);
     dat.push_back(std::make_pair(x, val));
@@ -111,7 +111,7 @@ TEST(XformMap, insert_sphere) {
        << lever << " sphere rad " << rad << endl;
   double angrad = rad / lever * 180.0 / M_PI;
   double quatrad = numeric::deg2quat(angrad);
-  numeric::rand_xform(rng, x, 256.0);
+  geom::rand_xform(rng, x, 256.0);
   XformHashNeighbors<XMap::Hasher> nbcache(rad, angrad, xmap.hasher_, 500.0);
   int nbitercount = xmap.insert_sphere(x, rad, lever, 12345.0, nbcache);
   cout << nbitercount << " " << xmap.count(12345.0) << " "
@@ -121,20 +121,19 @@ TEST(XformMap, insert_sphere) {
   int n_lever_false_pos = 0, n_lever_false_neg = 0, n_within = 0, n_without = 0;
   for (int i = 0; i < NSAMP2; ++i) {
     Xform p;
-    numeric::rand_xform_quat(rng, p, rad, 0.0);
+    geom::rand_xform_quat(rng, p, rad, 0.0);
     if (xmap[x * p] != 12345.0) ++n_cart_fail;
 
-    numeric::rand_xform_quat(rng, p, 0.0, quatrad);
+    geom::rand_xform_quat(rng, p, 0.0, quatrad);
     if (xmap[x * p] != 12345.0) ++n_rot_fail;
 
     double split1 = runif(rng);
     double split2 = sqrt(1.0 - split1 * split1);
-    numeric::rand_xform_quat(rng, p, split1 * rad, split2 * quatrad);
+    geom::rand_xform_quat(rng, p, split1 * rad, split2 * quatrad);
     if (xmap[x * p] != 12345.0) ++n_both_fail;
 
-    numeric::rand_xform_quat(rng, p, 1.5 * split1 * rad,
-                             1.5 * split2 * quatrad);
-    // numeric::rand_xform_quat(rng, p, rad, quatrad );
+    geom::rand_xform_quat(rng, p, 1.5 * split1 * rad, 1.5 * split2 * quatrad);
+    // geom::rand_xform_quat(rng, p, rad, quatrad );
     if (get_ident_lever_dis(p, lever) < rad) {
       ++n_within;
       if (xmap[x * p] != 12345.0) ++n_lever_false_neg;

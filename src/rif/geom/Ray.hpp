@@ -6,7 +6,7 @@
 #include "rif/global_rng.hpp"
 
 namespace rif {
-namespace numeric {
+namespace geom {
 
 /**
  * @brief      a ray in space

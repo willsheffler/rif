@@ -1,9 +1,9 @@
 #include <gtest/gtest.h>
 
-#include <numeric/Ray.hpp>
+#include <geom/Ray.hpp>
 
 namespace rif {
-namespace numeric {
+namespace geom {
 namespace test_numeric_Ray {
 
 using V = V3<float>;

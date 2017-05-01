@@ -2,8 +2,8 @@
 
 #include "actor/ActorConcept_io.hpp"
 #include "actor/BackboneActor.hpp"
+#include "geom/rand_geom.hpp"
 #include "numeric/X1dim.hpp"
-#include "numeric/rand_xform.hpp"
 #include "objective/ObjectiveFunction.hpp"
 #include "objective/ObjectiveVisitor.hpp"
 
@@ -80,7 +80,7 @@ TEST(BackboneActor, test_get_N_CA_C) {
 
   for (int i = 0; i < 100; ++i) {
     Xform x;
-    numeric::rand_xform(rng, x);
+    geom::rand_xform(rng, x);
     V3 n2 = x * n;
     V3 ca2 = x * ca;
     V3 c2 = x * c;

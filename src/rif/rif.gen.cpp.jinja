@@ -25,11 +25,11 @@ PYBIND11_PLUGIN(rif_cpp) {
 
 {{code}}
 
-#ifdef VERSION_INFO
-    rif.attr("__version__") = py::str(VERSION_INFO);
-#else
-    rif.attr("__version__") = py::str("dev");
-#endif
+// #ifdef VERSION_INFO
+//     rif.attr("__version__") = py::str(VERSION_INFO);
+// #else
+//     rif.attr("__version__") = py::str("dev");
+// #endif
 
     return rif.ptr();
 

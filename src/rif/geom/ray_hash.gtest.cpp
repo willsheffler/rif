@@ -1,10 +1,10 @@
 #include <gtest/gtest.h>
 
+#include "rif/geom/ray_hash.hpp"
 #include "rif/global_rng.hpp"
-#include "rif/numeric/ray_hash.hpp"
 
 namespace rif {
-namespace numeric {
+namespace geom {
 namespace ray_hash_test {
 
 using std::cout;

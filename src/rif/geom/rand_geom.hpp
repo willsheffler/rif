@@ -7,7 +7,9 @@
 #include "rif/numeric/util.hpp"
 
 namespace rif {
-namespace numeric {
+namespace geom {
+
+using namespace rif::numeric;
 
 template <class T>
 void rand_xform(std::mt19937 &rng, Eigen::Transform<T, 3, Eigen::Affine> &x,
@@ -44,13 +46,6 @@ void rand_xform(std::mt19937 &rng,
   x.data()[9] = runif(rng) * cart_bound - cart_bound / 2.0;
   x.data()[10] = runif(rng) * cart_bound - cart_bound / 2.0;
   x.data()[11] = runif(rng) * cart_bound - cart_bound / 2.0;
-}
-
-template <class F>
-X3<F> rand_xform(F cart_bound = 512.0) {
-  X3<F> x;
-  rand_xform(global_rng(), x, cart_bound);
-  return x;
 }
 
 template <class X>
@@ -136,6 +131,21 @@ void rand_xform_sphere(std::mt19937 &rng,
   }
 
   x.translation() = delta;
+}
+
+template <class F>
+V3<F> rand_normal(F len = 1.0) {
+  auto &rng = global_rng();
+  std::normal_distribution<> rnorm;
+  auto v = V3<F>(rnorm(rng), rnorm(rng), rnorm(rng));
+  return v.normalized() * len;
+}
+
+template <class F>
+X3<F> rand_xform(F cart_bound = 512.0) {
+  X3<F> x;
+  rand_xform(global_rng(), x, cart_bound);
+  return x;
 }
 }
 }

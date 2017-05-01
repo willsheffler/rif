@@ -2,7 +2,7 @@
 
 #include <gtest/gtest.h>
 
-#include "numeric/rand_xform.hpp"
+#include "geom/rand_geom.hpp"
 
 #include <Eigen/Geometry>
 
@@ -15,6 +15,7 @@ namespace pref_test {
 
 using std::cout;
 using std::endl;
+using namespace rif::geom;
 
 typedef Eigen::Transform<double, 3, Eigen::AffineCompact> Xform;
 // typedef Eigen::Affine3d Xform;

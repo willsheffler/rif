@@ -1,14 +1,16 @@
 #pragma once
 
 #include <eigen_types.hpp>
+#include <geom/Ray.hpp>
+#include <geom/cube_to_sphere.hpp>
 #include <iostream>
-#include <numeric/Ray.hpp>
 #include <numeric/bcc_lattice.hpp>
-#include <numeric/cube_to_sphere.hpp>
 #include <util/SimpleArray.hpp>
 
 namespace rif {
-namespace numeric {
+namespace geom {
+
+using namespace rif::numeric;
 
 ///@brief
 ///@detail
