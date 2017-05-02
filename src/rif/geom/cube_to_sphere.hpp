@@ -5,7 +5,7 @@ namespace geom {
 
 template <class V>
 void cube_to_sphere(V &v) {
-  typedef typename V::Scalar Float;
+  typedef typename V::Scalar F;
   double const xx = v[0] * v[0];
   double const yy = v[1] * v[1];
   double const zz = v[2] * v[2];
@@ -18,24 +18,24 @@ void cube_to_sphere(V &v) {
 // assumes we are on the +Z face!!!!!
 template <class V>
 void sphere_to_cube_facenum0(V &v) {
-  typedef typename V::Scalar Float;
-  Float const x = v[0];
-  Float const y = v[1];
-  // Float const z = v[2];
-  Float &X(v[0]);
-  Float &Y(v[1]);
-  Float &Z(v[2]);
-  Float eps = std::sqrt(std::numeric_limits<Float>::epsilon());
-  Float const INV_SQRT_2 = 0.70710676908493042;
-  Float const a2 = x * x * 2.0;
-  Float const b2 = y * y * 2.0;
-  Float const inner = -a2 + b2 - 3.0;
-  Float const innersqrt = -sqrt((inner * inner) - 12.0 * a2);
-  X = (fabs(x) < eps) ? 0.0 : sqrt(innersqrt + a2 - b2 + 3.0) * INV_SQRT_2;
-  Y = (fabs(y) < eps) ? 0.0 : sqrt(innersqrt - a2 + b2 + 3.0) * INV_SQRT_2;
-  Z = 1.0;  // not really necessary for lookups...
-  X = x < 0.0 ? -X : X;
+  typedef typename V::Scalar F;
+  F const y = v[1];
+  F const z = v[2];
+  // F const z = v[2];
+  F &X(v[0]);
+  F &Y(v[1]);
+  F &Z(v[2]);
+  F eps = std::sqrt(std::numeric_limits<F>::epsilon());
+  F const INV_SQRT_2 = 0.70710676908493042;
+  F const a2 = y * y * 2.0;
+  F const b2 = z * z * 2.0;
+  F const inner = -a2 + b2 - 3.0;
+  F const innersqrt = -sqrt((inner * inner) - 12.0 * a2);
+  Y = (fabs(y) < eps) ? 0.0 : sqrt(innersqrt + a2 - b2 + 3.0) * INV_SQRT_2;
+  Z = (fabs(z) < eps) ? 0.0 : sqrt(innersqrt - a2 + b2 + 3.0) * INV_SQRT_2;
+  X = 1.0;  // not really necessary for lookups...
   Y = y < 0.0 ? -Y : Y;
+  Z = z < 0.0 ? -Z : Z;
   // if(X > 1.0) X = 1.0; // shouldn't be necessary
   // if(Y > 1.0) Y = 1.0; // shouldn't be necessary
 }
@@ -48,41 +48,41 @@ void sphere_to_cube_facenum0(V &v) {
  * @param      y      { parameter_description }
  * @param      z      { parameter_description }
  *
- * @tparam     Float  { description }
+ * @tparam     F  { description }
  */
-template <class Float>
-void permute_cube_face(int face, Float &x, Float &y, Float &z) {
-  Float X = x, Y = y, Z = z;
+template <class F>
+void permute_cube_face_inverse(int face, F &x, F &y, F &z) {
+  F X = x, Y = y, Z = z;
   switch (face) {
     case 0:
-      x = X;
-      y = Y;
-      z = Z;
+      x = +X;
+      y = +Y;
+      z = +Z;
       break;
     case 1:
-      x = Z;
-      y = X;
-      z = Y;
+      x = +Y;
+      y = -X;
+      z = +Z;
       break;
     case 2:
+      x = +Z;
+      y = -X;
+      z = -Y;
+      break;
+    case 3:
+      x = -X;
+      y = -Z;
+      z = -Y;
+      break;
+    case 4:
       x = -Y;
       y = -Z;
       z = +X;
       break;
-    case 3:
-      x = -Z;
-      y = +X;
-      z = -Y;
-      break;
-    case 4:
-      x = Y;
-      y = Z;
-      z = X;
-      break;
     case 5:
-      x = -Y;
-      y = +X;
-      z = -Z;
+      x = -Z;
+      y = +Y;
+      z = +X;
       break;
     default:
       break;
@@ -97,41 +97,41 @@ void permute_cube_face(int face, Float &x, Float &y, Float &z) {
  * @param      y      { parameter_description }
  * @param      z      { parameter_description }
  *
- * @tparam     Float  { description }
+ * @tparam     F  { description }
  */
-template <class Float>
-void permute_cube_face_inverse(int face, Float &x, Float &y, Float &z) {
-  Float X = x, Y = y, Z = z;
+template <class F>
+void permute_cube_face(int face, F &x, F &y, F &z) {
+  F X = x, Y = y, Z = z;
   switch (face) {
     case 0:
-      x = X;
-      y = Y;
-      z = Z;
+      x = +X;
+      y = +Y;
+      z = +Z;
       break;
     case 1:
-      x = Y;
-      y = Z;
-      z = X;
+      x = -Y;
+      y = +X;
+      z = +z;
       break;
     case 2:
+      x = -Y;
+      y = -Z;
+      z = +X;
+      break;
+    case 3:
+      x = -X;
+      y = -Z;
+      z = -Y;
+      break;
+    case 4:
       x = +Z;
       y = -X;
       z = -Y;
       break;
-    case 3:
-      x = +Y;
-      y = -Z;
-      z = -X;
-      break;
-    case 4:
-      x = Z;
-      y = X;
-      z = Y;
-      break;
     case 5:
-      x = +Y;
-      y = -X;
-      z = -Z;
+      x = +Z;
+      y = +Y;
+      z = -X;
       break;
     default:
       break;
@@ -158,15 +158,15 @@ void permute_cube_face_inverse(int face, V &v) {
  */
 template <class V>
 uint64_t get_cube_facenum(V p) {
-  typedef typename V::Scalar Float;
-  Float const ax = fabs(p[0]), ay = fabs(p[1]), az = fabs(p[2]);
+  typedef typename V::Scalar F;
+  F const ax = fabs(p[0]), ay = fabs(p[1]), az = fabs(p[2]);
   uint64_t facenum = 0;
   if (ax >= ay && ax >= az)
-    facenum = (p[0] > 0) ? 1 : 3;
+    facenum = (p[0] > 0) ? 0 : 3;
   else if (ay >= az && ay >= ax)
-    facenum = (p[1] > 0) ? 4 : 2;
+    facenum = (p[1] > 0) ? 1 : 4;
   else if (az >= ax && az >= ay)
-    facenum = (p[2] > 0) ? 0 : 5;
+    facenum = (p[2] > 0) ? 2 : 5;
   return facenum;
 }
 
@@ -178,18 +178,18 @@ uint64_t get_cube_facenum(V p) {
  * @param      y     { parameter_description }
  *
  * @tparam     V     Vector of 3 floats type
- * @tparam     S     Scalar type
+ * @tparam     F     Scalar type
  *
  * @return     The coordinates.
  */
-template <class V, class S>
-uint64_t get_quadsphere_coords(V p, S &x, S &y) {
+template <class V, class F>
+uint64_t get_quadsphere_coords(V p, F &a, F &b) {
   uint64_t face = get_cube_facenum(p);
   permute_cube_face_inverse(face, p);
   sphere_to_cube_facenum0(p);
-  x = p[0];
-  y = p[1];
-  assert(fabs(p[2] - 1) < 0.0001);
+  a = p[1];
+  b = p[2];
+  assert(fabs(p[0] - 1) < 0.0001);
   return face;
 }
 
@@ -202,15 +202,15 @@ uint64_t get_quadsphere_coords(V p, S &x, S &y) {
  * @param      out   The out
  *
  * @tparam     V     { description }
- * @tparam     S     { description }
+ * @tparam     F     { description }
  * @tparam     Int   { description }
  */
-template <class V, class S, class Int>
-V get_point_from_quadsphere_coords(Int face, S x, S y) {
+template <class V, class F, class Int>
+V get_point_from_quadsphere_coords(Int face, F a, F b) {
   V out;
-  out[0] = x;
-  out[1] = y;
-  out[2] = 1;
+  out[0] = 1;
+  out[1] = a;
+  out[2] = b;
   permute_cube_face(face, out);
   cube_to_sphere(out);
   return out;

@@ -356,6 +356,7 @@ int main(int argc, char **argv) {
 def build_and_run_gtest_auto():
     try:
         cmake_dir = get_cmake_dir('temp', cfg='Release')
+        assert cmake_dir
     except AssertionError:
         rebuild_fast('gtest_wip')
         cmake_dir = get_cmake_dir('temp', cfg='Release')

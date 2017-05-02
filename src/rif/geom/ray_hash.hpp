@@ -98,20 +98,24 @@ struct RayToRayBinner4D {
   using Fs = typename Grid::Floats;
   using V = typename R::V;
   util::SimpleArray<6, Grid> bcc_;
+  F resl_, lever_, bound_;
   RayToRayBinner4D(F resl = 0.25, F lever = 1.5, F bound = 128)
       : bcc_(Grid(
             I4(2 * bound / resl, 2 * bound / resl, qs_nc(resl, lever),
                qs_nc(resl, lever)),
             Fs(-bound, -bound, -qs_bound(resl, lever), -qs_bound(resl, lever)),
             Fs(+bound, +bound, +qs_bound(resl, lever),
-               +qs_bound(resl, lever)))) {}
+               +qs_bound(resl, lever)))),
+        resl_(resl),
+        lever_(lever),
+        bound_(bound) {}
   K get_key(R a, R b) const noexcept { return get_key(align_ray_pair(a, b)); }
   K get_key(R r) const noexcept {
     assert(fabs(r.orig[2]) < 0.001);
     // std::cout << "get_key: " << r << std::endl;
-    F qsx, qsy;
-    K face = get_quadsphere_coords(r.dirn, qsx, qsy);
-    Fs bcrd(r.orig[0], r.orig[1], qsx, qsy);
+    F qsA, qsB;
+    K face = get_quadsphere_coords(r.dirn, qsA, qsB);
+    Fs bcrd(r.orig[0], r.orig[1], qsA, qsB);
     // std::cout << "get_key: " << bcrd << std::endl;
     K bcc_key = bcc_[face][bcrd];
     // std::cout << "get_key: " << face << " " << bcc_key << std::endl;
@@ -148,18 +152,22 @@ struct RayBinner5D {
   using Fs = typename Grid::Floats;
   using V = typename R::V;
   util::SimpleArray<6, Grid> bcc_;
+  F resl_, lever_, bound_;
   RayBinner5D(F resl = 0.25, F lever = 1.5, F bound = 32)
       : bcc_(Grid(makeI5(2 * bound / resl, 2 * bound / resl, 2 * bound / resl,
                          qs_nc(resl, lever), qs_nc(resl, lever)),
                   Fs(-bound, -bound, -bound, -qs_bound(resl, lever),
                      -qs_bound(resl, lever)),
                   Fs(+bound, +bound, +bound, +qs_bound(resl, lever),
-                     +qs_bound(resl, lever)))) {}
+                     +qs_bound(resl, lever)))),
+        resl_(resl),
+        lever_(lever),
+        bound_(bound) {}
   K get_key(R r) const noexcept {
     // std::cout << "get_key: " << r << std::endl;
-    F qsx, qsy;
-    K face = get_quadsphere_coords(r.dirn, qsx, qsy);
-    Fs bcrd(r.orig[0], r.orig[1], r.orig[2], qsx, qsy);
+    F qsA, qsB;
+    K face = get_quadsphere_coords(r.dirn, qsA, qsB);
+    Fs bcrd(r.orig[0], r.orig[1], r.orig[2], qsA, qsB);
     // std::cout << "get_key: " << bcrd << std::endl;
     K bcc_key = bcc_[face][bcrd];
     // std::cout << "get_key: " << face << " " << bcc_key << std::endl;
@@ -197,6 +205,7 @@ struct RayRayBinner10D {
   using Fs = typename Grid::Floats;
   using V = typename R::V;
   util::SimpleArray<36, Grid> bcc_;
+  F resl_, lever_, bound_;
   RayRayBinner10D(F resl = 0.25, F lever = 1.5, F bound = 32)
       : bcc_(Grid(makeI10(2 * bound / resl, 2 * bound / resl, 2 * bound / resl,
                           qs_nc(resl, lever), qs_nc(resl, lever),
@@ -207,7 +216,10 @@ struct RayRayBinner10D {
                      -qs_bound(resl, lever), -qs_bound(resl, lever)),
                   Fs(+bound, +bound, +bound, +qs_bound(resl, lever),
                      +qs_bound(resl, lever), +bound, +bound, +bound,
-                     +qs_bound(resl, lever), +qs_bound(resl, lever)))) {}
+                     +qs_bound(resl, lever), +qs_bound(resl, lever)))),
+        resl_(resl),
+        lever_(lever),
+        bound_(bound) {}
   K get_key(R r, R s) const noexcept {
     // std::cout << "get_key: " << r << std::endl;
     F qsx1, qsy1;

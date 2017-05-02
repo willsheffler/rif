@@ -13,6 +13,16 @@
 		},
 		{
 			"file_regex": "^[ ]*File \"(...*?)\", line ([0-9]*)",
+			"name": "conda2_build_and_test",
+			"shell_cmd": "cd $folder && /home/sheffler/anaconda2/bin/python2 tools/build_and_test.py $file --inplace 2>&1 | tee log/subl_build.log"
+		},
+		{
+			"file_regex": "^[ ]*File \"(...*?)\", line ([0-9]*)",
+			"name": "conda3_build_and_test",
+			"shell_cmd": "cd $folder && /home/sheffler/anaconda3/bin/python3 tools/build_and_test.py $file --inplace 2>&1 | tee log/subl_build.log"
+		},
+		{
+			"file_regex": "^[ ]*File \"(...*?)\", line ([0-9]*)",
 			"name": "build_and_test_noargs",
 			"shell_cmd": "cd $folder && python tools/build_and_test.py --inplace 2>&1 | tee log/subl_build.log"
 		},
@@ -67,7 +77,7 @@
 				"external/pybind11",
 				"deps",
 				"dist",
-				"*.egg-info",
+				"*.egg-info"
 			],
 			"path": ".."
 		}
@@ -81,12 +91,12 @@
 			},
 			"Linux":
 			{
-				"CC" : "gcc-5",
-				"CXX" : "g++-5",
+				"CC": "clang",
+				"CXX": "clang++",
 			},
 			"Windows":
 			{
-			},
+			}
 		},
 		"tab_size": 4,
 		"translate_tabs_to_spaces": true
