@@ -2,8 +2,16 @@ import pytest
 import numpy as np
 import rif
 from rif.dtypes import *
+from rif.eigen_types import V3, M3
 
 from numpy.testing import assert_almost_equal
+
+
+def test_V3():
+    u = V3([1, 2, 3])
+    v = V3([1, 2, 3])
+    assert u == v
+    assert len(v) == 3
 
 
 @pytest.mark.skipif('sys.version_info.major is 2')

@@ -1,5 +1,6 @@
 from __future__ import print_function
 import rif.geom.ray_hash as rh
+from pprint import pprint
 
 
 def test_ray_ray_hash():
@@ -15,4 +16,5 @@ def test_ray_ray_hash():
     assert binner10.lever == 2
     assert binner10.bound == 3
 
-    # assert 0
+    for i in range(10):
+        assert i == binner10.get_key(binner10.get_center(i))

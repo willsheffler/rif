@@ -37,10 +37,33 @@ template <>
 struct is_pod<test> : public std::integral_constant<bool, true> {};
 }
 
+template <class M>
+void bind_eigen_matrix_fixed(py::module& m, std::string name) {
+  py::class_<M>(m, name.c_str())
+      .def("__repr__", [=](M const& m) { return name; })
+      .def("__eq__", [](M const& m, M const& n) { return m.isApprox(n); })
+      .def("__getitem__", [](M const& m, int i) { return m.data()[i]; })
+      .def("__setitem__",
+           [](M& m, int i, typename M::Scalar f) { return m.data()[i] = f; })
+      .def("__len__", [](M const& m) { return m.rows() * m.cols(); })
+      .def("__abs__", [](M const& m) { return m.norm(); })
+      .def_property_readonly("norm", [](M const& m) { return m.norm(); })
+      .def("normalize", [](M& m) { m.normalize(); });
+  /**/;
+}
+
 void RIFLIB_PYBIND_eigen_types(py::module& m) {
   py::detail::npy_format_descriptor<V3f>::register_dtype();
   py::detail::npy_format_descriptor<M3f>::register_dtype();
   py::detail::npy_format_descriptor<V3<int32_t>>::register_dtype();
+  py::detail::npy_format_descriptor<V3<double>>::register_dtype();
+  py::detail::npy_format_descriptor<M3<double>>::register_dtype();
+  py::detail::npy_format_descriptor<V3<int64_t>>::register_dtype();
+
+  bind_eigen_matrix_fixed<V3<float>>(m, "V3f");
+  bind_eigen_matrix_fixed<V3<double>>(m, "V3");
+  bind_eigen_matrix_fixed<M3<float>>(m, "M3f");
+  bind_eigen_matrix_fixed<M3<double>>(m, "M3");
 
   PYBIND11_NUMPY_DTYPE(test, a, i, f, b);
 
