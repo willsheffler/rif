@@ -2,6 +2,8 @@
 a prototype module for fiber docking. for illustration see:
 
 https://docs.google.com/presentation/d/1qv6yZIy0b2dfmZAzA7bFNJD4pl9h7Nt1mOL4aqiVpOw/pub?start=false&loop=false&delayms=3000#slide=id.g1d6846b840_0_8
+
+(see prev slide for simpler, less-general case)
 """
 
 from rif.io.pdbio import read_pdb

@@ -4,7 +4,7 @@ import sys
 import numpy as np
 import rif.eigen_types
 from rif_cpp.dtypes import print_numpy_info
-from rif.eigen_types import v3f_t, m3f_t, v3i_t
+from rif.eigen_types import *
 from rif.actor import atom_t
 
 # str is necessary for python2
@@ -26,7 +26,8 @@ npy_rif_op2map[str(m3f_t), '', 'divide'] = rif.eigen_types.div_m3f_f
 npy_rif_op2map['', str(m3f_t), 'multiply'] = rif.eigen_types.mul_f_m3f
 npy_rif_op2map[str(m3f_t), str(m3f_t), 'subtract'] = rif.eigen_types.sub_m3f
 npy_rif_op2map[str(m3f_t), str(m3f_t), 'multiply'] = rif.eigen_types.mul_m3f
-npy_rif_op2map[str(m3f_t), str(v3f_t), 'multiply'] = rif.eigen_types.mul_m3f_v3f
+npy_rif_op2map[str(m3f_t), str(
+    v3f_t), 'multiply'] = rif.eigen_types.mul_m3f_v3f
 npy_rif_op2map[str(atom_t), str(v3f_t), 'add'] = rif.actor.add_atom_v3f
 npy_rif_op2map[str(v3f_t), str(atom_t), 'add'] = rif.actor.add_v3f_atom
 npy_rif_op2map[str(atom_t), str(v3f_t), 'subtract'] = rif.actor.sub_atom_v3f
@@ -69,7 +70,8 @@ class rif_ops(object):
     def __enter__(self):
         print('rif_ops: enter')
         d = {ufunc: override1(ufunc) for ufunc in ('absolute'.split())}
-        d2 = {ufunc: override2(ufunc) for ufunc in ('add subtract multiply'.split())}
+        d2 = {ufunc: override2(ufunc)
+              for ufunc in ('add subtract multiply'.split())}
         d.update(d2)
         self.orig = np.set_numeric_ops(**d)
 

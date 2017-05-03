@@ -1,3 +1,4 @@
+
 # Created by https://www.gitignore.io/api/c++,cmake
 
 ### C++ ###
@@ -46,37 +47,3 @@ compile_commands.json
 CTestTestfile.cmake
 
 # End of https://www.gitignore.io/api/c++,cmake
-
-# my mess:
-
-*.pyc
-*.o
-*.so
-*.dylib
-.cache
-.tags*
-.hypothesis
-.idea
-.eggs
-build*/
-.DS_Store
-_build/
-docs/_generate
-*.sxm
-*.sxhn
-*.sublime-workspace
-.clang_complete
-log/subl_build.log
-.tox
-dist
-_build
-.build
-docs/html
-docs/latex
-.coverage
-deps
-rif.egg-info
-log/*.log
-.ERROR
-._*
-*.log

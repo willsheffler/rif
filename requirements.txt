@@ -1,5 +1,4 @@
 PyYAML
-breathe
 colorama
 future
 hypothesis
@@ -11,6 +10,8 @@ pytest
 pytest-cov
 pytest-sugar
 pytest-xdist
+sphinx
+breathe
 sphinx_rtd_theme
 enum34
 mock

@@ -1,7 +1,7 @@
 from rif_cpp.eigen_types import *
 
 
-def V3_init(self, arg):
+def V3_init(self, arg=[0, 0, 0]):
     self[0] = arg[0]
     self[1] = arg[1]
     self[2] = arg[2]

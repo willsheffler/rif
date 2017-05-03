@@ -48,8 +48,12 @@ void bind_eigen_matrix_fixed(py::module& m, std::string name) {
       .def("__len__", [](M const& m) { return m.rows() * m.cols(); })
       .def("__abs__", [](M const& m) { return m.norm(); })
       .def_property_readonly("norm", [](M const& m) { return m.norm(); })
-      .def("normalize", [](M& m) { m.normalize(); });
-  /**/;
+      .def("normalize", [](M& m) { m.normalize(); })
+      .def_property_readonly("dtype",
+                             [](M const&) { return py::dtype::of<M>(); })
+      .def_property_readonly_static(
+          "dtype", [](py::object) { return py::dtype::of<M>(); })
+      /**/;
 }
 
 void RIFLIB_PYBIND_eigen_types(py::module& m) {
@@ -68,6 +72,7 @@ void RIFLIB_PYBIND_eigen_types(py::module& m) {
   PYBIND11_NUMPY_DTYPE(test, a, i, f, b);
 
   m.attr("v3f_t") = py::dtype::of<V3f>();
+  m.attr("v3d_t") = py::dtype::of<V3d>();
   m.attr("m3f_t") = py::dtype::of<M3f>();
   m.attr("v3i_t") = py::dtype::of<V3<int32_t>>();
   m.attr("test_t") = py::dtype::of<test>();

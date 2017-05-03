@@ -1,17 +1,32 @@
 import pytest
 import numpy as np
 import rif
-from rif.dtypes import *
-from rif.eigen_types import V3, M3
-
+from rif.dtypes import rif_ops
+from rif.eigen_types import *
+from pprint import pprint
 from numpy.testing import assert_almost_equal
 
 
+@pytest.mark.xfail
 def test_V3():
+    print([V3()] * 5)
+    a = np.ones(2, dtype=V3.dtype)
+    pprint(a)
+    print(a.dtype)
+    a[0] = V3([3, 4, 5])
+    print(a[0])
+
+    print(type(a[0]))
+    # print(np.array([V3()] * 5).dtype)
+
     u = V3([1, 2, 3])
     v = V3([1, 2, 3])
     assert u == v
     assert len(v) == 3
+    assert V3.dtype == v3d_t
+    assert V3().dtype == v3d_t
+
+    # assert 0
 
 
 @pytest.mark.skipif('sys.version_info.major is 2')
