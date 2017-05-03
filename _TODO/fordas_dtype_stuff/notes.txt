@@ -1,0 +1,13 @@
+You get dispatching/vectorization for free as long as you can use direct dtype-matching to dispatch down to the c++ layer. This means that you're running into problems when trying to match against the "xyz vector" dtype, because it's actually a composite shape-dtype match rather than an actual dtype.
+
+One option:
+
+1. Define a shim type with the same layout as the fixed-sized vector/matrix types you're working with, probably via some template magic.
+
+2. When you register a fixed-size eigen type register the eigen type as a "subarray" type (ie, (float, 3)) for use in structured type members and register the shim as a container dtype (ie. ("coord", float, 3)). 
+
+3. Write a c++ function at the binding level that accepts this shim type, casts it to the correct fixed-size type, and then dispatches to the correct underlying c++ function with your structured type and eigen fixed size type.
+
+4. Write a shim at the python level when you're defining the numeric op at coerces input arrays of the appropriate size/shape into the container dtype and then calls the vectorized methods for dispatch.
+
+I can flesh this idea out more if you're interested. I will probably involve a little template def at the c++ level, some single-line lambda wrappers on the binding level, and a generic coercion function at the python level.

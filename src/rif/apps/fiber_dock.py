@@ -9,16 +9,22 @@ https://docs.google.com/presentation/d/1qv6yZIy0b2dfmZAzA7bFNJD4pl9h7Nt1mOL4aqiV
 from rif.io.pdbio import read_pdb
 from rif.nest import NestedXforms
 from rif.models import ImplicitEnsemble, ImplicitEnsembleScore
-from rif.search import TieredBeamSearch
+from rif.search import HierBeamSearch
 
 import numpy as np
 
 
 def rel_prime_flat_tri(Nmax):
+    """return two same-size lists of relatively prime numbers
+
+    mapped to tuples, would be: 1,2 1,3 2,3 1,4 3,4 1,5 2,5 3,5 4,5 ...
+    replace with numpy one-liner, probably more clear
+    """
     pass
 
 
-def center_welzl():
+def center_welzl(model):
+    """center model based on welzl optimal bounding sphere, report radius"""
     pass
 
 
@@ -27,21 +33,21 @@ def fiber_dock(pdb_file):
 
     # setup
     resolutions = (16, 8, 4, 2, 1, 0.5)
-    M, N = rel_prime_flat_tri(Nmax=20)  # 1,2 1,3 2,3 1,4 3,4 1,5 2,5 3,5 4,5 ...
+    M, N = rel_prime_flat_tri(Nmax=20)
     powers = (M / N)[np.newaxis, :]  # shape (1, whatever)
     assert all(powers < 1)  # else Hsearch can't work
     prot, radius = center_welzl(read_pdb(pdb_file))
     bbframes = prot.bbframes(ss='HE', burial='exposed')
     samp_grid = NestedXforms(baseresl=resolutions[0], lever=radius)
     # ImplicitEnsemble represents a structural ensemble in which each member's
-    # elements (atoms, rays, stubs, etc) are within well-defined translational and
-    # rotational bounds of a reference structure.
-    # (rotation mag defined by radius/lever)
+    # elements (atoms, rays, stubs, etc) are within well-defined translational
+    # and rotational bounds of a reference structure. (rotation mag defined by
+    # radius/lever)
     ensemble0 = ImplicitEnsemble(atoms=prot.atoms, rotslots=bbframes,
                                  radius=0.0, lever=radius, bvh_max_radius=1.0,
                                  voxel_convolv_radii=resolutions)
-    hsearch = TieredBeamSearch(resls=resolutions, grid=samp_grid, beam_size_m=10,
-                               extra_fields=(('M', 'u1'), ('N', 'u1')), )
+    hsearch = HierBeamSearch(resls=resolutions, grid=samp_grid, beam_size_m=10,
+                             extra_fields=(('M', 'u1'), ('N', 'u1')), )
     score = ImplicitEnsembleScore(
         # todo
     )
@@ -87,15 +93,12 @@ def fiber_dock(pdb_file):
     # not sure if using iteration as an interface to the search is a
     # good idea or not... note that samples['score'] gets communicated
     # back to the search, which is not a pattern I've seen used much
-    # but it is clearer in the sense that you don't actually have to
+    # but it would be clearer for simpler cases... don't actually have to
     # define a function (ie score_samples)
     hsearch_accum = hsearch.accumulator()
     for iresl, samples in hsearch_accum:
         score_samples(iresl, samples)
     print(hsearch_accum.results())
-
-    # hsearch interface option 3
-    # more of an async / await co-routine?
 
 
 if __name__ == '__main__':
