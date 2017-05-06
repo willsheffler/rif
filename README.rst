@@ -27,9 +27,32 @@ Rotamer Interaction Field
 tell willsheffler@gmail.com to put something in this readme!
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+    http://rif.readthedocs.io
+
 
 INSTALL
 -------
+
+universal
+~~~~~~~~~~
+
+pip install -rrequirements.txt
+python tools/build_and_test.py
+
+or
+
+pip install .
+python3 -mpytest --pyargs rif
+
+or 
+
+pip install -rrequirements.txt
+mkdir build && cd build
+CXXFLAGS=-Ipath-to-site-packages/numpy/core/include cmake .. 
+PYTHONPATH=. python3 -mpytest --pyargs rif
+
+crappy details
+~~~~~~~~~~~~~~~~~
 
 python requirements
 numpy, jinja2, pytest, pytest-cpp*, hypothesis, pandas
@@ -68,10 +91,4 @@ sudo apt-get install clang g++-6 # optional
 mac (tested on 10.10 and 10.12)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 brew install python cmake ninja boost
-
-universal
-~~~~~~~~~~
-
-pip install -rrequirements.txt
-python tools/build_and_test.py
 

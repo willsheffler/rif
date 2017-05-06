@@ -1,3 +1,4 @@
+from __future__ import print_function
 import pytest
 import numpy as np
 import rif
@@ -7,17 +8,19 @@ from pprint import pprint
 from numpy.testing import assert_almost_equal
 
 
-@pytest.mark.xfail
-def test_V3():
-    print([V3()] * 5)
-    a = np.ones(2, dtype=V3.dtype)
-    pprint(a)
-    print(a.dtype)
-    a[0] = V3([3, 4, 5])
-    print(a[0])
+def test_V3_numpy():
+    # print([V3()] * 5)
+    a = np.array([(V3((7, 8, 9)),)] * 4, dtype=V3)
+    assert np.all(a['crd'][:, 0] == 7)
+    assert np.all(a['crd'][:, 1] == 8)
+    assert np.all(a['crd'][:, 2] == 9)
+    # print(a.dtype)
+    # print(a[0])
+    # assert repr(a[0]) == ''
 
     print(type(a[0]))
-    # print(np.array([V3()] * 5).dtype)
+    print(type(np.asscalar(a[0])))
+    assert V3(a[2][0]) == a[2]
 
     u = V3([1, 2, 3])
     v = V3([1, 2, 3])
@@ -27,6 +30,19 @@ def test_V3():
     assert V3().dtype == v3d_t
 
     # assert 0
+
+
+@pytest.mark.skipif('sys.version_info.major is 2')
+def test_V3_numpy_assign():
+    # print([V3()] * 5)
+    a = np.array([((7, 8, 9),)] * 4, dtype=V3)
+    b = V3([3, 4, 5])
+    a[0] = b
+    assert V3(a[0]['crd']) == b
+    assert a['crd'][0, 0] == 3
+    assert a['crd'][0, 1] == 4
+    assert a['crd'][0, 2] == 5
+
 
 
 @pytest.mark.skipif('sys.version_info.major is 2')

@@ -2,13 +2,15 @@ RIF Documentation
 ================================
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 5
 
    readme_include
 
    contributing_include
 
    intro
+
+   examples
 
    rif
 
