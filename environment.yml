@@ -1,0 +1,22 @@
+name: rif
+dependencies:
+ - python>2
+ - PyYAML
+ - colorama
+ - future
+ - jinja2
+ - numpy
+ - pandas
+ - xarray
+ - pytest
+ - pytest-cov
+ - sphinx_rtd_theme
+ - mock
+ - pip
+ - pip:
+   - external/hacked_packages/pytest-cpp-0.4
+   - breathe
+   - hypothesis
+   - pytest-sugar
+   - pytest-xdist
+ 
