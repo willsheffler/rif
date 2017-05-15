@@ -27,7 +27,7 @@ struct V3intPair {
   int second;
 };
 
-// these templates help the tree initializer get the bounding spheres either
+// these templates help the tree initializer get the bounding spheres either in
 // from a provided iterator range or using bounding_vol in a unified way
 template <typename Objs, typename Vols, typename Iter>
 struct get_bvols_helper {

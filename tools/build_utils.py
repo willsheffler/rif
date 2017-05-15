@@ -18,6 +18,10 @@ def get_my_compiler():
     if not my_compiler:
         my_compiler = "CXX"
     my_compiler = my_compiler.replace('usrbin', 'UB')
+    my_compiler = my_compiler.replace('clang++', 'C')
+    my_compiler = my_compiler.replace('g++', 'G')
+    my_compiler = my_compiler.replace('-', '')
+    my_compiler = my_compiler.replace('.', '')
     return my_compiler
 
 
@@ -28,8 +32,10 @@ def get_my_python():
     my_python = my_python.replace('/bin', 'B')
     my_python = my_python.replace('.tox', 'T')
     my_python = my_python.replace('anaconda', 'A')
+    my_python = my_python.replace('miniconda', 'A')
+    my_python = my_python.replace('software', 'S')
     my_python = my_python.replace(home, 'H')
-    my_python = my_python.replace('python', 'PY')
+    my_python = my_python.replace('python', 'Py')
     my_python = my_python.replace('rif', 'R')
     my_python = my_python.replace('/', '')
     return my_python
@@ -68,9 +74,19 @@ def which(program):
 
 def infer_config_from_build_dirname(path):
     path = basename(dirname(path))
-    if path.startswith('build_'):
-        return path.replace('build_', '')
+    if path is 'buildD':
+        return "Debug"
     return 'Release'
+
+
+def get_build_dir(cfg='Release'):
+    if cfg is 'Release':
+        d = 'buildR'
+    elif cfg is 'Debug':
+        d = 'buildD'
+    else:
+        raise NotImplemented('cfg not recognised: ' + cfg)
+    return join(get_proj_root(), d)
 
 
 def in_CI_environment():
@@ -92,11 +108,6 @@ def get_proj_root():
     else:
         raise SystemError("can't find project root!")
     return proj_root
-
-
-def get_build_dir(cfg='Release'):
-    d = 'build_' + cfg
-    return join(get_proj_root(), d)
 
 
 def get_cmake_dir(prefix, cfg):
@@ -149,8 +160,9 @@ def add_to_pypath(newpath):
 
 def rebuild_rif(cfg='Release'):
     proj_root = get_proj_root()
+    build_dir = get_build_dir(cfg)
     assert not os.system('cd ' + proj_root + '; ' + sys.executable +
-                         ' setup.py build --build-base=build_' + cfg)
+                         ' setup.py build --build-base=' + build_dir)
 
 
 def make_docs(kind='html', cfg='Release'):
@@ -264,7 +276,7 @@ def build_and_test():
     # print('== calling rebuild_fast ==')
     no_xdist = len(testfiles) or len(gtests)
     no_xdist |= os.system('egrep "#.*cpp_files" pytest.ini') == 0
-    no_xdist |= sys.version_info.major is 3 and sys.version_info.minor is 6
+    # no_xdist |= sys.version_info.major is 3 and sys.version_info.minor is 6
     force_redo_cmake = len(pybindfiles) or not no_xdist or src_dir_new_file()
     rebuild_fast(target='rif_cpp gtest_all',
                  cfg=cfg, force_redo_cmake=force_redo_cmake)
@@ -309,7 +321,6 @@ def build_and_test():
         if not no_xdist:
             # args.extend('--cov=./src -n{}'.format(ncpu).split())
             args.extend('-n{}'.format(min(ncpu, 16)).split())
-            pass
         if gtests:
             args.extend(['-k', ' or '.join(gtests)])
         if testfiles and not gtests:
