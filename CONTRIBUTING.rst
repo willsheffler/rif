@@ -20,7 +20,7 @@ This project *should* support
 - cmake (needs help finding a numpy library)
 - tools/build_and_test.py
  - should be refactored to use click (or other)
- - should dispatch on file pattern (use a library?) *.pybind.cpp *_test.py
+ - should dispatch on file pattern (use a library?) \*.pybind.cpp \*_test.py
 
 Adding wrapped c++ code
 --------------------------

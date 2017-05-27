@@ -44,20 +44,20 @@ or
 pip install .
 python3 -mpytest --pyargs rif
 
-or 
+or
 
 pip install -rrequirements.txt
 mkdir build && cd build
-CXXFLAGS=-Ipath-to-site-packages/numpy/core/include cmake .. 
+CXXFLAGS=-Ipath-to-site-packages/numpy/core/include cmake ..
 PYTHONPATH=. python3 -mpytest --pyargs rif
 
 crappy details
 ~~~~~~~~~~~~~~~~~
 
 python requirements
-numpy, jinja2, pytest, pytest-cpp*, hypothesis, pandas
+numpy, jinja2, pytest, pytest-cpp\*, hypothesis, pandas
 
-*use the pytest\_cpp in external: "cd \<rifdi\r>/external/hacked_packages/pytest-cpp-0.4 && pip install ."
+\*use the pytest\_cpp in external: "cd \<rifdi\r>/external/hacked_packages/pytest-cpp-0.4 && pip install ."
 
 for graphics requirements
 pymol + pip packages: PyOpenGL OpenGLContext PyVRML97 pydispatcher

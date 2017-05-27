@@ -82,3 +82,4 @@ log/*.log
 *.log
 \#*\#
 *~
+.autoxsh

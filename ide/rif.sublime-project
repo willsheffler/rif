@@ -93,6 +93,7 @@
 			{
 				"CC": "clang-4.0",
 				"CXX": "clang++-4.0",
+				"PYTHONPATH": "./src",
 			},
 			"Windows":
 			{

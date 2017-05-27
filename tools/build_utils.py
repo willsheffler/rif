@@ -33,6 +33,7 @@ def get_my_python():
     my_python = my_python.replace('.tox', 'T')
     my_python = my_python.replace('anaconda', 'A')
     my_python = my_python.replace('miniconda', 'A')
+    my_python = my_python.replace('condaenvs', 'ce')
     my_python = my_python.replace('software', 'S')
     my_python = my_python.replace(home, 'H')
     my_python = my_python.replace('python', 'Py')

@@ -9,6 +9,6 @@ package rif_cpp:
 -------------------
 .. automodule:: rif_cpp
 
-doxygen test:
-------------------
-.. doxygenfile:: NEST.hpp
+.. doxygen test:
+.. ------------------
+.. .. doxygenfile:: NEST.hpp
