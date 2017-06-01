@@ -1,5 +1,5 @@
-#include "rif/geom/primitive.hpp"
 #include <gtest/gtest.h>
+#include "rif/geom/primitive.hpp"
 #include "rif/global_rng.hpp"
 
 namespace rif_geom_prim_test {

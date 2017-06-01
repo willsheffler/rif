@@ -12,6 +12,12 @@ import filecmp
 
 import pytest
 
+###############################################################################
+# horrible duplicates with setup.py and tools/build_utils.py
+# setup.py must stand alone for detox to work(?)
+# and importing from setup.py is problematic....
+###############################################################################
+
 
 def get_my_compiler():
     my_compiler = os.getenv('CXX', '').replace('/', '')
@@ -78,6 +84,8 @@ def infer_config_from_build_dirname(path):
     if path is 'buildD':
         return "Debug"
     return 'Release'
+
+###############################################################################
 
 
 def get_build_dir(cfg='Release'):
@@ -199,7 +207,7 @@ def remove_installed_rif():
 def get_ncpu():
     ncpu = multiprocessing.cpu_count()
     if ncpu > 4:
-        ncpu = int(ncpu / 2)
+        ncpu = int(ncpu * 4.0 / 8.0)
     if in_CI_environment():
         ncpu = min(ncpu, 4)
         os.system('uname -a')

@@ -9,15 +9,86 @@ import multiprocessing
 from glob import glob
 from collections import defaultdict
 
-import numpy
+# import numpy
 
 from setuptools import setup, Extension, find_packages
 from setuptools.command.build_ext import build_ext
 from distutils.version import LooseVersion
 
-from tools.build_utils import (get_my_compiler, get_my_python, my_getenv,
-                               in_conda, which, infer_config_from_build_dirname)
 
+###############################################################################
+# horrible duplicates with setup.py and tools/build_utils.py
+# setup.py must stand alone for detox to work(?)
+# and importing from setup.py is problematic....
+###############################################################################
+
+def get_my_compiler():
+    my_compiler = os.getenv('CXX', '').replace('/', '')
+    if not my_compiler:
+        my_compiler = "CXX"
+    my_compiler = my_compiler.replace('usrbin', 'UB')
+    my_compiler = my_compiler.replace('clang++', 'C')
+    my_compiler = my_compiler.replace('g++', 'G')
+    my_compiler = my_compiler.replace('-', '')
+    my_compiler = my_compiler.replace('.', '')
+    return my_compiler
+
+
+def get_my_python():
+    home = os.environ['HOME'] if 'HOME' in os.environ else "HOME"
+    my_python = sys.executable
+    my_python = my_python.replace('/usr/bin', 'UB')
+    my_python = my_python.replace('/bin', 'B')
+    my_python = my_python.replace('.tox', 'T')
+    my_python = my_python.replace('anaconda', 'A')
+    my_python = my_python.replace('miniconda', 'A')
+    my_python = my_python.replace('condaenvs', 'ce')
+    my_python = my_python.replace('software', 'S')
+    my_python = my_python.replace(home, 'H')
+    my_python = my_python.replace('python', 'Py')
+    my_python = my_python.replace('rif', 'R')
+    my_python = my_python.replace('/', '')
+    return my_python
+
+
+def my_getenv(name):
+    if name in os.environ:
+        return os.environ[name]
+    else:
+        return "DEFAULT_" + name
+
+
+def in_conda():
+    return ('Anaconda' in sys.version or
+            'Continuum Analytics' in sys.version or
+            'conda' in sys.executable
+            )
+
+
+def which(program):
+    def is_exe(fpath):
+        return os.path.isfile(fpath) and os.access(fpath, os.X_OK)
+
+    fpath, fname = os.path.split(program)
+    if fpath:
+        if is_exe(program):
+            return program
+    else:
+        for path in os.environ["PATH"].split(os.pathsep):
+            path = path.strip('"')
+            exe_file = os.path.join(path, program)
+            if is_exe(exe_file):
+                return exe_file
+    return None
+
+
+def infer_config_from_build_dirname(path):
+    path = os.path.basename(os.path.dirname(path))
+    if path is 'buildD':
+        return "Debug"
+    return 'Release'
+
+###############################################################################
 
 _rif_setup_opts = defaultdict(list)
 _remove_from_sys_argv = list()
@@ -127,7 +198,7 @@ class CMakeBuild(build_ext):
         env = os.environ.copy()
         env['CXXFLAGS'] = '{} -DVERSION_INFO=\\"{}\\"'.format(
             env.get('CXXFLAGS', ''), self.distribution.get_version())
-        env['CXXFLAGS'] += ' -I' + numpy.get_include()
+        # env['CXXFLAGS'] += ' -I' + numpy.get_include()
         if in_conda():
             condadir = os.path.dirname(sys.executable)[:-4]  # /bin
             env['CXXFLAGS'] = env['CXXFLAGS'] + ' -I' + condadir + '/include'
@@ -137,13 +208,16 @@ class CMakeBuild(build_ext):
         if not os.path.exists(self.build_temp):
             os.makedirs(self.build_temp)
         try:
-            with open('log/cmake_cmd.log', 'w') as out:
-                out.writelines([
-                    'setup.py: ' + os.linesep,
-                    'CXXFLAGS: ' + env['CXXFLAGS'],
-                    'cmake ' + ext.sourcedir + ' ' + ' '.join(cmake_args),
-                    'cmake --build . ' + ' '.join(build_args),
-                ])
+            try:
+                with open('log/cmake_cmd.log', 'w') as out:
+                    out.writelines([
+                        'setup.py: ' + os.linesep,
+                        'CXXFLAGS: ' + env['CXXFLAGS'],
+                        'cmake ' + ext.sourcedir + ' ' + ' '.join(cmake_args),
+                        'cmake --build . ' + ' '.join(build_args),
+                    ])
+            except Exception:
+                pass
             subprocess.check_call(
                 ['cmake', ext.sourcedir] + cmake_args, cwd=self.build_temp, env=env)
             print("setup.py: cmake --build", " ".join(cmake_args))

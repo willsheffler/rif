@@ -142,6 +142,21 @@ V3<F> rand_normal(F len = 1.0) {
 }
 
 template <class F>
+V3<F> rand_box(V3<F> lb = V3<F>(0, 0, 0), V3<F> ub = V3<F>(1, 1, 1)) {
+  auto &rng = global_rng();
+  std::uniform_real_distribution<> runif(0, 1);
+  auto v = V3<F>(runif(rng), runif(rng), runif(rng));
+  return v.cwiseProduct(ub - lb) + lb;
+}
+
+template <class F = float>
+auto rand_box_n(int n, V3<F> lb = V3<F>(0, 0, 0), V3<F> ub = V3<F>(1, 1, 1)) {
+  std::vector<V3<F>> r(n);
+  for (V3<F> &v : r) v = rand_box(lb, ub);
+  return r;
+}
+
+template <class F>
 X3<F> rand_xform(F cart_bound = 512.0) {
   X3<F> x;
   rand_xform(global_rng(), x, cart_bound);
