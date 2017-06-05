@@ -60,10 +60,10 @@ F qs_bound(F resl, F lever) {
   return 1.0 - 0.25 / qs_nc(resl, lever);
 }
 
-template <class RBinner>
-auto brute_maxmin_nbr(RBinner& rh, bool face0_only = false) {
-  using R = typename RBinner::R;
-  using F = typename RBinner::F;
+template <class RHash>
+auto brute_maxmin_nbr(RHash& rh, bool face0_only = false) {
+  using R = typename RHash::R;
+  using F = typename RHash::F;
   int nface = face0_only ? 1 : 6;
   F maxmindot = -9e9, maxmindis = -9e9;
   for (int i = 0; i < rh.bcc_[0].size() * nface - 1; ++i) {
@@ -90,7 +90,7 @@ auto brute_maxmin_nbr(RBinner& rh, bool face0_only = false) {
  * @detail align_ray_pair to put ray2 in 'canonical' position
  */
 template <class _R = Ray<float>, class _K = uint32_t>
-struct RayToRayBinner4D {
+struct RayToRayHash4D {
   using R = _R;
   using F = typename R::Scalar;
   using K = _K;
@@ -99,7 +99,7 @@ struct RayToRayBinner4D {
   using V = typename R::V;
   util::SimpleArray<6, Grid> bcc_;
   F resl_, lever_, bound_;
-  RayToRayBinner4D(F resl = 0.25, F lever = 1.5, F bound = 128)
+  RayToRayHash4D(F resl = 0.25, F lever = 1.5, F bound = 128)
       : bcc_(Grid(
             I4(2 * bound / resl, 2 * bound / resl, qs_nc(resl, lever),
                qs_nc(resl, lever)),
@@ -143,8 +143,8 @@ struct RayToRayBinner4D {
  * @tparam     _K    { description }
  */
 template <class _R = Ray<float>, class _K = uint32_t>
-struct RayBinner5D {
-  // todo: reduce code duplication with RayToRayBinner4D
+struct RayHash5D {
+  // todo: reduce code duplication with RayToRayHash4D
   using R = _R;
   using F = typename R::Scalar;
   using K = _K;
@@ -153,7 +153,7 @@ struct RayBinner5D {
   using V = typename R::V;
   util::SimpleArray<6, Grid> bcc_;
   F resl_, lever_, bound_;
-  RayBinner5D(F resl = 0.25, F lever = 1.5, F bound = 32)
+  RayHash5D(F resl = 0.25, F lever = 1.5, F bound = 32)
       : bcc_(Grid(makeI5(2 * bound / resl, 2 * bound / resl, 2 * bound / resl,
                          qs_nc(resl, lever), qs_nc(resl, lever)),
                   Fs(-bound, -bound, -bound, -qs_bound(resl, lever),
@@ -196,8 +196,8 @@ struct RayBinner5D {
  * @tparam     _K    { description }
  */
 template <class _R = Ray<float>, class _K = uint64_t>
-struct RayRayBinner10D {
-  // todo: reduce code duplication with RayToRayBinner4D
+struct RayRayHash10D {
+  // todo: reduce code duplication with RayToRayHash4D
   using R = _R;
   using F = typename R::Scalar;
   using K = _K;
@@ -206,7 +206,7 @@ struct RayRayBinner10D {
   using V = typename R::V;
   util::SimpleArray<36, Grid> bcc_;
   F resl_, lever_, bound_;
-  RayRayBinner10D(F resl = 0.25, F lever = 1.5, F bound = 32)
+  RayRayHash10D(F resl = 0.25, F lever = 1.5, F bound = 32)
       : bcc_(Grid(makeI10(2 * bound / resl, 2 * bound / resl, 2 * bound / resl,
                           qs_nc(resl, lever), qs_nc(resl, lever),
                           2 * bound / resl, 2 * bound / resl, 2 * bound / resl,

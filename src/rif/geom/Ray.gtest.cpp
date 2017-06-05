@@ -23,7 +23,7 @@ TEST(Ray, ray_basic_tests) {
 TEST(Ray, rand_ray_gaussian) {
   std::mt19937 rng((unsigned int)time(0) + 267943);
   for (int i = 0; i < 10; ++i) {
-    auto ray = rand_ray_gaussian_rng(rng);
+    auto ray = rand_ray_gaussian_rng<float>(rng);
     ASSERT_FLOAT_EQ(ray.dirn.norm(), 1.0);
     ASSERT_LT(ray.orig.norm(), 50.0);
   }

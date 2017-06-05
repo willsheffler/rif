@@ -1,8 +1,8 @@
 // this was mostly copied from pybind11/eigen.h
 
-#include "SimpleArray.hpp"
 #include "pyutil/pybind_simplearray.hpp"
-#include "str.hpp"
+#include "rif/util/SimpleArray.hpp"
+#include "rif/util/str.hpp"
 
 struct SATest {
   rif::util::SimpleArray<2, int> m;

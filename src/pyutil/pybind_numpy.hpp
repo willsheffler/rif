@@ -35,8 +35,8 @@ struct npy_format_descriptor<Eigen::Matrix<Scalar, NROW, NCOL, OPTS>> {
     if (numpy_internals.get_type_info(tinfo, false))
       pybind11_fail("NumPy: dtype is already registered:\n    Eigen::Matrix<" +
                     cpp_repr<Scalar>() + ", " + str(NROW) + ", " + str(NCOL) +
-                    ", " + str(OPTS) + ">\n    hash_code: " +
-                    str(tindex.hash_code()));
+                    ", " + str(OPTS) +
+                    ">\n    hash_code: " + str(tindex.hash_code()));
 
     std::ostringstream oss;
     std::string scalar_fmt = format_descriptor<Scalar>::format();
@@ -44,16 +44,16 @@ struct npy_format_descriptor<Eigen::Matrix<Scalar, NROW, NCOL, OPTS>> {
     if (NCOL >= 2) oss << "(" << NROW << "," << NCOL << ")" << scalar_fmt;
     std::string dtype_str = oss.str();
     list names, formats, offsets;
-    names.append(PYBIND11_STR_TYPE("crd"));
+    names.append(PYBIND11_STR_TYPE("raw"));
     formats.append(dtype_str);
     offsets.append(pybind11::int_(0));
     auto dtype_ptr =
         pybind11::dtype(names, formats, offsets, sizeof(T)).release().ptr();
 
     std::ostringstream oss2;
-    if (NCOL == 1) oss2 << "T{" << NROW << scalar_fmt << ":crd:}";
+    if (NCOL == 1) oss2 << "T{" << NROW << scalar_fmt << ":raw:}";
     if (NCOL >= 2)
-      oss2 << "T{(" << NROW << "," << NCOL << ")" << scalar_fmt << ":crd:}";
+      oss2 << "T{(" << NROW << "," << NCOL << ")" << scalar_fmt << ":raw:}";
     std::string format_str = oss2.str();
 
     // std::cout << "npy_format_descriptor" << std::endl;

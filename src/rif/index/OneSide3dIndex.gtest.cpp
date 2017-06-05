@@ -1,18 +1,18 @@
 #include <gtest/gtest.h>
 
 #include "rif/geom/rand_geom.hpp"
-#include "rif/index/OneSidedIndex3D.hpp"
+#include "rif/index/OneSide3dIndex.hpp"
 #include "rif/util/Timer.hpp"
 
 namespace rif {
 namespace index {
 namespace test_xyzhash {
 
-using rif::index::xyzStripeHash;
+using rif::index::OneSide3dIndex;
 
 using F = float;
 
-TEST(OneSidedIndex3D, test_vs_brute_force) {
+TEST(OneSide3dIndex, test_vs_brute_force) {
   int const Niter = 10;
   int const Ntest = 1000;
   int const Npts = 1000;
@@ -22,7 +22,7 @@ TEST(OneSidedIndex3D, test_vs_brute_force) {
     if (iter > 0 && iter % 1000 == 0)
       std::cout << iter << " " << numtot << " " << num0 << std::endl;
     auto pts = geom::rand_box_n<F>(Npts);
-    xyzStripeHash<V3f> h(0.07, pts);
+    OneSide3dIndex<V3f> h(pts, 0.07);
     // h.sanity_check();
     std::vector<int> hcount(Ntest), bcount(Ntest), contact(Ntest);
     auto pts_test = geom::rand_box_n<F>(Ntest);

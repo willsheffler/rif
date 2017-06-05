@@ -167,14 +167,14 @@ struct npy_format_descriptor<rif::util::SimpleArray<DIM, Scalar, init0>> {
     oss << DIM << scalar_fmt;
     std::string dtype_str = oss.str();
     list names, formats, offsets;
-    names.append(PYBIND11_STR_TYPE("crd"));
+    names.append(PYBIND11_STR_TYPE("raw"));
     formats.append(dtype_str);
     offsets.append(pybind11::int_(0));
     auto dtype_ptr =
         pybind11::dtype(names, formats, offsets, sizeof(T)).release().ptr();
 
     std::ostringstream oss2;
-    oss2 << "T{" << DIM << scalar_fmt << ":crd:}";
+    oss2 << "T{" << DIM << scalar_fmt << ":raw:}";
     std::string format_str = oss2.str();
 
     // std::cout << "npy_format_descriptor" << std::endl;

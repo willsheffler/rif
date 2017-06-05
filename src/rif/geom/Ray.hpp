@@ -63,9 +63,9 @@ Ray<F> rand_ray_gaussian_rng(std::mt19937& rng, float sd = 10.0) {
   return r;
 }
 template <class F = float>
-Ray<F> rand_ray_gaussian(float sd = 10.0) {
+Ray<F> rand_ray_gaussian(F sd = 10.0) {
   auto& rng(global_rng());
-  return rand_ray_gaussian_rng(rng, sd);
+  return rand_ray_gaussian_rng<F>(rng, sd);
 }
 }
 }

@@ -26,7 +26,7 @@ TEST(ray_hash, align_ray_pair) {
 }
 
 TEST(ray_hash, ray_to_ray_hash_bins_of_centers) {
-  RayToRayBinner4D<> rh(0.25, 1.0, 1.0);
+  RayToRayHash4D<> rh(0.25, 1.0, 1.0);
   double nerr = 0;
   for (int key = 0; key < rh.size(); ++key) {
     auto cen = rh.get_center(key);
@@ -38,7 +38,7 @@ TEST(ray_hash, ray_to_ray_hash_bins_of_centers) {
 }
 
 TEST(ray_hash, ray_hash_bins_of_centers) {
-  RayBinner5D<> rh(0.33, 1.0, 1.0);
+  RayHash5D<> rh(0.33, 1.0, 1.0);
   double nerr = 0;
   for (int key = 0; key < rh.size(); ++key) {
     auto cen = rh.get_center(key);
@@ -50,7 +50,7 @@ TEST(ray_hash, ray_hash_bins_of_centers) {
 }
 
 TEST(ray_hash, two_ray_hash_bins_of_centers) {
-  RayRayBinner10D<> rh(0.33, 1.0, 1.0);
+  RayRayHash10D<> rh(0.33, 1.0, 1.0);
   double nerr = 0;
   // std::cout << rh.size() << std::endl;
   uint64_t step = sqrt(rh.size());
@@ -63,10 +63,10 @@ TEST(ray_hash, two_ray_hash_bins_of_centers) {
   ASSERT_LT(nerr / rh.size(), 0.001);
 }
 
-TEST(ray_hash, ray_hash_covering_radius) { RayBinner5D<> rh(0.1, 3.0); }
+TEST(ray_hash, ray_hash_covering_radius) { RayHash5D<> rh(0.1, 3.0); }
 
 TEST(ray_hash, ray_ray_hash_cart_ori_spacing) {
-  RayToRayBinner4D<> rh(0.25, 1.0, 0.3);
+  RayToRayHash4D<> rh(0.25, 1.0, 0.3);
   A2f nbr_sp = brute_maxmin_nbr(rh, 1);
   // std::cout << "rh.size " << rh.size() << ", cart " << rh.size_cart()
   // << ", qsph " << rh.size_qsph()
@@ -75,7 +75,7 @@ TEST(ray_hash, ray_ray_hash_cart_ori_spacing) {
 }
 
 TEST(ray_hash, ray_hash_cart_ori_spacing) {
-  RayBinner5D<> rh(0.4, 1.0, 0.5);
+  RayHash5D<> rh(0.4, 1.0, 0.5);
   A2f nbr_sp = brute_maxmin_nbr(rh, 1);
   std::cout << "rh.size " << rh.size() << ", cart " << rh.size_cart()
             << ", qsph " << rh.size_qsph()

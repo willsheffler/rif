@@ -5,7 +5,7 @@ import numpy as np
 
 
 def test_np_info():
-    x = np.ones(5, dtype=[('crd', '(2,3)f4')])
+    x = np.ones(5, dtype=[('raw', '(2,3)f4')])
     rif.dtypes.print_numpy_info(x)
 
 
@@ -20,7 +20,7 @@ def test_with_rif_ops():
     with pytest.raises(TypeError):
         x + x
     with rif.dtypes.rif_ops():
-        assert np.all((x + x)['crd'] == x['crd'] + x['crd'])
+        assert np.all((x + x)['raw'] == x['raw'] + x['raw'])
     with pytest.raises(TypeError):
         x * x
     assert np.all(np.arange(3) + np.arange(3) == np.arange(0, 6, 2))

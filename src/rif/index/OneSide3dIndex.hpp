@@ -1,4 +1,5 @@
 // gross but efficient code from c/gpu stuff many years ago
+// todo: refactor wtih visitor to remove extra code
 
 #pragma once
 
@@ -9,12 +10,12 @@ namespace rif {
 namespace index {
 
 template <class Pt, class Idx = uint16_t>
-struct xyzStripeHash {
+struct OneSide3dIndex {
   using F = typename Pt::Scalar;
   typedef struct { Idx x, y; } ushort2;
   typedef V3<F> Vec;
 
-  F width_, width2_;
+  F width_, width2_;  // cell width
   size_t Npts;
   Pt const *pts_ = nullptr;
   ushort2 const *pindex_ = nullptr;
@@ -22,15 +23,21 @@ struct xyzStripeHash {
   float xmx_, ymx_, zmx_;
   Vec translation_;
 
-  xyzStripeHash() {}
+  OneSide3dIndex() {}
 
-  xyzStripeHash(F grid_size, std::vector<Pt> const &pts) {
-    init(grid_size, pts);
+  template <class C>
+  OneSide3dIndex(C const &pts, F width) {
+    Pt const *ptr = &pts[0];
+    init(width, ptr, pts.size());
   }
 
-  void init(F grid_size, std::vector<Pt> const &pts);
+  OneSide3dIndex(F width, Pt const *ptr, size_t Npts) {
+    init(width, ptr, Npts);
+  }
 
-  virtual ~xyzStripeHash() {
+  void init(F width, Pt const *ptr, size_t Npts);
+
+  virtual ~OneSide3dIndex() {
     if (pts_) delete pts_;
     if (pindex_) delete pindex_;
   }
@@ -54,7 +61,7 @@ struct xyzStripeHash {
             bool zc = width_ * (float)iz <= z && z <= width_ * (float)(iz + 1);
             if (/*!xc||*/ !yc || !zc) {
               ALWAYS_ASSERT_MSG(false,
-                                "insanity in xyzStripeHash::sanity_check");
+                                "insanity in OneSide3dIndex::sanity_check");
             }
           }
         }
@@ -242,22 +249,22 @@ struct xyzStripeHash {
 };
 
 template <class Pt, class Idx>
-void xyzStripeHash<Pt, Idx>::init(F grid_size, std::vector<Pt> const &pts) {
-  assert(pts.size());
+void OneSide3dIndex<Pt, Idx>::init(F width, Pt const *ptr, size_t _Npts) {
+  Npts = _Npts;
+  assert(Npts);
 
-  Npts = pts.size();
-  width_ = grid_size;
-  width2_ = grid_size * grid_size;
+  width_ = width;
+  width2_ = width * width;
 
   F xmn = 9e9, ymn = 9e9, zmn = 9e9;
   F xmx = -9e9, ymx = -9e9, zmx = -9e9;
   for (int i = 0; i < Npts; ++i) {
-    xmn = std::min(xmn, pts[i][0]);
-    ymn = std::min(ymn, pts[i][1]);
-    zmn = std::min(zmn, pts[i][2]);
-    xmx = std::max(xmx, pts[i][0]);
-    ymx = std::max(ymx, pts[i][1]);
-    zmx = std::max(zmx, pts[i][2]);
+    xmn = std::min(xmn, ptr[i][0]);
+    ymn = std::min(ymn, ptr[i][1]);
+    zmn = std::min(zmn, ptr[i][2]);
+    xmx = std::max(xmx, ptr[i][0]);
+    ymx = std::max(ymx, ptr[i][1]);
+    zmx = std::max(zmx, ptr[i][2]);
   }
 
   xdim_ = static_cast<int>((xmx - xmn + 0.0001) / width_ + 0.999999);
@@ -278,9 +285,9 @@ void xyzStripeHash<Pt, Idx>::init(F grid_size, std::vector<Pt> const &pts) {
   // "<<ydim_<<" "<<zdim_<<std::endl;
 
   for (int i = 0; i < Npts; ++i) {
-    int ix = static_cast<int>((pts[i][0] - xmn /*+FUDGE*/) / width_);
-    int iy = static_cast<int>((pts[i][1] - ymn /*+FUDGE*/) / width_);
-    int iz = static_cast<int>((pts[i][2] - zmn /*+FUDGE*/) / width_);
+    int ix = static_cast<int>((ptr[i][0] - xmn /*+FUDGE*/) / width_);
+    int iy = static_cast<int>((ptr[i][1] - ymn /*+FUDGE*/) / width_);
+    int iz = static_cast<int>((ptr[i][2] - zmn /*+FUDGE*/) / width_);
     assert(ix >= 0);
     assert(iy >= 0);
     assert(iz >= 0);
@@ -313,7 +320,7 @@ void xyzStripeHash<Pt, Idx>::init(F grid_size, std::vector<Pt> const &pts) {
   //       "<<I(3,tmp_pindex[i].y)<<std::endl;
   //     }
   pindex_ = tmp_pindex;
-  Pt *gatom = new Pt[Npts + 4];  // space for 4 overflow pts
+  Pt *gatom = new Pt[Npts + 4];  // space for 4 overflow ptr
   for (int i = 0; i < 4; ++i) {
     gatom[Npts + i][0] = 9e9;
     gatom[Npts + i][1] = 9e9;
@@ -322,14 +329,14 @@ void xyzStripeHash<Pt, Idx>::init(F grid_size, std::vector<Pt> const &pts) {
   ushort *gridc = new ushort[gsize];
   for (int i = 0; i < gsize; ++i) gridc[i] = 0;
   for (int i = 0; i < Npts; ++i) {
-    int const ix = static_cast<int>((pts[i][0] - xmn /*+FUDGE*/) / width_);
-    int const iy = static_cast<int>((pts[i][1] - ymn /*+FUDGE*/) / width_);
-    int const iz = static_cast<int>((pts[i][2] - zmn /*+FUDGE*/) / width_);
+    int const ix = static_cast<int>((ptr[i][0] - xmn /*+FUDGE*/) / width_);
+    int const iy = static_cast<int>((ptr[i][1] - ymn /*+FUDGE*/) / width_);
+    int const iz = static_cast<int>((ptr[i][2] - zmn /*+FUDGE*/) / width_);
     int const ig = ix + xdim_ * iy + xdim_ * ydim_ * iz;
     int const idx = tmp_pindex2[ig].x + gridc[ig];
-    gatom[idx][0] = pts[i][0] - xmn /*+FUDGE*/;
-    gatom[idx][1] = pts[i][1] - ymn /*+FUDGE*/;
-    gatom[idx][2] = pts[i][2] - zmn /*+FUDGE*/;
+    gatom[idx][0] = ptr[i][0] - xmn /*+FUDGE*/;
+    gatom[idx][1] = ptr[i][1] - ymn /*+FUDGE*/;
+    gatom[idx][2] = ptr[i][2] - zmn /*+FUDGE*/;
     ++(gridc[ig]);
   }
   pts_ = gatom;

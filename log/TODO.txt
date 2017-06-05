@@ -1,18 +1,21 @@
-TODO FIX ANACONDA BUILD!
+FiberDock
+todo: check numpy op performance/amortization
+todo: api arounud OneSided3DIndex
+todo: bind TwoSided3DIndex
+todo: dtypes/ops for One/TwoSided3DIndex
 
- X   wrap simpleatom struct with numpy dtype
 
-TODO hunt down and eradicate stochastic failures (OR make pytest-cpp do two tries?)
+todo: visualize rays in 6x4D bcc lattice cubefaces
+todo: visualize orientation sets
+todo: visualize bcc lattice
+todo: remove crappy symlink to make tox work (FIX TOX!?!?)
+todo: make cones from orientation sets, see what ~1500 gets you
+todo: hunt down and eradicate stochastic failures (OR make pytest-cpp do two tries?)
  X   tox build docs
- X   figure out where conda puts boost on readthedocs
-TODO remove crappy symlink to make tox work
- X   pytest doctests
-TODO visualize orientation sets
-TODO make cones from orientation sets, see what ~1500 gets you
-TODO visualize bcc lattice
-TODO visualize rays in 6x4D bcc lattice cubefaces
- X    set pytest.ini stuff from scipts -- _thisfile no cpp,xdist
  X   tox
- X   auto-pep8 somehow
+ X   pytest doctests
+ X   figure out where conda puts boost on readthedocs
  X   build system run one file
+ X   auto-pep8 somehow
+ X    set pytest.ini stuff from scipts -- _thisfile no cpp,xdist
  x

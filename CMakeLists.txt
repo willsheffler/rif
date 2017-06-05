@@ -8,8 +8,8 @@ function(main)
     print_config()
     add_subdirectory(external/pybind11)
     # execute_process(COMMAND rm -f ${CMAKE_CURRENT_BINARY_DIR}/rif.gen.cpp)
-    build_python_bindings("")
     build_gtests()
+    build_python_bindings("")
     # summary()
 endfunction()
 
@@ -98,6 +98,7 @@ function(build_python_bindings)
         DEPENDS src/rif/rif.gen.cpp.jinja ${PY_CPP} ${SRCGEN})
     pybind11_add_module(rif_cpp ${CMAKE_CURRENT_BINARY_DIR}/rif.gen.cpp ${PY_CPP} ${SRCGEN} NO_EXTRAS)
     target_link_libraries( rif_cpp PRIVATE ${extra_libs} )
+
 endfunction()
 
 
@@ -107,25 +108,16 @@ function(build_gtests)
     include_directories("external/googletest/include")
     list(APPEND extra_libs gtest)
 
-    # shitty "data" files to compile faster TODO: remove these
-    list(APPEND LIB_CPP src/rif/rosetta/score/EtableParams_init.lib.cpp
-                        src/rif/rosetta/atype_map.lib.cpp)
-    set_source_files_properties(${LIB_CPP} PROPERTIES COMPILE_FLAGS -O0)
-    add_library(rif_data ${LIB_CPP})
-
     file(GLOB_RECURSE TEST_CPP "src/rif/[0-9a-zA-Z_]*.gtest.cpp")
     add_executable(gtest_all src/test/gtest_all.cpp ${TEST_CPP})
-    target_link_libraries(gtest_all rif_data ${extra_libs})
-
-    # add_executable(gtest_wip src/test/gtest_wip.cpp)
-    # target_link_libraries(gtest_wip rif_data ${extra_libs})
+    target_link_libraries(gtest_all ${extra_libs})
 
     if(NOT EXISTS ${CMAKE_CURRENT_BINARY_DIR}/gtest_auto.gen.cpp)
         message("!!!!! creating gtest_auto file")
         execute_process(COMMAND cp ${CMAKE_SOURCE_DIR}/tools/empty.cpp.tplt ${CMAKE_CURRENT_BINARY_DIR}/gtest_auto.gen.cpp)
     endif()
     add_executable(gtest_auto ${CMAKE_CURRENT_BINARY_DIR}/gtest_auto.gen.cpp)
-    target_link_libraries(gtest_auto rif_data ${extra_libs})
+    target_link_libraries(gtest_auto ${extra_libs})
 endfunction()
 
 function(summary)

@@ -11,8 +11,8 @@ using rif::util::str;
 
 template <class F, class K>
 void pybind_ray_hash4(py::module& m) {
-  using T = RayToRayBinner4D<Ray<F>, K>;
-  std::string name = "RayToRayBinner4D_" + short_str<F>() + short_str<K>();
+  using T = RayToRayHash4D<Ray<F>, K>;
+  std::string name = "RayToRayHash4D_" + short_str<F>() + short_str<K>();
   py::class_<T>(m, name.c_str())
       .def(py::init<F, F, F>(), "resl"_a = 0.25, "lever"_a = 2, "bound"_a = 32)
       .def("__repr__",
@@ -26,8 +26,8 @@ void pybind_ray_hash4(py::module& m) {
 
 template <class F, class K>
 void pybind_ray_hash5(py::module& m) {
-  using T = RayBinner5D<Ray<F>, K>;
-  std::string name = "RayBinner5D_" + short_str<F>() + short_str<K>();
+  using T = RayHash5D<Ray<F>, K>;
+  std::string name = "RayHash5D_" + short_str<F>() + short_str<K>();
   py::class_<T>(m, name.c_str())
       .def(py::init<F, F, F>(), "resl"_a = 0.25, "lever"_a = 2, "bound"_a = 32)
       .def("__repr__",
@@ -41,8 +41,8 @@ void pybind_ray_hash5(py::module& m) {
 
 template <class F, class K>
 void pybind_ray_hash10(py::module& m) {
-  using T = RayRayBinner10D<Ray<F>, K>;
-  std::string name = "RayRayBinner10D_" + short_str<F>() + short_str<K>();
+  using T = RayRayHash10D<Ray<F>, K>;
+  std::string name = "RayRayHash10D_" + short_str<F>() + short_str<K>();
   py::class_<T>(m, name.c_str())
       .def(py::init<F, F, F>(), "resl"_a = 0.25, "lever"_a = 2, "bound"_a = 32)
       .def("__repr__",
@@ -61,7 +61,10 @@ void pybind_ray_hash10(py::module& m) {
 }
 
 void RIFLIB_PYBIND_geom_ray_hash(py::module& m) {
-  pybind_ray_hash4<double, int64_t>(m);
-  pybind_ray_hash5<double, int64_t>(m);
-  pybind_ray_hash10<double, int64_t>(m);
+  pybind_ray_hash4<float, int64_t>(m);
+  pybind_ray_hash5<float, int64_t>(m);
+  pybind_ray_hash10<float, int64_t>(m);
+  m.attr("RayToRayHash4D") = m.attr("RayToRayHash4D_f4i8");
+  m.attr("RayHash5D") = m.attr("RayHash5D_f4i8");
+  m.attr("RayRayHash10D") = m.attr("RayRayHash10D_f4i8");
 }

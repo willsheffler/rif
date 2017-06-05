@@ -18,7 +18,7 @@ for name in dir(rif.numeric.bcc_lattice):
 
         def bcc_center(self, idx):
             r = self._center_impl(idx)
-            return r['crd']
+            return r['raw']
         cls.center = bcc_center
 
         def bcc_index(self, arg):

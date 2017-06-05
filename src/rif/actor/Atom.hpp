@@ -13,7 +13,8 @@ namespace actor {
 template <class _Position>
 struct Atom {
   using Position = _Position;
-  using This = Atom<Position>;
+  using THIS = Atom<Position>;
+  using Scalar = typename Position::Scalar;
 
   Atom() : pos(0, 0, 0), atype(-1), rtype(-1), anum(-1) {}
 
@@ -57,10 +58,13 @@ struct Atom {
            o.rtype == rtype && o.anum == anum;
   }
 
+  auto &operator[](size_t i) { return pos[i]; }
+  auto const &operator[](size_t i) const { return pos[i]; }
+
   Position pos;
-  int16_t atype;
-  int8_t rtype;
+  int8_t atype;
   int8_t anum;
+  int16_t rtype;
 };
 
 template <class P>
@@ -74,81 +78,88 @@ void write_pdb(std::ostream &out, Atom<P> const &a, MetaData const &meta) {
                     meta.atom_data(a.restype(), a.atomnum()));
 }
 
-using chemical::AtomData;
+// using chemical::AtomData;
 
-template <class _Position>
-struct AtomWithData {
-  typedef _Position Position;
+// template <class _Position>
+// struct AtomWithData {
+//   typedef _Position Position;
 
-  AtomWithData()
-      : pos(0, 0, 0), atype(0), data_(rif::make_shared<AtomData>()) {}
-  // data_(new AtomData) {}
+//   AtomWithData()
+//       : pos(0, 0, 0), atype(0), data_(rif::make_shared<AtomData>()) {}
+//   // data_(new AtomData) {}
 
-  template <class P>
-  AtomWithData(P const &p, int type = 0,
-               std::string const &atomname = AtomData::default_atomname(),
-               std::string const &resname = AtomData::default_resname(),
-               char chain = AtomData::default_chain(),
-               int resnum = AtomData::default_resnum(),
-               int atomnum = AtomData::default_atomnum(),
-               std::string const &elem = AtomData::default_elem(),
-               bool ishet = AtomData::default_ishet(),
-               float occ = AtomData::default_occ(),
-               float bfac = AtomData::default_bfac())
-      : pos(p[0], p[1], p[2]),
-        atype(type),
-        data_(rif::make_shared<AtomData>(  // TODO: why do I need rif:: here?
-            // data_(new AtomData(
-            atomname, resname, chain, resnum, atomnum, elem, ishet, occ,
-            bfac)) {}
+//   template <class P>
+//   AtomWithData(P const &p, int type = 0,
+//                std::string const &atomname = AtomData::default_atomname(),
+//                std::string const &resname = AtomData::default_resname(),
+//                char chain = AtomData::default_chain(),
+//                int resnum = AtomData::default_resnum(),
+//                int atomnum = AtomData::default_atomnum(),
+//                std::string const &elem = AtomData::default_elem(),
+//                bool ishet = AtomData::default_ishet(),
+//                float occ = AtomData::default_occ(),
+//                float bfac = AtomData::default_bfac())
+//       : pos(p[0], p[1], p[2]),
+//         atype(type),
+//         data_(rif::make_shared<AtomData>(  // TODO: why do I need rif:: here?
+//             // data_(new AtomData(
+//             atomname, resname, chain, resnum, atomnum, elem, ishet, occ,
+//             bfac)) {}
 
-  // // TODO: compare raw ptr for speed
-  // ~AtomWithData(){ delete data_; }
+//   // // TODO: compare raw ptr for speed
+//   // ~AtomWithData(){ delete data_; }
 
-  template <class Xform>
-  AtomWithData(AtomWithData const &a, Xform const &moveby) {
-    pos = moveby * a.position();
-    atype = a.atype;
-    data_ = a.data_;
-  }
+//   template <class Xform>
+//   AtomWithData(AtomWithData const &a, Xform const &moveby) {
+//     pos = moveby * a.position();
+//     atype = a.atype;
+//     data_ = a.data_;
+//   }
 
-  int type() const { return atype; }
-  void set_type(int i) { atype = i; }
-  AtomData const &data() const { return *data_; }
-  AtomData &nonconst_data() { return *data_; }
+//   int type() const { return atype; }
+//   void set_type(int i) { atype = i; }
+//   AtomData const &data() const { return *data_; }
+//   AtomData &nonconst_data() { return *data_; }
 
-  Position const &position() const { return pos; }
+//   Position const &position() const { return pos; }
 
-  template <class P>
-  void set_position(P const &pos) {
-    pos[0] = pos[0];
-    pos[1] = pos[1];
-    pos[2] = pos[2];
-  }
+//   template <class P>
+//   void set_position(P const &pos) {
+//     pos[0] = pos[0];
+//     pos[1] = pos[1];
+//     pos[2] = pos[2];
+//   }
 
-  bool operator==(AtomWithData<Position> const &o) const {
-    return numeric::approx_eq(o.pos, pos) && o.atype == atype &&
-           o.data_ == data_;
-  }
+//   bool operator==(AtomWithData<Position> const &o) const {
+//     return numeric::approx_eq(o.pos, pos) && o.atype == atype &&
+//            o.data_ == data_;
+//   }
 
- private:
-  int atype;
-  shared_ptr<AtomData> data_;
-  // AtomData *data_;
-  Position pos;
-};
+//  private:
+//   int atype;
+//   shared_ptr<AtomData> data_;
+//   // AtomData *data_;
+//   Position pos;
+// };
 
+// template <class P>
+// std::ostream &operator<<(std::ostream &out, AtomWithData<P> const &x) {
+//   return out << "AtomWithData( " << x.position() << ", " << x.type() << ", "
+//              << x.data() << " )";
+// }
+
+// template <class P, class MetaData>
+// void write_pdb(std::ostream &out, AtomWithData<P> const &a, MetaData const &)
+// {
+//   io::dump_pdb_atom(out, a.position(), a.data());
+// }
+}
+}
+
+namespace std {
 template <class P>
-std::ostream &operator<<(std::ostream &out, AtomWithData<P> const &x) {
-  return out << "AtomWithData( " << x.position() << ", " << x.type() << ", "
-             << x.data() << " )";
-}
-
-template <class P, class MetaData>
-void write_pdb(std::ostream &out, AtomWithData<P> const &a, MetaData const &) {
-  io::dump_pdb_atom(out, a.position(), a.data());
-}
-}
+struct is_pod<rif::actor::Atom<P>> : public std::integral_constant<bool, true> {
+};
 }
 
 #endif
