@@ -75,15 +75,61 @@ def override2(name):
     return ufunc
 
 
+_GLOBAL_RIF_OPS = None
+
+
 class rif_ops(object):
+    """contect manager for locally enabling rif ops"""
+
     def __enter__(self):
-        print('rif_ops: enter')
-        d = {ufunc: override1(ufunc) for ufunc in ('absolute'.split())}
-        d2 = {ufunc: override2(ufunc)
-              for ufunc in ('add subtract multiply'.split())}
-        d.update(d2)
-        self.orig = np.set_numeric_ops(**d)
+        global _GLOBAL_RIF_OPS
+        if _GLOBAL_RIF_OPS is not None:
+            print('warning: global_rif_ops is enabled, rif_ops contect manager doing nothing')
+            self.orig = None
+        else:
+            print('rif_ops: enter')
+            d = {ufunc: override1(ufunc) for ufunc in ('absolute'.split())}
+            d2 = {ufunc: override2(ufunc)
+                  for ufunc in ('add subtract multiply'.split())}
+            d.update(d2)
+            self.orig = np.set_numeric_ops(**d)
 
     def __exit__(self, *args):
-        print("rif_ops: exit", args)
-        np.set_numeric_ops(**self.orig)
+        if args:
+            print("rif_ops: exit", args)
+        if self.orig:
+            np.set_numeric_ops(**self.orig)
+
+
+class rif_ops_disable(object):
+    """context manager to locally disable rif_ops"""
+
+    def __enter__(self):
+        global_rif_ops_disable(quiet=True)
+
+    def __exit__(self, *args):
+        global_rif_ops_enable(quiet=True)
+
+
+def global_rif_ops_enable(quiet=False):
+    global _GLOBAL_RIF_OPS
+    if not _GLOBAL_RIF_OPS:
+        tmp = rif_ops()
+        tmp.__enter__()
+        _GLOBAL_RIF_OPS = tmp
+    elif not quiet:
+        print("warning: global_rif_ops_enable called after already enabled")
+
+
+def global_rif_ops_disable(quiet=False):
+    global _GLOBAL_RIF_OPS
+    if _GLOBAL_RIF_OPS:
+        tmp = _GLOBAL_RIF_OPS
+        _GLOBAL_RIF_OPS = None
+        tmp.__exit__()
+    elif not quiet:
+        print("warning: global_rif_ops_disable called when not enabled")
+
+
+if sys.version_info.major is 3:
+    global_rif_ops_enable()

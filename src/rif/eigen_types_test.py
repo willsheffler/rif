@@ -1,5 +1,6 @@
 from __future__ import print_function
 import pytest
+import sys
 import numpy as np
 import rif
 from rif.dtypes import rif_ops
@@ -44,21 +45,32 @@ def test_V3_numpy_assign():
     assert a['raw'][0, 2] == 5
 
 
+def eigen_v3f_test_helper():
+    a = np.ones(10, dtype=v3f_t)
+    a['raw'] = np.random.rand(10, 3)
+    b = np.ones(10, dtype=v3f_t)
+    assert a.shape == (10, )
+    assert a['raw'].shape == (10, 3)
+    assert_almost_equal(a['raw'] + b['raw'], (a + b)['raw'], 5)
+    assert_almost_equal(a['raw'] - b['raw'], (a - b)['raw'], 5)
+    assert all(np.arange(10) + np.arange(10) == np.arange(0, 20, 2))
+    c = a + 2 * b
+    assert_almost_equal(abs(a + 2 * b), abs(c))
+    d = a[:, np.newaxis] * b
+    assert np.all((2 * b)['raw'] == [2.0, 2, 2])
+
+
 @pytest.mark.skipif('sys.version_info.major is 2')
 def test_eigen_v3f_dtype():
     with rif_ops():
-        a = np.ones(10, dtype=v3f_t)
-        a['raw'] = np.random.rand(10, 3)
-        b = np.ones(10, dtype=v3f_t)
-        assert a.shape == (10, )
-        assert a['raw'].shape == (10, 3)
-        assert_almost_equal(a['raw'] + b['raw'], (a + b)['raw'], 5)
-        assert_almost_equal(a['raw'] - b['raw'], (a - b)['raw'], 5)
-        assert all(np.arange(10) + np.arange(10) == np.arange(0, 20, 2))
-        c = a + 2 * b
-        assert_almost_equal(abs(a + 2 * b), abs(c))
-        d = a[:, np.newaxis] * b
-        assert np.all((2 * b)['raw'] == [2.0, 2, 2])
+        eigen_v3f_test_helper()
+
+
+@pytest.mark.skipif('sys.version_info.major is 2')
+def test_global_rif_ops():
+    rif.dtypes.global_rif_ops_enable()
+    eigen_v3f_test_helper()
+    rif.dtypes.global_rif_ops_disable()
 
 
 @pytest.mark.skipif('sys.version_info.major is 2')
