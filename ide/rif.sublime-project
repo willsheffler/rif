@@ -39,7 +39,7 @@
 			"file_regex": "^[ ]*File \"(...*?)\", line ([0-9]*)",
 			"name": "Anaconda Python Builder",
 			"selector": "source.python",
-			"shell_cmd": "\"/usr/bin/python\" -u \"$file\""
+			"shell_cmd": "\"/home/sheffler/.conda/envs/sheffler/bin/python\" -u \"$file\""
 		}
 	],
 	"folders":
@@ -92,13 +92,17 @@
 			"Linux":
 			{
 				"CC": "clang-4.0",
-				"CXX": "clang++-4.0",
-				"PYTHONPATH": "./src",
+				"CXX": "clang++-4.0"
 			},
 			"Windows":
 			{
 			}
 		},
+		"extra_paths":
+		[
+			"/home/sheffler/rif/buildR/lib.linux-x86_64-3.6-H.ceshefflerBPy3-C40"
+		],
+		"python_interpreter": "/home/sheffler/.conda/envs/sheffler/bin/python",
 		"tab_size": 4,
 		"translate_tabs_to_spaces": true
 	}

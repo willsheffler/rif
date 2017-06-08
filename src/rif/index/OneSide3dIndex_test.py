@@ -1,6 +1,8 @@
+from rif import actor
 from rif.actor import Atom
 from rif.index import AtomIndexOneSided
 import numpy as np
+print(actor)
 
 
 def test_AtomIndexOneSided():
@@ -11,3 +13,9 @@ def test_AtomIndexOneSided():
     print(aindex)
 
     # assert 0
+
+# NOTES:
+# pyflakes doesn't validate imports
+# setting python_interpreter works? at least for conda root?
+# removed rif.pth from interpreters, still finding rif.actor?
+# get a better handle on what's up, then post anaconda issue

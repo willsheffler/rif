@@ -36,10 +36,14 @@ namespace std {
 template <>
 struct is_pod<test> : public std::integral_constant<bool, true> {};
 }
+namespace std {
+template <>
+struct is_pod<X3f> : public std::integral_constant<bool, true> {};
+}
 
 template <class M>
 void bind_eigen_matrix_fixed(py::module& m, std::string name) {
-  using F = typename M::Scalar;
+  using F = ScalarOf<M>;
   auto cls = py::class_<M>(m, name.c_str(), py::buffer_protocol());
   cls.def("__eq__", [](M const& m, M const& n) { return m.isApprox(n); })
       .def("__getitem__", [](M const& m, int i) { return m.data()[i]; })
@@ -60,32 +64,44 @@ void bind_eigen_matrix_fixed(py::module& m, std::string name) {
           stride.pop_back();
           stride[0] = sizeof(F);
         }
-        return py::buffer_info(
-            m.data(), sizeof(F),
-            py::format_descriptor<typename M::Scalar>::format(), shape.size(),
-            shape, stride);
+        return py::buffer_info(m.data(), sizeof(F),
+                               py::format_descriptor<F>::format(), shape.size(),
+                               shape, stride);
       })
       /**/;
   py::detail::npy_format_descriptor<M>::register_dtype();
-  // TODO: somehow set dtype.type here
+  // TODO: somehow set dtype.type here?!?
   // quaternion_descr->typeobj = &PyQuaternion_Type;
 }
 
+template <class X>
+void bind_eigen_xform(py::module& m, std::string name) {
+  auto cls = py::class_<X>(m, name.c_str() /*, buffer?*/);
+  cls.def_property_readonly_static(
+      "dtype", [](py::object) { return py::dtype::of<X>(); })
+      /**/;
+  py::detail::npy_format_descriptor<X>::register_dtype();
+}
+
+void print_numpy_info(py::array a) {
+  py::buffer_info b(py::buffer(a).request());
+  std::cout << "size: " << b.size << std::endl;
+  std::cout << "itemsize: " << b.itemsize << std::endl;
+  std::cout << "ndim: " << b.ndim << std::endl;
+  std::cout << "format: '" << b.format << "'" << std::endl;
+}
+
 void RIFLIB_PYBIND_eigen_types(py::module& m) {
-  bind_eigen_matrix_fixed<V3<float>>(m, "V3f");
-  bind_eigen_matrix_fixed<V3<double>>(m, "V3");
+  bind_eigen_matrix_fixed<V3f>(m, "V3");
+  bind_eigen_matrix_fixed<V3d>(m, "V3d");
   bind_eigen_matrix_fixed<V3<int32_t>>(m, "V3i4");
   bind_eigen_matrix_fixed<V3<int64_t>>(m, "V3i");
-  bind_eigen_matrix_fixed<M3<float>>(m, "M3f");
-  bind_eigen_matrix_fixed<M3<double>>(m, "M3");
-
-  PYBIND11_NUMPY_DTYPE(test, a, i, f, b);
-
-  m.attr("v3f_t") = py::dtype::of<V3f>();
-  m.attr("v3d_t") = py::dtype::of<V3d>();
-  m.attr("m3f_t") = py::dtype::of<M3f>();
-  m.attr("v3i_t") = py::dtype::of<V3<int32_t>>();
-  m.attr("test_t") = py::dtype::of<test>();
+  bind_eigen_matrix_fixed<M3f>(m, "M3");
+  bind_eigen_matrix_fixed<M3d>(m, "M3d");
+  bind_eigen_xform<X3f>(m, "X3");
+  bind_eigen_xform<X3d>(m, "X3d");
+  bind_eigen_xform<Xc3f>(m, "Xc3");
+  bind_eigen_xform<Xc3d>(m, "Xc3d");
 
   m.def("abs_v3f", py::vectorize(abs_v3f));
   m.def("abs_m3f", py::vectorize(abs_m3f));
@@ -103,4 +119,9 @@ void RIFLIB_PYBIND_eigen_types(py::module& m) {
   m.def("mul_m3f_f", py::vectorize(mul_m3f_f));
   m.def("div_m3f_f", py::vectorize(div_m3f_f));
   m.def("mul_f_m3f", py::vectorize(mul_f_m3f));
+
+  m.def("print_numpy_info", &print_numpy_info);
+
+  PYBIND11_NUMPY_DTYPE(test, a, i, f, b);
+  m.attr("test_t") = py::dtype::of<test>();
 }

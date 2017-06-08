@@ -10,7 +10,9 @@ using V3 = Eigen::Matrix<F, 3, 1>;
 template <class F>
 using M3 = Eigen::Matrix<F, 3, 3, Eigen::RowMajor>;  // to match numpy (??)
 template <class F>
-using X3 = Eigen::Transform<F, 3, Eigen::Affine>;
+using X3 = Eigen::Transform<F, 3, Eigen::Affine, Eigen::RowMajor>;
+template <class F>
+using Xc3 = Eigen::Transform<F, 3, Eigen::AffineCompact>;  // always colmajor
 
 template <class S>
 using A1 = Eigen::Array<S, 1, 1>;
@@ -70,9 +72,11 @@ using I10 = A10<int64_t>;
 using V3f = V3<float>;
 using M3f = M3<float>;
 using X3f = X3<float>;
+using Xc3f = Xc3<float>;
 using V3d = V3<double>;
 using M3d = M3<double>;
 using X3d = X3<double>;
+using Xc3d = Xc3<double>;
 
 static I1 makeI1(uint64_t a) {
   I1 r;
@@ -126,4 +130,37 @@ std::ostream& operator<<(std::ostream& out, X3<F> x) {
   out << x.translation().transpose();
   return out;
 }
+
+static_assert(sizeof(V3f) == 4 * 3);  // should use aligned vector3?
+static_assert(sizeof(M3f) == 4 * 3 * 3);
+static_assert(sizeof(X3f) == 4 * 4 * 4);
+
+template <class X>
+using ScalarOf = typename X::Scalar;
+
+namespace util {
+using namespace Eigen;
+
+// this shit is dumb... use ::linear and ::translation instead
+
+template <class F>
+size_t raw_asif_rowmajor(Transform<F, 3, Affine, RowMajor>& x, size_t i) {
+  static size_t idx[12] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11};
+  return x.data()[idx[i]];
 }
+
+template <class F>
+size_t raw_asif_rowmajor(Transform<F, 3, Affine, ColMajor>& x, size_t i) {
+  static size_t idx[12] = {0, 4, 8, 12, 1, 5, 9, 13, 2, 6, 10, 14};
+  return x.data()[idx[i]];
+}
+
+// AffineCompact is always ColMajor!?!
+template <class F>
+size_t raw_asif_rowmajor(Transform<F, 3, AffineCompact>& x, size_t i) {
+  static size_t idx[12] = {0, 3, 6, 9, 1, 4, 7, 10, 2, 5, 8, 11};
+  return x.data()[idx[i]];
+}
+}  // namespace util
+
+}  // namespace rif

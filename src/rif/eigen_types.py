@@ -1,6 +1,8 @@
 import rif_cpp
 from rif_cpp.eigen_types import *
 
+__all__ = 'V3 M3 X3'.split()
+
 
 for cls in vars(rif_cpp.eigen_types):
     prefix = "V3 M3 T3".split()

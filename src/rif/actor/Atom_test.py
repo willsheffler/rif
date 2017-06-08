@@ -1,7 +1,7 @@
 import numpy as np
 
-from rif.dtypes import rif_ops
-from rif.eigen_types import v3f_t
+from rif import V3
+from rif.dtypes import RifOperators
 from rif.actor import Atom
 
 
@@ -16,14 +16,14 @@ def test_atom_dtype():
 
 
 def test_atom_math():
-    v = np.ones(2, dtype=v3f_t)
+    v = np.ones(2, dtype=V3)
     a = np.zeros(2, dtype=Atom)
     a['atype'] = [3, 4]
     a['rtype'] = [12, 6]
     a['anum'] = [1, 2]
     print('v', v)
     print('a', a)
-    with rif_ops():
+    with RifOperators():
         assert np.all(1 == (a + v)['pos']['raw'])
         assert np.all(3 == (v + a + v + v)['pos']['raw'])
         assert np.all(-1 == (a - v)['pos']['raw'])

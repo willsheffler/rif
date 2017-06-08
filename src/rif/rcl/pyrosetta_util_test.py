@@ -1,12 +1,12 @@
 import pytest
 from types import ModuleType
 from mock import MagicMock
-from rif.util import rcl
+from rif import rcl
 
 
 def test_import_pyrosetta():
-    from rif.util.rcl import pyrosetta
-    from rif.util.rcl import rosetta
+    from rif.rcl import pyrosetta
+    from rif.rcl import rosetta
     if rcl.HAVE_PYROSETTA:
         assert isinstance(pyrosetta, ModuleType)
         assert isinstance(rosetta, ModuleType)

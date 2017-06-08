@@ -1,6 +1,6 @@
 from __future__ import print_function
-from rif.util import rcl
-from rif.util.rcl import pyrosetta, rosetta
+from rif import rcl
+from rif.rcl import pyrosetta, rosetta
 from rif.chem.biochem import aa_name3s
 import os
 import numpy as np
@@ -25,7 +25,8 @@ def get_rotamer_space():
     """B is disulfide, x4 -> x2other"""
     global _cached_richardson_rotamer_space
     if _cached_richardson_rotamer_space is None:
-        r = pd.read_csv(localpath('richardson.csv'), header=0, nrows=999, index_col=0)
+        r = pd.read_csv(localpath('richardson.csv'),
+                        header=0, nrows=999, index_col=0)
         # print(r.columns)
         assert all(x > 0 for x in r.iloc[:, 0])
         for i in range(1, 5):
@@ -56,8 +57,10 @@ def get_rotamer_space():
             r['lb' + i] = np.NaN
             r['ub' + i] = np.NaN
             idx = r['x' + i + 'r'].notnull()
-            r.loc[idx, 'lb' + i] = [float(x.split()[0]) for x in r['x' + i + 'r'][idx]]
-            r.loc[idx, 'ub' + i] = [float(x.split()[2]) for x in r['x' + i + 'r'][idx]]
+            r.loc[idx, 'lb' + i] = [float(x.split()[0])
+                                    for x in r['x' + i + 'r'][idx]]
+            r.loc[idx, 'ub' + i] = [float(x.split()[2])
+                                    for x in r['x' + i + 'r'][idx]]
         # print_full(r.loc[:, 'lb1 ub1 ub2 ub2 lb3 ub3 lb4 ub4'.split()])
         # print_full(r.loc[:, 'x1w x2w x3w x4w'.split()])
         _cached_richardson_rotamer_space = r

@@ -11,76 +11,47 @@ namespace geom {
 
 using namespace rif::numeric;
 
-template <class T>
-void rand_xform(std::mt19937 &rng, Eigen::Transform<T, 3, Eigen::Affine> &x,
-                T cart_bound = 512.0) {
-  std::uniform_real_distribution<> runif;
-  std::normal_distribution<> rnorm;
-  Eigen::Quaterniond qrand(rnorm(rng), rnorm(rng), rnorm(rng), rnorm(rng));
+template <class F, int M, int O>
+void rand_xform(std::mt19937 &rng, Eigen::Transform<F, 3, M, O> &x,
+                float cart_bound = 512.0f) {
+  std::uniform_real_distribution<F> runif;
+  std::normal_distribution<F> rnorm;
+  Eigen::Quaternion<F> qrand(rnorm(rng), rnorm(rng), rnorm(rng), rnorm(rng));
   qrand.normalize();
-  Eigen::Matrix3d m = qrand.matrix();
-
-  x.data()[3] = 0;
-  x.data()[7] = 0;
-  x.data()[11] = 0;
-  x.data()[15] = 1;
-  for (int i = 0; i < 3; ++i) x.data()[i] = m.data()[i - 0];
-  for (int i = 4; i < 7; ++i) x.data()[i] = m.data()[i - 1];
-  for (int i = 8; i < 11; ++i) x.data()[i] = m.data()[i - 2];
-  x.data()[12] = runif(rng) * cart_bound - cart_bound / 2.0;
-  x.data()[13] = runif(rng) * cart_bound - cart_bound / 2.0;
-  x.data()[14] = runif(rng) * cart_bound - cart_bound / 2.0;
-}
-
-template <class T>
-void rand_xform(std::mt19937 &rng,
-                Eigen::Transform<T, 3, Eigen::AffineCompact> &x,
-                T cart_bound = 512.0) {
-  std::uniform_real_distribution<> runif;
-  std::normal_distribution<> rnorm;
-  Eigen::Quaterniond qrand(rnorm(rng), rnorm(rng), rnorm(rng), rnorm(rng));
-  qrand.normalize();
-  Eigen::Matrix3d m = qrand.matrix();
-  for (int i = 0; i < 9; ++i) x.data()[i] = m.data()[i];
-
-  x.data()[9] = runif(rng) * cart_bound - cart_bound / 2.0;
-  x.data()[10] = runif(rng) * cart_bound - cart_bound / 2.0;
-  x.data()[11] = runif(rng) * cart_bound - cart_bound / 2.0;
+  x.linear() = qrand.matrix();
+  x.translation() = V3<F>(runif(rng) * cart_bound - cart_bound / 2.0,
+                          runif(rng) * cart_bound - cart_bound / 2.0,
+                          runif(rng) * cart_bound - cart_bound / 2.0);
 }
 
 template <class X>
-X rand_xform(std::mt19937 &rng, scalar<X> cart_bound = 512.0) {
+X rand_xform(std::mt19937 &rng, ScalarOf<X> cart_bound = 512.0f) {
   X x;
   rand_xform(rng, x, cart_bound);
   return x;
 }
 
-template <class T>
-void rand_xform_cartnormal(std::mt19937 &rng,
-                           Eigen::Transform<T, 3, Eigen::AffineCompact> &x,
-                           T const &cart_sd) {
-  std::uniform_real_distribution<> runif;
-  std::normal_distribution<> rnorm;
-  Eigen::Quaterniond qrand(rnorm(rng), rnorm(rng), rnorm(rng), rnorm(rng));
+template <class F, int M, int O>
+void rand_xform_cartnormal(std::mt19937 &rng, Eigen::Transform<F, 3, M, O> &x,
+                           F const &cart_sd) {
+  std::uniform_real_distribution<F> runif;
+  std::normal_distribution<F> rnorm;
+  Eigen::Quaternion<F> qrand(rnorm(rng), rnorm(rng), rnorm(rng), rnorm(rng));
   qrand.normalize();
-  Eigen::Matrix3d m = qrand.matrix();
-  for (int i = 0; i < 9; ++i) x.data()[i] = m.data()[i];
-  x.data()[9] = rnorm(rng) * cart_sd;
-  x.data()[10] = rnorm(rng) * cart_sd;
-  x.data()[11] = rnorm(rng) * cart_sd;
+  x.linear() = qrand.matrix();
+  x.translation() =
+      V3<F>(rnorm(rng) * cart_sd, rnorm(rng) * cart_sd, rnorm(rng) * cart_sd);
 }
 
-template <class T>
-void rand_xform_quat(std::mt19937 &rng,
-                     Eigen::Transform<T, 3, Eigen::AffineCompact> &x,
-                     double cart_bound, double quat_bound) {
-  std::uniform_real_distribution<> runif;
-  std::normal_distribution<> rnorm;
-
+template <class F, int M, int O>
+void rand_xform_quat(std::mt19937 &rng, Eigen::Transform<F, 3, M, O> &x,
+                     float cart_bound, float quat_bound) {
+  std::uniform_real_distribution<F> runif;
+  std::normal_distribution<F> rnorm;
   assert(quat_bound < sqrt(3.0) / 2.0);
 
   {  // ori part
-    Eigen::Quaterniond qrand(0.0, rnorm(rng), rnorm(rng), rnorm(rng));
+    Eigen::Quaternion<F> qrand(0.0, rnorm(rng), rnorm(rng), rnorm(rng));
     double scale = 1.0 - runif(rng) * runif(rng);
     double len = qrand.norm();
     qrand.x() *= scale * quat_bound / len;
@@ -88,28 +59,24 @@ void rand_xform_quat(std::mt19937 &rng,
     qrand.z() *= scale * quat_bound / len;
     qrand.w() = sqrt(1.0 - qrand.squaredNorm());
     assert(fabs(qrand.norm() - 1.0) < 0.00001);
-
     qrand.normalize();
-    Eigen::Matrix3d m = qrand.matrix();
-    for (int i = 0; i < 9; ++i) x.data()[i] = m.data()[i];
+    x.linear() = qrand.matrix();
   }
   {  // cart part
-    x.data()[9] = rnorm(rng);
-    x.data()[10] = rnorm(rng);
-    x.data()[11] = rnorm(rng);
+    V3<F> t(rnorm(rng), rnorm(rng), rnorm(rng));
     double scale = 1.0 - runif(rng) * runif(rng);
-    double len = sqrt(x.data()[9] * x.data()[9] + x.data()[10] * x.data()[10] +
-                      x.data()[11] * x.data()[11]);
-    x.data()[9] *= scale * cart_bound / len;
-    x.data()[10] *= scale * cart_bound / len;
-    x.data()[11] *= scale * cart_bound / len;
+    double len = sqrt(t[0] * t[0] + t[1] * t[1] + t[2] * t[2]);
+    t[0] *= scale * cart_bound / len;
+    t[1] *= scale * cart_bound / len;
+    t[2] *= scale * cart_bound / len;
+    x.translation() = t;
   }
 }
 
 template <class T>
 void rand_xform_sphere(std::mt19937 &rng,
                        Eigen::Transform<T, 3, Eigen::AffineCompact> &x,
-                       T const cart_radius, T const ang_radius) {
+                       float cart_radius, float ang_radius) {
   std::normal_distribution<> rnorm;
   std::uniform_real_distribution<> runif;
 

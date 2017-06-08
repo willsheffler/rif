@@ -8,7 +8,7 @@ import xarray as xr
 
 
 def test_can_treat_xr_as_dict():
-    with rif.dtypes.rif_ops_disable():  # this may indicate sketchiness
+    with rif.dtypes.RifOperatorsDisabled():  # this may indicate sketchiness
         data = xr.DataArray(np.random.randn(2, 3), coords={'x': ['a', 'b']}, dims=('x', 'y'))
         ds = xr.Dataset({'foo': data, 'bar': ('x', [1, 2]), 'baz': np.pi})
         sp = pi.print_dict(ds)  # this dies with rif.dtypes?

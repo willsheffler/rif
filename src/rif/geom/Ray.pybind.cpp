@@ -21,7 +21,7 @@ void bind_ray(py::module &m) {
   m.def(name1.c_str(), py::vectorize(rand_ray_gaussian<F>));
 
   std::string name2 = "Ray" + rif::util::short_str<F>();
-  std::cout << "!!!!!!!!!!!!!!!!!!!!!!" << name2 << std::endl;
+  // std::cout << "!!!!!!!!!!!!!!!!!!!!!!" << name2 << std::endl;
   py::class_<R> cls(m, name2.c_str());
   cls.def_readwrite("orig", &R::orig)
       .def_readwrite("dirn", &R::dirn)

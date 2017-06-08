@@ -16,8 +16,9 @@ using std::endl;
 // Eigen::Transform<T,3,Eigen::AffineCompact> & x,
 // double cart_bound, double quat_bound
 
-TEST(rand_xform, cart_correctness) {
-  typedef Eigen::Transform<double, 3, Eigen::AffineCompact> Xform;
+template <int MODE, int OPTS = Eigen::ColMajor>
+void test_cart_helper() {
+  typedef Eigen::Transform<double, 3, MODE, OPTS> Xform;
 
   int NSAMP = 1000;
 #ifdef SCHEME_BENCHMARK
@@ -37,7 +38,8 @@ TEST(rand_xform, cart_correctness) {
   EXPECT_LE(cart_bound * 0.99, max_cart);
 }
 
-TEST(rand_xform, ori_correctness) {
+template <int MODE, int OPTS = Eigen::ColMajor>
+void test_ori_helper() {
   typedef Eigen::Transform<double, 3, Eigen::AffineCompact> Xform;
 
   int NSAMP = 10;
@@ -61,6 +63,17 @@ TEST(rand_xform, ori_correctness) {
     }
     ASSERT_LE(ANG * 0.95, max_ang);
   }
+}
+TEST(rand_xform_quat, cart_correctness) {
+  test_cart_helper<Eigen::Affine, Eigen::ColMajor>();
+  test_cart_helper<Eigen::Affine, Eigen::RowMajor>();
+  test_cart_helper<Eigen::AffineCompact>();
+}
+
+TEST(rand_xform_quat, ori_correctness) {
+  test_ori_helper<Eigen::Affine, Eigen::ColMajor>();
+  test_ori_helper<Eigen::Affine, Eigen::RowMajor>();
+  test_ori_helper<Eigen::AffineCompact>();
 }
 
 TEST(rand_xform, rand_xform_sphere) {

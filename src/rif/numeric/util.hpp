@@ -7,9 +7,6 @@
 namespace rif {
 namespace numeric {
 
-template <class X>
-using scalar = typename X::Scalar;
-
 template <class Position>
 bool approx_eq(Position const &a, Position const &b) {
   return a.isApprox(b);

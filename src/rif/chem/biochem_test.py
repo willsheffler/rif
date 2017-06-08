@@ -2,7 +2,7 @@ import pytest
 
 import rif
 import rif.chem.biochem as biochem
-import rif.util.rcl as rcl
+import rif.rcl as rcl
 
 
 @pytest.mark.skipif('not rcl.HAVE_PYROSETTA')
