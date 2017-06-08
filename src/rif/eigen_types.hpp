@@ -6,7 +6,7 @@
 namespace rif {
 
 template <class F>
-using V3 = Eigen::Matrix<F, 3, 1>;
+using V3 = Eigen::Matrix<F, 3, 1>;  // todo: should use aligned vector3?
 template <class F>
 using M3 = Eigen::Matrix<F, 3, 3, Eigen::RowMajor>;  // to match numpy (??)
 template <class F>
@@ -131,9 +131,10 @@ std::ostream& operator<<(std::ostream& out, X3<F> x) {
   return out;
 }
 
-static_assert(sizeof(V3f) == 4 * 3);  // should use aligned vector3?
-static_assert(sizeof(M3f) == 4 * 3 * 3);
-static_assert(sizeof(X3f) == 4 * 4 * 4);
+static_assert(sizeof(V3f) == 4 * 3, "V3f insane size!");
+static_assert(sizeof(M3f) == 4 * 3 * 3, "M3f insane size!");
+static_assert(sizeof(X3f) == 4 * 4 * 4, "X3f insane size");
+static_assert(sizeof(Xc3f) == 4 * 3 * 4, "X3f insane size");
 
 template <class X>
 using ScalarOf = typename X::Scalar;
