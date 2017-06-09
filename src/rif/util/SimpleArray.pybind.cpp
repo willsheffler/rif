@@ -5,7 +5,7 @@
 #include "rif/util/str.hpp"
 
 struct SATest {
-  rif::util::SimpleArray<2, int> m;
+  rif::util::SimpleArray<2, int> m, n;
   rif::util::SimpleArray<2, int> &member() { return m; }
 };
 
@@ -50,7 +50,7 @@ void RIFLIB_PYBIND_util_SimpleArray(py::module &m) {
   register_dtype_SimpleArrays_1_to_10<double>(m);
   register_dtype_SimpleArrays_1_to_10<uint64_t>(m);
   register_dtype_SimpleArrays_1_to_10<int64_t>(m);
-  PYBIND11_NUMPY_DTYPE(SATest, m);
+  PYBIND11_NUMPY_DTYPE(SATest, m, n);
   m.def("echo_SimpleArray_1_int", &echo<SimpleArray<1, int>>);
   m.def("echo_SimpleArray_3_int", &echo<SimpleArray<3, int>>);
   py::class_<SATest>(m, "SATest")

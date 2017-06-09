@@ -90,7 +90,7 @@ auto brute_maxmin_nbr(RHash& rh, bool face0_only = false) {
  * @detail align_ray_pair to put ray2 in 'canonical' position
  */
 template <class _R = Ray<float>, class _K = uint32_t>
-struct RayToRayHash4D {
+struct RayToRay4dHash {
   using R = _R;
   using F = typename R::Scalar;
   using K = _K;
@@ -99,7 +99,7 @@ struct RayToRayHash4D {
   using V = typename R::V;
   util::SimpleArray<6, Grid> bcc_;
   F resl_, lever_, bound_;
-  RayToRayHash4D(F resl = 0.25, F lever = 1.5, F bound = 128)
+  RayToRay4dHash(F resl = 0.25, F lever = 1.5, F bound = 128)
       : bcc_(Grid(
             I4(2 * bound / resl, 2 * bound / resl, qs_nc(resl, lever),
                qs_nc(resl, lever)),
@@ -143,8 +143,8 @@ struct RayToRayHash4D {
  * @tparam     _K    { description }
  */
 template <class _R = Ray<float>, class _K = uint32_t>
-struct RayHash5D {
-  // todo: reduce code duplication with RayToRayHash4D
+struct Ray5dHash {
+  // todo: reduce code duplication with RayToRay4dHash
   using R = _R;
   using F = typename R::Scalar;
   using K = _K;
@@ -153,7 +153,7 @@ struct RayHash5D {
   using V = typename R::V;
   util::SimpleArray<6, Grid> bcc_;
   F resl_, lever_, bound_;
-  RayHash5D(F resl = 0.25, F lever = 1.5, F bound = 32)
+  Ray5dHash(F resl = 0.25, F lever = 1.5, F bound = 32)
       : bcc_(Grid(makeI5(2 * bound / resl, 2 * bound / resl, 2 * bound / resl,
                          qs_nc(resl, lever), qs_nc(resl, lever)),
                   Fs(-bound, -bound, -bound, -qs_bound(resl, lever),
@@ -196,8 +196,8 @@ struct RayHash5D {
  * @tparam     _K    { description }
  */
 template <class _R = Ray<float>, class _K = uint64_t>
-struct RayRayHash10D {
-  // todo: reduce code duplication with RayToRayHash4D
+struct RayRay10dHash {
+  // todo: reduce code duplication with RayToRay4dHash
   using R = _R;
   using F = typename R::Scalar;
   using K = _K;
@@ -206,7 +206,7 @@ struct RayRayHash10D {
   using V = typename R::V;
   util::SimpleArray<36, Grid> bcc_;
   F resl_, lever_, bound_;
-  RayRayHash10D(F resl = 0.25, F lever = 1.5, F bound = 32)
+  RayRay10dHash(F resl = 0.25, F lever = 1.5, F bound = 32)
       : bcc_(Grid(makeI10(2 * bound / resl, 2 * bound / resl, 2 * bound / resl,
                           qs_nc(resl, lever), qs_nc(resl, lever),
                           2 * bound / resl, 2 * bound / resl, 2 * bound / resl,
@@ -234,7 +234,7 @@ struct RayRayHash10D {
     // std::cout << "get_key: " << face << " " << bcc_key << std::endl;
     return face12 * bcc_[0].size() + bcc_key;
   }
-  K get_key(std::pair<R, R> p) const noexcept {
+  K get_key_from_pair(std::pair<R, R> p) const noexcept {
     return get_key(p.first, p.second);
   }
   std::pair<R, R> get_center(K k) const {

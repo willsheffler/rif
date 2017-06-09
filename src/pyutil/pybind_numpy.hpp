@@ -181,6 +181,7 @@ struct npy_format_descriptor<Eigen::Transform<Scalar, DIM, MODE, OPTS>> {
   }
 };
 }  // end detail
+
 template <class Scalar, int NROW, int NCOL, int OPTS>
 struct format_descriptor<Eigen::Matrix<Scalar, NROW, NCOL, OPTS>> {
   using T = Eigen::Matrix<Scalar, NROW, NCOL, OPTS>;

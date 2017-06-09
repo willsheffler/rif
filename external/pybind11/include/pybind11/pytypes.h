@@ -10,6 +10,7 @@
 #pragma once
 
 #include "common.h"
+#include "buffer_info.h"
 #include <utility>
 #include <type_traits>
 
@@ -43,7 +44,7 @@ using tuple_accessor = accessor<accessor_policies::tuple_item>;
 
 /// Tag and check to identify a class which implements the Python object API
 class pyobject_tag { };
-template <typename T> using is_pyobject = std::is_base_of<pyobject_tag, typename std::remove_reference<T>::type>;
+template <typename T> using is_pyobject = std::is_base_of<pyobject_tag, remove_reference_t<T>>;
 
 /** \rst
     A mixin class which adds common functions to `handle`, `object` and various accessors.
@@ -109,10 +110,15 @@ public:
     PYBIND11_DEPRECATED("call(...) was deprecated in favor of operator()(...)")
         object call(Args&&... args) const;
 
+    /// Equivalent to ``obj is other`` in Python.
+    bool is(object_api const& other) const { return derived().ptr() == other.derived().ptr(); }
     /// Equivalent to ``obj is None`` in Python.
     bool is_none() const { return derived().ptr() == Py_None; }
     PYBIND11_DEPRECATED("Use py::str(obj) instead")
     pybind11::str str() const;
+
+    /// Get or set the object's docstring, i.e. ``obj.__doc__``.
+    str_attr_accessor doc() const;
 
     /// Return the object's current reference count
     int ref_count() const { return static_cast<int>(Py_REFCNT(derived().ptr())); }
@@ -166,10 +172,12 @@ public:
     /// Return ``true`` when the `handle` wraps a valid Python object
     explicit operator bool() const { return m_ptr != nullptr; }
     /** \rst
-        Check that the underlying pointers are the same.
+        Deprecated: Check that the underlying pointers are the same.
         Equivalent to ``obj1 is obj2`` in Python.
     \endrst */
+    PYBIND11_DEPRECATED("Use obj1.is(obj2) instead")
     bool operator==(const handle &h) const { return m_ptr == h.m_ptr; }
+    PYBIND11_DEPRECATED("Use !obj1.is(obj2) instead")
     bool operator!=(const handle &h) const { return m_ptr != h.m_ptr; }
     PYBIND11_DEPRECATED("Use handle::operator bool() instead")
     bool check() const { return m_ptr != nullptr; }
@@ -236,11 +244,6 @@ protected:
     // Tags for choosing constructors from raw PyObject *
     struct borrowed_t { };
     struct stolen_t { };
-    // These can cause linkage problems; see #770
-    PYBIND11_DEPRECATED("Use of the `borrowed` static variable is deprecated; use `borrowed_t{}' instead")
-    static constexpr borrowed_t borrowed{};
-    PYBIND11_DEPRECATED("Use of the `stolen` static variable is deprecated; use `stolen_t{}' instead")
-    static constexpr stolen_t stolen{};
 
     template <typename T> friend T reinterpret_borrow(handle);
     template <typename T> friend T reinterpret_steal(handle);
@@ -359,6 +362,7 @@ inline handle get_function(handle value) {
 #if PY_MAJOR_VERSION >= 3
         if (PyInstanceMethod_Check(value.ptr()))
             value = PyInstanceMethod_GET_FUNCTION(value.ptr());
+        else
 #endif
         if (PyMethod_Check(value.ptr()))
             value = PyMethod_GET_FUNCTION(value.ptr());
@@ -384,6 +388,8 @@ class accessor : public object_api<accessor<Policy>> {
 
 public:
     accessor(handle obj, key_type key) : obj(obj), key(std::move(key)) { }
+    accessor(const accessor &a) = default;
+    accessor(accessor &&a) = default;
 
     // accessor overload required to override default assignment operator (templates are not allowed
     // to replace default compiler-generated assignments).
@@ -1137,10 +1143,13 @@ public:
 class function : public object {
 public:
     PYBIND11_OBJECT_DEFAULT(function, object, PyCallable_Check)
-    bool is_cpp_function() const {
+    handle cpp_function() const {
         handle fun = detail::get_function(m_ptr);
-        return fun && PyCFunction_Check(fun.ptr());
+        if (fun && PyCFunction_Check(fun.ptr()))
+            return fun;
+        return handle();
     }
+    bool is_cpp_function() const { return (bool) cpp_function(); }
 };
 
 class buffer : public object {
@@ -1151,8 +1160,10 @@ public:
         int flags = PyBUF_STRIDES | PyBUF_FORMAT;
         if (writable) flags |= PyBUF_WRITABLE;
         Py_buffer *view = new Py_buffer();
-        if (PyObject_GetBuffer(m_ptr, view, flags) != 0)
+        if (PyObject_GetBuffer(m_ptr, view, flags) != 0) {
+            delete view;
             throw error_already_set();
+        }
         return buffer_info(view);
     }
 };
@@ -1165,15 +1176,15 @@ public:
         static std::vector<Py_ssize_t> py_strides { };
         static std::vector<Py_ssize_t> py_shape { };
         buf.buf = info.ptr;
-        buf.itemsize = (Py_ssize_t) info.itemsize;
+        buf.itemsize = info.itemsize;
         buf.format = const_cast<char *>(info.format.c_str());
         buf.ndim = (int) info.ndim;
-        buf.len = (Py_ssize_t) info.size;
+        buf.len = info.size;
         py_strides.clear();
         py_shape.clear();
-        for (size_t i = 0; i < info.ndim; ++i) {
-            py_strides.push_back((Py_ssize_t) info.strides[i]);
-            py_shape.push_back((Py_ssize_t) info.shape[i]);
+        for (size_t i = 0; i < (size_t) info.ndim; ++i) {
+            py_strides.push_back(info.strides[i]);
+            py_shape.push_back(info.shape[i]);
         }
         buf.strides = py_strides.data();
         buf.shape = py_shape.data();
@@ -1241,6 +1252,9 @@ template <typename D> template <typename T> bool object_api<D>::contains(T &&ite
 
 template <typename D>
 pybind11::str object_api<D>::str() const { return pybind11::str(derived()); }
+
+template <typename D>
+str_attr_accessor object_api<D>::doc() const { return attr("__doc__"); }
 
 template <typename D>
 handle object_api<D>::get_type() const { return (PyObject *) Py_TYPE(derived().ptr()); }

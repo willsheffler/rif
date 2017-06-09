@@ -6,11 +6,6 @@
 namespace py = pybind11;
 using namespace rif::geom;
 
-namespace std {
-template <class F>
-struct is_pod<Ray<F>> : public std::integral_constant<bool, true> {};
-}
-
 template <class F>
 void bind_ray(py::module &m) {
   using R = Ray<F>;

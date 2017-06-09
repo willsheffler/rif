@@ -1,9 +1,9 @@
 #include "pyutil/pybind_numpy.hpp"
 
 #include <Eigen/Dense>
-#include "actor/Atom.hpp"
-#include "eigen_types.hpp"
 #include "pyutil/nonpod_dtype_support.h"
+#include "rif/actor/Atom.hpp"
+#include "rif/eigen_types.hpp"
 
 namespace py = pybind11;
 using namespace rif;

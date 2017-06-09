@@ -16,13 +16,18 @@
 #  define NAMESPACE_END(name) }
 #endif
 
-// Neither MSVC nor Intel support enough of C++14 yet (in particular, as of MSVC 2015 and ICC 17
-// beta, neither support extended constexpr, which we rely on in descr.h), so don't enable pybind
-// CPP14 features for them.
 #if !defined(_MSC_VER) && !defined(__INTEL_COMPILER)
 #  if __cplusplus >= 201402L
 #    define PYBIND11_CPP14
 #    if __cplusplus > 201402L /* Temporary: should be updated to >= the final C++17 value once known */
+#      define PYBIND11_CPP17
+#    endif
+#  endif
+#elif defined(_MSC_VER)
+// MSVC sets _MSVC_LANG rather than __cplusplus (supposedly until the standard is fully implemented)
+#  if _MSVC_LANG >= 201402L
+#    define PYBIND11_CPP14
+#    if _MSVC_LANG > 201402L && _MSC_VER >= 1910
 #      define PYBIND11_CPP17
 #    endif
 #  endif
@@ -71,12 +76,8 @@
 
 #if defined(PYBIND11_CPP14)
 #  define PYBIND11_DEPRECATED(reason) [[deprecated(reason)]]
-#elif defined(__clang__)
+#else
 #  define PYBIND11_DEPRECATED(reason) __attribute__((deprecated(reason)))
-#elif defined(__GNUG__)
-#  define PYBIND11_DEPRECATED(reason) __attribute__((deprecated))
-#elif defined(_MSC_VER)
-#  define PYBIND11_DEPRECATED(reason) __declspec(deprecated)
 #endif
 
 #define PYBIND11_VERSION_MAJOR 2
@@ -135,6 +136,8 @@
 
 #if PY_MAJOR_VERSION >= 3 /// Compatibility macros for various Python versions
 #define PYBIND11_INSTANCE_METHOD_NEW(ptr, class_) PyInstanceMethod_New(ptr)
+#define PYBIND11_INSTANCE_METHOD_CHECK PyInstanceMethod_Check
+#define PYBIND11_INSTANCE_METHOD_GET_FUNCTION PyInstanceMethod_GET_FUNCTION
 #define PYBIND11_BYTES_CHECK PyBytes_Check
 #define PYBIND11_BYTES_FROM_STRING PyBytes_FromString
 #define PYBIND11_BYTES_FROM_STRING_AND_SIZE PyBytes_FromStringAndSize
@@ -153,6 +156,8 @@
     extern "C" PYBIND11_EXPORT PyObject *PyInit_##name()
 #else
 #define PYBIND11_INSTANCE_METHOD_NEW(ptr, class_) PyMethod_New(ptr, nullptr, class_)
+#define PYBIND11_INSTANCE_METHOD_CHECK PyMethod_Check
+#define PYBIND11_INSTANCE_METHOD_GET_FUNCTION PyMethod_GET_FUNCTION
 #define PYBIND11_BYTES_CHECK PyString_Check
 #define PYBIND11_BYTES_FROM_STRING PyString_FromString
 #define PYBIND11_BYTES_FROM_STRING_AND_SIZE PyString_FromStringAndSize
@@ -189,6 +194,8 @@ extern "C" {
     PYBIND11_TOSTRING(PYBIND11_VERSION_MAJOR) "_" PYBIND11_TOSTRING(PYBIND11_VERSION_MINOR) "__"
 
 /** \rst
+    ***Deprecated in favor of PYBIND11_MODULE***
+
     This macro creates the entry point that will be invoked when the Python interpreter
     imports a plugin library. Please create a `module` in the function body and return
     the pointer to its underlying Python object at the end.
@@ -202,6 +209,7 @@ extern "C" {
         }
 \endrst */
 #define PYBIND11_PLUGIN(name)                                                  \
+    PYBIND11_DEPRECATED("PYBIND11_PLUGIN is deprecated, use PYBIND11_MODULE")  \
     static PyObject *pybind11_init();                                          \
     PYBIND11_PLUGIN_IMPL(name) {                                               \
         int major, minor;                                                      \
@@ -228,6 +236,54 @@ extern "C" {
         }                                                                      \
     }                                                                          \
     PyObject *pybind11_init()
+
+/** \rst
+    This macro creates the entry point that will be invoked when the Python interpreter
+    imports an extension module. The module name is given as the fist argument and it
+    should not be in quotes. The second macro argument defines a variable of type
+    `py::module` which can be used to initialize the module.
+
+    .. code-block:: cpp
+
+        PYBIND11_MODULE(example, m) {
+            m.doc() = "pybind11 example module";
+
+            // Add bindings here
+            m.def("foo", []() {
+                return "Hello, World!";
+            });
+        }
+\endrst */
+#define PYBIND11_MODULE(name, variable)                                        \
+    static void pybind11_init_##name(pybind11::module &);                      \
+    PYBIND11_PLUGIN_IMPL(name) {                                               \
+        int major, minor;                                                      \
+        if (sscanf(Py_GetVersion(), "%i.%i", &major, &minor) != 2) {           \
+            PyErr_SetString(PyExc_ImportError, "Can't parse Python version."); \
+            return nullptr;                                                    \
+        } else if (major != PY_MAJOR_VERSION || minor != PY_MINOR_VERSION) {   \
+            PyErr_Format(PyExc_ImportError,                                    \
+                         "Python version mismatch: module was compiled for "   \
+                         "version %i.%i, while the interpreter is running "    \
+                         "version %i.%i.", PY_MAJOR_VERSION, PY_MINOR_VERSION, \
+                         major, minor);                                        \
+            return nullptr;                                                    \
+        }                                                                      \
+        auto m = pybind11::module(#name);                                      \
+        try {                                                                  \
+            pybind11_init_##name(m);                                           \
+            return m.ptr();                                                    \
+        } catch (pybind11::error_already_set &e) {                             \
+            e.clear();                                                         \
+            PyErr_SetString(PyExc_ImportError, e.what());                      \
+            return nullptr;                                                    \
+        } catch (const std::exception &e) {                                    \
+            PyErr_SetString(PyExc_ImportError, e.what());                      \
+            return nullptr;                                                    \
+        }                                                                      \
+    }                                                                          \
+    void pybind11_init_##name(pybind11::module &variable)
+
 
 NAMESPACE_BEGIN(pybind11)
 
@@ -286,69 +342,6 @@ enum class return_value_policy : uint8_t {
     reference_internal
 };
 
-/// Information record describing a Python buffer object
-struct buffer_info {
-    void *ptr = nullptr;         // Pointer to the underlying storage
-    size_t itemsize = 0;         // Size of individual items in bytes
-    size_t size = 0;             // Total number of entries
-    std::string format;          // For homogeneous buffers, this should be set to format_descriptor<T>::format()
-    size_t ndim = 0;             // Number of dimensions
-    std::vector<size_t> shape;   // Shape of the tensor (1 entry per dimension)
-    std::vector<size_t> strides; // Number of entries between adjacent entries (for each per dimension)
-
-    buffer_info() { }
-
-    buffer_info(void *ptr, size_t itemsize, const std::string &format, size_t ndim,
-                const std::vector<size_t> &shape, const std::vector<size_t> &strides)
-        : ptr(ptr), itemsize(itemsize), size(1), format(format),
-          ndim(ndim), shape(shape), strides(strides) {
-        for (size_t i = 0; i < ndim; ++i)
-            size *= shape[i];
-    }
-
-    buffer_info(void *ptr, size_t itemsize, const std::string &format, size_t size)
-    : buffer_info(ptr, itemsize, format, 1, std::vector<size_t> { size },
-                  std::vector<size_t> { itemsize }) { }
-
-    explicit buffer_info(Py_buffer *view, bool ownview = true)
-        : ptr(view->buf), itemsize((size_t) view->itemsize), size(1), format(view->format),
-          ndim((size_t) view->ndim), shape((size_t) view->ndim), strides((size_t) view->ndim), view(view), ownview(ownview) {
-        for (size_t i = 0; i < (size_t) view->ndim; ++i) {
-            shape[i] = (size_t) view->shape[i];
-            strides[i] = (size_t) view->strides[i];
-            size *= shape[i];
-        }
-    }
-
-    buffer_info(const buffer_info &) = delete;
-    buffer_info& operator=(const buffer_info &) = delete;
-
-    buffer_info(buffer_info &&other) {
-        (*this) = std::move(other);
-    }
-
-    buffer_info& operator=(buffer_info &&rhs) {
-        ptr = rhs.ptr;
-        itemsize = rhs.itemsize;
-        size = rhs.size;
-        format = std::move(rhs.format);
-        ndim = rhs.ndim;
-        shape = std::move(rhs.shape);
-        strides = std::move(rhs.strides);
-        std::swap(view, rhs.view);
-        std::swap(ownview, rhs.ownview);
-        return *this;
-    }
-
-    ~buffer_info() {
-        if (view && ownview) { PyBuffer_Release(view); delete view; }
-    }
-
-private:
-    Py_buffer *view = nullptr;
-    bool ownview = false;
-};
-
 NAMESPACE_BEGIN(detail)
 
 inline static constexpr int log2(size_t n, int k = 0) { return (n <= 1) ? k : log2(n >> 1, k + 1); }
@@ -402,18 +395,20 @@ struct internals {
 inline internals &get_internals();
 
 /// from __cpp_future__ import (convenient aliases from C++14/17)
-#ifdef PYBIND11_CPP14
+#if defined(PYBIND11_CPP14) && (!defined(_MSC_VER) || _MSC_VER >= 1910)
 using std::enable_if_t;
 using std::conditional_t;
 using std::remove_cv_t;
+using std::remove_reference_t;
 #else
 template <bool B, typename T = void> using enable_if_t = typename std::enable_if<B, T>::type;
 template <bool B, typename T, typename F> using conditional_t = typename std::conditional<B, T, F>::type;
 template <typename T> using remove_cv_t = typename std::remove_cv<T>::type;
+template <typename T> using remove_reference_t = typename std::remove_reference<T>::type;
 #endif
 
 /// Index sequences
-#if defined(PYBIND11_CPP14) || defined(_MSC_VER)
+#if defined(PYBIND11_CPP14)
 using std::index_sequence;
 using std::make_index_sequence;
 #else
@@ -422,6 +417,12 @@ template<size_t N, size_t ...S> struct make_index_sequence_impl : make_index_seq
 template<size_t ...S> struct make_index_sequence_impl <0, S...> { typedef index_sequence<S...> type; };
 template<size_t N> using make_index_sequence = typename make_index_sequence_impl<N>::type;
 #endif
+
+/// Make an index sequence of the indices of true arguments
+template <typename ISeq, size_t, bool...> struct select_indices_impl { using type = ISeq; };
+template <size_t... IPrev, size_t I, bool B, bool... Bs> struct select_indices_impl<index_sequence<IPrev...>, I, B, Bs...>
+    : select_indices_impl<conditional_t<B, index_sequence<IPrev..., I>, index_sequence<IPrev...>>, I + 1, Bs...> {};
+template <bool... Bs> using select_indices = typename select_indices_impl<index_sequence<>, 0, Bs...>::type;
 
 /// Backports of std::bool_constant and std::negation to accomodate older compilers
 template <bool B> using bool_constant = std::integral_constant<bool, B>;
@@ -553,8 +554,22 @@ struct is_instantiation<Class, Class<Us...>> : std::true_type { };
 /// Check if T is std::shared_ptr<U> where U can be anything
 template <typename T> using is_shared_ptr = is_instantiation<std::shared_ptr, T>;
 
+/// Check if T looks like an input iterator
+template <typename T, typename = void> struct is_input_iterator : std::false_type {};
+template <typename T>
+struct is_input_iterator<T, void_t<decltype(*std::declval<T &>()), decltype(++std::declval<T &>())>>
+    : std::true_type {};
+
 /// Ignore that a variable is unused in compiler warnings
 inline void ignore_unused(const int *) { }
+
+/// Apply a function over each element of a parameter pack
+#ifdef __cpp_fold_expressions
+#define PYBIND11_EXPAND_SIDE_EFFECTS(PATTERN) (((PATTERN), void()), ...)
+#else
+using expand_side_effects = bool[];
+#define PYBIND11_EXPAND_SIDE_EFFECTS(PATTERN) pybind11::detail::expand_side_effects{ ((PATTERN), void(), false)..., false }
+#endif
 
 NAMESPACE_END(detail)
 
@@ -660,32 +675,14 @@ template <typename T> struct is_fmt_numeric<T, enable_if_t<std::is_arithmetic<T>
 };
 NAMESPACE_END(detail)
 
-template <typename T> struct format_descriptor<T, detail::enable_if_t<detail::is_fmt_numeric<T>::value>> {
-    static constexpr const char c = "?bBhHiIqQfdgFDG"[detail::is_fmt_numeric<T>::index];
+template <typename T> struct format_descriptor<T, detail::enable_if_t<std::is_arithmetic<T>::value>> {
+    static constexpr const char c = "?bBhHiIqQfdg"[detail::is_fmt_numeric<T>::index];
     static constexpr const char value[2] = { c, '\0' };
     static std::string format() { return std::string(1, c); }
 };
 
 template <typename T> constexpr const char format_descriptor<
-    T, detail::enable_if_t<detail::is_fmt_numeric<T>::value>>::value[2];
-
-NAMESPACE_BEGIN(detail)
-
-template <typename T, typename SFINAE = void> struct compare_buffer_info {
-    static bool compare(const buffer_info& b) {
-        return b.format == format_descriptor<T>::format() && b.itemsize == sizeof(T);
-    }
-};
-
-template <typename T> struct compare_buffer_info<T, detail::enable_if_t<std::is_integral<T>::value>> {
-    static bool compare(const buffer_info& b) {
-        return b.itemsize == sizeof(T) && (b.format == format_descriptor<T>::value ||
-            ((sizeof(T) == sizeof(long)) && b.format == (std::is_unsigned<T>::value ? "L" : "l")) ||
-            ((sizeof(T) == sizeof(size_t)) && b.format == (std::is_unsigned<T>::value ? "N" : "n")));
-    }
-};
-
-NAMESPACE_END(detail)
+    T, detail::enable_if_t<std::is_arithmetic<T>::value>>::value[2];
 
 /// RAII wrapper that temporarily clears any Python error state
 struct error_scope {
@@ -697,8 +694,8 @@ struct error_scope {
 /// Dummy destructor wrapper that can be used to expose classes with a private destructor
 struct nodelete { template <typename T> void operator()(T*) { } };
 
-// overload_cast requires variable templates: C++14 or MSVC
-#if defined(PYBIND11_CPP14) || defined(_MSC_VER)
+// overload_cast requires variable templates: C++14
+#if defined(PYBIND11_CPP14)
 #define PYBIND11_OVERLOAD_CAST 1
 
 NAMESPACE_BEGIN(detail)
@@ -730,6 +727,54 @@ static constexpr detail::overload_cast_impl<Args...> overload_cast = {};
 ///  - sweet:   overload_cast<Arg>(&Class::func, const_)
 static constexpr auto const_ = std::true_type{};
 
+#else // no overload_cast: providing something that static_assert-fails:
+template <typename... Args> struct overload_cast {
+    static_assert(detail::deferred_t<std::false_type, Args...>::value,
+                  "pybind11::overload_cast<...> requires compiling in C++14 mode");
+};
 #endif // overload_cast
+
+NAMESPACE_BEGIN(detail)
+
+// Adaptor for converting arbitrary container arguments into a vector; implicitly convertible from
+// any standard container (or C-style array) supporting std::begin/std::end, any singleton
+// arithmetic type (if T is arithmetic), or explicitly constructible from an iterator pair.
+template <typename T>
+class any_container {
+    std::vector<T> v;
+public:
+    any_container() = default;
+
+    // Can construct from a pair of iterators
+    template <typename It, typename = enable_if_t<is_input_iterator<It>::value>>
+    any_container(It first, It last) : v(first, last) { }
+
+    // Implicit conversion constructor from any arbitrary container type with values convertible to T
+    template <typename Container, typename = enable_if_t<std::is_convertible<decltype(*std::begin(std::declval<const Container &>())), T>::value>>
+    any_container(const Container &c) : any_container(std::begin(c), std::end(c)) { }
+
+    // initializer_list's aren't deducible, so don't get matched by the above template; we need this
+    // to explicitly allow implicit conversion from one:
+    template <typename TIn, typename = enable_if_t<std::is_convertible<TIn, T>::value>>
+    any_container(const std::initializer_list<TIn> &c) : any_container(c.begin(), c.end()) { }
+
+    // Avoid copying if given an rvalue vector of the correct type.
+    any_container(std::vector<T> &&v) : v(std::move(v)) { }
+
+    // Moves the vector out of an rvalue any_container
+    operator std::vector<T> &&() && { return std::move(v); }
+
+    // Dereferencing obtains a reference to the underlying vector
+    std::vector<T> &operator*() { return v; }
+    const std::vector<T> &operator*() const { return v; }
+
+    // -> lets you call methods on the underlying vector
+    std::vector<T> *operator->() { return &v; }
+    const std::vector<T> *operator->() const { return &v; }
+};
+
+NAMESPACE_END(detail)
+
+
 
 NAMESPACE_END(pybind11)

@@ -1,6 +1,5 @@
 #pragma once
 
-#include <Eigen/Dense>
 #include <eigen_types.hpp>
 #include <iostream>
 #include "rif/global_rng.hpp"
@@ -68,4 +67,29 @@ Ray<F> rand_ray_gaussian(F sd = 10.0) {
   return rand_ray_gaussian_rng<F>(rng, sd);
 }
 }
+}
+
+// for pybind to know Ray 'is_pod_struct'
+namespace std {
+template <class F>
+struct is_pod<rif::geom::Ray<F>> : public std::integral_constant<bool, true> {};
+template <class F>
+struct is_standard_layout<rif::geom::Ray<F>>
+    : public std::integral_constant<bool, true> {};
+#if !defined(__GNUG__) || defined(__clang__) || __GNUC__ >= 5
+template <class F>
+struct is_trivially_copyable<rif::geom::Ray<F>>
+    : public std::integral_constant<bool, true> {};
+#else
+// GCC 4 doesn't implement is_trivially_copyable, so approximate it
+template <class F>
+struct is_trivially_destructible<rif::geom::Ray<F>>
+    : public std::integral_constant<bool, true> {};
+template <class F>
+struct has_trivial_copy_constructor<rif::geom::Ray<F>>
+    : public std::integral_constant<bool, true> {};
+template <class F>
+struct has_trivial_copy_assign<rif::geom::Ray<F>>
+    : public std::integral_constant<bool, true> {};
+#endif
 }

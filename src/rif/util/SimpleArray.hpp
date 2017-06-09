@@ -1,5 +1,4 @@
-#ifndef INCLUDED_util_SimpleArray_HH
-#define INCLUDED_util_SimpleArray_HH
+#pragma once
 
 #include <algorithm>
 #include <boost/assert.hpp>
@@ -431,4 +430,8 @@ using SimpleArrayLegacy = SimpleArray<N, F, init0>;
 }
 }
 
-#endif
+namespace std {
+template <int N, class F, bool B>
+struct is_pod<rif::util::SimpleArray<N, F, B>>
+    : public std::integral_constant<bool, true> {};
+}

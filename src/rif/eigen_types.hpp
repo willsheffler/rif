@@ -165,3 +165,12 @@ size_t raw_asif_rowmajor(Transform<F, 3, AffineCompact>& x, size_t i) {
 }  // namespace util
 
 }  // namespace rif
+
+namespace std {
+template <class F>
+struct is_pod<rif::V3<F>> : public std::integral_constant<bool, true> {};
+template <class F>
+struct is_pod<rif::M3<F>> : public std::integral_constant<bool, true> {};
+template <class F>
+struct is_pod<rif::X3<F>> : public std::integral_constant<bool, true> {};
+}

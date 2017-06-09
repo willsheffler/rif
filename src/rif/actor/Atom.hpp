@@ -199,10 +199,30 @@ Atom<V> operator*(M m, Atom<V> a) {
 }
 }
 
+// for pybind to know Atom 'is_pod_struct'
 namespace std {
-template <class P>
-struct is_pod<rif::actor::Atom<P>> : public std::integral_constant<bool, true> {
-};
+template <class Pos>
+struct is_pod<rif::actor::Atom<Pos>>
+    : public std::integral_constant<bool, true> {};
+template <class Pos>
+struct is_standard_layout<rif::actor::Atom<Pos>>
+    : public std::integral_constant<bool, true> {};
+#if !defined(__GNUG__) || defined(__clang__) || __GNUC__ >= 5
+template <class Pos>
+struct is_trivially_copyable<rif::actor::Atom<Pos>>
+    : public std::integral_constant<bool, true> {};
+#else
+// GCC 4 doesn't implement is_trivially_copyable, so approximate it
+template <class Pos>
+struct is_trivially_destructible<rif::actor::Atom<Pos>>
+    : public std::integral_constant<bool, true> {};
+template <class Pos>
+struct has_trivial_copy_constructor<rif::actor::Atom<Pos>>
+    : public std::integral_constant<bool, true> {};
+template <class Pos>
+struct has_trivial_copy_assign<rif::actor::Atom<Pos>>
+    : public std::integral_constant<bool, true> {};
+#endif
 }
 
 #endif

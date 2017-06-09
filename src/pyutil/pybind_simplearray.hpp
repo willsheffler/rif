@@ -215,11 +215,14 @@ struct npy_format_descriptor<rif::util::SimpleArray<DIM, Scalar, init0>> {
   }
 };
 }  // end detail
-template <int DIM, class Scalar, bool init0>
-struct format_descriptor<rif::util::SimpleArray<DIM, Scalar, init0>> {
-  static std::string format() {
-    return detail::npy_format_descriptor<
-        rif::util::SimpleArray<DIM, Scalar, init0>>::format();
-  }
-};
+
+// this conflicts with pybind's one in numpy.h...
+//     previously wasn't an issue b/c not pod
+// template <int DIM, class Scalar, bool init0>
+// struct format_descriptor<rif::util::SimpleArray<DIM, Scalar, init0>> {
+//   static std::string format() {
+//     return detail::npy_format_descriptor<
+//         rif::util::SimpleArray<DIM, Scalar, init0>>::format();
+//   }
+// };
 }

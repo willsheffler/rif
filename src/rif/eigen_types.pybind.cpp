@@ -51,12 +51,6 @@ struct test {
 namespace std {
 template <>
 struct is_pod<test> : public std::integral_constant<bool, true> {};
-template <class F>
-struct is_pod<V3<F>> : public std::integral_constant<bool, true> {};
-template <class F>
-struct is_pod<M3<F>> : public std::integral_constant<bool, true> {};
-template <class F>
-struct is_pod<X3<F>> : public std::integral_constant<bool, true> {};
 }
 
 template <class M>
