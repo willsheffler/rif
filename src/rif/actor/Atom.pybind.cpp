@@ -9,15 +9,30 @@ namespace py = pybind11;
 using namespace rif;
 using namespace rif::actor;
 
+using F = float;
 using A = Atom<V3f>;
 using V = V3f;
 using M = M3f;
 using X = X3f;
 
-A add_v3f_atom(V v, A a) { return A(v + a.pos, a); }
-A add_atom_v3f(A a, V v) { return A(a.pos + v, a); }
-A sub_v3f_atom(V v, A a) { return A(v - a.pos, a); }
-A sub_atom_v3f(A a, V v) { return A(a.pos - v, a); }
+template <class A, class B, class C>
+C add(A a, B b) {
+  return a + b;
+}
+template <class A, class B, class C>
+C sub(A a, B b) {
+  return a - b;
+}
+template <class A, class B, class C>
+C mul(A a, B b) {
+  return a * b;
+}
+template <class A, class B, class C>
+C div(A a, B b) {
+  return a / b;
+}
+
+float abs_Atom(A a) { return a.pos.norm(); }
 
 void RIFLIB_PYBIND_actor_Atom(py::module &m) {
   static_assert(sizeof(Atom<V3f>) == 16, "bad atom size");
@@ -25,8 +40,15 @@ void RIFLIB_PYBIND_actor_Atom(py::module &m) {
   py::class_<Atom<V3f>> acls(m, "Atom");
   acls.attr("dtype") = py::dtype::of<Atom<V3f>>();
 
-  m.def("add_v3f_atom", py::vectorize(add_v3f_atom));
-  m.def("add_atom_v3f", py::vectorize(add_atom_v3f));
-  m.def("sub_v3f_atom", py::vectorize(sub_v3f_atom));
-  m.def("sub_atom_v3f", py::vectorize(sub_atom_v3f));
+  m.def("op_abs_AT", py::vectorize(abs_Atom));
+
+  m.def("op_add_AT_V3", py::vectorize(add<A, V, A>));
+  m.def("op_add_V3_AT", py::vectorize(add<V, A, A>));
+  m.def("op_sub_AT_V3", py::vectorize(sub<A, V, A>));
+  m.def("op_sub_V3_AT", py::vectorize(sub<V, A, A>));
+  m.def("op_mul_fl_AT", py::vectorize(mul<F, A, A>));
+  m.def("op_mul_AT_fl", py::vectorize(mul<A, F, A>));
+  m.def("op_mul_M3_AT", py::vectorize(mul<M, A, A>));
+  m.def("op_mul_X3_AT", py::vectorize(mul<X, A, A>));
+  m.def("op_div_AT_fl", py::vectorize(div<A, F, A>));
 }

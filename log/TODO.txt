@@ -1,10 +1,13 @@
+make my own py::vectorize wrapper that makes single args into arrays:
+    np.ones(2, dtype=V3) + V3(1,2,3) should work
+
 FiberDock
 todo: check numpy op performance/amortization
 todo: api arounud OneSided3DIndex
 todo: bind TwoSided3DIndex
 todo: dtypes/ops for One/TwoSided3DIndex
 
-
+todo: rename X3 to T3?
 todo: visualize rays in 6x4D bcc lattice cubefaces
 todo: visualize orientation sets
 todo: visualize bcc lattice

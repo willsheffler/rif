@@ -37,6 +37,10 @@ struct npy_format_descriptor<Eigen::Matrix<Scalar, NROW, NCOL, OPTS>> {
                     cpp_repr<Scalar>() + ", " + str(NROW) + ", " + str(NCOL) +
                     ", " + str(OPTS) +
                     ">\n    hash_code: " + str(tindex.hash_code()));
+    if (NCOL > 0 && (OPTS & Eigen::ColMajor)) {
+      std::cout << "WARNING! you are binding a ColMajor eigen matrix, it "
+                   "will not behave the same way numpy does!!";
+    }
 
     std::ostringstream oss;
     std::string scalar_fmt = format_descriptor<Scalar>::format();
@@ -119,6 +123,10 @@ struct npy_format_descriptor<Eigen::Transform<Scalar, DIM, MODE, OPTS>> {
     if (MODE == Eigen::Affine) {
       oss << "(" << DIM + 1 << "," << DIM + 1 << ")" << scalar_fmt;
       assert(sizeof(T) / sizeof(Scalar) == (DIM + 1) * (DIM + 1));
+      if (OPTS & Eigen::ColMajor) {
+        std::cout << "WARNING! you are binding a ColMajor eigen transform, it "
+                     "will not behave the same way numpy does!!";
+      }
     } else if (MODE == Eigen::AffineCompact) {
       oss << "(" << DIM << "," << DIM + 1 << ")" << scalar_fmt;
       assert(sizeof(T) / sizeof(Scalar) == (DIM) * (DIM + 1));
@@ -127,7 +135,6 @@ struct npy_format_descriptor<Eigen::Transform<Scalar, DIM, MODE, OPTS>> {
                 << std::endl;
       std::exit(-1);
     }
-
     std::string dtype_str = oss.str();
     list names, formats, offsets;
     names.append(PYBIND11_STR_TYPE("raw"));

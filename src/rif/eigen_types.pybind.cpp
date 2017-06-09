@@ -7,9 +7,25 @@
 namespace py = pybind11;
 using namespace rif;
 
+template <class A, class B, class C>
+C add(A a, B b) {
+  return a + b;
+}
+template <class A, class B, class C>
+C sub(A a, B b) {
+  return a - b;
+}
+template <class A, class B, class C>
+C mul(A a, B b) {
+  return a * b;
+}
+template <class A, class B, class C>
+C div(A a, B b) {
+  return a / b;
+}
+
 V3f add_v3f(V3f a, V3f b) { return a + b; }
 V3f sub_v3f(V3f a, V3f b) { return a - b; }
-float mul_v3f(V3f a, V3f b) { return a.dot(b); }
 float abs_v3f(V3f a) { return a.norm(); }
 M3f add_m3f(M3f a, M3f b) { return a + b; }
 M3f sub_m3f(M3f a, M3f b) { return a - b; }
@@ -35,10 +51,12 @@ struct test {
 namespace std {
 template <>
 struct is_pod<test> : public std::integral_constant<bool, true> {};
-}
-namespace std {
-template <>
-struct is_pod<X3f> : public std::integral_constant<bool, true> {};
+template <class F>
+struct is_pod<V3<F>> : public std::integral_constant<bool, true> {};
+template <class F>
+struct is_pod<M3<F>> : public std::integral_constant<bool, true> {};
+template <class F>
+struct is_pod<X3<F>> : public std::integral_constant<bool, true> {};
 }
 
 template <class M>
@@ -103,25 +121,35 @@ void RIFLIB_PYBIND_eigen_types(py::module& m) {
   bind_eigen_xform<Xc3f>(m, "Xc3");
   bind_eigen_xform<Xc3d>(m, "Xc3d");
 
-  m.def("abs_v3f", py::vectorize(abs_v3f));
-  m.def("abs_m3f", py::vectorize(abs_m3f));
-  m.def("add_v3f", py::vectorize(add_v3f));
-  m.def("sub_v3f", py::vectorize(sub_v3f));
-  m.def("mul_v3f", py::vectorize(mul_v3f));
-  m.def("add_m3f", py::vectorize(add_m3f));
-  m.def("sub_m3f", py::vectorize(sub_m3f));
-  m.def("mul_m3f", py::vectorize(mul_m3f));
-  m.def("mul_m3f_v3f", py::vectorize(mul_m3f_v3f));
+  /*
+    for o in "add sub mul div".split():
+        for t1 in "float V3f M3f X3f".split():
+            for t2 in "float V3f M3f X3f".split():
+                r = 'RET'
+                print(('m.def("%(o)s_%(t1)s_%(t2)s", ' +
+                       'py::vectorize(%(o)s<%(t1)s, %(t2)s, %(r)s>));') %
+    vars())
 
-  m.def("mul_v3f_f", py::vectorize(mul_v3f_f));
-  m.def("div_v3f_f", py::vectorize(div_v3f_f));
-  m.def("mul_f_v3f", py::vectorize(mul_f_v3f));
-  m.def("mul_m3f_f", py::vectorize(mul_m3f_f));
-  m.def("div_m3f_f", py::vectorize(div_m3f_f));
-  m.def("mul_f_m3f", py::vectorize(mul_f_m3f));
+  */
+  m.def("op_abs_V3", py::vectorize(abs_v3f));
+  m.def("op_abs_M3", py::vectorize(abs_m3f));
+  m.def("op_add_V3_V3", py::vectorize(add<V3f, V3f, V3f>));
+  m.def("op_add_M3_M3", py::vectorize(add<M3f, M3f, M3f>));
+  m.def("op_sub_V3_V3", py::vectorize(sub<V3f, V3f, V3f>));
+  m.def("op_sub_M3_M3", py::vectorize(sub<M3f, M3f, M3f>));
+  m.def("op_mul_fl_V3", py::vectorize(mul<float, V3f, V3f>));
+  m.def("op_mul_fl_M3", py::vectorize(mul<float, M3f, M3f>));
+  m.def("op_mul_V3_fl", py::vectorize(mul<V3f, float, V3f>));
+  m.def("op_mul_M3_V3", py::vectorize(mul<M3f, V3f, V3f>));
+  m.def("op_mul_M3_M3", py::vectorize(mul<M3f, M3f, M3f>));
+  m.def("op_mul_X3_V3", py::vectorize(mul<X3f, V3f, V3f>));
+  m.def("op_mul_X3_M3", py::vectorize(mul<X3f, M3f, M3f>));
+  m.def("op_mul_X3_X3", py::vectorize(mul<X3f, X3f, X3f>));
+  m.def("op_div_V3_fl", py::vectorize(div<V3f, float, V3f>));
+  m.def("op_div_M3_fl", py::vectorize(div<M3f, float, M3f>));
 
+  // testing crap
   m.def("print_numpy_info", &print_numpy_info);
-
-  PYBIND11_NUMPY_DTYPE(test, a, i, f, b);
-  m.attr("test_t") = py::dtype::of<test>();
+  // PYBIND11_NUMPY_DTYPE(test, a, i, f, b);
+  // m.attr("test_t") = py::dtype::of<test>();
 }

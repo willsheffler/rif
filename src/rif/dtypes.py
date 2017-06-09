@@ -3,38 +3,49 @@ from __future__ import print_function
 import sys
 import numpy as np
 import rif
-from rif import V3, M3, Atom
+from rif import V3, M3, X3, Atom
+import rif.actor
 
 
 def _init_dispatch():
-    tM = str(M3.dtype)
-    tV = str(V3.dtype)
-    tA = str(Atom.dtype)
-
-    # str is necessary for python2
-    # TODO: figures out why my dtypes won't hash in python2
     _npy_rif_op1map = dict()
-    _npy_rif_op1map[tM, 'absolute'] = rif.eigen_types.abs_m3f
-    _npy_rif_op1map[tV, 'absolute'] = rif.eigen_types.abs_v3f
-
     _npy_rif_op2map = dict()
-    _npy_rif_op2map[tV, tV, 'add'] = rif.eigen_types.add_v3f
-    _npy_rif_op2map[tV, tV, 'subtract'] = rif.eigen_types.sub_v3f
-    _npy_rif_op2map[tV, tV, 'multiply'] = rif.eigen_types.mul_v3f
-    _npy_rif_op2map[tM, tM, 'add'] = rif.eigen_types.add_m3f
-    _npy_rif_op2map[tV, '', 'multiply'] = rif.eigen_types.mul_v3f_f
-    _npy_rif_op2map[tV, '', 'divide'] = rif.eigen_types.div_v3f_f
-    _npy_rif_op2map['', tV, 'multiply'] = rif.eigen_types.mul_f_v3f
-    _npy_rif_op2map[tM, '', 'multiply'] = rif.eigen_types.mul_m3f_f
-    _npy_rif_op2map[tM, '', 'divide'] = rif.eigen_types.div_m3f_f
-    _npy_rif_op2map['', tM, 'multiply'] = rif.eigen_types.mul_f_m3f
-    _npy_rif_op2map[tM, tM, 'subtract'] = rif.eigen_types.sub_m3f
-    _npy_rif_op2map[tM, tM, 'multiply'] = rif.eigen_types.mul_m3f
-    _npy_rif_op2map[tM, tV, 'multiply'] = rif.eigen_types.mul_m3f_v3f
-    _npy_rif_op2map[tA, tV, 'add'] = rif.actor.add_atom_v3f
-    _npy_rif_op2map[tV, tA, 'add'] = rif.actor.add_v3f_atom
-    _npy_rif_op2map[tA, tV, 'subtract'] = rif.actor.sub_atom_v3f
-    _npy_rif_op2map[tV, tA, 'subtract'] = rif.actor.sub_v3f_atom
+    if sys.version_info.major > 2:
+        modules_to_search = [rif.eigen_types, rif.actor]
+
+        _npy_rif_op1map[M3.dtype, 'absolute'] = rif.eigen_types.op_abs_M3
+        _npy_rif_op1map[V3.dtype, 'absolute'] = rif.eigen_types.op_abs_V3
+
+        # binary ops set here
+
+        opmap = dict(
+            add='add',
+            mul='multiply',
+            sub='subtract',
+            div='divide')
+        dtmap = dict(
+            fl=(type(1), type(1.0)),
+            V3=V3.dtype,
+            M3=M3.dtype,
+            X3=X3.dtype,
+            AT=Atom.dtype,
+        )
+        dtmap = {k: v if hasattr(v, '__iter__') else (v,)
+                 for k, v in dtmap.items()}
+
+        for module in modules_to_search:
+            for fn in dir(module):
+                splt = fn.split('_')
+                if len(splt) is not 4:
+                    continue
+                head, op, t1, t2 = splt
+                if head != "op":
+                    continue
+                for dt1 in dtmap[t1]:
+                    for dt2 in dtmap[t2]:
+                        k = dt1, dt2, opmap[op]
+                        # print(k, fn)
+                        _npy_rif_op2map[k] = getattr(module, fn)
     return _npy_rif_op1map, _npy_rif_op2map
 
 
@@ -51,7 +62,7 @@ def _get_type_str(t):
 def _override1(name):
     def ufunc(x):
         try:
-            t = _get_type_str(x)
+            t = x.dtype if hasattr(x, 'dtype') else type(x)
             r = _npy_rif_op1map[t, name](x)
             return r
         except (AttributeError, KeyError):
@@ -63,11 +74,11 @@ def _override1(name):
 def _override2(name):
     def ufunc(x, y):
         try:
-            t1 = _get_type_str(x)
-            t2 = _get_type_str(y)
+            t1 = x.dtype if hasattr(x, 'dtype') else type(x)
+            t2 = y.dtype if hasattr(y, 'dtype') else type(y)
             r = _npy_rif_op2map[t1, t2, name](x, y)
             return r
-        except (AttributeError, KeyError):
+        except KeyError:
             r = getattr(np, name)(x, y)
             return r
     return ufunc
@@ -80,6 +91,9 @@ class RifOperators(object):
     """contect manager for locally enabling rif ops"""
 
     def __enter__(self):
+        if sys.version_info.major == 2:
+            print("RifOperators not supported in python 2")
+            return
         global _GLOBAL_RIF_OPS
         if _GLOBAL_RIF_OPS is not None:
             print('warning: global_rif_ops is enabled')
@@ -94,6 +108,10 @@ class RifOperators(object):
             self.orig = np.set_numeric_ops(**d)
 
     def __exit__(self, *args):
+        if sys.version_info.major == 2:
+            print("RifOperators not supported in python 2")
+            return
+
         if args:
             print("RifOperators: exit", args)
         if self.orig:
@@ -111,6 +129,9 @@ class RifOperatorsDisabled(object):
 
 
 def global_rif_operators_enable(quiet=False):
+    if sys.version_info.major == 2:
+        print("RifOperators not supported in python 2")
+        return
     global _GLOBAL_RIF_OPS
     if not _GLOBAL_RIF_OPS:
         tmp = RifOperators()
@@ -121,6 +142,9 @@ def global_rif_operators_enable(quiet=False):
 
 
 def global_rif_operators_disable(quiet=False):
+    if sys.version_info.major == 2:
+        print("RifOperators not supported in python 2")
+        return
     global _GLOBAL_RIF_OPS
     if _GLOBAL_RIF_OPS:
         tmp = _GLOBAL_RIF_OPS

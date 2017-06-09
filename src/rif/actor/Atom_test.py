@@ -1,4 +1,5 @@
 import numpy as np
+import pytest
 
 from rif import V3
 from rif.dtypes import RifOperators
@@ -15,6 +16,7 @@ def test_atom_dtype():
     a.pos['raw'] = np.random.randn(10, 3)
 
 
+@pytest.mark.skipif('sys.version_info.major is 2')
 def test_atom_math():
     v = np.ones(2, dtype=V3)
     a = np.zeros(2, dtype=Atom)
@@ -28,3 +30,6 @@ def test_atom_math():
         assert np.all(3 == (v + a + v + v)['pos']['raw'])
         assert np.all(-1 == (a - v)['pos']['raw'])
         assert np.all(3 == (3 * v - a + v - v)['pos']['raw'])
+        print(a + 3 * v)
+        # print(a + V3(1, 2, 3))
+    # assert 0

@@ -78,6 +78,49 @@ void write_pdb(std::ostream &out, Atom<P> const &a, MetaData const &meta) {
                     meta.atom_data(a.restype(), a.atomnum()));
 }
 
+template <class V>
+Atom<V> operator+(Atom<V> a, V v) {
+  Atom<V> b(a);
+  b.pos += v;
+  return b;
+}
+template <class V>
+Atom<V> operator+(V v, Atom<V> a) {
+  Atom<V> b(a);
+  b.pos += v;
+  return b;
+}
+template <class V>
+Atom<V> operator-(Atom<V> a, V v) {
+  Atom<V> b(a);
+  b.pos -= v;
+  return b;
+}
+template <class V>
+Atom<V> operator-(V v, Atom<V> a) {
+  Atom<V> b(a);
+  b.pos = v - a.pos;
+  return b;
+}
+template <class V>
+Atom<V> operator*(Atom<V> a, float f) {
+  Atom<V> b(a);
+  b.pos = f * a.pos;
+  return b;
+}
+template <class V>
+Atom<V> operator/(Atom<V> a, float f) {
+  Atom<V> b(a);
+  b.pos = a.pos / f;
+  return b;
+}
+template <class M, class V>
+Atom<V> operator*(M m, Atom<V> a) {
+  Atom<V> b(a);
+  b.pos = m * a.pos;
+  return b;
+}
+
 // using chemical::AtomData;
 
 // template <class _Position>
