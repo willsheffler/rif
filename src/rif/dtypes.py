@@ -103,7 +103,7 @@ class RifOperators(object):
             print('RifOperators: enter')
             d = {ufunc: _override1(ufunc) for ufunc in ('absolute'.split())}
             d2 = {ufunc: _override2(ufunc)
-                  for ufunc in ('add subtract multiply'.split())}
+                  for ufunc in ('add subtract multiply divide'.split())}
             d.update(d2)
             self.orig = np.set_numeric_ops(**d)
 

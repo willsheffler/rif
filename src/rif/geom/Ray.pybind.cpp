@@ -4,6 +4,8 @@
 #include "rif/util/str.hpp"
 
 namespace py = pybind11;
+using namespace pybind11::literals;
+
 using namespace rif::geom;
 
 template <class F>
@@ -13,7 +15,15 @@ void bind_ray(py::module &m) {
   PYBIND11_NUMPY_DTYPE(R, orig, dirn);
 
   std::string name1 = "rand_ray_gaussian" + rif::util::short_str<F>();
-  m.def(name1.c_str(), py::vectorize(rand_ray_gaussian<F>));
+  m.def(name1.c_str(), py::vectorize(rand_ray_gaussian<F>), "sd"_a);
+  m.def(name1.c_str(),
+        [](F sd, size_t size) {
+          py::array_t<R> out(size);
+          R *ptr = (R *)out.request().ptr;
+          for (int i = 0; i < size; ++i) ptr[i] = rand_ray_gaussian<F>(sd);
+          return out;
+        },
+        "sd"_a, "size"_a);
 
   std::string name2 = "Ray" + rif::util::short_str<F>();
   // std::cout << "!!!!!!!!!!!!!!!!!!!!!!" << name2 << std::endl;

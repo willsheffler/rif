@@ -50,12 +50,15 @@ struct BCC {
     width_ = (upper - lower_) / nside_.template cast<Float>();
     half_width_ = width_ / 2.0;
     lower_cen_ = lower_ + half_width_;
-    uint64_t totsize = 2;
+    Index totsize = 2;
     for (size_t i = 0; i < DIM; ++i) {
       if (totsize * nside_[i] < totsize)
         throw std::invalid_argument("Index Type is too narrow");
       totsize *= nside_[i];
     }
+    // std::cout << lower_ << std::endl;
+    // std::cout << lower_ + nside_.template cast<Float>() * width_ <<
+    // std::endl;
   }
 
   Index size() const noexcept { return nside_.prod() * 2; }
@@ -63,7 +66,9 @@ struct BCC {
 
   Floats operator[](Index index) const noexcept {
     bool odd = index & 1;
+    // std::cout << "bcc get_floats " << index << std::endl;
     Indices indices = ((index >> 1) / nside_prefsum_) % nside_;
+    // std::cout << "bcc get_floats " << indices << " " << odd << std::endl;
     return this->get_center(indices, odd);
   }
 
@@ -74,9 +79,15 @@ struct BCC {
 
   Indices get_indices(Floats value, bool &odd) const noexcept {
     value = (value - lower_) / width_;
+    // std::cout << "bcc::get_indices lower_ " << lower_ << std::endl;
+    // std::cout << "bcc::get_indices width_ " << width_ << std::endl;
+    // std::cout << "bcc::get_indices " << value << std::endl;
     Indices const indices = value.template cast<Index>();
+    // std::cout << "bcc::get_indices " << indices << std::endl;
     value = value - indices.template cast<Float>() - 0.5;
+    // std::cout << "bcc::get_indices " << value << std::endl;
     Indices const corner_indices = indices - (value < 0).template cast<Index>();
+    // std::cout << "bcc::get_indices " << corner_indices << std::endl;
     odd = (0.25 * DIM) < fabs((value.sign() * value).sum());
     return odd ? corner_indices : indices;
   }
@@ -84,8 +95,11 @@ struct BCC {
   Index operator[](Floats value) const noexcept {
     bool odd;
     Indices indices = get_indices(value, odd);
+    // std::cout << "bcc get_idx " << indices << " " << odd << std::endl;
     Index index = (nside_prefsum_ * indices).sum();
-    return (index << 1) + odd;
+    index = (index << 1) + odd;
+    // std::cout << "bcc get idx " << index << std::endl;
+    return index;
   }
 
   template <class Iiter>

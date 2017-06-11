@@ -38,7 +38,7 @@ void bind_bcc_N_F_I(py::module& m) {
                     typename T::Floats>(),
            "nc"_a, "lb"_a, "ub"_a)
       .def_property_readonly("dim", &T::dim)
-      .def("__len__", &T::size)
+      .def_property_readonly("ncells", &T::size)
       .def("_center_impl", &bcc_center_impl<N, F, I>)
       .def("_index_impl", &bcc_index_impl<N, F, I>);
 }

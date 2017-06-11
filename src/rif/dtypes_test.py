@@ -43,20 +43,22 @@ def test_V3_numpy():
     assert np.all(a['raw'][:, 0] == 7)
     assert np.all(a['raw'][:, 1] == 8)
     assert np.all(a['raw'][:, 2] == 9)
+
+    if sys.version_info.major is 3:
+        assert np.all(abs(a) == np.linalg.norm(a['raw'], axis=1))
+
     # print(a.dtype)
     # print(a[0])
     # assert repr(a[0]) == ''
 
-    print(type(a[0]))
-    print(type(np.asscalar(a[0])))
+    # print(type(a[0]))
+    # print(type(np.asscalar(a[0])))
     assert V3(a[2][0]) == a[2]
 
     u = V3([1, 2, 3])
     v = V3([1, 2, 3])
     assert u == v
     assert len(v) == 3
-
-    # assert 0
 
 
 @pytest.mark.skipif('sys.version_info.major is 2')
