@@ -17,11 +17,12 @@ TEST(ray_hash, align_ray_pair) {
     auto a2 = rand_ray_gaussian(/*rng*/);
     auto b1 = Ray<>(V3f(0, 0, 0), V3f(1, 0, 0));
     auto b2 = align_ray_pair(a1, a2);
-    ASSERT_LT(fabs(b2.orig[2]), 0.001f);
-    ASSERT_NEAR(a1.dirn.dot(a2.dirn), b1.dirn.dot(b2.dirn), 0.0001);
-    ASSERT_NEAR((a1.orig - a2.orig).norm(), (b1.orig - b2.orig).norm(), 0.0001);
-    ASSERT_NEAR((a1.orig + a1.dirn - a2.orig - a2.dirn).norm(),
-                (b1.orig + b1.dirn - b2.orig - b2.dirn).norm(), 0.0001);
+    ASSERT_LT(fabs(b2.orig()[2]), 0.001f);
+    ASSERT_NEAR(a1.dirn().dot(a2.dirn()), b1.dirn().dot(b2.dirn()), 0.0001);
+    ASSERT_NEAR((a1.orig() - a2.orig()).norm(), (b1.orig() - b2.orig()).norm(),
+                0.0001);
+    ASSERT_NEAR((a1.orig() + a1.dirn() - a2.orig() - a2.dirn()).norm(),
+                (b1.orig() + b1.dirn() - b2.orig() - b2.dirn()).norm(), 0.0001);
   }
 }
 

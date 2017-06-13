@@ -1,3 +1,5 @@
+
+
 make my own py::vectorize wrapper that makes single args into arrays:
     np.ones(2, dtype=V3) + V3(1,2,3) should work
 

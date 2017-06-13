@@ -27,22 +27,22 @@ using namespace rif::numeric;
  * @tparam     F     float type
  *
  * @return     Ray b aligned to Ray a's canonical position
- * @detail     canonical position places r at the orig along x and s in the
+ * @detail     canonical position places r at the orig() along x and s in the
  * x,y plane
  */
 template <class F>
 Ray<F> align_ray_pair(Ray<F> a, Ray<F> b) {
   // todo: should this be made symmetrical???
   M3<F> rotation;
-  V3<F> basis1 = a.dirn;
-  V3<F> basis3 = basis1.cross(b.orig - a.orig).normalized();
+  V3<F> basis1 = a.dirn();
+  V3<F> basis3 = basis1.cross(b.orig() - a.orig()).normalized();
   V3<F> basis2 = basis3.cross(basis1).normalized();
   rotation.row(0) = basis1;
   rotation.row(1) = basis2;
   rotation.row(2) = basis3;
-  V3<F> a2_origin = rotation * a.orig;
+  V3<F> a2_origin = rotation * a.orig();
   Ray<F> b2 = rotation * b;
-  b2.orig -= a2_origin;
+  b2.orig() -= a2_origin;
   // std::cout << rotation.determinant() << std::endl;
   // Ray<F> a2 = rotation * a;
   // std::cout << "a  " << a << std::endl;
@@ -85,8 +85,8 @@ auto brute_maxmin_nbr(RHash& rh, bool face0_only = false) {
       for (int j = i + 1; j < rh.bcc_[0].size() * nface; ++j) {
         if (rh.quadsphere_inbounds(j)) {
           R b = rh.get_center(j);
-          mindot = std::min(mindot, a.dirn.dot(b.dirn));
-          F dis = (a.orig - b.orig).norm();
+          mindot = std::min(mindot, a.dirn().dot(b.dirn()));
+          F dis = (a.orig() - b.orig()).norm();
           if (dis > 0.0001) mindis = std::min(mindis, dis);
         }
       }
@@ -123,16 +123,20 @@ struct RayToRay4dHash {
                +qs_bound(resl, lever)))),
         resl_(resl),
         lever_(lever),
-        bound_(bound) {}
+        bound_(bound) {
+    if (__int128(6) * __int128(bcc_[0].size()) >
+        __int128(std::numeric_limits<K>::max()))
+      throw std::invalid_argument("Index Type is too narrow");
+  }
   K get_key(R a, R b) const noexcept {
     return get_key_aligned(align_ray_pair(a, b));
   }
   K get_key_aligned(R r) const noexcept {
-    assert(fabs(r.orig[2]) < 0.001);
+    assert(fabs(r.orig()[2]) < 0.001);
     // std::cout << "get_key: " << r << std::endl;
     F qsA, qsB;
-    K face = get_quadsphere_coords(r.dirn, qsA, qsB);
-    Fs bcrd(r.orig[0], r.orig[1], qsA, qsB);
+    K face = get_quadsphere_coords(r.dirn(), qsA, qsB);
+    Fs bcrd(r.orig()[0], r.orig()[1], qsA, qsB);
     // std::cout << "get_key: " << bcrd << std::endl;
     K bcc_key = bcc_[face][bcrd];
     // std::cout << "get_key: " << face << " " << bcc_key << std::endl;
@@ -189,17 +193,16 @@ struct Ray5dHash {
         resl_(resl),
         lever_(lever),
         bound_(bound) {
-    // kinda dumb way to bounds check...
-    for (int m = 2; m < 7; ++m)
-      if (K(m * bcc_[0].size()) < K(bcc_[0].size()))
-        throw std::invalid_argument("Index Type is too narrow");
+    if (__int128(6) * __int128(bcc_[0].size()) >
+        __int128(std::numeric_limits<K>::max()))
+      throw std::invalid_argument("Index Type is too narrow");
   }
   K get_key(R r) const noexcept {
     // std::cout << "get_key: " << r << std::endl;
     F qsA, qsB;
-    K face = get_quadsphere_coords(r.dirn, qsA, qsB);
+    K face = get_quadsphere_coords(r.dirn(), qsA, qsB);
     // std::cout << "face: " << face << std::endl;
-    Fs bcrd(r.orig[0], r.orig[1], r.orig[2], qsA, qsB);
+    Fs bcrd(r.orig()[0], r.orig()[1], r.orig()[2], qsA, qsB);
     // std::cout << "qs: " << qsA << " " << qsB << std::endl;
     // std::cout << "getkey bcrd " << bcrd << std::endl;
     K bcc_key = bcc_[face][bcrd];
@@ -269,16 +272,20 @@ struct RayRay10dHash {
                      +qs_bound(resl, lever), +qs_bound(resl, lever)))),
         resl_(resl),
         lever_(lever),
-        bound_(bound) {}
+        bound_(bound) {
+    if (__int128(36) * __int128(bcc_[0].size()) >
+        __int128(std::numeric_limits<K>::max()))
+      throw std::invalid_argument("Index Type is too narrow");
+  }
   K get_key(R r, R s) const noexcept {
     // std::cout << "get_key: " << r << std::endl;
     F qsx1, qsy1;
     F qsx2, qsy2;
-    K face1 = get_quadsphere_coords(r.dirn, qsx1, qsy1);
-    K face2 = get_quadsphere_coords(s.dirn, qsx2, qsy2);
+    K face1 = get_quadsphere_coords(r.dirn(), qsx1, qsy1);
+    K face2 = get_quadsphere_coords(s.dirn(), qsx2, qsy2);
     K face12 = 6 * face1 + face2;
-    Fs bcrd(r.orig[0], r.orig[1], r.orig[2], qsx1, qsy1, s.orig[0], s.orig[1],
-            s.orig[2], qsx2, qsy2);
+    Fs bcrd(r.orig()[0], r.orig()[1], r.orig()[2], qsx1, qsy1, s.orig()[0],
+            s.orig()[1], s.orig()[2], qsx2, qsy2);
     // std::cout << "get_key: " << bcrd << std::endl;
     K bcc_key = bcc_[face12][bcrd];
     // std::cout << "get_key: " << face << " " << bcc_key << std::endl;

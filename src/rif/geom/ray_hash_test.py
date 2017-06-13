@@ -2,17 +2,26 @@ from __future__ import print_function
 import rif
 import rif.dtypes
 import rif.geom.ray_hash as rh
-from rif.geom import Ray
+from rif.geom import Ray, rayorig, raydirn
 from pprint import pprint
 import numpy as np
 import pytest
+
+
+# def test_ray_pyarray():
+#     a = np.array([Ray()], dtype=Ray)
+#     # this is utter insanity... on gcc, this needs to be defined
+#     # in Ray.pybind.cpp or else I get dtype errors
+#     # assert rif.geom.pyarray_Ray_test(a, a) == 8
+#     assert rif.geom.ray_hash.pyarray_Ray_test(a, a) == 7
 
 
 @pytest.mark.skipif('sys.version_info.major is 2')
 def test_RayToRay4dHash(resl=2, n=100, lever=10):
     h = rh.RayToRay4dHash(resl, lever, bound=1000)
     for i in range(n):
-        r1, r2 = rif.geom.rand_ray_gaussian(size=2, sd=10)
+        r1 = rif.geom.rand_ray_gaussian(sd=10)
+        r2 = rif.geom.rand_ray_gaussian(sd=10)
         r = rh.align_ray_pair(r1, r2)
         c = h.get_center(h.get_key_aligned(r))
         d = rif.geom.ray_smalldiff(r, c, lever=lever)[0]
@@ -48,12 +57,12 @@ def test_RayRay10dHash():
     assert h.lever == 2
     assert h.bound == 3
 
-# this would be better as three functions with common parts factored out???
+
 def coverage_test_helper(cls, twoargs, N, resl, lever, sd, bound, fudge=1.0):
-        # for resl in [2**i * 0.125 for i in range(6)]:
-            # for lever in [2**i * 0.125 for i in range(9)]:
+    # for resl in [2**i * 0.125 for i in range(6)]:
+    # for lever in [2**i * 0.125 for i in range(9)]:
     h = cls(resl=resl, lever=lever, bound=bound)
-    # print(cls.__name__, h.size())
+    print(cls.__name__, h.ncells, end='\t')
     rr = rif.geom.rand_ray_gaussian(size=N, sd=sd)
     if twoargs:
         rr2 = rif.geom.rand_ray_gaussian(size=N, sd=sd)
@@ -80,14 +89,16 @@ def coverage_test_helper(cls, twoargs, N, resl, lever, sd, bound, fudge=1.0):
         print("FAIL!", cls.__name__)
         print('resl: ', resl, 'maxdiff', np.max(diff), ', cart: ',
               cart[i], ', rads: ', rads[i] * lever)
-        print('ran orig', rr['orig'][i])
-        print('cen orig', cen['orig'][i])
-        print('ran dirn', rr['dirn'][i])
-        print('cen dirn', cen['dirn'][i])
+        print('ran orig', rayorig(rr)[i])
+        print('cen orig', rayorig(cen)[i])
+        print('ran dirn', raydirn(rr)[i])
+        print('cen dirn', raydirn(cen)[i])
         assert np.max(diff) <= resl * fudge
     return np.max(diff)
 
 # todo: investigate covering radius more thoroughly
+
+
 def test_RayToRay4dHash_coverage():
     for resl in [2**i * .25 for i in range(4)]:
         for lever in [2**i * 0.25 for i in range(7)]:
@@ -108,10 +119,23 @@ def test_Ray5dHash_coverage():
 
 
 def test_RayRay10dHash_coverage():
-    for resl in [2**i * .25 for i in range(4)]:
-        for lever in [2**i * 0.25 for i in range(7)]:
+    maxdiff = coverage_test_helper(
+        rh.RayRay10dHash, twoargs=True,
+        resl=0.5, lever=3, sd=1, bound=32,
+        N=1000, fudge=1.3)
+    for resl in [.25, .5, 1, 2]:
+        for lever in [.25, .5, 1, 2, 4, 8]:
             maxdiff = coverage_test_helper(
-                rh.RayRay10dHash, twoargs=True,
-                resl=resl, lever=lever, sd=resl, bound=resl * 10,
-                N=1000, fudge=1.3)
+                rh.RayRay10dHash, twoargs=True, resl=resl, lever=lever,
+                sd=resl, bound=resl**1.5 / lever**.5 * 60, N=1000, fudge=1.3)
             print('RayRay10dHash ', resl, lever, maxdiff / resl)
+
+
+def bench_RayRay10dHash_scaling():
+    for resl in [.5, 1.0, 2, 4]:
+        h = rh.Ray5dHash(resl=resl, lever=3, bound=10)
+        rr1 = rif.geom.rand_ray_gaussian(size=10000000, sd=2)
+        # rr2 = rif.geom.rand_ray_gaussian(size=100000, sd=2)
+        keys = h.get_keys(rr1)
+        print(resl, len(set(keys)), sep='\t')
+    assert 0

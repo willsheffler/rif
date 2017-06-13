@@ -1,3 +1,4 @@
+#include "pyutil/pybind_numpy.hpp"
 #include "rif/geom/ray_hash.hpp"
 #include "rif/util/str.hpp"
 
@@ -25,6 +26,8 @@ void pybind_ray_hash4(py::module& m) {
       .def("get_key_aligned", &T::get_key_aligned, "ray"_a)
       .def("get_keys",
            [](T const& self, py::array_t<R> rays1, py::array_t<R> rays2) {
+             std::cout << "get_keys test??" << std::endl;
+             std::exit(-1);
              auto func = [&self](R a, R b) { return self.get_key(a, b); };
              return py::vectorize(func)(rays1, rays2);
            },
@@ -134,4 +137,13 @@ void RIFLIB_PYBIND_geom_ray_hash(py::module& m) {
   m.attr("RayToRay4dHash") = m.attr("RayToRay4dHash_f4i8");
   m.attr("Ray5dHash") = m.attr("Ray5dHash_f4i8");
   m.attr("RayRay10dHash") = m.attr("RayRay10dHash_f4i8");
+
+  using R = Ray<float>;
+  m.def("pyarray_Ray_test",
+        [](py::array_t<R> rays1, py::array_t<R> rays2) {
+          std::cout << "get_keys test??" << std::endl;
+          auto func = [](R a, R b) { return 7; };
+          return py::vectorize(func)(rays1, rays2);
+        },
+        "rays1"_a, "rays2"_a);
 }

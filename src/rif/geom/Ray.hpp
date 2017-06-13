@@ -16,25 +16,46 @@ template <class F = float>
 struct Ray {
   using Scalar = F;
   using V = V3<F>;
-  V3<F> orig;
-  V3<F> dirn;
-  Ray() : orig(0, 0, 0), dirn(1, 0, 0) {}
-  Ray(V3<F> o, V3<F> d) : orig(o), dirn(d.normalized()) {}
+  using VM = Eigen::Map<V3<F>, 0, Eigen::InnerStride<2>>;
+  using VMconst = Eigen::Map<V3<F> const, 0, Eigen::InnerStride<2>>;
+  using M42 = Eigen::Matrix<F, 4, 2, Eigen::RowMajor>;
+  M42 _m42;
+  Ray() { _m42 << 0, 1, 0, 0, 0, 0, 1, 0; }
+  Ray(V3<F> o, V3<F> d) {
+    orig() = o;
+    dirn() = d.normalized();
+    _m42.row(3) = A2<F>(1, 0);  // homo-coords, 1==point, 0=dirn
+  }
+  template <class F2, int OPTS>
+  Ray(Eigen::Matrix<F2, 4, 2, OPTS> const& in) : _m42(in) {}
+  VM orig() { return VM(_m42.data()); }
+  VM dirn() { return VM(_m42.data() + 1); }
+  VMconst orig() const { return VMconst(_m42.data()); }
+  VMconst dirn() const { return VMconst(_m42.data() + 1); }
+  void normalize() { dirn().normalize(); }
+  V getorig() { return orig(); }
+  V getdirn() { return dirn(); }
+  void setorig(V o) { orig() = o; }
+  void setdirn(V d) { dirn() = d.normalized(); }
 };
 
 template <class F>
 std::ostream& operator<<(std::ostream& s, Ray<F> r) {
-  s << "Ray( " << r.orig.transpose() << " ; " << r.dirn.transpose() << " )";
+  s << "Ray( " << r.orig().transpose() << " ; " << r.dirn().transpose() << " )";
   return s;
 }
 
 template <class F1, class F2>
 Ray<F2> operator*(X3<F1> const& x, Ray<F2> const& r) {
-  return Ray<F2>(x * r.orig, x.rotation() * r.dirn);
+  using namespace Eigen;
+  return Ray<F2>(typename Ray<F2>::M42(x.matrix() * r._m42));
+
+  // return Ray<F2>(x * r.orig(), x.linear() * r.dirn());
 }
 template <class F1, class F2>
 Ray<F2> operator*(M3<F1> const& m, Ray<F2> const& r) {
-  return Ray<F2>(m * r.orig, m * r.dirn);
+  return Ray<F2>(m * r.orig(), m * r.dirn());
+  // return Ray<F2>(m * r._m42);
 }
 
 /**
@@ -52,13 +73,13 @@ template <class F = float>
 Ray<F> rand_ray_gaussian_rng(std::mt19937& rng, float sd = 10.0) {
   Ray<F> r;
   std::normal_distribution<> gaussian;
-  r.dirn[0] = gaussian(rng);
-  r.dirn[1] = gaussian(rng);
-  r.dirn[2] = gaussian(rng);
-  r.dirn.normalize();
-  r.orig[0] = gaussian(rng) * sd;
-  r.orig[1] = gaussian(rng) * sd;
-  r.orig[2] = gaussian(rng) * sd;
+  r.dirn()[0] = gaussian(rng);
+  r.dirn()[1] = gaussian(rng);
+  r.dirn()[2] = gaussian(rng);
+  r.dirn().normalize();
+  r.orig()[0] = gaussian(rng) * sd;
+  r.orig()[1] = gaussian(rng) * sd;
+  r.orig()[2] = gaussian(rng) * sd;
   return r;
 }
 template <class F = float>

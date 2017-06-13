@@ -50,11 +50,13 @@ struct BCC {
     width_ = (upper - lower_) / nside_.template cast<Float>();
     half_width_ = width_ / 2.0;
     lower_cen_ = lower_ + half_width_;
-    Index totsize = 2;
+    __int128 totsize = 2;
     for (size_t i = 0; i < DIM; ++i) {
       if (totsize * nside_[i] < totsize)
         throw std::invalid_argument("Index Type is too narrow");
-      totsize *= nside_[i];
+      totsize *= __int128(nside_[i]);
+      if (totsize > __int128(std::numeric_limits<Index>::max()))
+        throw std::invalid_argument("Index Type is too narrow");
     }
     // std::cout << lower_ << std::endl;
     // std::cout << lower_ + nside_.template cast<Float>() * width_ <<
