@@ -13,13 +13,13 @@ Ray.__init__ = _Ray_init
 
 
 def rayorig(rays):
-    assert rays['raw'].shape[-2:] == (4, 2)
-    return rays['raw'][..., :3, 0]
+    assert rays['_m42']['raw'].shape[-2:] == (4, 2)
+    return rays['_m42']['raw'][..., :3, 0]
 
 
 def raydirn(rays):
-    assert rays['raw'].shape[-2:] == (4, 2)
-    return rays['raw'][..., :3, 1]
+    assert rays['_m42']['raw'].shape[-2:] == (4, 2)
+    return rays['_m42']['raw'][..., :3, 1]
 
 
 def ray_smalldiff(r1, r2, lever=None):

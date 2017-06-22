@@ -96,10 +96,10 @@
 			},
 			"Linux":
 			{
-				// "CC": "clang-4.0",
-				// "CXX": "clang++-4.0"
-				"CC": "gcc-5",
-				"CXX": "g++-5"
+				"CC": "clang-4.0",
+				"CXX": "clang++-4.0"
+				// "CC": "gcc-5",
+				// "CXX": "g++-5"
 			},
 			"Windows":
 			{

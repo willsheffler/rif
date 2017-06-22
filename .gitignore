@@ -83,3 +83,4 @@ log/*.log
 \#*\#
 *~
 .autoxsh
+.ipynb_checkpoints

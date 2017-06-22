@@ -8,9 +8,9 @@ from numpy.testing import assert_allclose
 
 
 # def test_ray_pyarray():
-    # a = np.array([Ray()], dtype=Ray)
-    # assert rif.geom.pyarray_Ray_test(a, a) == 8
-    # assert rif.geom.ray_hash.pyarray_Ray_test(a, a) == 7
+# a = np.array([Ray()], dtype=Ray)
+# assert rif.geom.pyarray_Ray_test(a, a) == 8
+# assert rif.geom.ray_hash.pyarray_Ray_test(a, a) == 7
 
 
 def test_Ray_dtype():
@@ -39,8 +39,8 @@ def test_Ray_npy_input():
     a = np.array([r], dtype=Ray)
     assert (rayorig(a) == [r.orig[i] for i in (0, 1, 2)]).all()
     assert (raydirn(a) == [r.dirn[i] for i in (0, 1, 2)]).all()
-    assert np.all(a['raw'][..., 3, 0] == 1)
-    assert np.all(a['raw'][..., 3, 1] == 0)
+    assert np.all(a['_m42']['raw'][..., 3, 0] == 1)
+    assert np.all(a['_m42']['raw'][..., 3, 1] == 0)
 
 
 @pytest.mark.skipif('sys.version_info.major is 2')

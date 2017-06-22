@@ -8,15 +8,16 @@ using namespace pybind11::literals;
 
 using namespace rif::geom;
 
-namespace pybind11 {
-namespace detail {
-template <class F>
-struct npy_format_descriptor<Ray<F>>
-    : npy_format_descriptor<typename Ray<F>::M42> {};
-}
-template <class F>
-struct format_descriptor<Ray<F>> : format_descriptor<typename Ray<F>::M42> {};
-}
+// namespace pybind11 {
+// namespace detail {
+// template <class F>
+// struct npy_format_descriptor<Ray<F>>
+//     : npy_format_descriptor<typename Ray<F>::M42> {};
+// }
+// template <class F>
+// struct format_descriptor<Ray<F>> : format_descriptor<typename Ray<F>::M42>
+// {};
+// }
 
 template <class F>
 void bind_ray(py::module &m) {
@@ -65,9 +66,11 @@ void bind_ray(py::module &m) {
       });
 
   // std::cout << "register M42" << std::endl;
-  // py::detail::npy_format_descriptor<typename R::M42>::register_dtype();
+  py::detail::npy_format_descriptor<typename R::M42>::register_dtype();
   // std::cout << "register R" << std::endl;
-  py::detail::npy_format_descriptor<R>::register_dtype();
+  // py::detail::npy_format_descriptor<R>::register_dtype();
+  PYBIND11_NUMPY_DTYPE(R, _m42);
+
   cls.attr("dtype") = py::dtype::of<R>();
 
   // using R2 = Ray<double>;

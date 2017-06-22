@@ -26,8 +26,6 @@ void pybind_ray_hash4(py::module& m) {
       .def("get_key_aligned", &T::get_key_aligned, "ray"_a)
       .def("get_keys",
            [](T const& self, py::array_t<R> rays1, py::array_t<R> rays2) {
-             std::cout << "get_keys test??" << std::endl;
-             std::exit(-1);
              auto func = [&self](R a, R b) { return self.get_key(a, b); };
              return py::vectorize(func)(rays1, rays2);
            },
