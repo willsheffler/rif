@@ -40,15 +40,15 @@ void RIFLIB_PYBIND_actor_Atom(py::module &m) {
   py::class_<Atom<V3f>> acls(m, "Atom");
   acls.attr("dtype") = py::dtype::of<Atom<V3f>>();
 
-  m.def("op_abs_AT", py::vectorize(abs_Atom));
+  m.def("rifop_abs_AT", py::vectorize(abs_Atom));
 
-  m.def("op_add_AT_V3", py::vectorize(add<A, V, A>));
-  m.def("op_add_V3_AT", py::vectorize(add<V, A, A>));
-  m.def("op_sub_AT_V3", py::vectorize(sub<A, V, A>));
-  m.def("op_sub_V3_AT", py::vectorize(sub<V, A, A>));
-  m.def("op_mul_fl_AT", py::vectorize(mul<F, A, A>));
-  m.def("op_mul_AT_fl", py::vectorize(mul<A, F, A>));
-  m.def("op_mul_M3_AT", py::vectorize(mul<M, A, A>));
-  m.def("op_mul_X3_AT", py::vectorize(mul<X, A, A>));
-  m.def("op_div_AT_fl", py::vectorize(div<A, F, A>));
+  m.def("rifop_add_AT_V3", py::vectorize(add<A, V, A>));
+  m.def("rifop_add_V3_AT", py::vectorize(add<V, A, A>));
+  m.def("rifop_sub_AT_V3", py::vectorize(sub<A, V, A>));
+  m.def("rifop_sub_V3_AT", py::vectorize(sub<V, A, A>));
+  m.def("rifop_mul_fl_AT", py::vectorize(mul<F, A, A>));
+  m.def("rifop_mul_AT_fl", py::vectorize(mul<A, F, A>));
+  m.def("rifop_mul_M3_AT", py::vectorize(mul<M, A, A>));
+  m.def("rifop_mul_X3_AT", py::vectorize(mul<X, A, A>));
+  m.def("rifop_div_AT_fl", py::vectorize(div<A, F, A>));
 }

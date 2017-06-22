@@ -2,6 +2,7 @@ from __future__ import print_function
 from rif import rcl
 from rif.rcl import pyrosetta, rosetta
 from rif.chem.biochem import aa_name3s
+from rif.dtypes import RifOperatorsDisabled
 import os
 import numpy as np
 import pandas as pd
@@ -37,8 +38,10 @@ def get_rotamer_space(concat=True, disulf=False):
     """
     r = pd.read_csv(localpath('richardson.csv'),
                     header=0, nrows=999, index_col=(0, 1))
-    r = r.reset_index()
-    r = r.sort_values(['aa', 'lbl']).set_index(['aa', 'lbl'])
+    r.reset_index(inplace=True)
+    r.sort_values(['aa', 'lbl'], inplace=True)
+    with RifOperatorsDisabled():  # todo: figure out why fails w/rifops!
+        r.set_index(['aa', 'lbl'], inplace=True)
     # r = r.drop('lbl', axis=1)
     # print(r.columns)
     # print(r.iloc[0])
@@ -147,7 +150,9 @@ def concat_rotamer_space(rotspace):
             newdat.append(merge_on_chi(fixchiprefix, chi=nchi))
     r = pd.concat(newdat)
     r = r.reset_index()
-    r = r.sort_values(['aa', 'lbl']).set_index(['aa', 'lbl'])
+    r = r.sort_values(['aa', 'lbl'])
+    with RifOperatorsDisabled():
+        r = r.set_index(['aa', 'lbl'])
     return r
 
 

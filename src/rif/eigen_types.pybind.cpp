@@ -125,22 +125,22 @@ void RIFLIB_PYBIND_eigen_types(py::module& m) {
     vars())
 
   */
-  m.def("op_abs_V3", py::vectorize(abs_v3f));
-  m.def("op_abs_M3", py::vectorize(abs_m3f));
-  m.def("op_add_V3_V3", py::vectorize(add<V3f, V3f, V3f>));
-  m.def("op_add_M3_M3", py::vectorize(add<M3f, M3f, M3f>));
-  m.def("op_sub_V3_V3", py::vectorize(sub<V3f, V3f, V3f>));
-  m.def("op_sub_M3_M3", py::vectorize(sub<M3f, M3f, M3f>));
-  m.def("op_mul_fl_V3", py::vectorize(mul<float, V3f, V3f>));
-  m.def("op_mul_fl_M3", py::vectorize(mul<float, M3f, M3f>));
-  m.def("op_mul_V3_fl", py::vectorize(mul<V3f, float, V3f>));
-  m.def("op_mul_M3_V3", py::vectorize(mul<M3f, V3f, V3f>));
-  m.def("op_mul_M3_M3", py::vectorize(mul<M3f, M3f, M3f>));
-  m.def("op_mul_X3_V3", py::vectorize(mul<X3f, V3f, V3f>));
-  m.def("op_mul_X3_M3", py::vectorize(mul<X3f, M3f, M3f>));
-  m.def("op_mul_X3_X3", py::vectorize(mul<X3f, X3f, X3f>));
-  m.def("op_div_V3_fl", py::vectorize(div<V3f, float, V3f>));
-  m.def("op_div_M3_fl", py::vectorize(div<M3f, float, M3f>));
+  m.def("rifop_abs_V3", py::vectorize(abs_v3f));
+  m.def("rifop_abs_M3", py::vectorize(abs_m3f));
+  m.def("rifop_add_V3_V3", py::vectorize(add<V3f, V3f, V3f>));
+  m.def("rifop_add_M3_M3", py::vectorize(add<M3f, M3f, M3f>));
+  m.def("rifop_sub_V3_V3", py::vectorize(sub<V3f, V3f, V3f>));
+  m.def("rifop_sub_M3_M3", py::vectorize(sub<M3f, M3f, M3f>));
+  m.def("rifop_mul_fl_V3", py::vectorize(mul<float, V3f, V3f>));
+  m.def("rifop_mul_fl_M3", py::vectorize(mul<float, M3f, M3f>));
+  m.def("rifop_mul_V3_fl", py::vectorize(mul<V3f, float, V3f>));
+  m.def("rifop_mul_M3_V3", py::vectorize(mul<M3f, V3f, V3f>));
+  m.def("rifop_mul_M3_M3", py::vectorize(mul<M3f, M3f, M3f>));
+  m.def("rifop_mul_X3_V3", py::vectorize(mul<X3f, V3f, V3f>));
+  m.def("rifop_mul_X3_M3", py::vectorize(mul<X3f, M3f, M3f>));
+  m.def("rifop_mul_X3_X3", py::vectorize(mul<X3f, X3f, X3f>));
+  m.def("rifop_div_V3_fl", py::vectorize(div<V3f, float, V3f>));
+  m.def("rifop_div_M3_fl", py::vectorize(div<M3f, float, M3f>));
 
   // testing crap
   m.def("print_numpy_info", &print_numpy_info);

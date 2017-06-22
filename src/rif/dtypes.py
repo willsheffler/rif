@@ -1,55 +1,66 @@
+"""overrides numpy operators to work with rif dpypes
+
+override numpy operators using numpy.set_numeric_ops. keep track of
+overridden operators and call them if a custom operator is not found
+
+"""
 from __future__ import print_function
 
 import sys
 import numpy as np
 import rif
-from rif import V3, M3, X3, Atom
 import rif.actor
+import rif.eigen_types
+from rif import V3, M3, X3, Atom
+
+_RIFOP_MODULES = [
+    rif.eigen_types,
+    rif.actor,
+]
+_NPY_RIF_OP1MAP = dict()
+_NPY_RIF_OP2MAP = dict()
+_ORIG_NUMPY_OPS = None
+
+_opmap1 = dict(
+    abs='absolute'
+)
+
+_opmap2 = dict(
+    add='add',
+    mul='multiply',
+    sub='subtract',
+    div='divide',
+)
 
 
 def _init_dispatch():
-    _npy_rif_op1map = dict()
-    _npy_rif_op2map = dict()
-    if sys.version_info.major > 2:
-        modules_to_search = [rif.eigen_types, rif.actor]
-
-        _npy_rif_op1map[M3.dtype, 'absolute'] = rif.eigen_types.op_abs_M3
-        _npy_rif_op1map[V3.dtype, 'absolute'] = rif.eigen_types.op_abs_V3
-
-        # binary ops set here
-
-        opmap = dict(
-            add='add',
-            mul='multiply',
-            sub='subtract',
-            div='divide')
-        dtmap = dict(
-            fl=(type(1), type(1.0)),
-            V3=V3.dtype,
-            M3=M3.dtype,
-            X3=X3.dtype,
-            AT=Atom.dtype,
-        )
-        dtmap = {k: v if hasattr(v, '__iter__') else (v,)
-                 for k, v in dtmap.items()}
-
-        for module in modules_to_search:
-            for fn in dir(module):
+    global _NPY_RIF_OP1MAP
+    global _NPY_RIF_OP2MAP
+    dtmap = dict(
+        fl=(type(1), type(1.0)),
+        V3=V3.dtype,
+        M3=M3.dtype,
+        X3=X3.dtype,
+        AT=Atom.dtype,
+    )
+    dtmap = {k: v if hasattr(v, '__iter__') else (v,)  # x -> (x,) iff not iter
+             for k, v in dtmap.items()}
+    for module in _RIFOP_MODULES:
+        for fn in dir(module):
+            if fn.startswith('rifop_'):
                 splt = fn.split('_')
-                if len(splt) is not 4:
-                    continue
-                head, op, t1, t2 = splt
-                if head != "op":
-                    continue
-                for dt1 in dtmap[t1]:
-                    for dt2 in dtmap[t2]:
-                        k = dt1, dt2, opmap[op]
-                        # print(k, fn)
-                        _npy_rif_op2map[k] = getattr(module, fn)
-    return _npy_rif_op1map, _npy_rif_op2map
-
-
-_npy_rif_op1map, _npy_rif_op2map = _init_dispatch()
+                if len(splt) is 3:
+                    _, op, t1 = splt
+                    for dt1 in dtmap[t1]:
+                        k = dt1, _opmap1[op]
+                        _NPY_RIF_OP1MAP[k] = getattr(module, fn)
+                elif len(splt) is 4:
+                    _, op, t1, t2 = splt
+                    for dt1 in dtmap[t1]:
+                        for dt2 in dtmap[t2]:
+                            k = dt1, dt2, _opmap2[op]
+                            _NPY_RIF_OP2MAP[k] = getattr(module, fn)
+_init_dispatch()
 
 
 def _get_type_str(t):
@@ -60,99 +71,87 @@ def _get_type_str(t):
 
 
 def _override1(name):
-    def ufunc(x):
+    def ufunc(x, *args, **kwargs):
+        # return _ORIG_NUMPY_OPS[name](x, *args, **kwargs)
         try:
             t = x.dtype if hasattr(x, 'dtype') else type(x)
-            r = _npy_rif_op1map[t, name](x)
+            r = _NPY_RIF_OP1MAP[t, name](x, *args, **kwargs)
             return r
         except (AttributeError, KeyError):
-            r = getattr(np, name)(x)
+            assert _ORIG_NUMPY_OPS
+            print("_override1", name)
+            r = _ORIG_NUMPY_OPS[name](x, *args, **kwargs)
             return r
     return ufunc
 
 
 def _override2(name):
-    def ufunc(x, y):
+    def ufunc(x, y, *args, **kwargs):
+        # return _ORIG_NUMPY_OPS[name](x, y, *args, **kwargs)
         try:
             t1 = x.dtype if hasattr(x, 'dtype') else type(x)
             t2 = y.dtype if hasattr(y, 'dtype') else type(y)
-            r = _npy_rif_op2map[t1, t2, name](x, y)
+            r = _NPY_RIF_OP2MAP[t1, t2, name](x, y, *args, **kwargs)
             return r
         except KeyError:
-            r = getattr(np, name)(x, y)
+            assert _ORIG_NUMPY_OPS
+            r = _ORIG_NUMPY_OPS[name](x, y, *args, **kwargs)
             return r
     return ufunc
 
 
-_GLOBAL_RIF_OPS = None
+def rif_operators_are_enabled():
+    return _ORIG_NUMPY_OPS is not None
+
+
+def global_rif_operators_enable(quiet=False):
+    global _ORIG_NUMPY_OPS
+    if rif_operators_are_enabled():
+        print('warning: global_rif_ops is already enabled')
+    else:
+        d1 = {ufunc: _override1(ufunc) for ufunc in _opmap1.values()}
+        d2 = {ufunc: _override2(ufunc) for ufunc in _opmap2.values()}
+        d1.update(d2)
+        _ORIG_NUMPY_OPS = np.set_numeric_ops(**d1)
+
+
+def global_rif_operators_disable(quiet=False):
+    global _ORIG_NUMPY_OPS
+    assert _ORIG_NUMPY_OPS
+    np.set_numeric_ops(**_ORIG_NUMPY_OPS)
+    _ORIG_NUMPY_OPS = None
 
 
 class RifOperators(object):
     """contect manager for locally enabling rif ops"""
 
     def __enter__(self):
-        if sys.version_info.major == 2:
-            print("RifOperators not supported in python 2")
-            return
-        global _GLOBAL_RIF_OPS
-        if _GLOBAL_RIF_OPS is not None:
-            print('warning: global_rif_ops is enabled')
-            print('RifOperators context manager doing nothing')
-            self.orig = None
-        else:
-            print('RifOperators: enter')
-            d = {ufunc: _override1(ufunc) for ufunc in ('absolute'.split())}
-            d2 = {ufunc: _override2(ufunc)
-                  for ufunc in ('add subtract multiply divide'.split())}
-            d.update(d2)
-            self.orig = np.set_numeric_ops(**d)
+        self.previously_not_using_rifops = _ORIG_NUMPY_OPS is None
+        if self.previously_not_using_rifops:
+            global_rif_operators_enable()
 
     def __exit__(self, *args):
-        if sys.version_info.major == 2:
-            print("RifOperators not supported in python 2")
-            return
-
         if args:
-            print("RifOperators: exit", args)
-        if self.orig:
-            np.set_numeric_ops(**self.orig)
+            print("========== RifOperators: exit ============")
+            for a in args:
+                print(a)
+            print('----------- end rifops exit --------------')
+        if self.previously_not_using_rifops:
+            global_rif_operators_disable()
 
 
 class RifOperatorsDisabled(object):
     """context manager to locally disable RifOperators"""
 
     def __enter__(self):
-        global_rif_operators_disable(quiet=True)
+        self.previously_using_rifops = rif_operators_are_enabled()
+        if self.previously_using_rifops:
+            global_rif_operators_disable()
 
     def __exit__(self, *args):
-        global_rif_operators_enable(quiet=True)
+        if self.previously_using_rifops:
+            global_rif_operators_enable()
 
 
-def global_rif_operators_enable(quiet=False):
-    if sys.version_info.major == 2:
-        print("RifOperators not supported in python 2")
-        return
-    global _GLOBAL_RIF_OPS
-    if not _GLOBAL_RIF_OPS:
-        tmp = RifOperators()
-        tmp.__enter__()
-        _GLOBAL_RIF_OPS = tmp
-    elif not quiet:
-        print("warning: global_rif_operators_enable called after already enabled")
-
-
-def global_rif_operators_disable(quiet=False):
-    if sys.version_info.major == 2:
-        print("RifOperators not supported in python 2")
-        return
-    global _GLOBAL_RIF_OPS
-    if _GLOBAL_RIF_OPS:
-        tmp = _GLOBAL_RIF_OPS
-        _GLOBAL_RIF_OPS = None
-        tmp.__exit__()
-    elif not quiet:
-        print("warning: global_rif_operators_disable called when not enabled")
-
-
-if sys.version_info.major is 3:
-    global_rif_operators_enable()
+global_rif_operators_enable()
+assert rif_operators_are_enabled()
