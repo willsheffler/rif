@@ -2,7 +2,7 @@
 
 #include <map>
 #include "geom/rand_geom.hpp"
-#include "numeric/bcc_lattice.hpp"
+#include "numeric/lattice.hpp"
 #include "numeric/util.hpp"
 
 namespace rif {

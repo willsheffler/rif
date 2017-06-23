@@ -2,7 +2,7 @@
 
 #include "io/dump_pdb_atom.hpp"
 #include "nest/pmap/TetracontoctachoronMap.hpp"
-#include "numeric/bcc_lattice.hpp"
+#include "numeric/lattice.hpp"
 
 #include <boost/foreach.hpp>
 #include <random>

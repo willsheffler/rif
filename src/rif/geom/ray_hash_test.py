@@ -139,3 +139,13 @@ def bench_RayRay10dHash_scaling():
         keys = h.get_keys(rr1)
         print(resl, len(set(keys)), sep='\t')
     assert 0
+
+
+if __name__ == '__main__':
+    print('MAIN')
+    test_RayToRay4dHash()
+    test_Ray5dHash()
+    test_RayRay10dHash()
+    test_RayToRay4dHash_coverage()
+    test_Ray5dHash_coverage()
+    test_RayRay10dHash_coverage()

@@ -4,7 +4,7 @@
 // #include "util/SimpleArray.hpp"
 #include "nest/pmap/TetracontoctachoronMap.hpp"
 #include "numeric/FixedPoint.hpp"
-#include "numeric/bcc_lattice.hpp"
+#include "numeric/lattice.hpp"
 #include "objective/hash/XformHash.hpp"
 #include "objective/hash/XformHashNeighbors.hpp"
 #include "util/dilated_int.hpp"

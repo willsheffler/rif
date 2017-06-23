@@ -4,7 +4,7 @@
 #include "rif/eigen_types.hpp"
 #include "rif/geom/Ray.hpp"
 #include "rif/geom/cube_to_sphere.hpp"
-#include "rif/numeric/bcc_lattice.hpp"
+#include "rif/numeric/lattice.hpp"
 #include "rif/util/SimpleArray.hpp"
 #include "rif/util/assert.hpp"
 

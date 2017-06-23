@@ -12,6 +12,7 @@ try:
     import pyrosetta
     import rosetta
     from rosetta import utility, numeric, basic, core
+    from rosetta.core.conformation import Residue
     from rosetta.core.pose import make_pose_from_sequence, Pose
     from rosetta.core.kinematics import FoldTree, MoveMap
     from rosetta.core.import_pose import pose_from_file
@@ -19,6 +20,11 @@ try:
     from rosetta.core.id import AtomID
     from rosetta.core.scoring import ScoreFunction, get_score_function
     from rosetta.numeric import xyzVector_double_t as xyzVector
+
+    import rosetta.basic
+    import rosetta.core
+    import rosetta.core.pack.rotamer_set
+    from rosetta.protocols.protein_interface_design.movers import TryRotamers
 
     create_score_function = rosetta.core.scoring.ScoreFunctionFactory.create_score_function
     ROSETTA_DB = pyrosetta._rosetta_database_from_env()
@@ -150,3 +156,60 @@ def add_atom_types_to_rosettaDB(newprops, extradict, typeset='fa_standard'):
         updated = update_roesettaDB_file(mypath, extraval)
         any_updates = any_updates or updated
     return any_updates
+
+
+def generate_canonical_residue(residue_name3):
+    work_pose = Pose()
+    make_pose_from_sequence(
+        work_pose, "X[%s]" % residue_name3, "fa_standard", auto_termini=False)
+    work_residue = rosetta.core.conformation.Residue(work_pose.residue(1))
+
+    ca_loc = work_residue.xyz("CA")
+
+    for a in range(work_residue.natoms()):
+        work_residue.set_xyz(a + 1, work_residue.xyz(a + 1) - ca_loc)
+
+    return work_residue
+
+
+def generate_canonical_rotamer_residues_phipsi(residue_name3, target_phi_psi):
+    canonical_residue = generate_canonical_residue(residue_name3)
+    test_sequence = "AAX[%s]AA" % residue_name3
+    target_phi, target_psi = target_phi_psi
+    sf = get_score_function()
+    tryrot = TryRotamers(
+        resnum=3,
+        scorefxn=sf,
+        explosion=0,
+        jump_num=0,
+        clash_check=True,
+        solo_res=False,
+        include_current=False)
+    test_pose = Pose()
+    make_pose_from_sequence(test_pose, test_sequence, "fa_standard")
+    for i in range(1, test_pose.size() + 1):
+        test_pose.set_psi(i, target_psi)
+        test_pose.set_phi(i, target_phi)
+        test_pose.set_omega(i, 180)
+    tryrot.setup_rotamer_set(test_pose)
+    rotamer_set = tryrot.rotamer_set()
+    # print('rotamer_set.num_rotamers()', rotamer_set.num_rotamers())
+    rotamers = [rotamer_set.rotamer(i).clone()
+                for i in range(1, rotamer_set.num_rotamers() + 1)]
+    for r in rotamers:
+        r.orient_onto_residue(canonical_residue)
+        r.seqpos(1)
+    return rotamers
+
+
+def generate_canonical_rotamer_residues(residue_name3):
+    canonical_phi_psi = {
+        "helical": (-66.0, -42.0),
+        "sheet": (-126.0, 124.0),
+    }
+    result = list()
+    for phipsi in canonical_phi_psi.values():
+        result.extend(
+            generate_canonical_rotamer_residues_phipsi(residue_name3, phipsi))
+        # print(phipsi, len(result))
+    return result

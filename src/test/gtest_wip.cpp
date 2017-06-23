@@ -37,8 +37,8 @@
 // #include "nest/pmap/OriTransMap.gtest.cpp"
 
 // #include "numeric/geom_4d.gtest.cpp"
-// #include "numeric/bcc_lattice.gtest.cpp"
-// #include "numeric/bcc_lattice_orientation.gtest.cpp"
+// #include "numeric/lattice.gtest.cpp"
+// #include "numeric/lattice_orientation.gtest.cpp"
 
 // #include "util/meta/util.gtest.cpp"
 // #include "util/container/ContainerInteractions.gtest.cpp"

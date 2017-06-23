@@ -7,7 +7,7 @@
 #include <random>
 #include <sparsehash/dense_hash_set>
 #include "io/dump_pdb_atom.hpp"
-#include "numeric/bcc_lattice.hpp"
+#include "numeric/lattice.hpp"
 #include "util/Timer.hpp"
 
 #include <Eigen/Geometry>
@@ -54,7 +54,7 @@ using std::endl;
 //  cout << dis << endl;
 // }
 
-TEST(bcc_lattice, bounds) {
+TEST(lattice, bounds) {
   BCC<3, float> bcc(2, 0, 1);
   std::set<float> xs, ys, zs;
   float mn = 9e9, mx = -9e9;
@@ -78,7 +78,7 @@ TEST(bcc_lattice, bounds) {
   ASSERT_EQ(mx, 1.00);
 }
 
-TEST(bcc_lattice, centers_map) {
+TEST(lattice, centers_map) {
   typedef util::SimpleArray<3, double> V;
   typedef util::SimpleArray<3, uint64_t> I;
 
@@ -148,7 +148,7 @@ F test_bcc_performance(size_t NSAMP, S const Nside, F const Width) {
   return maxdiff;
 }
 
-TEST(bcc_lattice, performance) {
+TEST(lattice, performance) {
   size_t NITER = 50 * 1000;
 #ifdef SCHEME_BENCHMARK
   NITER *= 50;
@@ -199,7 +199,7 @@ F test_bcc_inradius() {
   return min_inrad;
 }
 
-TEST(bcc_lattice, inradius) {
+TEST(lattice, inradius) {
   ASSERT_NEAR((test_bcc_inradius<3, double, uint64_t>()), 0.433015, 0.03);
   ASSERT_NEAR((test_bcc_inradius<4, double, uint64_t>()), 0.500000, 0.03);
   ASSERT_NEAR((test_bcc_inradius<5, double, uint64_t>()), 0.500000, 0.03);
@@ -315,7 +315,7 @@ F test_bcc_neighbors(size_t NSAMP) {
   return maxrad_99;
 }
 
-TEST(bcc_lattice, neighbors) {
+TEST(lattice, neighbors) {
   size_t NITER = 1000;
 #ifdef SCHEME_BENCHMARK
   NITER *= 50;
@@ -349,7 +349,7 @@ TEST(bcc_lattice, neighbors) {
   // cout << test_bcc_neighbors<7,double,size_t>(1000000) << endl; // 0.6
 }
 
-// TEST(bcc_lattice,coverage_transform_7d){
+// TEST(lattice,coverage_transform_7d){
 //  using namespace Eigen;
 //  typedef Transform<double,3,AffineCompact> Xform;
 //  typedef util::SimpleArray<7,double> V;
@@ -459,7 +459,7 @@ F test_bcc_children(size_t NSAMP) {
   return 0;
 }
 
-TEST(bcc_lattice, children) {
+TEST(lattice, children) {
   int NITER = 5 * 1000;
 #ifdef SCHEME_BENCHMARK
   NITER *= 30;

@@ -95,7 +95,7 @@ def _override2(name):
             t2 = y.dtype if hasattr(y, 'dtype') else type(y)
             return _NPY_RIF_OP2MAP[t1, t2, name](x, y, *args, **kwargs)
         except KeyError:
-            print(name, 'x', x, 'y', y, 'args', args, 'kwargs', kwargs)
+            # print(name, 'x', x, 'y', y, 'args', args, 'kwargs', kwargs)
             # return getattr(np, name)(x, y, *args, **kwargs)
             return _ORIG_NUMPY_OPS[name](x, y, *args, **kwargs)
     return ufunc

@@ -1,4 +1,4 @@
-from rif_cpp.numeric.bcc_lattice import *
+from rif_cpp.numeric.lattice import *
 import rif
 
 BCC3 = BCC3f8i8
@@ -11,10 +11,10 @@ BCC9 = BCC9f8i8
 BCC10 = BCC10f8i8
 
 
-for name in dir(rif.numeric.bcc_lattice):
+for name in dir(rif.numeric.lattice):
     if name.startswith("BCC"):
         # print(name)
-        cls = getattr(rif.numeric.bcc_lattice, name)
+        cls = getattr(rif.numeric.lattice, name)
 
         def bcc_center(self, idx):
             r = self._center_impl(idx)

@@ -1,7 +1,7 @@
 #include "pyutil/pybind_simplearray.hpp"
 
 #include <util/str.hpp>
-#include "bcc_lattice.hpp"
+#include "lattice.hpp"
 
 namespace py = pybind11;
 using namespace pybind11::literals;
@@ -51,7 +51,7 @@ void bind_bcc_N(py::module& m) {
   bind_bcc_N_F_I<N, double, int64_t>(m);
 }
 
-void RIFLIB_PYBIND_numeric_bcc_lattice(py::module& m) {
+void RIFLIB_PYBIND_numeric_lattice(py::module& m) {
   bind_bcc_N<3>(m);
   bind_bcc_N<4>(m);
   bind_bcc_N<5>(m);

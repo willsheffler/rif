@@ -1,4 +1,4 @@
-from rif.numeric.bcc_lattice import *
+from rif.numeric.lattice import *
 from rif.util import sa_dtype
 import numpy as np
 import pytest

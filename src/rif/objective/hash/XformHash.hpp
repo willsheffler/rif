@@ -2,7 +2,7 @@
 #define INCLUDED_objective_hash_XformHash_HH
 
 #include "nest/pmap/TetracontoctachoronMap.hpp"
-#include "numeric/bcc_lattice.hpp"
+#include "numeric/lattice.hpp"
 #include "numeric/util.hpp"
 #include "util/SimpleArray.hpp"
 #include "util/dilated_int.hpp"
