@@ -4,12 +4,11 @@ import numpy as np
 
 
 def test_richardson_space():
-
     rotspace = get_rotamer_space(disulf=False, concat=False)
     assert rotspace.shape == (163 - 10, 29 - 3 * 4 + 1)
     # print(rotspace.loc[:, "lb1 lb2 lb3 lb4 nchi".split()])
-    print(rotspace.loc[list('DNEQ'),
-                       'lb1 ub1 lb2 ub2 lb3 ub3 lb4 ub4'.split()])
+    # print(rotspace.loc[list('DNEQ'),
+                       # 'lb1 ub1 lb2 ub2 lb3 ub3 lb4 ub4'.split()])
     # for k, g in rotspace.loc['D'].groupby(['lb1', 'ub1']):
     # print(g.loc[:, boundsfields])
 
@@ -42,4 +41,7 @@ def test_richardson_space_concat():
 
 if __name__ == '__main__':
     print("MAIN!")
+    test_richardson_space()
+    test_richardson_space_cache()
+    test_richardson_space_nchi()
     test_richardson_space_concat()

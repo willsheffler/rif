@@ -5,6 +5,7 @@ from rif import V3, M3, X3
 from rif.eigen_types import Xc3
 from rif.dtypes import RifOperators, RifOperatorsDisabled
 import numpy as np
+import pandas as pd
 from numpy.testing import assert_almost_equal
 
 
@@ -14,6 +15,16 @@ def test_plus_equals_forwarding():
         a += a
     except TypeError as e:
         pytest.fail('unexpected TypeError', e)
+
+
+def test_pandas_del_bug():
+    a = np.array([1, 2, 3])
+    df = pd.DataFrame(dict(A=a, B=a))
+    del df['A']
+    np.cumsum(a)
+    with RifOperatorsDisabled():
+        a.cumsum()  # todo: this is still broken!
+
 
 
 def test_dtype_hash():
@@ -153,3 +164,8 @@ def test_eigen_M3_V3_mult():
             np_mult = a[i]['raw'].dot(v[i]['raw'])
             cp_mult = (a * v)[i]['raw']
             assert_almost_equal(np_mult, cp_mult, 5)
+
+
+if __name__ == '__main__':
+    print("MAIN!")
+    test_pandas_del_bug()

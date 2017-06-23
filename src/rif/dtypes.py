@@ -11,8 +11,15 @@ import numpy as np
 import rif
 import rif.actor
 import rif.eigen_types
+import pandas
 from rif import V3, M3, X3, Atom
+from functools import wraps
 
+_FUNCS_BROKEN_WITH_RIOPS = [
+    (np, 'cumsum'),
+    (pandas.core.internals.BlockManager, 'delete')
+    # (np.ndarray, 'cumsum'),  # can't set attrib of build-in ndarray!
+]
 _RIFOP_MODULES = [
     rif.eigen_types,
     rif.actor,
@@ -72,31 +79,25 @@ def _get_type_str(t):
 
 def _override1(name):
     def ufunc(x, *args, **kwargs):
-        # return _ORIG_NUMPY_OPS[name](x, *args, **kwargs)
         try:
             t = x.dtype if hasattr(x, 'dtype') else type(x)
-            r = _NPY_RIF_OP1MAP[t, name](x, *args, **kwargs)
-            return r
+            return _NPY_RIF_OP1MAP[t, name](x, *args, **kwargs)
         except (AttributeError, KeyError):
-            assert _ORIG_NUMPY_OPS
-            print("_override1", name)
-            r = _ORIG_NUMPY_OPS[name](x, *args, **kwargs)
-            return r
+            # return getattr(np, name)(x, *args, **kwargs)
+            return _ORIG_NUMPY_OPS[name](x, *args, **kwargs)
     return ufunc
 
 
 def _override2(name):
     def ufunc(x, y, *args, **kwargs):
-        # return _ORIG_NUMPY_OPS[name](x, y, *args, **kwargs)
         try:
             t1 = x.dtype if hasattr(x, 'dtype') else type(x)
             t2 = y.dtype if hasattr(y, 'dtype') else type(y)
-            r = _NPY_RIF_OP2MAP[t1, t2, name](x, y, *args, **kwargs)
-            return r
+            return _NPY_RIF_OP2MAP[t1, t2, name](x, y, *args, **kwargs)
         except KeyError:
-            assert _ORIG_NUMPY_OPS
-            r = _ORIG_NUMPY_OPS[name](x, y, *args, **kwargs)
-            return r
+            print(name, 'x', x, 'y', y, 'args', args, 'kwargs', kwargs)
+            # return getattr(np, name)(x, y, *args, **kwargs)
+            return _ORIG_NUMPY_OPS[name](x, y, *args, **kwargs)
     return ufunc
 
 
@@ -113,6 +114,7 @@ def global_rif_operators_enable(quiet=False):
         d2 = {ufunc: _override2(ufunc) for ufunc in _opmap2.values()}
         d1.update(d2)
         _ORIG_NUMPY_OPS = np.set_numeric_ops(**d1)
+        wrap_broken_functions()
 
 
 def global_rif_operators_disable(quiet=False):
@@ -120,6 +122,7 @@ def global_rif_operators_disable(quiet=False):
     assert _ORIG_NUMPY_OPS
     np.set_numeric_ops(**_ORIG_NUMPY_OPS)
     _ORIG_NUMPY_OPS = None
+    unwrap_broken_functions()
 
 
 class RifOperators(object):
@@ -151,6 +154,41 @@ class RifOperatorsDisabled(object):
     def __exit__(self, *args):
         if self.previously_using_rifops:
             global_rif_operators_enable()
+
+
+def with_rifops_enabled(f):
+    @wraps(f)
+    def wrap(*args, **kwargs):
+        with RifOperators():
+            return f(*args, **kwargs)
+    return wrap
+
+
+def with_rifops_disabled(f):
+    @wraps(f)
+    def wrap(*args, **kwargs):
+        with RifOperatorsDisabled():
+            return f(*args, **kwargs)
+    return wrap
+
+_ORIG_WRAPPED_BROKEN_FUNCTIONS = None
+
+
+def wrap_broken_functions():
+    global _ORIG_WRAPPED_BROKEN_FUNCTIONS
+    assert not _ORIG_WRAPPED_BROKEN_FUNCTIONS
+    _ORIG_WRAPPED_BROKEN_FUNCTIONS = dict()
+    for mod, fn in _FUNCS_BROKEN_WITH_RIOPS:
+        _ORIG_WRAPPED_BROKEN_FUNCTIONS[mod.__name__, fn] = getattr(mod, fn)
+        setattr(mod, fn, with_rifops_disabled(getattr(mod, fn)))
+
+
+def unwrap_broken_functions():
+    global _ORIG_WRAPPED_BROKEN_FUNCTIONS
+    assert _ORIG_WRAPPED_BROKEN_FUNCTIONS is not None
+    for mod, fn in _FUNCS_BROKEN_WITH_RIOPS:
+        setattr(mod, fn, _ORIG_WRAPPED_BROKEN_FUNCTIONS[mod.__name__, fn])
+    _ORIG_WRAPPED_BROKEN_FUNCTIONS = None
 
 
 global_rif_operators_enable()

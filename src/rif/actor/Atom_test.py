@@ -24,13 +24,10 @@ def test_atom_math():
     a['anum'] = [1, 2]
     # print('v', v)
     # print('a', a)
-    assert rif.dtypes.rif_operators_are_enabled()
-    # with rif.dtypes.RifOperators():
-    if 1:
-        assert np.alltrue(1 == (a + v)['pos']['raw'])
-        assert np.alltrue(3 == (v + a + v + v)['pos']['raw'])
-        assert np.alltrue(-1 == (a - v)['pos']['raw'])
-        assert np.alltrue(3 == (3 * v - a + v - v)['pos']['raw'])
-        # print(a + 3 * v)
-        # print(a + V3(1, 2, 3))
+    assert np.alltrue(1 == (a + v)['pos']['raw'])
+    assert np.alltrue(3 == (v + a + v + v)['pos']['raw'])
+    assert np.alltrue(-1 == (a - v)['pos']['raw'])
+    assert np.alltrue(3 == (3 * v - a + v - v)['pos']['raw'])
+    # print(a + 3 * v)
+    # print(a + V3(1, 2, 3))
     # assert 0

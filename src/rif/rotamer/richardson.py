@@ -1,8 +1,7 @@
 from __future__ import print_function
-from rif import rcl
-from rif.rcl import pyrosetta, rosetta
-from rif.chem.biochem import aa_name3s
-from rif.dtypes import RifOperatorsDisabled
+# from rif import rcl
+# from rif.rcl import pyrosetta, rosetta
+# from rif.chem.biochem import aa_name3s
 import os
 import numpy as np
 import pandas as pd
@@ -25,23 +24,12 @@ def localpath(pth):
     return os.path.join(os.path.dirname(__file__), pth)
 
 
-@lru_cache()
-def get_rotamer_space(concat=True, disulf=False):
-    """B is disulfide, x4 -> x2other
-    n num observations
-    fabo total fraction/alpha/beta/other
-    x#a chi # "act"
-    x#  chi # "com"
-    x#r chi # range text
-    x#w chi # peak width
-    lb#/ub# chi # range
-    """
+def get_rotamer_space_raw():
     r = pd.read_csv(localpath('richardson.csv'),
                     header=0, nrows=999, index_col=(0, 1))
     r.reset_index(inplace=True)
     r.sort_values(['aa', 'lbl'], inplace=True)
-    with RifOperatorsDisabled():  # todo: figure out why fails w/rifops!
-        r.set_index(['aa', 'lbl'], inplace=True)
+    r.set_index(['aa', 'lbl'], inplace=True)
     # r = r.drop('lbl', axis=1)
     # print(r.columns)
     # print(r.iloc[0])
@@ -82,7 +70,26 @@ def get_rotamer_space(concat=True, disulf=False):
         'x1a x2a x3a x4a x1w x2w x3w x4w x1r x2r x3r x4r'.split(), axis=1)
 
     r['nchi'] = 4 - r.loc[:, boundsfields].isnull().sum(axis=1) / 2
+    return r
 
+
+@lru_cache()
+def get_rotamer_space(concat=False, disulf=False):
+    """B is disulfide, x4 -> x2other
+    n num observations
+    fabo total fraction/alpha/beta/other
+    x#a chi # "act"
+    x#  chi # "com"
+    x#r chi # range text
+    x#w chi # peak width
+    lb#/ub# chi # range
+    """
+    try:
+        r = pd.read_pickle(localpath('richardson.pkl'))
+    except IOError:  # todo: python3 only use FileNotFoundError
+        # print('warning: richardson.pkl not available, reading from richardson.csv')
+        r = get_rotamer_space_raw()
+        # r.to_pickle(localpath('richardson.pkl'))
     # print_full(r.loc[:, 'lb1 ub1 ub2 ub2 lb3 ub3 lb4 ub4'.split()])
     # print_full(r.loc[:, 'x1w x2w x3w x4w'.split()])
     if not disulf:
@@ -117,7 +124,7 @@ def merge_on_chi(rs, chi):
                 rs = rs.drop(rs.index[j])
                 # print(oldlen, rs.shape[0])
                 # print('NEW:')
-                print(rs[boundsfields])
+                # print(rs[boundsfields])
                 updated = True
                 break
             elif _roteq(rs[ub][i], rs[lb][j]):
@@ -130,7 +137,7 @@ def merge_on_chi(rs, chi):
                 rs = rs.drop(rs.index[j])
                 # print(oldlen, rs.shape[0])
                 # print('NEW:')
-                print(rs[boundsfields])
+                # print(rs[boundsfields])
                 updated = True
                 break
         if not updated:
@@ -151,8 +158,7 @@ def concat_rotamer_space(rotspace):
     r = pd.concat(newdat)
     r = r.reset_index()
     r = r.sort_values(['aa', 'lbl'])
-    with RifOperatorsDisabled():
-        r = r.set_index(['aa', 'lbl'])
+    r = r.set_index(['aa', 'lbl'])
     return r
 
 
