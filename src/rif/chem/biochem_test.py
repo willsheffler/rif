@@ -20,5 +20,6 @@ def test_rif_atypes():
     assert len(bc.aa_name1s) is len(bc.aa_name3s)
 
 
+@pytest.mark.skipif('not rcl.HAVE_PYROSETTA')
 def test_chi_levers():
     chi_levers = bc.compute_chi_levers()

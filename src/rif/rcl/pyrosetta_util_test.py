@@ -50,11 +50,11 @@ def test_generate_canonical_residue():
 def test_generate_canonical_rotamer_residues():
     rcl.init_check()
     rots = rcl.generate_canonical_rotamer_residues('ASN')
+    assert len(rots) == 267
     # for i, rot in enumerate(rots):
     # p = rcl.Pose()
     # p.append_residue_by_jump(rot, 0)
     # print(i)
     # p.dump_pdb('asn%i.pdb' % i)
     # print(len(rots))
-    assert len(rots) == 267
-    # assert 0
+    # print(rcl.rosetta.options)

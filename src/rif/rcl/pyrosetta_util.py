@@ -193,7 +193,8 @@ def generate_canonical_rotamer_residues_phipsi(residue_name3, target_phi_psi):
         test_pose.set_omega(i, 180)
     tryrot.setup_rotamer_set(test_pose)
     rotamer_set = tryrot.rotamer_set()
-    # print('rotamer_set.num_rotamers()', rotamer_set.num_rotamers())
+    # print('rotamer_set.num_rotamers()',
+          # residue_name3, target_phi_psi, rotamer_set.num_rotamers())
     rotamers = [rotamer_set.rotamer(i).clone()
                 for i in range(1, rotamer_set.num_rotamers() + 1)]
     for r in rotamers:

@@ -23,3 +23,7 @@ def compute_chi_levers():
     rts = chem_manager.get_instance().residue_type_set("fa_standard")
     for aa in aa_name3s:
         print(aa)
+        rots = rcl.generate_canonical_rotamer_residues(aa)
+        for rot in rots:
+            for ichi in range(rot.nchi()):
+                print(aa, ichi, rot)

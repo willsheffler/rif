@@ -9,11 +9,10 @@
 namespace rif {
 namespace index {
 
-template <class Pt, class Idx = uint16_t>
+template <class Pt, class ShortIdx = uint16_t>
 struct OneSide3dIndex {
   using F = typename Pt::Scalar;
-  typedef struct { Idx x, y; } ushort2;
-  typedef V3<F> Vec;
+  typedef struct { ShortIdx x, y; } ushort2;
 
   F width_, width2_;  // cell width
   size_t Npts;
@@ -21,7 +20,7 @@ struct OneSide3dIndex {
   ushort2 const *pindex_ = nullptr;
   int xdim_, ydim_, zdim_;
   float xmx_, ymx_, zmx_;
-  Vec translation_;
+  V3f translation_;
 
   OneSide3dIndex() {}
 
@@ -33,6 +32,51 @@ struct OneSide3dIndex {
 
   OneSide3dIndex(F width, Pt const *ptr, size_t Npts) {
     init(width, ptr, Npts);
+  }
+
+  /// basic visitor to count contacts, good one to take as an example
+  struct CountVisitor {
+    int result = 0;
+    bool visit(Pt v, Pt c, float d2) {
+      ++result;
+      return false;  // no early termination, want full count
+    }
+  };
+
+  struct ContactVisitor {
+    bool result = false;
+    bool visit(Pt v, Pt c, float d2) {
+      result = true;
+      return true;  // return true to terminate early
+    }
+  };
+
+  template <class Point>
+  int nbcount(Point query) const {
+    CountVisitor myvisitor;
+    visit(query, myvisitor);
+    return myvisitor.result;
+  }
+
+  template <class Point>
+  bool contact(Point query) const {
+    ContactVisitor myvisitor;
+    visit(query, myvisitor);
+    return myvisitor.result;
+  }
+
+  template <class Point>
+  int brute_nbcount(Point query) const {
+    CountVisitor myvisitor;
+    brute_visit(query, myvisitor);
+    return myvisitor.result;
+  }
+
+  template <class Point>
+  int brute_contact(Point query) const {
+    ContactVisitor myvisitor;
+    brute_visit(query, myvisitor);
+    return myvisitor.result;
   }
 
   void init(F width, Pt const *ptr, size_t Npts);
@@ -52,8 +96,8 @@ struct OneSide3dIndex {
           ushort const igu = pindex_[ig].y;
           for (int i = igl; i < igu; ++i) {
             // float const & x(pts_[i].x);
-            float const &y(pts_[i].y());
-            float const &z(pts_[i].z());
+            float const &y(pts_[i][1]);
+            float const &z(pts_[i][2]);
             // if(i==igl) std::cout << endl;
             // bool xc = width_*(float)ix <= x && x <=
             // width_*(float)(ix+1);
@@ -71,120 +115,43 @@ struct OneSide3dIndex {
     return true;
   }
 
-  int brute_nbcount(Vec const &v_in) {
-    Vec const v = v_in + translation_;
-    int count = 0;
-    for (size_t i = 0; i < Npts; ++i) {
-      Pt const &a2 = pts_[i];
-      float const d2 = (v[0] - a2[0]) * (v[0] - a2[0]) +
-                       (v[1] - a2[1]) * (v[1] - a2[1]) +
-                       (v[2] - a2[2]) * (v[2] - a2[2]);
-      if (d2 <= width2_) {
-        ++count;
-      }
+  template <class OrigVisitor>
+  struct D2CheckVisitor {
+    float mywidth2;
+    OrigVisitor &visitor;
+    D2CheckVisitor(float w, OrigVisitor &v) : mywidth2(w), visitor(v) {}
+    bool visit(Pt v, Pt c) {
+      float d2 = (v[0] - c[0]) * (v[0] - c[0]) + (v[1] - c[1]) * (v[1] - c[1]) +
+                 (v[2] - c[2]) * (v[2] - c[2]);
+      if (d2 <= mywidth2) return visitor.visit(v, c, d2);
+      return false;
     }
-    return count;
+  };
+
+  template <typename Visitor, typename Point>
+  void visit(Point const &query, Visitor &visitor) const {
+    D2CheckVisitor<Visitor> d2_checking_visitor(width2_, visitor);
+    visit_lax(query, d2_checking_visitor);
   }
 
-  // todo: express with visitor instead iff pref same
-  int nbcount(Vec const &v_in) const {
-    Vec const v = v_in + translation_;
-    float x = v.x();
-    float y = v.y();
-    float z = v.z();
-    if (x < -width_ || y < -width_ || z < -width_) return 0;  // worth it iff
-    if (x > xmx_ || y > ymx_ || z > zmx_) return 0;           // worth it iff
-    int count = 0;
-    int const ix =
-        (x < 0) ? 0 : std::min(xdim_ - 1, static_cast<int>(x / width_));
-    int const iy0 = (y < 0) ? 0 : static_cast<int>(y / width_);
-    int const iz0 = (z < 0) ? 0 : static_cast<int>(z / width_);
-    int const iyl = std::max(0, iy0 - 1);
-    int const izl = std::max(0, iz0 - 1);
-    int const iyu = std::min(static_cast<int>(ydim_), iy0 + 2);
-    int const izu =
-        std::min(static_cast<int>(zdim_), static_cast<int>(iz0) + 2);
-    for (int iy = iyl; iy < iyu; ++iy) {
-      for (int iz = izl; iz < izu; ++iz) {
-        int const ig = ix + xdim_ * iy + xdim_ * ydim_ * iz;
-        assert(ig < xdim_ * ydim_ * zdim_);
-        assert(ix < xdim_);
-        assert(iy < ydim_);
-        assert(iz < zdim_);
-        int const &igl = pindex_[ig].x;
-        int const &igu = pindex_[ig].y;
-        for (int i = igl; i < igu; ++i) {
-          Pt const a2 = pts_[i];
-          float const d2 = (x - a2.x()) * (x - a2.x()) +
-                           (y - a2.y()) * (y - a2.y()) +
-                           (z - a2.z()) * (z - a2.z());
-          if (d2 <= width2_) {
-            ++count;
-          }
-        }
-      }
-    }
-    return count;
-  }
-
-  bool contact(Vec const &v_in) const {
-    Vec const v = v_in + translation_;
-    float x = v.x();
-    float y = v.y();
-    float z = v.z();
-    if (x < -width_ || y < -width_ || z < -width_)
-      return false;                                      // worth it iff
-    if (x > xmx_ || y > ymx_ || z > zmx_) return false;  // worth it iff
-    int const ix =
-        (x < 0) ? 0 : std::min(xdim_ - 1, static_cast<int>(x / width_));
-    int const iy0 = (y < 0) ? 0 : static_cast<int>(y / width_);
-    int const iz0 = (z < 0) ? 0 : static_cast<int>(z / width_);
-    int const iyl = std::max(0, iy0 - 1);
-    int const izl = std::max(0, iz0 - 1);
-    int const iyu = std::min(static_cast<int>(ydim_), iy0 + 2);
-    int const izu =
-        std::min(static_cast<int>(zdim_), static_cast<int>(iz0) + 2);
-    for (int iy = iyl; iy < iyu; ++iy) {
-      for (int iz = izl; iz < izu; ++iz) {
-        int const ig = ix + xdim_ * iy + xdim_ * ydim_ * iz;
-        assert(ig < xdim_ * ydim_ * zdim_);
-        assert(ix < xdim_);
-        assert(iy < ydim_);
-        assert(iz < zdim_);
-        int const &igl = pindex_[ig].x;
-        int const &igu = pindex_[ig].y;
-        for (int i = igl; i < igu; ++i) {
-          Pt const a2 = pts_[i];
-          float const d2 = (x - a2.x()) * (x - a2.x()) +
-                           (y - a2.y()) * (y - a2.y()) +
-                           (z - a2.z()) * (z - a2.z());
-          if (d2 <= width2_) {
-            return true;
-          }
-        }
-      }
-    }
-    return false;
-  }
-
-  template <typename Visitor, typename P>
-  void visit(P const &v_in, Visitor &visitor) const {
-    P v(v_in);
-    v.x() += translation_.x();
-    v.y() += translation_.y();
-    v.z() += translation_.z();
-    float x = v.x();
-    float y = v.y();
-    float z = v.z();
+  template <typename Visitor, typename Point>
+  void visit_lax(Point query_in, Visitor &visitor) const {
+    Pt query(query_in);
+    query[0] += translation_[0];
+    query[1] += translation_[1];
+    query[2] += translation_[2];
+    float x = query[0];
+    float y = query[1];
+    float z = query[2];
     if (x < -width_ || y < -width_ || z < -width_) return;  // worth it iff
     if (x > xmx_ || y > ymx_ || z > zmx_) return;           // worth it iff
     int const ix = (x < 0) ? 0 : std::min(xdim_ - 1, (int)(x / width_));
-    int const iy0 = (y < 0) ? 0 : y / width_;
-    int const iz0 = (z < 0) ? 0 : z / width_;
+    int const iy0 = (y < 0) ? 0 : (int)(y / width_);
+    int const iz0 = (z < 0) ? 0 : (int)(z / width_);
     int const iyl = std::max(0, iy0 - 1);
     int const izl = std::max(0, iz0 - 1);
-    int const iyu = std::min((int)ydim_, iy0 + 2);
-    int const izu = std::min((int)zdim_, (int)iz0 + 2);
+    int const iyu = std::min((int)(ydim_), iy0 + 2);
+    int const izu = std::min((int)(zdim_), (int)(iz0 + 2));
     for (int iy = iyl; iy < iyu; ++iy) {
       for (int iz = izl; iz < izu; ++iz) {
         int const ig = ix + xdim_ * iy + xdim_ * ydim_ * iz;
@@ -195,61 +162,33 @@ struct OneSide3dIndex {
         int const &igl = pindex_[ig].x;
         int const &igu = pindex_[ig].y;
         for (int i = igl; i < igu; ++i) {
-          Pt const &c = *((P *)pts_ + i);  // DANGER! assume type P has
-                                           // same in-memory prefix as
-                                           // Pt (works for
-                                           // xyzVector<float>)
-          float const d2 = (x - c.x()) * (x - c.x()) +
-                           (y - c.y()) * (y - c.y()) +
-                           (z - c.z()) * (z - c.z());
-          if (d2 <= width2_) {
-            visitor.visit(v, c, d2);
-          }
+          if (visitor.visit(query, pts_[i])) return;
         }
       }
     }
   }
 
-  template <typename Visitor, typename P>
-  void visit_lax(P const &v_in, Visitor &visitor) const {
-    P v(v_in);
-    v.x() += translation_.x();
-    v.y() += translation_.y();
-    v.z() += translation_.z();
-    float x = v.x();
-    float y = v.y();
-    float z = v.z();
-    if (x < -width_ || y < -width_ || z < -width_) return;  // worth it iff
-    if (x > xmx_ || y > ymx_ || z > zmx_) return;           // worth it iff
-    int const ix =
-        (x < 0) ? 0 : std::min(xdim_ - 1, static_cast<int>(x / width_));
-    int const iy0 = (y < 0) ? 0 : static_cast<int>(y / width_);
-    int const iz0 = (z < 0) ? 0 : static_cast<int>(z / width_);
-    int const iyl = std::max(0, iy0 - 1);
-    int const izl = std::max(0, iz0 - 1);
-    int const iyu = std::min(static_cast<int>(ydim_), iy0 + 2);
-    int const izu =
-        std::min(static_cast<int>(zdim_), static_cast<int>(iz0 + 2));
-    for (int iy = iyl; iy < iyu; ++iy) {
-      for (int iz = izl; iz < izu; ++iz) {
-        int const ig = ix + xdim_ * iy + xdim_ * ydim_ * iz;
-        assert(ig < xdim_ * ydim_ * zdim_);
-        assert(ix < xdim_);
-        assert(iy < ydim_);
-        assert(iz < zdim_);
-        int const &igl = pindex_[ig].x;
-        int const &igu = pindex_[ig].y;
-        for (int i = igl; i < igu; ++i) {
-          P const &c = *((P *)(pts_ + i));
-          visitor.visit(v, c);
-        }
-      }
+  template <typename Visitor, typename Point>
+  void brute_visit(Point const &query, Visitor &visitor) const {
+    D2CheckVisitor<Visitor> d2_checking_visitor(width2_, visitor);
+    brute_visit_lax(query, d2_checking_visitor);
+  }
+
+  /// testing utility function
+  template <typename Visitor, typename Point>
+  void brute_visit_lax(Point query_in, Visitor &visitor) const {
+    Pt query(query_in);
+    query[0] += translation_[0];
+    query[1] += translation_[1];
+    query[2] += translation_[2];
+    for (size_t i = 0; i < Npts; ++i) {
+      visitor.visit(query, pts_[i]);
     }
   }
 };
 
-template <class Pt, class Idx>
-void OneSide3dIndex<Pt, Idx>::init(F width, Pt const *ptr, size_t _Npts) {
+template <class Pt, class ShortIdx>
+void OneSide3dIndex<Pt, ShortIdx>::init(F width, Pt const *ptr, size_t _Npts) {
   Npts = _Npts;
   assert(Npts);
 
@@ -267,9 +206,9 @@ void OneSide3dIndex<Pt, Idx>::init(F width, Pt const *ptr, size_t _Npts) {
     zmx = std::max(zmx, ptr[i][2]);
   }
 
-  xdim_ = static_cast<int>((xmx - xmn + 0.0001) / width_ + 0.999999);
-  ydim_ = static_cast<int>((ymx - ymn + 0.0001) / width_ + 0.999999);
-  zdim_ = static_cast<int>((zmx - zmn + 0.0001) / width_ + 0.999999);
+  xdim_ = (int)((xmx - xmn + 0.0001) / width_ + 0.999999);
+  ydim_ = (int)((ymx - ymn + 0.0001) / width_ + 0.999999);
+  zdim_ = (int)((zmx - zmn + 0.0001) / width_ + 0.999999);
   assert(xdim_ < 9999);
   assert(ydim_ < 9999);
   assert(zdim_ < 9999);
@@ -285,9 +224,9 @@ void OneSide3dIndex<Pt, Idx>::init(F width, Pt const *ptr, size_t _Npts) {
   // "<<ydim_<<" "<<zdim_<<std::endl;
 
   for (int i = 0; i < Npts; ++i) {
-    int ix = static_cast<int>((ptr[i][0] - xmn /*+FUDGE*/) / width_);
-    int iy = static_cast<int>((ptr[i][1] - ymn /*+FUDGE*/) / width_);
-    int iz = static_cast<int>((ptr[i][2] - zmn /*+FUDGE*/) / width_);
+    int ix = (int)((ptr[i][0] - xmn /*+FUDGE*/) / width_);
+    int iy = (int)((ptr[i][1] - ymn /*+FUDGE*/) / width_);
+    int iz = (int)((ptr[i][2] - zmn /*+FUDGE*/) / width_);
     assert(ix >= 0);
     assert(iy >= 0);
     assert(iz >= 0);
@@ -329,9 +268,9 @@ void OneSide3dIndex<Pt, Idx>::init(F width, Pt const *ptr, size_t _Npts) {
   ushort *gridc = new ushort[gsize];
   for (int i = 0; i < gsize; ++i) gridc[i] = 0;
   for (int i = 0; i < Npts; ++i) {
-    int const ix = static_cast<int>((ptr[i][0] - xmn /*+FUDGE*/) / width_);
-    int const iy = static_cast<int>((ptr[i][1] - ymn /*+FUDGE*/) / width_);
-    int const iz = static_cast<int>((ptr[i][2] - zmn /*+FUDGE*/) / width_);
+    int const ix = (int)((ptr[i][0] - xmn /*+FUDGE*/) / width_);
+    int const iy = (int)((ptr[i][1] - ymn /*+FUDGE*/) / width_);
+    int const iz = (int)((ptr[i][2] - zmn /*+FUDGE*/) / width_);
     int const ig = ix + xdim_ * iy + xdim_ * ydim_ * iz;
     int const idx = tmp_pindex2[ig].x + gridc[ig];
     gatom[idx][0] = ptr[i][0] - xmn /*+FUDGE*/;

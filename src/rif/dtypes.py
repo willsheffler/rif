@@ -78,26 +78,26 @@ def _get_type_str(t):
 
 
 def _override1(name):
-    def ufunc(x, *args, **kwargs):
+    def ufunc(*args, **kwargs):
         try:
-            t = x.dtype if hasattr(x, 'dtype') else type(x)
-            return _NPY_RIF_OP1MAP[t, name](x, *args, **kwargs)
+            t = args[0].dtype if hasattr(args[0], 'dtype') else type(args[0])
+            return _NPY_RIF_OP1MAP[t, name](*args, **kwargs)
         except (AttributeError, KeyError):
             # return getattr(np, name)(x, *args, **kwargs)
-            return _ORIG_NUMPY_OPS[name](x, *args, **kwargs)
+            return _ORIG_NUMPY_OPS[name](*args, **kwargs)
     return ufunc
 
 
 def _override2(name):
-    def ufunc(x, y, *args, **kwargs):
+    def ufunc(*args, **kwargs):
         try:
-            t1 = x.dtype if hasattr(x, 'dtype') else type(x)
-            t2 = y.dtype if hasattr(y, 'dtype') else type(y)
-            return _NPY_RIF_OP2MAP[t1, t2, name](x, y, *args, **kwargs)
+            t1 = args[0].dtype if hasattr(args[0], 'dtype') else type(args[0])
+            t2 = args[1].dtype if hasattr(args[1], 'dtype') else type(args[1])
+            return _NPY_RIF_OP2MAP[t1, t2, name](*args, **kwargs)
         except KeyError:
             # print(name, 'x', x, 'y', y, 'args', args, 'kwargs', kwargs)
             # return getattr(np, name)(x, y, *args, **kwargs)
-            return _ORIG_NUMPY_OPS[name](x, y, *args, **kwargs)
+            return _ORIG_NUMPY_OPS[name](*args, **kwargs)
     return ufunc
 
 
