@@ -21,6 +21,11 @@ def test_Ray_dtype():
     sd = np.mean(np.std(rayorig(r), axis=0))
     assert abs(7 - sd) < 0.5  # generous enough, hopefully
 
+    print(Ray.dtype)
+    test = ((((1, 2), (3, 4), (5, 6), (7, 8),),),)
+
+    np.array([test, ], dtype=Ray)
+
 
 def test_Ray():
     r = Ray(orig=[1, 2, 3], dirn=[0, 3, 0])

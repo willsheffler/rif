@@ -1,7 +1,8 @@
 from . import pyrosetta_util
-from rif.sele import parse_atom_names
+from rif.sele import parse_atom_names, parse_ray_atom_names
 from rif.chem.biochem import rif_atype_names
 from rif import Atom
+from rif.geom import Ray
 import numpy as np
 
 
@@ -10,6 +11,7 @@ _RIF_ATYPE_MAP = None
 _RIF_ATOM_NAME_MAP = dict()
 for aname in rif_atype_names:
     _RIF_ATOM_NAME_MAP[aname] = aname
+del aname
 _RIF_ATOM_NAME_MAP['CH0'] = 'aroC'
 _RIF_ATOM_NAME_MAP['HS'] = 'Hpol'
 _RIF_ATOM_NAME_MAP['NtrR'] = 'Narg'
@@ -48,7 +50,7 @@ def rif_rtype(rosetta_aa):
 def _get_atom_from_res(res, aname, verbose=False):
     if not res.has(aname):
         raise AttributeError(
-            'pose res %i has neither %s nor %s' % (ir, aname0, alt))
+            'pose res %i %s has no atom %s' % (res.seqpos(), res.name3(), aname))
     xyz = res.xyz(aname)
     atomno = res.atom_index(aname)
     if verbose:
@@ -66,6 +68,13 @@ def _get_atom_from_res(res, aname, verbose=False):
     )
 
 
+def first_available_atom(res, anames):
+    for aname in anames:
+        if res.has(aname):
+            return aname
+    return None
+
+
 def atoms_fixed_width(pose, sele, protein_only=True, **kwargs):
     anames_list = parse_atom_names(sele)
     atoms = list()
@@ -74,14 +83,13 @@ def atoms_fixed_width(pose, sele, protein_only=True, **kwargs):
         if protein_only and not res.is_protein():
             continue
         for anames in anames_list:
-            for aname in anames:
-                if res.has(aname):
-                    break
+            aname = first_available_atom(res, anames)
             atoms.append(_get_atom_from_res(res, aname, **kwargs))
     atoms = np.array(atoms, dtype=Atom)
     n = len(anames_list)
-    assert len(atoms) % n == 0
-    atoms = atoms.reshape(int(len(atoms) / n), n)
+    if n > 1:
+        assert len(atoms) % n == 0
+        atoms = atoms.reshape(int(len(atoms) / n), n)
     return atoms
 
 
@@ -115,11 +123,49 @@ def atoms(pose, sele='ALLHEAVY', **kwargs):
         return atoms_fixed_width(pose, sele=sele, **kwargs)
 
 
+# why this instead of rays(atoms(from), atoms(to))?
+def rays(pose, sele, shifts=None, protein_only=True, **kwargs):
+    'extract rif style rays from rosetta pose'
+    ray_list = parse_ray_atom_names(sele)
+    if shifts is None:
+        shifts = [0] * len(ray_list)
+    rays = list()
+    for ir in range(1, pose.size() + 1):
+        rays_tmp = []
+        # tmp = 0
+        for anames, shift in zip(ray_list, shifts):
+            if ir + shift > pose.size():
+                break
+            res = pose.residue(ir + shift)
+            if protein_only and not res.is_protein():
+                break
+            aname0 = first_available_atom(res, anames[0])
+            aname1 = first_available_atom(res, anames[1])
+            if not aname0 or not aname1:
+                break
+            orig = res.xyz(aname0)
+            dest = res.xyz(aname1)
+            dirn = (dest - orig).normalized()
+            ray = ((((orig.x, dirn.x),
+                     (orig.y, dirn.y),
+                     (orig.z, dirn.z),
+                     (1, 0),),),)
+            # ray = ((((0, 0),
+                     # (0, 0),
+                     # (0, 0),
+                     # (ir + shift, tmp),),),)
+            # tmp += 1
+            rays_tmp.append(ray)
+        else:
+            rays.extend(rays_tmp)
+    rays = np.array(rays, dtype=Ray)
+    n = len(ray_list)
+    if n > 1:
+        assert len(rays) % n == 0
+        rays = rays.reshape(int(len(rays) / n), n)
+    return rays
+
+
 def stubs():
     'extract rif style stubs from rosetta pose'
-    raise NotImplementedError
-
-
-def rays():
-    'extract rif style rays from rosetta pose'
     raise NotImplementedError
