@@ -1,6 +1,7 @@
 import pytest
 import os
 from os.path import join, dirname, abspath, exists
+from rif import rcl
 
 
 @pytest.fixture(scope='session')
@@ -22,3 +23,19 @@ def pdbfname(datadir):
     f = join(datadir, 'pdb', '3uc7A.pdb')
     assert exists(f)
     return f
+
+
+@pytest.fixture(scope='session')
+def pdbsmallfname(datadir):
+    f = join(datadir, 'pdb', 'small.pdb')
+    assert exists(f)
+    return f
+
+
+@pytest.fixture(scope='session')
+def pose(pdbsmallfname):
+    if not rcl.HAVE_PYROSETTA:
+        return None
+    rcl.init_check('-mute all -beta_nov15', strict=False)
+    pose = rcl.pose_from_file(pdbsmallfname)
+    return pose

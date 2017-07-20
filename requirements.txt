@@ -14,5 +14,6 @@ sphinx
 breathe
 sphinx_rtd_theme
 mock
+parsimonious
 backports.functools_lru_cache
 -e external/hacked_packages/pytest-cpp-0.4

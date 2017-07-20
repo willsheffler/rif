@@ -59,24 +59,29 @@ def is_initialized():
     return pyrosetta_init_options is not None
 
 
-def init_check(options='-beta_nov15', fail_if_options_dont_match=True):
+def init_check(options=None, strict=True):
+    if options is None:
+        strict = False
+        options = '-beta_nov15 -mute all'
     global pyrosetta_init_options
     if pyrosetta_init_options is None:
         pyrosetta.init(options=options)
         pyrosetta_init_options = options
     elif options != pyrosetta_init_options:
-        if fail_if_options_dont_match:
+        if strict:
             raise ReInitError(
                 'attempt to init rosetta with different options: previous: {}, thiscall: {}'
                 .format(pyrosetta_init_options, options))
 
 
-def ats():
-    return core.chemical.ChemicalManager.get_instance().atom_type_set('fa_standard')
+def ats(kind='fa_standard'):
+    init_check()
+    return core.chemical.ChemicalManager.get_instance().atom_type_set(kind)
 
 
-def rts():
-    return core.chemical.ChemicalManager.get_instance().residue_type_set('fa_standard')
+def rts(kind='fa_standard'):
+    init_check()
+    return core.chemical.ChemicalManager.get_instance().residue_type_set(kind)
 
 
 def get_rtype(res_type_name):
@@ -194,7 +199,7 @@ def generate_canonical_rotamer_residues_phipsi(residue_name3, target_phi_psi):
     tryrot.setup_rotamer_set(test_pose)
     rotamer_set = tryrot.rotamer_set()
     # print('rotamer_set.num_rotamers()',
-          # residue_name3, target_phi_psi, rotamer_set.num_rotamers())
+    # residue_name3, target_phi_psi, rotamer_set.num_rotamers())
     rotamers = [rotamer_set.rotamer(i).clone()
                 for i in range(1, rotamer_set.num_rotamers() + 1)]
     for r in rotamers:

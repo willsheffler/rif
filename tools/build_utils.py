@@ -302,6 +302,9 @@ def build_and_test():
                 join(libdir, 'rif', 'conftest.py'))
     testfiles = testfiles_in_lib
 
+    if '--noxdist' in sys.argv:
+        no_xdist = True
+
     if '--inplace' in sys.argv:
         if _VERBOSE:
             print('== adding to python path:', libdir, '==')

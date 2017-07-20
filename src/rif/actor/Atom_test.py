@@ -15,6 +15,9 @@ def test_atom_dtype():
     assert a.anum.shape == (10,)
     a.pos['raw'] = np.random.randn(10, 3)
 
+    b = np.array([(([1, 2, 3],), 4, 5, 6)], dtype=Atom)
+    assert np.all(b['pos']['raw'] == [1, 2, 3])
+
 
 def test_atom_math():
     v = np.ones(2, dtype=V3)

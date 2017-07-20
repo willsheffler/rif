@@ -62,9 +62,9 @@ struct Atom {
   auto const &operator[](size_t i) const { return pos[i]; }
 
   Position pos;
-  int8_t atype;
-  int8_t anum;
-  int16_t rtype;
+  uint8_t atype;
+  uint8_t anum;
+  uint16_t rtype;
 };
 
 template <class P>

@@ -1,0 +1,125 @@
+from . import pyrosetta_util
+from rif.sele import parse_atom_names
+from rif.chem.biochem import rif_atype_names
+from rif import Atom
+import numpy as np
+
+
+_RIF_ATYPE_MAP = None
+
+_RIF_ATOM_NAME_MAP = dict()
+for aname in rif_atype_names:
+    _RIF_ATOM_NAME_MAP[aname] = aname
+_RIF_ATOM_NAME_MAP['CH0'] = 'aroC'
+_RIF_ATOM_NAME_MAP['HS'] = 'Hpol'
+_RIF_ATOM_NAME_MAP['NtrR'] = 'Narg'
+_RIF_ATOM_NAME_MAP['SH1'] = 'S'
+
+
+def rosetta2rif_atom_name(rosetta_atom_name):
+    return _RIF_ATOM_NAME_MAP[rosetta_atom_name]
+
+
+def get_rif_atype_map():
+    global _RIF_ATYPE_MAP
+    if None is _RIF_ATYPE_MAP:
+        pyrosetta_util.init_check(strict=False)
+        for aname in _RIF_ATOM_NAME_MAP.values():
+            assert aname in rif_atype_names
+        ats = pyrosetta_util.ats()
+        atypemap = np.zeros(ats.n_atomtypes() + 1, dtype='i4')
+        atypemap[:] = 255
+        for aname in _RIF_ATOM_NAME_MAP.keys():
+            rif_atype_index = rif_atype_names.index(
+                rosetta2rif_atom_name(aname))
+            atypemap[ats.atom_type_index(aname)] = rif_atype_index
+        _RIF_ATYPE_MAP = atypemap
+    return _RIF_ATYPE_MAP
+
+
+def rif_atype(rosetta_atype):
+    return get_rif_atype_map()[rosetta_atype]
+
+
+def rif_rtype(rosetta_aa):
+    return int(rosetta_aa) - 1
+
+
+def _get_atom_from_res(res, aname, verbose=False):
+    if not res.has(aname):
+        raise AttributeError(
+            'pose res %i has neither %s nor %s' % (ir, aname0, alt))
+    xyz = res.xyz(aname)
+    atomno = res.atom_index(aname)
+    if verbose:
+        print('_get_atom_from_res:', res.name3(), atomno,
+              res.atom_name(atomno),
+              res.atom_type_index(atomno),
+              rif_atype(res.atom_type_index(atomno)))
+    atype = rif_atype(res.atom_type_index(atomno))
+    restype = rif_rtype(res.aa())
+    return (
+        ([xyz.x, xyz.y, xyz.z],),
+        atype,
+        atomno - 1,  # 0-indexing!
+        restype,
+    )
+
+
+def atoms_fixed_width(pose, sele, protein_only=True, **kwargs):
+    anames_list = parse_atom_names(sele)
+    atoms = list()
+    for ir in range(1, pose.size() + 1):
+        res = pose.residue(ir)
+        if protein_only and not res.is_protein():
+            continue
+        for anames in anames_list:
+            for aname in anames:
+                if res.has(aname):
+                    break
+            atoms.append(_get_atom_from_res(res, aname, **kwargs))
+    atoms = np.array(atoms, dtype=Atom)
+    n = len(anames_list)
+    assert len(atoms) % n == 0
+    atoms = atoms.reshape(int(len(atoms) / n), n)
+    return atoms
+
+
+def atoms_matching(pose, predicate, **kwargs):
+    atoms = list()
+    for ir in range(1, pose.size() + 1):
+        res = pose.residue(ir)
+        for ia in range(1, res.natoms() + 1):
+            aname = res.atom_name(ia)
+            if predicate(res, aname):
+                atoms.append(_get_atom_from_res(res, aname, **kwargs))
+    atoms = np.array(atoms, dtype=Atom)
+    return atoms
+
+
+def pred_all(*args, **kwargs):
+    return True
+
+
+def pred_heavy(res, aname, **kwargs):
+    return not res.atom_is_hydrogen(res.atom_index(aname))
+
+
+def atoms(pose, sele='ALLHEAVY', **kwargs):
+    'extract rif style atoms from rosetta pose'
+    if sele.lower() == 'all':
+        return atoms_matching(pose, pred_all, **kwargs)
+    elif sele.lower() == 'heavy':
+        return atoms_matching(pose, pred_heavy, **kwargs)
+    else:
+        return atoms_fixed_width(pose, sele=sele, **kwargs)
+
+
+def stubs():
+    'extract rif style stubs from rosetta pose'
+    raise NotImplementedError
+
+
+def rays():
+    'extract rif style rays from rosetta pose'
+    raise NotImplementedError
