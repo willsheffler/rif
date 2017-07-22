@@ -1,1 +1,1 @@
-from rif_cpp.test.xarray_interop import *
+from _rif._test._xarray_interop import *

@@ -5,9 +5,9 @@ package rif:
 --------------
 .. automodule:: rif
 
-package rif_cpp:
+package _rif:
 -------------------
-.. automodule:: rif_cpp
+.. automodule:: _rif
 
 .. doxygen test:
 .. ------------------

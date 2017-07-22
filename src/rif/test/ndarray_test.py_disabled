@@ -1,4 +1,4 @@
-from rif_cpp.test import ndarray
+from _rif.test import ndarray
 
 import numpy
 import numpy.testing

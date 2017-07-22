@@ -1,5 +1,6 @@
 from parsimonious.grammar import Grammar, NodeVisitor
 
+# todo: figure out how to properly use parsimonious
 sele_grammar = Grammar(
     """
     expr = (obj ' ')* obj

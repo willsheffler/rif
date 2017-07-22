@@ -1,10 +1,11 @@
 #include <gtest/gtest.h>
 #include "rif/geom/primitive.hpp"
-#include "rif/global_rng.hpp"
+#include "rif/numeric/global_rng.hpp"
 
 namespace rif_geom_prim_test {
 using namespace rif;
 using namespace rif::geom;
+using rif::numeric::global_rng;
 
 template <class F>
 void geom_primitive_sphere_test(int niter) {

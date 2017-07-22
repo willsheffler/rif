@@ -2,4 +2,4 @@
 """docstring for rif.actor
 """
 
-from rif_cpp.actor import *
+from _rif._actor import *

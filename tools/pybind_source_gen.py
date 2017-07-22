@@ -1,7 +1,5 @@
 #!/usr/bin/env python
 
-from __future__ import print_function
-
 """generate main rifgen.gen.cpp pybind file with modules
 organized based on file paths of *.pybind.cpp components"""
 
@@ -45,8 +43,8 @@ def gen__init__(srcdir):
     if DBG:
         print('    == pybind_source_gen.gen__init__ ==')
     packages = set()
-    rif_cpp = set()
-    rif_cpp.add(srcdir)
+    _rif = set()
+    _rif.add(srcdir)
     extensions = '.py .pybind.cpp'.split()
     for root, _, files in os.walk(srcdir):
         for fname in files:
@@ -55,12 +53,12 @@ def gen__init__(srcdir):
                      fname.endswith('test.py'))):
                 packages.update(all_parent_dirs(root + '/dummy', srcdir))
             if fname.endswith('.pybind.cpp'):
-                rif_cpp.update(all_parent_dirs(root + '/dummy', srcdir))
+                _rif.update(all_parent_dirs(root + '/dummy', srcdir))
             # if fname == '__init__.py':
                 # if DBG: print('        removing', root + '/' + fname)
                 # os.remove(root + '/' + fname)
     # if DBG: print("RIF_CPP:")
-    # for fn in rif_cpp:
+    # for fn in _rif:
         # if DBG: print('   ', fn)
     # if DBG: print("PACKAGES")
     # for fn in packages:
@@ -75,8 +73,9 @@ def gen__init__(srcdir):
                     ppath = ''
                 out.write(os.linesep + '"""docstring for rif' +
                           ppath + os.linesep + '"""' + os.linesep * 2)
-                if p in rif_cpp:
-                    out.write('from rif_cpp' + ppath + ' import *' + os.linesep)
+                if p in _rif:
+                    out.write('from _rif' + ppath +
+                              ' import *' + os.linesep)
 
 
 def get_pybind_modules(srcpath):
@@ -150,11 +149,12 @@ def shitty_make_code(cppmodules):
 
         code2 += ('    py::module ' + path.replace('/', '__') +
                   ' = rif.def_submodule("' +
-                  '").def_submodule("'.join(path.split('/')) +
+                  '").def_submodule("'.join(['_' + x for x in path.split('/')]) +
                   '");' + os.linesep)
     code2 += os.linesep
     for func, path in list(cppmodules.items()):
-        code1 += 'void RIFLIB_PYBIND_' + func + '(py::module & m);' + os.linesep
+        code1 += 'void RIFLIB_PYBIND_' + func + \
+            '(py::module & m);' + os.linesep
         code2 += '    RIFLIB_PYBIND_' + func + \
             '(' + path.replace('/', '__') + ');' + os.linesep
     return code1, code2
@@ -175,9 +175,9 @@ def mkfile_if_necessary(path, content):
 def make_py_stencils(cppmodules, srcdir):
     """makes __init__.py files where necersary"""
     mkdir_if_necessary(srcdir)
-    mkfile_if_necessary(srcdir + "/__init__.py", 'from rif_cpp import *' + os.linesep +
-                        'import rif_cpp' + os.linesep +
-                        '__version__ = rif_cpp.__version__' + os.linesep)
+    # mkfile_if_necessary(srcdir + "/__init__.py", 'from _rif import *' + os.linesep +
+                        # 'import _rif' + os.linesep +
+                        # '__version__ = _rif.__version__' + os.linesep)
     directories = set()
     for path in set(cppmodules.values()):
         for nprefix in range(1, len(path.split('/'))):
@@ -187,8 +187,8 @@ def make_py_stencils(cppmodules, srcdir):
     for path in set(cppmodules.values()):
         if not os.path.exists(srcdir + path + '/__init__.py'):
             pyfile = srcdir + path + ".py"
-            mkfile_if_necessary(pyfile, 'from rif_cpp.' +
-                                path.replace('/', '.') + ' import *' + os.linesep)
+            mkfile_if_necessary(pyfile, 'from _rif._' +
+                                path.replace('/', '._') + ' import *' + os.linesep)
 
 
 def main(template_fname, srcdir, dstdir):
@@ -217,4 +217,4 @@ if __name__ == '__main__':
     dstdir = sys.argv[2]
     srcdir += '/' if not srcdir.endswith('/') else ''
     dstdir += '/' if not dstdir.endswith('/') else ''
-    main(srcdir + 'rif.gen.cpp.jinja', srcdir, dstdir)
+    main(srcdir + 'util/_rif.gen.cpp.jinja', srcdir, dstdir)

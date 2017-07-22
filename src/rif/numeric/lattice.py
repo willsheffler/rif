@@ -1,4 +1,4 @@
-from rif_cpp.numeric.lattice import *
+from _rif._numeric._lattice import *
 import rif
 
 BCC3 = BCC3f8i8

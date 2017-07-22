@@ -3,7 +3,7 @@
 #include <Eigen/Geometry>
 #include <random>
 #include "rif/eigen_types.hpp"
-#include "rif/global_rng.hpp"
+#include "rif/numeric/global_rng.hpp"
 #include "rif/numeric/util.hpp"
 
 namespace rif {

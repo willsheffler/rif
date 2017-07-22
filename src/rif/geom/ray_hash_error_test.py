@@ -1,4 +1,3 @@
-from __future__ import print_function
 import rif
 import rif.dtypes
 import rif.geom.ray_hash as rh

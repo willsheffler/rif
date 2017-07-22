@@ -1,5 +1,3 @@
-from __future__ import absolute_import, division, print_function
-
 import os
 import re
 import sys
@@ -8,6 +6,8 @@ import subprocess
 import multiprocessing
 from glob import glob
 from collections import defaultdict
+
+# assert sys.version_info.major > 2
 
 # import numpy
 
@@ -256,7 +256,7 @@ setup(
     description='Rotamer Interaction Field protein design library',
     long_description='',
     url='https://github.com/willsheffler/rif',
-    ext_modules=[CMakeExtension('rif_cpp')],
+    ext_modules=[CMakeExtension('_rif')],
     cmdclass=dict(build_ext=CMakeBuild),
     zip_safe=False,
     setup_requires=['wheel', 'pytest-runner'],

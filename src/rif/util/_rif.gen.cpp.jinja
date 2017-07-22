@@ -5,16 +5,16 @@ namespace py = pybind11;
 {{forward}}
 
 
-PYBIND11_PLUGIN(rif_cpp) {
-    py::module rif("rif_cpp", R"pbdoc(
-        docstring in rif.gen.cpp, **compiled on {{mydate}}**
+PYBIND11_PLUGIN(_rif) {
+    py::module rif("_rif", R"pbdoc(
+        docstring in _rif.gen.cpp, **compiled on {{mydate}}**
 
-        rif_cpp docs
+        _rif docs
         ------------
 
         py\:currentmodule is:
 
-        .. py:currentmodule:: rif_cpp
+        .. py:currentmodule:: _rif
 
         autosummary is:
 

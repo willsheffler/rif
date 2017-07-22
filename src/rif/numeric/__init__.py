@@ -2,4 +2,4 @@
 docstring for rif.numeric
 """
 
-from rif_cpp.numeric import *
+from _rif._numeric import _lattice as lattice

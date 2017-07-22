@@ -1,3 +1,4 @@
+#include <pybind11/numpy.h>
 #include "pyutil/pybind_numpy.hpp"
 
 #include "eigen_types.hpp"

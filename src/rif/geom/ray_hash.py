@@ -1,1 +1,1 @@
-from rif_cpp.geom.ray_hash import *
+from _rif._geom._ray_hash import *

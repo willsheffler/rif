@@ -2,7 +2,7 @@
 """docstring for rif.util
 """
 
-from rif_cpp.util import *
+from _rif._util import *
 from numpy import dtype
 
 sa_dtype = dict()

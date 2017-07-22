@@ -2,10 +2,12 @@
 
 #include <eigen_types.hpp>
 #include <iostream>
-#include "rif/global_rng.hpp"
+#include "rif/numeric/global_rng.hpp"
 
 namespace rif {
 namespace geom {
+
+using rif::numeric::global_rng;
 
 /**
  * @brief      a ray in space

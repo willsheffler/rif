@@ -1,10 +1,10 @@
-import rif_cpp
-from rif_cpp.eigen_types import *
+import _rif
+from _rif._eigen_types import *
 
 __all__ = 'V3 M3 X3'.split()
 
 
-for cls in vars(rif_cpp.eigen_types):
+for cls in vars(_rif._eigen_types):
     prefix = "V3".split()
     if not any(cls.startswith(p) for p in prefix):
         continue
@@ -22,5 +22,5 @@ for cls in vars(rif_cpp.eigen_types):
     def cls_repr(self):
         return "V3([%f, %f, %f])" % (self[0], self[1], self[2])
 
-    vars()[cls].__init__ = cls_init
-    vars()[cls].__repr__ = cls_repr
+    vars(_rif._eigen_types)[cls].__init__ = cls_init
+    vars(_rif._eigen_types)[cls].__repr__ = cls_repr

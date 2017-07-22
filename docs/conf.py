@@ -13,7 +13,6 @@
 # All configuration values have a default; values that are commented out
 # serve to show the default.
 
-from __future__ import print_function
 import sys
 import os
 import subprocess
@@ -37,7 +36,7 @@ def build_rif_and_add_path():
         try:
             assert not os.system('(cd .. && python' + version +
                                  ' setup.py build --build-base=build_docs ' +
-                                 '--rif_setup_opts_build_args=rif_cpp )')
+                                 '--rif_setup_opts_build_args=_rif )')
             rifpath = os.path.abspath(
                 glob.glob('../build_docs/lib.*' + version + '*')[0])
             print('sphinx conf.py adding to sys.path:',
@@ -72,9 +71,9 @@ extensions = [
 ]
 
 breathe_projects = {
-    'rif_cpp': '.build/doxygenxml'
+    '_rif': '.build/doxygenxml'
 }
-breathe_default_project = 'rif_cpp'
+breathe_default_project = '_rif'
 breathe_domain_by_extension = {'h': 'cpp', 'hpp': 'cpp', 'cpp': 'cpp'}
 
 # Add any paths that contain templates here, relative to this directory.

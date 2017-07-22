@@ -151,9 +151,9 @@ def rays(pose, sele, shifts=None, protein_only=True, **kwargs):
                      (orig.z, dirn.z),
                      (1, 0),),),)
             # ray = ((((0, 0),
-                     # (0, 0),
-                     # (0, 0),
-                     # (ir + shift, tmp),),),)
+            # (0, 0),
+            # (0, 0),
+            # (ir + shift, tmp),),),)
             # tmp += 1
             rays_tmp.append(ray)
         else:

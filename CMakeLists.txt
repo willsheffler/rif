@@ -7,7 +7,7 @@ function(main)
     # message("-------------- CMAKE main --------------------------------------")
     print_config()
     add_subdirectory(external/pybind11)
-    # execute_process(COMMAND rm -f ${CMAKE_CURRENT_BINARY_DIR}/rif.gen.cpp)
+    # execute_process(COMMAND rm -f ${CMAKE_CURRENT_BINARY_DIR}/util/_rif.gen.cpp)
     build_gtests()
     build_python_bindings("")
     # summary()
@@ -93,11 +93,11 @@ function(build_python_bindings)
         # message(FATAL_ERROR "${SRCGEN} failed: ${STATUS}")
     # endif()
     add_custom_command(
-        OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/rif.gen.cpp
+        OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/_rif.gen.cpp
         COMMAND python ${SRCGEN} ${CMAKE_SOURCE_DIR}/src/rif ${CMAKE_CURRENT_BINARY_DIR}
-        DEPENDS src/rif/rif.gen.cpp.jinja ${PY_CPP} ${SRCGEN})
-    pybind11_add_module(rif_cpp ${CMAKE_CURRENT_BINARY_DIR}/rif.gen.cpp ${PY_CPP} ${SRCGEN} NO_EXTRAS)
-    target_link_libraries( rif_cpp PRIVATE ${extra_libs} )
+        DEPENDS src/rif/util/_rif.gen.cpp.jinja ${PY_CPP} ${SRCGEN})
+    pybind11_add_module(_rif ${CMAKE_CURRENT_BINARY_DIR}/_rif.gen.cpp ${PY_CPP} ${SRCGEN} NO_EXTRAS)
+    target_link_libraries( _rif PRIVATE ${extra_libs} )
 
 endfunction()
 
@@ -128,7 +128,7 @@ function(summary)
             COMMAND ${CCACHE_PROGRAM} -s
             WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
             COMMENT "!!!!!!!!!!!!!!!!!!!! getting ccache stats !!!!!!!!!!!!!!!!!!!!!!!!!!"
-            DEPENDS rif_cpp gtest_all
+            DEPENDS _rif gtest_all
         )
     endif()
 endfunction()

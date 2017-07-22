@@ -1,7 +1,6 @@
-from __future__ import print_function
 import rif.dtypes
 
-from rif_cpp.test import pandas_interop as pi
+from _rif._test import _pandas_interop as pi
 
 import numpy as np
 import xarray as xr

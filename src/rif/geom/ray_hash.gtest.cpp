@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 
 #include "rif/geom/ray_hash.hpp"
-#include "rif/global_rng.hpp"
+#include "rif/numeric/global_rng.hpp"
 
 namespace rif {
 namespace geom {
@@ -9,6 +9,7 @@ namespace ray_hash_test {
 
 using std::cout;
 using std::endl;
+using rif::numeric::global_rng;
 
 TEST(ray_hash, align_ray_pair) {
   // std::mt19937 rng((unsigned int)time(0) + 267943);

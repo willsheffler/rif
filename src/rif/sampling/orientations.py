@@ -1,8 +1,7 @@
-from __future__ import print_function
 import os
 from os.path import join
 import gzip
-from rif_cpp.sampling.orientations import read_karney_orientations
+from _rif._sampling._orientations import read_karney_orientations
 import pandas as pd
 # import numpy as np
 

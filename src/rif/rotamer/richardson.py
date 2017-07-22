@@ -1,4 +1,3 @@
-from __future__ import print_function
 # from rif import rcl
 # from rif.rcl import pyrosetta, rosetta
 # from rif.chem.biochem import aa_name3s

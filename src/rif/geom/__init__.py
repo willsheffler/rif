@@ -2,5 +2,5 @@
 """docstring for rif.geom
 """
 
-from rif_cpp.geom import *
+from _rif._geom import *
 from .Ray import *

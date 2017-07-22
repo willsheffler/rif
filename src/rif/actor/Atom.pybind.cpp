@@ -38,6 +38,11 @@ void RIFLIB_PYBIND_actor_Atom(py::module &m) {
   static_assert(sizeof(Atom<V3f>) == 16, "bad atom size");
   PYBIND11_NUMPY_DTYPE(A, pos, atype, anum, rtype);
   py::class_<Atom<V3f>> acls(m, "Atom");
+  acls.def("__repr__", [](Atom<V3f> const &self) -> std::string {
+    std::ostringstream oss;
+    oss << self;
+    return oss.str();
+  });
   acls.attr("dtype") = py::dtype::of<Atom<V3f>>();
 
   m.def("rifop_abs_AT", py::vectorize(abs_Atom));

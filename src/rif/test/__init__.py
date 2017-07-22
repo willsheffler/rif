@@ -2,4 +2,4 @@
 docstring for rif.test
 """
 
-from rif_cpp.test import *
+from _rif._test import *

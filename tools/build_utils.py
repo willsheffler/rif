@@ -1,4 +1,3 @@
-from __future__ import absolute_import, division, print_function
 from builtins import bytes
 
 import glob
@@ -11,6 +10,8 @@ import re
 import filecmp
 
 import pytest
+
+assert sys.version_info.major > 2
 
 ###############################################################################
 # horrible duplicates with setup.py and tools/build_utils.py
@@ -249,7 +250,7 @@ def filter_testfiles(testfiles):
     return testfiles
 
 
-def rebuild_fast(target='rif_cpp', cfg='Release', force_redo_cmake=False):
+def rebuild_fast(target='_rif', cfg='Release', force_redo_cmake=False):
     try:
         if force_redo_cmake:
             raise OSError
@@ -287,7 +288,7 @@ def build_and_test():
     no_xdist |= os.system('egrep "#.*cpp_files" pytest.ini') == 0
     # no_xdist |= sys.version_info.major is 3 and sys.version_info.minor is 6
     force_redo_cmake = len(pybindfiles) or not no_xdist or src_dir_new_file()
-    rebuild_fast(target='rif_cpp gtest_all',
+    rebuild_fast(target='_rif gtest_all',
                  cfg=cfg, force_redo_cmake=force_redo_cmake)
     libdir = abspath(get_cmake_dir('lib', cfg))
     builddir = dirname(libdir)

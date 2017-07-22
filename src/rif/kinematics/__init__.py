@@ -2,4 +2,4 @@
 docstring for rif.kinematics
 """
 
-from rif_cpp.kinematics import *
+from _rif._kinematics import *

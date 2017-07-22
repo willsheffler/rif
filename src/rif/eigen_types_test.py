@@ -1,4 +1,3 @@
-from __future__ import print_function
 import numpy as np
 import rif
 from rif.eigen_types import V3

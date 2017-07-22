@@ -1,4 +1,3 @@
-from __future__ import print_function
 import rif
 from rif.io import pdbio
 

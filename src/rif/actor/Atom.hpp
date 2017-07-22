@@ -69,7 +69,8 @@ struct Atom {
 
 template <class P>
 std::ostream &operator<<(std::ostream &out, Atom<P> const &x) {
-  return out << "Atom( " << x.position() << ", " << x.type() << " )";
+  return out << "Atom( " << x.position().transpose() << ", type=" << x.type()
+             << ", anum=" << x.atomnum() << ", restype=" << x.restype() << " )";
 }
 
 template <class P, class MetaData>

@@ -5,12 +5,13 @@
 #include "rif/geom/bvh.hpp"
 #include "rif/geom/primitive.hpp"
 #include "rif/geom/rand_geom.hpp"
-#include "rif/global_rng.hpp"
+#include "rif/numeric/global_rng.hpp"
 #include "util/Timer.hpp"
 
 using namespace Eigen;
 using namespace rif;
 using namespace rif::geom;
+using rif::numeric::global_rng;
 
 using F = double;
 using Timer = util::Timer;

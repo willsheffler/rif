@@ -3,11 +3,6 @@
 	[
 		{
 			"file_regex": "^[ ]*File \"(...*?)\", line ([0-9]*)",
-			"name": "py2_build_and_test",
-			"shell_cmd": "cd $folder && python2 tools/build_and_test.py $file --inplace 2>&1 | tee log/subl_build.log"
-		},
-		{
-			"file_regex": "^[ ]*File \"(...*?)\", line ([0-9]*)",
 			"name": "py3_build_and_test",
 			"shell_cmd": "cd $folder && python3 tools/build_and_test.py $file --inplace 2>&1 | tee log/subl_build.log"
 		},
@@ -15,11 +10,6 @@
 			"file_regex": "^[ ]*File \"(...*?)\", line ([0-9]*)",
 			"name": "py35_build_and_test",
 			"shell_cmd": "cd $folder && python3.5 tools/build_and_test.py $file --inplace 2>&1 | tee log/subl_build.log"
-		},
-		{
-			"file_regex": "^[ ]*File \"(...*?)\", line ([0-9]*)",
-			"name": "conda2_build_and_test",
-			"shell_cmd": "cd $folder && /home/sheffler/anaconda2/bin/python2 tools/build_and_test.py $file --inplace 2>&1 | tee log/subl_build.log"
 		},
 		{
 			"file_regex": "^[ ]*File \"(...*?)\", line ([0-9]*)",

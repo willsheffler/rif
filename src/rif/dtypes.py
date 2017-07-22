@@ -4,8 +4,6 @@ override numpy operators using numpy.set_numeric_ops. keep track of
 overridden operators and call them if a custom operator is not found
 
 """
-from __future__ import print_function
-
 import sys
 import numpy as np
 import rif

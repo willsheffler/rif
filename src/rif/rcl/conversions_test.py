@@ -31,7 +31,6 @@ def test_rays(pose):
     a = rays(pose, 'n->h')
     assert a.shape == (6,)  # 1st res fails Nterm 1H not H
     a = a.view('(4,2)f')
-    print(a.shape)
     d = a[..., :3, 1]
     d = (d * d).sum(axis=1)
     assert np.all(np.abs(d - 1.0) < 0.001)

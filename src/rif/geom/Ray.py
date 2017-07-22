@@ -1,5 +1,5 @@
 import rif
-from rif_cpp.geom import Ray
+from _rif._geom import Ray
 import numpy as np
 
 

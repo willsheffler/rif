@@ -1,1 +1,1 @@
-from rif_cpp.geom.rand_geom import *
+from _rif._geom._rand_geom import *
