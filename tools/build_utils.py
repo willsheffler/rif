@@ -11,8 +11,6 @@ import filecmp
 
 import pytest
 
-assert sys.version_info.major > 2
-
 ###############################################################################
 # horrible duplicates with setup.py and tools/build_utils.py
 # setup.py must stand alone for detox to work(?)

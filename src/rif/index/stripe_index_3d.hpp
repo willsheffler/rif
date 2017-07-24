@@ -151,7 +151,7 @@ struct stripe_index_3d {
   }
   template <class Point>
   std::vector<Pt> neighboring_points(Point query) const {
-    std::vector<Payload> result;
+    std::vector<Point> result;
     auto myvisitor = neighboring_points_visitor(std::back_inserter(result));
     visit(query, myvisitor);
     return result;
