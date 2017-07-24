@@ -10,7 +10,10 @@ import os
 
 try:
     import pyrosetta
-    import rosetta
+    try:
+        import rosetta
+    except ImportError:
+        import pyrosetta.rosetta as rosetta
     from rosetta import utility, numeric, basic, core
     from rosetta.core.conformation import Residue
     from rosetta.core.pose import make_pose_from_sequence, Pose
@@ -62,7 +65,7 @@ def is_initialized():
 def init_check(options=None, strict=True):
     if options is None:
         strict = False
-        options = '-beta_nov15 -mute all'
+        options = '-corrections:beta_nov16 -mute all'
     global pyrosetta_init_options
     if pyrosetta_init_options is None:
         pyrosetta.init(options=options)

@@ -7,6 +7,8 @@ from rosetta.protocols.sic_dock import trans_pose
 nfold = 3
 
 # temporary workaround, fixed in newer pyrosetta
+
+
 def mat_vec_mul(M, V):
     return rosetta.numeric.xyzVector_double_t(
         M.xx() * V.x + M.xy() * V.y + M.xz() * V.z,
@@ -14,24 +16,28 @@ def mat_vec_mul(M, V):
         M.zx() * V.x + M.zy() * V.y + M.zz() * V.z
     )
 
+
 def append_pose_to_pose(pose1, pose2, start_res=1, end_res=None, new_chain=True):
     if end_res is None:
         end_res = pose2.total_residue()
-    pose1.append_residue_by_jump(pose2.residue(start_res), pose1.total_residue(), "", "", new_chain)
+    pose1.append_residue_by_jump(pose2.residue(
+        start_res), pose1.total_residue(), "", "", new_chain)
     for i in range(start_res + 1, end_res + 1):
         if pose2.residue(i).is_lower_terminus():
             if i > 1 and pose2.chain(i) == pose2.chain(i - 1):
-                pose1.append_residue_by_jump(pose2.residue(i), pose1.total_residue(), "", "", False)
+                pose1.append_residue_by_jump(pose2.residue(
+                    i), pose1.total_residue(), "", "", False)
             else:
-                pose1.append_residue_by_jump(pose2.residue(i), pose1.total_residue(), "", "", True)
+                pose1.append_residue_by_jump(pose2.residue(
+                    i), pose1.total_residue(), "", "", True)
         else:
-            pose1.append_residue_by_bond(pose2.residue(i));
+            pose1.append_residue_by_bond(pose2.residue(i))
 
 
 def rot_pose(pose, xform):
-    for ir in range(1, pose.total_residue()+1):
-        for ia in range(1, pose.residue_type(ir).natoms()+1):
-            aid = AtomID(ia,ir)
+    for ir in range(1, pose.total_residue() + 1):
+        for ia in range(1, pose.residue_type(ir).natoms() + 1):
+            aid = AtomID(ia, ir)
             pose.set_xyz(aid, mat_vec_mul(xform, pose.xyz(aid)))
 
 
@@ -43,7 +49,7 @@ def rot_pose(pose, xform):
 
 
 def make_cyclic(pose, nfold):
-    rot = rosetta.numeric.z_rotation_matrix_degrees_double_t(360.0/nfold)
+    rot = rosetta.numeric.z_rotation_matrix_degrees_double_t(360.0 / nfold)
     cyclic = Pose()
     for i in range(nfold):
         rot_pose(cyclic, rot)
@@ -73,7 +79,8 @@ class AxleDock(object):
         self.offset = 0
 
     def reset(self):
-        trans_pose(self.pose, Vec(0, 0, -self.offset), 1, self.pose1.total_residue())
+        trans_pose(self.pose, Vec(0, 0, -self.offset),
+                   1, self.pose1.total_residue())
         self.offset = 0
 
     def wheel_vs_wheel_score(self):
@@ -86,7 +93,8 @@ class AxleDock(object):
         delta = direction * 256.0
         while abs(delta) >= 0.1:
             self.offset += delta
-            trans_pose(self.pose, Vec(0, 0, delta), 1, self.pose1.total_residue())
+            trans_pose(self.pose, Vec(0, 0, delta),
+                       1, self.pose1.total_residue())
             score = self.wheel_vs_wheel_score()
             in_contact = abs(score) > 0.001
             moving_away = delta * direction > 0.0
@@ -96,7 +104,7 @@ class AxleDock(object):
             delta /= 2.0
 
 if __name__ == '__main__':
-    init('-beta_nov15')
+    init('-corrections:beta_nov16')
     p1 = pose_from_file("/Users/sheffler/data/C3/C3_1woz_1.pdb.gz")
     p2 = pose_from_file("/Users/sheffler/data/C3/C3_3l8r_1.pdb.gz")
     # cyclic1.dump_pdb("/Users/sheffler/Desktop/cyclic1.pdb")
@@ -109,6 +117,3 @@ if __name__ == '__main__':
     docker.pose.dump_pdb('/Users/sheffler/Desktop/down1.pdb')
     docker.slide_out_of_contact('up')
     docker.pose.dump_pdb('/Users/sheffler/Desktop/up2.pdb')
-
-
-

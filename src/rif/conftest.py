@@ -36,6 +36,6 @@ def pdbsmallfname(datadir):
 def pose(pdbsmallfname):
     if not rcl.HAVE_PYROSETTA:
         return None
-    rcl.init_check('-mute all -beta_nov15', strict=False)
+    rcl.init_check('-mute all -corrections:beta_nov16', strict=False)
     pose = rcl.pose_from_file(pdbsmallfname)
     return pose
