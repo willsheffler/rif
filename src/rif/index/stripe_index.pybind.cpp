@@ -46,12 +46,12 @@ void bind_one_sided_index(py::module& m, std::string name) {
     instance.init(width, points.data(), points.size());
   });
   cls.def("neighbors", [](Index const& self, Point query) {
-    return pyutil::to_py_array(self.neighboring_points(query));
+    return pyutil::to_pyarray(self.neighboring_points(query));
   });
   if (is_simple_point<Point>())
     cls.def("neighbors", [](Index const& self, py::object obj) {
       Point query = pyutil::sequence_to<Point, F>(obj, 3);
-      return pyutil::to_py_array(self.neighboring_points(query));
+      return pyutil::to_pyarray(self.neighboring_points(query));
     });
   bind_rest<Index>(cls);
 }
@@ -73,12 +73,12 @@ void bind_one_sided_index(py::module& m, std::string name) {
     return get_second_if_pair(self.values_[i]);
   });
   cls.def("neighbors", [](Index const& self, Point query) {
-    return pyutil::to_py_array(self.neighboring_payloads(query));
+    return pyutil::to_pyarray(self.neighboring_payloads(query));
   });
   if (is_simple_point<Point>())
     cls.def("neighbors", [](Index const& self, py::object obj) {
       Point query = pyutil::sequence_to<Point, float>(obj, 3);
-      return pyutil::to_py_array(self.neighboring_payloads(query));
+      return pyutil::to_pyarray(self.neighboring_payloads(query));
     });
   bind_rest<Index>(cls);
 }
@@ -91,4 +91,16 @@ void RIFLIB_PYBIND_rif_index(py::module& m) {
   bind_one_sided_index<V3f, Atom>(m, "stripe_index_3d_V3_Atom");
   bind_one_sided_index<V3f, size_t>(m, "stripe_index_3d_V3_object");
   bind_one_sided_index<Atom, size_t>(m, "stripe_index_3d_Atom_object");
+  m.def("make_huge_array", [](size_t s) {
+    int* raw = (int*)malloc(s * sizeof(int));
+    raw[0] = 293847;
+    std::cout << "done alloc size " << s << std::endl;
+    for (int i = 0; i < 10; ++i) std::cout << raw[i] << std::endl;
+    auto a = py::array(pybind11::buffer_info(
+        raw, sizeof(int), pybind11::format_descriptor<int>::format(), 1, {s},
+        {sizeof(int)}));
+    std::cout << "done making py::array" << std::endl;
+    return a;
+
+  });
 }

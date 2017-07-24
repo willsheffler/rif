@@ -12,9 +12,10 @@ auto sequence_to(pybind11::object obj, size_t n) {
 }
 
 template <class Container>
-auto to_py_buffer_info(Container const& orig) {
+auto new_pybuffer(Container const& orig) {
   using Payload = typename Container::value_type;
-  Payload* raw = new Payload[orig.size()];
+  // use malloc
+  Payload* raw = (Payload*)malloc(orig.size() * sizeof(Payload));
   std::copy(orig.begin(), orig.end(), raw);
   return pybind11::buffer_info(raw, sizeof(Payload),
                                pybind11::format_descriptor<Payload>::format(),
@@ -22,7 +23,21 @@ auto to_py_buffer_info(Container const& orig) {
 }
 
 template <class Container>
-auto to_py_array(Container const& orig) {
-  return pybind11::array(to_py_buffer_info(orig));
+auto new_pyarray(Container const& orig) {
+  return pybind11::array(new_pybuffer(orig));
+}
+
+template <class Container>
+auto to_pybuffer(Container const& orig) {
+  using Payload = typename Container::value_type;
+  return pybind11::buffer_info((Payload*)(&orig[0]), sizeof(Payload),
+                               pybind11::format_descriptor<Payload>::format(),
+                               1, {orig.size()}, {sizeof(Payload)});
+}
+
+template <class Container>
+auto to_pyarray(Container const& orig) {
+  // this copies
+  return pybind11::array(to_pybuffer(orig));
 }
 }
