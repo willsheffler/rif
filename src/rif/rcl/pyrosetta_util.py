@@ -1,7 +1,7 @@
 
 
 """
-Rosetta Compatibility Layer
+nRosetta Compatibility Layer
 
 if pyrosetta is available, provides pyrosetta. check value of HAVE_PYROSETTA.
 """
@@ -11,7 +11,7 @@ import os
 try:
     import pyrosetta
     try:
-        import pyrosetta.rosetta as rosetta
+        from pyrosetta import rosetta
     except ImportError:
         import rosetta
     from rosetta import utility, numeric, basic, core
