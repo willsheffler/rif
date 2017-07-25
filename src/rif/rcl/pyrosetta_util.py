@@ -11,9 +11,9 @@ import os
 try:
     import pyrosetta
     try:
-        import rosetta
-    except ImportError:
         import pyrosetta.rosetta as rosetta
+    except ImportError:
+        import rosetta
     from rosetta import utility, numeric, basic, core
     from rosetta.core.conformation import Residue
     from rosetta.core.pose import make_pose_from_sequence, Pose
