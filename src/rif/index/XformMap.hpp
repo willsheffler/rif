@@ -1,12 +1,11 @@
-#ifndef INCLUDED_objective_hash_XformMap_HH
-#define INCLUDED_objective_hash_XformMap_HH
+#pragma once
 
 // #include "util/SimpleArray.hpp"
+#include "hash/XformHash.hpp"
+#include "hash/XformHashNeighbors.hpp"
 #include "nest/pmap/TetracontoctachoronMap.hpp"
 #include "numeric/FixedPoint.hpp"
 #include "numeric/lattice.hpp"
-#include "objective/hash/XformHash.hpp"
-#include "objective/hash/XformHashNeighbors.hpp"
 #include "util/dilated_int.hpp"
 
 #include <sparsehash/dense_hash_map>
@@ -16,8 +15,7 @@
 #endif
 
 namespace rif {
-namespace objective {
-namespace hash {
+namespace index {
 
 template <int ArrayBits, class Key, class Value>
 struct XfromMapSerializer {
@@ -38,15 +36,16 @@ struct XfromMapSerializer {
   }
 };
 
-template <class _Xform,
-          // class Value=numeric::FixedPoint<-17>,
-          // int ArrayBits=4,
-          class _Value,
-          // template<class X> class _Hasher = XformHash_bt24_BCC6_Zorder >
-          template <class X> class _Hasher = XformHash_Quat_BCC7_Zorder,
-          // class ElementSerializer = XfromMapSerializer< ArrayBits, uint64_t,
-          // Value >
-          class ElementSerializer = XfromMapSerializer<0, uint64_t, _Value>>
+template <
+    class _Xform,
+    // class Value=numeric::FixedPoint<-17>,
+    // int ArrayBits=4,
+    class _Value,
+    // template<class X> class _Hasher = hash::XformHash_bt24_BCC6_Zorder >
+    template <class X> class _Hasher = hash::XformHash_Quat_BCC7_Zorder,
+    // class ElementSerializer = XfromMapSerializer< ArrayBits, uint64_t,
+    // Value >
+    class ElementSerializer = XfromMapSerializer<0, uint64_t, _Value>>
 struct XformMap {
   // BOOST_STATIC_ASSERT(( ArrayBits >= 0 ));
   typedef _Value Value;
@@ -139,7 +138,7 @@ struct XformMap {
   }
 
   int insert_sphere(Xform const &x, Float lever_bound, Float lever, Value value,
-                    XformHashNeighbors<Hasher> &nbcache) {
+                    hash::XformHashNeighbors<Hasher> &nbcache) {
     Float thresh2 = lever_bound + cart_resl_ / 2.0;
     thresh2 = thresh2 * thresh2;
     Key key = hasher_.get_key(x);
@@ -148,15 +147,15 @@ struct XformMap {
     x_lever_coord[1] = x.translation()[1];
     x_lever_coord[2] = x.translation()[2];
     Eigen::Matrix<Float, 3, 3> rot;
-    get_transform_rotation(x, rot);
+    hash::get_transform_rotation(x, rot);
     Eigen::Quaternion<Float> q(rot);
     x_lever_coord[3] = q.w() * 2.0 * lever;
     x_lever_coord[4] = q.x() * 2.0 * lever;
     x_lever_coord[5] = q.y() * 2.0 * lever;
     x_lever_coord[6] = q.z() * 2.0 * lever;
-    typename XformHashNeighbors<Hasher>::crappy_iterator itr =
+    typename hash::XformHashNeighbors<Hasher>::crappy_iterator itr =
         nbcache.neighbors_begin(key);
-    typename XformHashNeighbors<Hasher>::crappy_iterator end =
+    typename hash::XformHashNeighbors<Hasher>::crappy_iterator end =
         nbcache.neighbors_end(key);
     int nbcount = 0, count = 0;
 
@@ -331,6 +330,3 @@ std::ostream &operator<<(std::ostream &out, XformMap<X, V, H, S> const &xmap) {
 }
 }
 }
-}
-
-#endif

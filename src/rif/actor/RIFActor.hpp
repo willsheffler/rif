@@ -1,7 +1,7 @@
 #ifndef INCLUDED_actor_RIFActor_HH
 #define INCLUDED_actor_RIFActor_HH
 
-#include "objective/hash/XformMap.hpp"
+#include "index/XformMap.hpp"
 
 namespace rif {
 namespace actor {

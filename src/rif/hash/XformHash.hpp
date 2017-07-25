@@ -1,5 +1,4 @@
-#ifndef INCLUDED_objective_hash_XformHash_HH
-#define INCLUDED_objective_hash_XformHash_HH
+#pragma once
 
 #include "nest/pmap/TetracontoctachoronMap.hpp"
 #include "numeric/lattice.hpp"
@@ -10,14 +9,12 @@
 #include <boost/utility/binary.hpp>
 
 namespace rif {
-namespace objective {
 namespace hash {
-
-template <class Float>
-void get_transform_rotation(
-    Eigen::Transform<Float, 3, Eigen::AffineCompact> const &x,
-    Eigen::Matrix<Float, 3, 3> &rotation) {
-  for (int i = 0; i < 9; ++i) rotation.data()[i] = x.data()[i];
+template <class Float, int MODE, int OPT>
+void get_transform_rotation(Eigen::Transform<Float, 3, MODE, OPT> const &x,
+                            Eigen::Matrix<Float, 3, 3> &rotation) {
+  // for (int i = 0; i < 9; ++i) rotation.data()[i] = x.data()[i];
+  rotation = x.linear();
 }
 
 template <class _Xform>
@@ -210,7 +207,8 @@ struct XformHash_Quat_BCC7_Zorder {
     Key x = util::undilate<7>(key >> 5) & 63;
     Key y = util::undilate<7>(key >> 6) & 63;
     Key z = util::undilate<7>(key >> 7) & 63;
-    // std::cout << grid_.nside_[3]-o <<" " << o << "    " << w << "\t" << x <<
+    // std::cout << grid_.nside_[3]-o <<" " << o << "    " << w << "\t" << x
+    // <<
     // "\t" << y << "\t" << z << std::endl;
     // move to primaary
     assert(o == 0 || o == 1);
@@ -247,7 +245,8 @@ struct XformHash_Quat_BCC7_Zorder {
     Key x = util::undilate<7>(key >> 5) & 63;
     Key y = util::undilate<7>(key >> 6) & 63;
     Key z = util::undilate<7>(key >> 7) & 63;
-    // std::cout << grid_.nside_[3]-o <<" " << o << "    " << w << "\t" << x <<
+    // std::cout << grid_.nside_[3]-o <<" " << o << "    " << w << "\t" << x
+    // <<
     // "\t" << y << "\t" << z << std::endl;
     // move to isym
     Key nside1 = grid_.nside_[3] - o;
@@ -482,7 +481,8 @@ struct XformHash_bt24_BCC3_Zorder {
     F3 trans(x.translation());
     cart_indices = cart_grid_.get_indices(trans, cart_odd);
 
-    // std::cout << "get_index  " << cell_index << " " << cart_indices << " " <<
+    // std::cout << "get_index  " << cell_index << " " << cart_indices << " "
+    // <<
     // cart_odd << " " << ori_indices << " " << ori_odd << std::endl;
 
     Key key;
@@ -535,7 +535,8 @@ struct XformHash_bt24_BCC3_Zorder {
     F3 params = ori_grid_.get_center(ori_indices, ori_odd);
     Eigen::Matrix3d m;
     ori_map_.params_to_value(params, cell_index, 0, m);
-    // std::cout << "get_center " << cell_index << " " << cart_indices << " " <<
+    // std::cout << "get_center " << cell_index << " " << cart_indices << " "
+    // <<
     // cart_odd << " " << ori_indices << " " << ori_odd << std::endl;
 
     Xform center(m);
@@ -666,6 +667,7 @@ template <class Xform>
 struct XformHash_bt24_BCC6 {
   typedef uint64_t Key;
   typedef typename Xform::Scalar Float;
+  typedef typename Xform::Scalar Scalar;
   typedef rif::nest::pmap::TetracontoctachoronMap<> OriMap;
   typedef rif::numeric::BCC<6, Float, uint64_t> Grid;
   typedef rif::util::SimpleArray<3, Float> F3;
@@ -677,6 +679,7 @@ struct XformHash_bt24_BCC6 {
   Float grid_spacing_;
   OriMap ori_map_;
   Grid grid_;
+  Float cart_resl_, ang_resl_, cart_bound_;
 
   static std::string name() { return "XformHash_bt24_BCC6"; }
 
@@ -688,6 +691,9 @@ struct XformHash_bt24_BCC6 {
   }
 
   void init(Float cart_resl, Float ang_resl, Float cart_bound = 512.0) {
+    cart_resl_ = cart_resl;
+    ang_resl_ = ang_resl;
+    cart_bound_ = cart_bound;
     // bcc orientation grid covering radii
     static float const covrad[64] = {
         49.66580, 25.99805, 17.48845, 13.15078, 10.48384, 8.76800, 7.48210,
@@ -808,7 +814,8 @@ struct XformHash_bt24_BCC6 {
 
       params = w * (params - 0.5);  // now |params| < sqrt(2)-1
 
-      // Eigen::Quaternion<Float> q( sqrt(1.0-p.squaredNorm()), p[0], p[1], p[2]
+      // Eigen::Quaternion<Float> q( sqrt(1.0-p.squaredNorm()), p[0], p[1],
+      // p[2]
       // );
       // assert( fabs(q.squaredNorm()-1.0) < 0.000001 );
       Eigen::Quaternion<Float> q(1.0, params[0], params[1], params[2]);
@@ -902,7 +909,8 @@ struct XformHash_bt24_Cubic_Zorder {
     F3 trans(x.translation());
     cart_indices = cart_grid_.get_indices(trans);
 
-    // std::cout << "get_index  " << cell_index << " " << cart_indices << " " <<
+    // std::cout << "get_index  " << cell_index << " " << cart_indices << " "
+    // <<
     // ori_indices << std::endl;
 
     Key key;
@@ -944,7 +952,8 @@ struct XformHash_bt24_Cubic_Zorder {
 
     F3 trans = cart_grid_.get_center(cart_indices);
     F3 params = ori_grid_.get_center(ori_indices);
-    // std::cout << "get_center " << cell_index << " " << cart_indices << " " <<
+    // std::cout << "get_center " << cell_index << " " << cart_indices << " "
+    // <<
     // ori_indices << std::endl;
     Eigen::Matrix3d m;
     ori_map_.params_to_value(params, cell_index, 0, m);
@@ -1032,7 +1041,8 @@ struct XformHash_Quatgrid_Cubic {
     F3 trans(x.translation());
     cart_indices = cart_grid_.get_indices(trans, cart_odd);
 
-    // std::cout << "get_index  " << cell_index << " " << cart_indices << " " <<
+    // std::cout << "get_index  " << cell_index << " " << cart_indices << " "
+    // <<
     // cart_odd << " " << ori_indices << " " << ori_odd << std::endl;
 
     Key key;
@@ -1082,7 +1092,8 @@ struct XformHash_Quatgrid_Cubic {
     F3 params = ori_grid_.get_center(ori_indices, ori_odd);
     Eigen::Matrix3d m;
     ori_map_.params_to_value(params, cell_index, 0, m);
-    // std::cout << "get_center " << cell_index << " " << cart_indices << " " <<
+    // std::cout << "get_center " << cell_index << " " << cart_indices << " "
+    // <<
     // cart_odd << " " << ori_indices << " " << ori_odd << std::endl;
 
     Xform center(m);
@@ -1099,6 +1110,3 @@ struct XformHash_Quatgrid_Cubic {
 };
 }
 }
-}
-
-#endif

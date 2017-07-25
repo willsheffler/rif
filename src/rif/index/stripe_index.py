@@ -5,7 +5,7 @@ import functools
 from rif import index
 
 
-def _wrapinit(init):
+def _enable_init_object_payload(init):
     @functools.wraps(init)
     def newinit(self, radius, points, payload):
         self._init_payload = payload
@@ -13,48 +13,39 @@ def _wrapinit(init):
     return newinit
 
 
-def _wrappayload(cls, funcname):
+def _enable_return_object_payload(func):
+    def getpayload(load, x):
+        return (x[0], load[x[1]]) if isinstance(x, tuple) else load[x]
+    @functools.wraps(func)
+    def newfunc(self, *args, **kwargs):
+        ret = func(self, *args, **kwargs)
+        return ([getpayload(self._init_payload, r) for r in ret]
+                if hasattr(ret, '__iter__')
+                else getpayload(self._init_payload, ret))
+    return newfunc
+
+# when should convert point array return to tuples?
+# def _enable_return_tuple(func):
+#     @functools.wraps(func)
+#     def newfunc(self, *args, **kwargs):
+#         ret = func(self, *args, **kwargs)
+#         return [(x[0],x[1],x[2]) for x in ret]
+#     return newfunc
+
+
+def _decorate(cls, funcname, decorator):
     orig = getattr(cls, funcname)
-    def dowrap(func):
-        def getpayload(load, x):
-            if isinstance(x, tuple):
-                return x[0], load[x[1]]
-            else:
-                return load[x]
-        @functools.wraps(func)
-        def newfunc(self, *args, **kwargs):
-            ret = func(self, *args, **kwargs)
-            if hasattr(ret, '__iter__'):
-                return [getpayload(self._init_payload, r) for r in ret]
-            else:
-                return getpayload(self._init_payload, ret)
-        return newfunc
-    setattr(cls, funcname, dowrap(orig))
+    setattr(cls, funcname, decorator(orig))
 
 
-_typemap_3d = dict()
-
-
-def get_dtype(name):
+def _get_dtype_by_name(name):
     if name == 'object':
         return np.dtype('O')
     else:
         return vars(rif)[name].dtype
 
-for clsname in vars(_rif._index._stripe_index):
-    cls = vars(_rif._index._stripe_index)[clsname]
-    if clsname.endswith('_object'):
-        cls.__init__ = _wrapinit(cls.__init__)
-        _wrappayload(cls, '_raw_payload')
-        _wrappayload(cls, 'neighbors')
-    if clsname.startswith('stripe_index_3d_'):
-        dtypes = tuple([get_dtype(x) for x in clsname.split('_')[3:]])
-        if len(dtypes) is 1:
-            dtypes = (dtypes[0], None)
-        _typemap_3d[dtypes] = cls
 
-
-def convert_to_arrayV3(iterable):
+def _convert_to_arrayV3(iterable):
     seq = list(iterable)
     array = np.zeros((len(seq), 3), dtype='f4')
     for i, v in enumerate(seq):
@@ -62,6 +53,21 @@ def convert_to_arrayV3(iterable):
         array[i, 1] = v[1]
         array[i, 2] = v[2]
     return array.view(V3)
+
+
+_typemap_3d = dict()
+for clsname in vars(_rif._index._stripe_index):
+    cls = vars(_rif._index._stripe_index)[clsname]
+    if clsname.startswith('stripe_index_3d_'):
+        if clsname.endswith('_object'):
+            cls.__init__ = _enable_init_object_payload(cls.__init__)
+            _decorate(cls, '_raw_payload',
+                      _enable_return_object_payload)
+            _decorate(cls, 'neighbors', _enable_return_object_payload)
+        dtypes = tuple([_get_dtype_by_name(x) for x in clsname.split('_')[3:]])
+        if len(dtypes) is 1:
+            dtypes = (dtypes[0], None)
+        _typemap_3d[dtypes] = cls
 
 
 def stripe_index_3d(radius, points, payload=None):
@@ -99,7 +105,7 @@ def stripe_index_3d(radius, points, payload=None):
                 # if payload is sequence of objects, allow points
                 # to be an iterable of sequences of len at least 3
                 # for example, a list of rosetta xyzVectors
-                points = convert_to_arrayV3(points)
+                points = _convert_to_arrayV3(points)
                 dtype1 = V3.dtype
     try:
         return _typemap_3d[dtype1, dtype2](radius, points, payload)

@@ -68,10 +68,10 @@
 
 // #include "objective/methods/hbond_5dof.gtest.cpp"
 
-// #include "objective/hash/XformHash.gtest.cpp"
-// #include "objective/hash/XformHashFromNest.gtest.cpp"
-// #include "objective/hash/XformHashNeighbors.gtest.cpp"
-// #include "objective/hash/XformMap.gtest.cpp"
+// #include "hash/XformHash.gtest.cpp"
+// #include "hash/XformHashFromNest.gtest.cpp"
+// #include "hash/XformHashNeighbors.gtest.cpp"
+// #include "index/XformMap.gtest.cpp"
 
 // #include "objective/storage/RotamerScores.gtest.cpp"
 

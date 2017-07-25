@@ -2,7 +2,7 @@
 
 #include <Eigen/Geometry>
 #include "geom/rand_geom.hpp"
-#include "objective/hash/XformMap.hpp"
+#include "index/XformMap.hpp"
 
 #include <sparsehash/dense_hash_set>
 
@@ -12,10 +12,10 @@
 #include <fstream>
 
 namespace rif {
-namespace objective {
-namespace hash {
+namespace index {
 namespace xmtest {
 
+using namespace ::rif::hash;
 using std::cout;
 using std::endl;
 
@@ -112,7 +112,8 @@ TEST(XformMap, insert_sphere) {
   double angrad = rad / lever * 180.0 / M_PI;
   double quatrad = numeric::deg2quat(angrad);
   geom::rand_xform(rng, x, 256.0);
-  XformHashNeighbors<XMap::Hasher> nbcache(rad, angrad, xmap.hasher_, 500.0);
+  hash::XformHashNeighbors<XMap::Hasher> nbcache(rad, angrad, xmap.hasher_,
+                                                 500.0);
   int nbitercount = xmap.insert_sphere(x, rad, lever, 12345.0, nbcache);
   cout << nbitercount << " " << xmap.count(12345.0) << " "
        << xmap.size() - (float)xmap.count(0) << " "
@@ -159,25 +160,18 @@ TEST(XformMap, insert_sphere) {
 
 TEST(XformMap, test_bt24_bcc6) {
   typedef Eigen::Transform<double, 3, Eigen::AffineCompact> EigenXform;
-  typedef rif::objective::hash::XformMap<EigenXform, double,
-                                         XformHash_bt24_BCC6>
-      XMap;
+  typedef XformMap<EigenXform, double, hash::XformHash_bt24_BCC6> XMap;
 
   XMap xmap(1.0, 10.0);
 }
 
 TEST(XformMap, DISABLED_test_float_double) {
   typedef Eigen::Transform<double, 3, Eigen::AffineCompact> EigenXformD;
-  typedef rif::objective::hash::XformMap<EigenXformD, double,
-                                         XformHash_bt24_BCC6>
-      XMapD;
+  typedef XformMap<EigenXformD, double, hash::XformHash_bt24_BCC6> XMapD;
   typedef Eigen::Transform<float, 3, Eigen::AffineCompact> EigenXformF;
-  typedef rif::objective::hash::XformMap<EigenXformF, double,
-                                         XformHash_bt24_BCC6>
-      XMapF;
+  typedef XformMap<EigenXformF, double, hash::XformHash_bt24_BCC6> XMapF;
 
   ASSERT_TRUE(false);
-}
 }
 }
 }

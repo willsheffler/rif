@@ -17,12 +17,13 @@ try:
     from rosetta import utility, numeric, basic, core
     from rosetta.core.conformation import Residue
     from rosetta.core.pose import make_pose_from_sequence, Pose
-    from rosetta.core.kinematics import FoldTree, MoveMap
+    from rosetta.core.kinematics import FoldTree, MoveMap, Stub
     from rosetta.core.import_pose import pose_from_file
     from rosetta.core.io.pdb import dump_pdb
     from rosetta.core.id import AtomID
     from rosetta.core.scoring import ScoreFunction, get_score_function
     from rosetta.numeric import xyzVector_double_t as xyzVector
+    from rosetta.numeric import xyzVector_double_t as xyzMatrix
 
     import rosetta.basic
     import rosetta.core

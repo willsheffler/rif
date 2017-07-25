@@ -1,5 +1,4 @@
-#ifndef INCLUDED_objective_hash_XformHashFromNest_HH
-#define INCLUDED_objective_hash_XformHashFromNest_HH
+#pragma once
 
 #include "util/SimpleArray.hpp"
 
@@ -7,9 +6,7 @@
 #include <boost/type_traits/is_same.hpp>
 
 namespace rif {
-namespace objective {
 namespace hash {
-
 template <class _Nest>
 struct XformHashFromNest {
   template <class _Xform>
@@ -62,6 +59,3 @@ struct XformHashFromNest {
 };
 }
 }
-}
-
-#endif

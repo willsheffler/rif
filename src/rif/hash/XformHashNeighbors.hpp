@@ -1,5 +1,4 @@
-#ifndef INCLUDED_objective_hash_XformHashNeighbors_HH
-#define INCLUDED_objective_hash_XformHashNeighbors_HH
+#pragma once
 
 #include "geom/rand_geom.hpp"
 #include "util/SimpleArray.hpp"
@@ -17,9 +16,7 @@
 #include <sparsehash/dense_hash_set>
 
 namespace rif {
-namespace objective {
 namespace hash {
-
 template <class XformHash, bool UNIQUE = false>
 struct XformHashNeighbors;
 
@@ -91,9 +88,9 @@ struct XformHashNeighborCrappyIterator
       return true;
     else
       return false;
-    std::cerr
-        << "will needs to implement XformHashNeighborCrappyIterator comparison"
-        << std::endl;
+    std::cerr << "will needs to implement XformHashNeighborCrappyIterator "
+                 "comparison"
+              << std::endl;
   }
 };
 template <class XformHash, bool UNIQUE>
@@ -232,7 +229,8 @@ struct XformHashNeighbors {
       } else {
         std::vector<Key> const &asym_nbrs = get_ori_neighbors(asym_key);
         // std::cout << "set sym_key nbrs from asym_nbrs " << asym_nbrs.size()
-        // << ", store in " << ori_key << " " << ori_cache_.size() << std::endl;
+        // << ", store in " << ori_key << " " << ori_cache_.size() <<
+        // std::endl;
         ori_cache_.insert(
             std::make_pair(ori_key, std::vector<Key>(asym_nbrs.size())));
         for (int i = 0; i < asym_nbrs.size(); ++i) {
@@ -414,6 +412,3 @@ struct XformHashNeighbors {
 };
 }
 }
-}
-
-#endif

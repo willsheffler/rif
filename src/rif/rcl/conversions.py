@@ -1,9 +1,11 @@
 from . import pyrosetta_util
+import rif
 from rif.sele import parse_atom_names, parse_ray_atom_names
 from rif.chem.biochem import rif_atype_names
 from rif import Atom
 from rif.geom import Ray
 import numpy as np
+from rif import rcl
 
 
 _RIF_ATYPE_MAP = None
@@ -169,3 +171,33 @@ def rays(pose, sele, shifts=None, protein_only=True, **kwargs):
 def stubs():
     'extract rif style stubs from rosetta pose'
     raise NotImplementedError
+
+
+def to_rif_stub(rosstub):
+    rifstub = np.zeros(1, dtype='4,4f')
+    for i in range(3):
+        rifstub[..., i, 3] = rosstub.v[i]
+        for j in range(3):
+            rifstub[..., i, j] = rosstub.M(i + 1, j + 1)
+    rifstub[..., 3, 3] = 1.0
+    return rifstub.reshape(16,).view(rif.X3)
+
+
+def to_rosetta_stub(rifstub, i=0):
+    if isinstance(i, int):
+        i = (i,)
+    rifstub = rifstub.view('4,4f')
+    rosstub = rcl.Stub()
+    rosstub.M.xx = rifstub[i + (0, 0)]
+    rosstub.M.xy = rifstub[i + (0, 1)]
+    rosstub.M.xz = rifstub[i + (0, 2)]
+    rosstub.M.yx = rifstub[i + (1, 0)]
+    rosstub.M.yy = rifstub[i + (1, 1)]
+    rosstub.M.yz = rifstub[i + (1, 2)]
+    rosstub.M.zx = rifstub[i + (2, 0)]
+    rosstub.M.zy = rifstub[i + (2, 1)]
+    rosstub.M.zz = rifstub[i + (2, 2)]
+    rosstub.v.x = rifstub[i + (0, 3)]
+    rosstub.v.y = rifstub[i + (1, 3)]
+    rosstub.v.z = rifstub[i + (2, 3)]
+    return rosstub

@@ -1,15 +1,16 @@
 #include <gtest/gtest.h>
 
-#include "objective/hash/XformHashFromNest.hpp"
+#include "hash/XformHashFromNest.hpp"
 
+#include "index/XformMap.hpp"
 #include "nest/NEST.hpp"
 #include "nest/pmap/OriTransMap.hpp"
-#include "objective/hash/XformMap.hpp"
 
 namespace rif {
-namespace objective {
 namespace hash {
 namespace test_XHFN {
+
+using namespace ::rif::index;
 
 TEST(XformHashFromNest, static_checks) {
   typedef Eigen::Transform<float, 3, Eigen::AffineCompact> Xform;
@@ -45,7 +46,8 @@ TEST(XformHashFromNest, basic_operation) {
 
   {
     Xform x(Xform::Identity());
-    // ASSERT_EQ( 9402275379703, xmap.hasher_.get_key( x ) ); // not a real test
+    // ASSERT_EQ( 9402275379703, xmap.hasher_.get_key( x ) ); // not a real
+    // test
   }
 
   int nfail = 0;
@@ -63,7 +65,6 @@ TEST(XformHashFromNest, basic_operation) {
   }
 
   ASSERT_LE(nfail * 1. / end, 0.05);
-}
 }
 }
 }

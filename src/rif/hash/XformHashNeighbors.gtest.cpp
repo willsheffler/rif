@@ -1,15 +1,14 @@
 #include <gtest/gtest.h>
 
 #include "geom/rand_geom.hpp"
-#include "objective/hash/XformHash.hpp"
-#include "objective/hash/XformHashNeighbors.hpp"
+#include "hash/XformHash.hpp"
+#include "hash/XformHashNeighbors.hpp"
 
 #include <Eigen/Geometry>
 #include <random>
 #include <sparsehash/dense_hash_set>
 
 namespace rif {
-namespace objective {
 namespace hash {
 namespace xhnbtest {
 
@@ -467,7 +466,8 @@ TEST(XformHashNeighbors, Quat_BCC7_Zorder_check_ori_neighbors) {
         geom::rand_xform_quat(rng, p, cart_bound, quat_bound);
         p.translation()[0] = p.translation()[1] = p.translation()[2] = 0.0;
         Key nk = xh.get_key(p * c) & xh.ORI_MASK;
-        // nk = nk | (Key)1; // debug... this makes it correct much more of the
+        // nk = nk | (Key)1; // debug... this makes it correct much more of
+        // the
         // time....
         bool fail = nbrs_set.find(nk) == nbrs_set.end();
         nfail += fail;
@@ -625,7 +625,6 @@ TEST(XformHashNeighbors, Quat_BCC7_Zorder_check_general_neighbors) {
     ASSERT_EQ(nb.ori_cache_, nb2.ori_cache_);
     ASSERT_EQ(nb.cart_shifts_, nb2.cart_shifts_);
   }
-}
 }
 }
 }

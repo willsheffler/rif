@@ -2,14 +2,13 @@
 
 #include <Eigen/Geometry>
 #include "geom/rand_geom.hpp"
-#include "objective/hash/XformMap.hpp"
+#include "index/XformMap.hpp"
 
 #include <random>
 #include <sparsehash/dense_hash_set>
 #include "util/Timer.hpp"
 
 namespace rif {
-namespace objective {
 namespace hash {
 namespace xhtest {
 
@@ -363,7 +362,8 @@ void test_xform_hash_perf(double cart_resl, double ang_resl,
   double tot_cell_vol = covrad * covrad * covrad * covrad * covrad * covrad *
                         xh.approx_nori() / (cart_resl * cart_resl * cart_resl);
   printf(
-      " %5.3f/%5.1f cr %5.3f dt %5.3f da %6.3f x2k: %7.3fns k2x: %7.3fns %9.3f "
+      " %5.3f/%5.1f cr %5.3f dt %5.3f da %6.3f x2k: %7.3fns k2x: %7.3fns "
+      "%9.3f "
       "%7lu\n",
       cart_resl, ang_resl, covrad, max_dt, max_da / ang_resl, time_key / N2,
       time_cen / N2, tot_cell_vol, xh.approx_nori());
@@ -494,7 +494,6 @@ TEST(XformHash, XformHash_Quat_BCC7_Zorder_cart_shift) {
   ASSERT_EQ(h.cart_shift_key(3450, 0, 0, 0, 1), 3451);
   ASSERT_EQ(h.cart_shift_key(3451, 0, 0, 0, 0), 3451);
   ASSERT_EQ(h.cart_shift_key(3451, 0, 0, 0, 1), 3450);
-}
 }
 }
 }
