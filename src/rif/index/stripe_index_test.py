@@ -36,7 +36,10 @@ def test_stripe_index_3d_pyobject():
     assert hasattr(index, '_init_payload')
     # index.__dont_gc_me = objs
     assert index.neighbor_count(V3(0, 1, 2)) == 1
+    assert index.neighbor_count((0, 1, 2)) == 1
+    assert index.neighbor_exists((0, 1, 2))
     assert index.neighbor_count(V3(1, 2, 5)) == 0
+    assert not index.neighbor_exists((1, 2, 5))
     assert index.neighbors(V3(0, 1, 2))[0] is 'zero'
     assert index.neighbors(V3(3, 4, 5))[0] is 'one'
     assert index.neighbors(V3(6, 7, 8))[0] is 'two'
@@ -71,8 +74,8 @@ def test_stripe_index_3d_pyobject2():
     index = stripe_index_3d(2.5, atoms, objs)
     for i in range(len(index)):
         assert index._raw_payload(i) is objs[i]
-    assert index.neighbors(atoms[0]) == list('012')
-    assert index.neighbors(atoms[7]) == list('56789')
+    assert index.neighbors(atoms['pos']['raw'][0]) == list('012')
+    assert index.neighbors(atoms['pos']['raw'][7]) == list('56789')
 
 
 def test_stripe_index_3d_pyobject_seq_input():

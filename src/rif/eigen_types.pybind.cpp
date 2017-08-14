@@ -1,4 +1,5 @@
 #include <pybind11/numpy.h>
+#include <pybind11/operators.h>
 #include "pyutil/pybind_numpy.hpp"
 
 #include "eigen_types.hpp"
@@ -63,6 +64,10 @@ void bind_eigen_matrix_fixed(py::module& m, std::string name) {
       .def("__setitem__", [](M& m, int i, F f) { return m.data()[i] = f; })
       .def("__len__", [](M const& m) { return m.rows() * m.cols(); })
       .def("__abs__", [](M const& m) { return m.norm(); })
+      .def("__add__", [](M const& a, M const& b) { return M(a + b); },
+           py::is_operator())
+      .def("__sub__", [](M const& a, M const& b) { return M(a - b); },
+           py::is_operator())
       .def_property_readonly("norm", [](M const& m) { return m.norm(); })
       .def("normalize", [](M& m) { m.normalize(); })
       .def_property_readonly("dtype",

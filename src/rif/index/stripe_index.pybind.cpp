@@ -28,15 +28,18 @@ void bind_rest(py::class_<Index>& cls) {
     return get_first_if_pair(self.values_[i]);
   });
   cls.def("neighbor_count", &Index::template nbcount<Point>);
-  // if (is_simple_point<Point>()) {
-  // cls.def("neighbor_count", [](Index const& self, py::object obj) {
-  // return self.nbcount(sequence_to<Point, F>(obj, 3));
-  // });
-  // }
+  cls.def("neighbor_count", [](Index const& self, py::object obj) {
+    return self.nbcount(sequence_to<Point, F>(obj, 3));
+  });
+  cls.def("neighbor_exists", &Index::template nbcount<Point>);
+  cls.def("neighbor_exists", [](Index const& self, py::object obj) {
+    return self.nbexists(sequence_to<Point, F>(obj, 3));
+  });
+  cls.def_readonly("translation", &Index::translation_);
 }
 
 template <class Point>
-void bind_one_sided_index(py::module& m, std::string name) {
+void bind_stripe_index_3d(py::module& m, std::string name) {
   using Index = rif::index::stripe_index_3d<Point>;
   using F = typename Point::Scalar;
   py::class_<Index> cls(m, name.c_str(), py::dynamic_attr());
@@ -48,16 +51,15 @@ void bind_one_sided_index(py::module& m, std::string name) {
   cls.def("neighbors", [](Index const& self, Point query) {
     return pyutil::to_pyarray(self.neighboring_points(query));
   });
-  if (is_simple_point<Point>())
-    cls.def("neighbors", [](Index const& self, py::object obj) {
-      Point query = pyutil::sequence_to<Point, F>(obj, 3);
-      return pyutil::to_pyarray(self.neighboring_points(query));
-    });
+  cls.def("neighbors", [](Index const& self, py::object obj) {
+    Point query = pyutil::sequence_to<Point, F>(obj, 3);
+    return pyutil::to_pyarray(self.neighboring_points(query));
+  });
   bind_rest<Index>(cls);
 }
 
 template <class Point, class Payload>
-void bind_one_sided_index(py::module& m, std::string name) {
+void bind_stripe_index_3d(py::module& m, std::string name) {
   using Index = rif::index::stripe_index_3d<Point, Payload>;
   using F = typename Point::Scalar;
   py::class_<Index> cls(m, name.c_str(), py::dynamic_attr());
@@ -75,22 +77,21 @@ void bind_one_sided_index(py::module& m, std::string name) {
   cls.def("neighbors", [](Index const& self, Point query) {
     return pyutil::to_pyarray(self.neighboring_payloads(query));
   });
-  if (is_simple_point<Point>())
-    cls.def("neighbors", [](Index const& self, py::object obj) {
-      Point query = pyutil::sequence_to<Point, float>(obj, 3);
-      return pyutil::to_pyarray(self.neighboring_payloads(query));
-    });
+  cls.def("neighbors", [](Index const& self, py::object obj) {
+    Point query = pyutil::sequence_to<Point, float>(obj, 3);
+    return pyutil::to_pyarray(self.neighboring_payloads(query));
+  });
   bind_rest<Index>(cls);
 }
 
 void RIFLIB_PYBIND_rif_index(py::module& m) {
   using Atom = rif::actor::Atom<V3f>;
-  bind_one_sided_index<V3f>(m, "stripe_index_3d_V3");
-  bind_one_sided_index<Atom>(m, "stripe_index_3d_Atom");
-  bind_one_sided_index<V3f, V3f>(m, "stripe_index_3d_V3_V3");
-  bind_one_sided_index<V3f, Atom>(m, "stripe_index_3d_V3_Atom");
-  bind_one_sided_index<V3f, size_t>(m, "stripe_index_3d_V3_object");
-  bind_one_sided_index<Atom, size_t>(m, "stripe_index_3d_Atom_object");
+  bind_stripe_index_3d<V3f>(m, "stripe_index_3d_V3");
+  bind_stripe_index_3d<Atom>(m, "stripe_index_3d_Atom");
+  bind_stripe_index_3d<V3f, V3f>(m, "stripe_index_3d_V3_V3");
+  bind_stripe_index_3d<V3f, Atom>(m, "stripe_index_3d_V3_Atom");
+  bind_stripe_index_3d<V3f, size_t>(m, "stripe_index_3d_V3_object");
+  bind_stripe_index_3d<Atom, size_t>(m, "stripe_index_3d_Atom_object");
   m.def("make_huge_array", [](size_t s) {
     int* raw = (int*)malloc(s * sizeof(int));
     raw[0] = 293847;

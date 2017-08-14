@@ -69,7 +69,7 @@ struct stripe_index_3d {
       return false;  // no early termination, want full count
     }
   };
-  struct ContactVisitor {
+  struct NBExistsVisitor {
     bool result = false;
     bool visit(Pt, Value, float) {
       result = true;
@@ -83,8 +83,8 @@ struct stripe_index_3d {
     return myvisitor.result;
   }
   template <class Point>
-  bool contact(Point query) const {
-    ContactVisitor myvisitor;
+  bool nbexists(Point query) const {
+    NBExistsVisitor myvisitor;
     visit(query, myvisitor);
     return myvisitor.result;
   }
@@ -96,7 +96,7 @@ struct stripe_index_3d {
   }
   template <class Point>
   int brute_contact(Point query) const {
-    ContactVisitor myvisitor;
+    NBExistsVisitor myvisitor;
     brute_visit(query, myvisitor);
     return myvisitor.result;
   }

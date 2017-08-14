@@ -5,14 +5,9 @@ from rif import rcl
 
 
 def test_import_pyrosetta():
-    from rif.rcl import pyrosetta
-    from rif.rcl import rosetta
     if rcl.HAVE_PYROSETTA:
-        assert isinstance(pyrosetta, ModuleType)
-        assert isinstance(rosetta, ModuleType)
-    else:
-        assert isinstance(pyrosetta, MagicMock)
-        assert isinstance(rosetta, MagicMock)
+        assert isinstance(rcl.pyrosetta, ModuleType)
+        assert isinstance(rcl.rosetta, ModuleType)
 
 
 @pytest.mark.skipif('not rcl.HAVE_PYROSETTA')

@@ -10,6 +10,7 @@ import os
 
 try:
     import pyrosetta
+    from pyrosetta import _rosetta_database_from_env
     try:
         from pyrosetta import rosetta
     except ImportError:
@@ -31,13 +32,15 @@ try:
     from rosetta.protocols.protein_interface_design.movers import TryRotamers
 
     create_score_function = rosetta.core.scoring.ScoreFunctionFactory.create_score_function
-    ROSETTA_DB = pyrosetta._rosetta_database_from_env()
+    # for x in dir(pyrosetta):
+    # print('pyrosetta:', x)/
+    ROSETTA_DB = _rosetta_database_from_env()
     HAVE_PYROSETTA = True
 except ImportError as e:
-    import mock
+    # import mock
     HAVE_PYROSETTA = False
-    pyrosetta = mock.MagicMock()
-    rosetta = mock.MagicMock()
+    # pyrosetta = mock.MagicMock()
+    # rosetta = mock.MagicMock()
 
 
 class Error(Exception):

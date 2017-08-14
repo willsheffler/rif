@@ -1,5 +1,4 @@
 #include <gtest/gtest.h>
-
 #include "rif/geom/rand_geom.hpp"
 #include "rif/index/stripe_index_3d.hpp"
 #include "rif/util/Timer.hpp"
@@ -25,7 +24,7 @@ TEST(stripe_index_3d, test_nopayload_with_timing) {
     auto pts = geom::rand_box_n<F>(Npts);
     stripe_index_3d<V3f> h(radius, pts);
     h.sanity_check();
-    vector<int> hcount(Ntest), bcount(Ntest), contact(Ntest);
+    vector<int> hcount(Ntest), bcount(Ntest), nbexists(Ntest);
     auto pts_test = geom::rand_box_n<F>(Ntest);
     for (auto& v : pts_test) v = 1.1 * v - V3<F>(0.05, 0.05, 0.05);
     util::Timer hcount_timer;
@@ -38,7 +37,7 @@ TEST(stripe_index_3d, test_nopayload_with_timing) {
     bcount_timer.stop();
     util::Timer contact_timer;
     for (int itest = 0; itest < Ntest; ++itest)
-      contact[itest] = h.contact(pts_test[itest]);
+      nbexists[itest] = h.nbexists(pts_test[itest]);
     contact_timer.stop();
     htime += hcount_timer.elapsed();
     btime += bcount_timer.elapsed();
@@ -46,7 +45,7 @@ TEST(stripe_index_3d, test_nopayload_with_timing) {
     // cout << "hcount " << hcount << " bcount " << bcount << endl;
     for (int itest = 0; itest < Ntest; ++itest) {
       ASSERT_EQ(hcount[itest], bcount[itest]);
-      ASSERT_EQ(contact[itest], bcount[itest] != 0);
+      ASSERT_EQ(nbexists[itest], bcount[itest] != 0);
       num0 += hcount[itest] == 0;
       numtot++;
       numnbr += hcount[itest];

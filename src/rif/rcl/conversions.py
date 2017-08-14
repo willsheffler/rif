@@ -115,12 +115,25 @@ def pred_heavy(res, aname, **kwargs):
     return not res.atom_is_hydrogen(res.atom_index(aname))
 
 
-def atoms(pose, sele='ALLHEAVY', **kwargs):
+def pred_bb(res, aname, **kwargs):
+    return res.atom_is_backbone(res.atom_index(aname))
+
+
+def pred_bbheavy(res, aname, **kwargs):
+    return (res.atom_is_backbone(res.atom_index(aname)) and
+            not res.atom_is_hydrogen(res.atom_index(aname)))
+
+
+def atoms(pose, sele='HEAVY', **kwargs):
     'extract rif style atoms from rosetta pose'
     if sele.lower() == 'all':
         return atoms_matching(pose, pred_all, **kwargs)
     elif sele.lower() == 'heavy':
         return atoms_matching(pose, pred_heavy, **kwargs)
+    elif sele.lower() == 'bb':
+        return atoms_matching(pose, pred_bb, **kwargs)
+    elif sele.lower() == 'bbheavy':
+        return atoms_matching(pose, pred_bbheavy, **kwargs)
     else:
         return atoms_fixed_width(pose, sele=sele, **kwargs)
 
