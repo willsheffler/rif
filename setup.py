@@ -90,6 +90,7 @@ def infer_config_from_build_dirname(path):
 
 ###############################################################################
 
+
 _rif_setup_opts = defaultdict(list)
 _remove_from_sys_argv = list()
 for arg in sys.argv:
@@ -248,6 +249,7 @@ class CMakeBuild(build_ext):
 #             pdat.extend(datfiles)
 #     return pdat
 
+
 setup(
     name='rif',
     version='0.0.1',
@@ -259,9 +261,12 @@ setup(
     ext_modules=[CMakeExtension('_rif')],
     cmdclass=dict(build_ext=CMakeBuild),
     zip_safe=False,
-    setup_requires=['wheel', 'pytest-runner'],
+    setup_requires=['wheel', 'pytest-runner', 'jinja2'],
+    install_requires=['numpy', 'pandas', 'xarray', 'parsimonious', 'mock', 'pytest',
+                      'pytest-xdist', 'hypothesis', 'colorama', 'pytest_cpp',
+                      'pytest-sugar'],
     tests_require=['pytest', 'pytest-xdist', 'hypothesis', 'colorama',
-                   'pytest_cpp', 'jinja2'],
+                   'pytest_cpp'],
     test_suite='pytest',
     # packages=['rif'],
     # package_dir={'rif': 'src/rif'},
