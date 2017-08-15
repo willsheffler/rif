@@ -1,6 +1,7 @@
-from rif.hash import *
-from rif import rcl
 import pytest
+from rif import rcl
+from rif.hash import XformHash_bt24_BCC6_X3f, RosettaStubHash
+from rif.rcl import Stub
 
 
 def test_XformHash_bt24_BCC6_X3f():
@@ -16,9 +17,9 @@ def test_XformHash_bt24_BCC6_X3f():
 
 
 @pytest.mark.skipif('not rcl.HAVE_PYROSETTA')
-def test_XformHash_bt24_BCC6_Rosetta():
-    xh = XformHash_bt24_BCC6_Rosetta(1.0, 15.0)
-    name = 'XformHash_bt24_BCC6_Rosetta(cart_resl=1, ang_resl=15, cart_bound=512)'
+def test_RosettaStubHash():
+    xh = RosettaStubHash(cart_resl=1.0, ang_resl=15.0)
+    name = 'RosettaStubHash(cart_resl=1, ang_resl=15, cart_bound=512)'
     assert repr(xh) == name
     for i in range(100):
         x0 = xh.get_center(i)  # arbitrary xform
@@ -26,3 +27,15 @@ def test_XformHash_bt24_BCC6_Rosetta():
         x = xh.get_center(k)
         ktest = xh.get_key(x)
         assert ktest == k
+
+
+@pytest.mark.skipif('not rcl.HAVE_PYROSETTA')
+def test_RosettaStubHash_with_pose(bigpose):
+    stub_hasher = RosettaStubHash(cart_resl=1.0, ang_resl=15.0)
+    for r in bigpose:
+        stub = Stub(r.xyz('N'), r.xyz('CA'), r.xyz('C'))
+        key = stub_hasher.get_key(stub)
+        print(stub, key)
+        # sanity check, cartesian position of bin cen should be within 1.0
+        bincen = stub_hasher.get_center(key)
+        assert (stub.v - bincen.v).length() < 1.0

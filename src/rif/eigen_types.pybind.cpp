@@ -94,10 +94,23 @@ void bind_eigen_matrix_fixed(py::module& m, std::string name) {
 
 template <class X>
 void bind_eigen_xform(py::module& m, std::string name) {
-  auto cls = py::class_<X>(m, name.c_str() /*, buffer?*/);
-  cls.def_property_readonly_static(
-      "dtype", [](py::object) { return py::dtype::of<X>(); })
-      /**/;
+  using F = ScalarOf<X>;
+  if (sizeof(X) == 16 * sizeof(F)) {
+    auto cls = py::class_<X>(m, name.c_str(), py::buffer_protocol());
+    cls.def_property_readonly_static(
+        "dtype", [](py::object) { return py::dtype::of<X>(); });
+    cls.def_buffer([](X& x) -> py::buffer_info {
+      std::vector<size_t> shape = {4, 4};
+      std::vector<size_t> stride = {sizeof(F) * 4, sizeof(F)};
+      return py::buffer_info(x.data(), sizeof(F),
+                             py::format_descriptor<F>::format(), shape.size(),
+                             shape, stride);
+    });
+  } else {
+    auto cls = py::class_<X>(m, name.c_str());
+    cls.def_property_readonly_static(
+        "dtype", [](py::object) { return py::dtype::of<X>(); });
+  }
   py::detail::npy_format_descriptor<X>::register_dtype();
 }
 

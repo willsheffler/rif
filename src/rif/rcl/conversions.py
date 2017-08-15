@@ -197,6 +197,8 @@ def to_rif_stub(rosstub):
 
 
 def to_rosetta_stub(rifstub, i=0):
+    if isinstance(rifstub, rif.X3):
+        rifstub = np.array([(rifstub,)], dtype=rif.X3)
     if isinstance(i, int):
         i = (i,)
     rifstub = rifstub.view('4,4f')

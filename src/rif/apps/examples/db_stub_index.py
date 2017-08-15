@@ -1,7 +1,6 @@
 from rif import stripe_index_3d, rcl
 from rosetta.numeric import xyzVector_float_t
 from rosetta.core.kinematics import Stub
-from rosetta.core.id import AtomID
 
 
 class PoseResnumIndex(object):
@@ -9,18 +8,17 @@ class PoseResnumIndex(object):
         bb_atoms = rcl.atoms(pose, 'bbheavy')
         self.clash_check = stripe_index_3d(clash_dis, bb_atoms)
         cens, resnums = list(), list()
-        for ir in range(1, pose.size() + 1):
-            res = pose.residue(ir)
+        for res in pose:
             if res.is_protein():
                 cens.append(res.xyz('CA'))
-                resnums.append(ir)
+                resnums.append(res.seqpos())
         self.resi_map = stripe_index_3d(nbr_dis, cens, resnums)
         self.nbr_atom = nbr_atom
 
     def clashes(self, pose):
-        for ir in range(1, pose.size() + 1):
-            for ia in range(1, pose.residue(ir).nheavyatoms() + 1):
-                xyz = pose.xyz(AtomID(ia, ir))
+        for res in pose:
+            for ia in range(1, res.nheavyatoms() + 1):
+                xyz = res.xyz(ia)
                 if self.clash_check.neighbor_exists(xyz):
                     return True
         return False
@@ -29,8 +27,7 @@ class PoseResnumIndex(object):
         if self.clashes(pose):
             return None  # could alternately return empty set
         contacts = set()
-        for ir in range(1, pose.size() + 1):
-            res = pose.residue(ir)
+        for res in pose:
             if res.has(self.nbr_atom):
                 xyz = res.xyz(self.nbr_atom)
                 nbrs = self.resi_map.neighbors(xyz)
@@ -43,14 +40,13 @@ class PoseResnumIndex(object):
 
 def get_rosetta_stubs(pose, cen, aname1, aname2, aname3):
     centers, stubs = [], []
-    for ir in range(1, pose.size() + 1):
-        r = pose.residue(ir)
-        if not (r.has(cen) and r.has(aname1) and r.has(aname2) and
-                r.has(aname3)):
+    for res in pose:
+        if not (res.has(cen) and res.has(aname1) and res.has(aname2) and
+                res.has(aname3)):
             continue
-        centers.append(r.xyz(cen))
-        stub = Stub(r.xyz(aname1), r.xyz(aname2), r.xyz(aname3))
-        stubs.append((ir, stub))
+        centers.append(res.xyz(cen))
+        stub = Stub(res.xyz(aname1), res.xyz(aname2), res.xyz(aname3))
+        stubs.append((res.seqpos(), stub))
     return centers, stubs
 
 
@@ -63,10 +59,9 @@ class PoseStubIndex(object):
         self.nbr_atom = nbr_atom
 
     def clashes(self, pose):
-        for ir in range(1, pose.size() + 1):
-            for ia in range(1, pose.residue(ir).nheavyatoms() + 1):
-                xyz = pose.xyz(AtomID(ia, ir))
-                if self.clash_check.neighbor_exists(xyz):
+        for res in pose:
+            for ia in range(1, res.nheavyatoms() + 1):
+                if self.clash_check.neighbor_exists(res.xyz(ia)):
                     return True
         return False
 
@@ -74,10 +69,8 @@ class PoseStubIndex(object):
         if self.clashes(pose):
             return None  # could alternately return empty set
         contacts = set()
-        for ir in range(1, pose.size() + 1):
-            res = pose.residue(ir)
+        for res in pose:
             if res.has(self.nbr_atom):
-                xyz = res.xyz(self.nbr_atom)
-                nbrs = self.stub_map.neighbors(xyz)
+                nbrs = self.stub_map.neighbors(res.xyz(self.nbr_atom))
                 contacts.update(nbrs)
         return contacts
