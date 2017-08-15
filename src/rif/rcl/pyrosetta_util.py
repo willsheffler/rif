@@ -13,23 +13,36 @@ try:
     from pyrosetta import _rosetta_database_from_env
     try:
         from pyrosetta import rosetta
+        from pyrosetta.rosetta import utility, numeric, basic, core
+        from pyrosetta.rosetta.core.conformation import Residue
+        from pyrosetta.rosetta.core.pose import make_pose_from_sequence, Pose
+        from pyrosetta.rosetta.core.kinematics import FoldTree, MoveMap, Stub
+        from pyrosetta.rosetta.core.import_pose import pose_from_file
+        from pyrosetta.rosetta.core.io.pdb import dump_pdb
+        from pyrosetta.rosetta.core.id import AtomID
+        from pyrosetta.rosetta.core.scoring import ScoreFunction, get_score_function
+        from pyrosetta.rosetta.numeric import xyzVector_double_t as xyzVector
+        from pyrosetta.rosetta.numeric import xyzVector_double_t as xyzMatrix
+        import pyrosetta.rosetta.basic
+        import pyrosetta.rosetta.core
+        import pyrosetta.rosetta.core.pack.rotamer_set
+        from pyrosetta.rosetta.protocols.protein_interface_design.movers import TryRotamers
     except ImportError:
         import rosetta
-    from rosetta import utility, numeric, basic, core
-    from rosetta.core.conformation import Residue
-    from rosetta.core.pose import make_pose_from_sequence, Pose
-    from rosetta.core.kinematics import FoldTree, MoveMap, Stub
-    from rosetta.core.import_pose import pose_from_file
-    from rosetta.core.io.pdb import dump_pdb
-    from rosetta.core.id import AtomID
-    from rosetta.core.scoring import ScoreFunction, get_score_function
-    from rosetta.numeric import xyzVector_double_t as xyzVector
-    from rosetta.numeric import xyzVector_double_t as xyzMatrix
-
-    import rosetta.basic
-    import rosetta.core
-    import rosetta.core.pack.rotamer_set
-    from rosetta.protocols.protein_interface_design.movers import TryRotamers
+        from rosetta import utility, numeric, basic, core
+        from rosetta.core.conformation import Residue
+        from rosetta.core.pose import make_pose_from_sequence, Pose
+        from rosetta.core.kinematics import FoldTree, MoveMap, Stub
+        from rosetta.core.import_pose import pose_from_file
+        from rosetta.core.io.pdb import dump_pdb
+        from rosetta.core.id import AtomID
+        from rosetta.core.scoring import ScoreFunction, get_score_function
+        from rosetta.numeric import xyzVector_double_t as xyzVector
+        from rosetta.numeric import xyzVector_double_t as xyzMatrix
+        import rosetta.basic
+        import rosetta.core
+        import rosetta.core.pack.rotamer_set
+        from rosetta.protocols.protein_interface_design.movers import TryRotamers
 
     create_score_function = rosetta.core.scoring.ScoreFunctionFactory.create_score_function
     # for x in dir(pyrosetta):
