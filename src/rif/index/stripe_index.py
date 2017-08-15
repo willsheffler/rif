@@ -53,7 +53,7 @@ def stripe_index_3d(radius, points, payload=None):
 def _enable_init_pyobject_store(init):
     @functools.wraps(init)
     def newinit(self, radius, points, payload):
-        self._init_payload = payload
+        self._init_payload = list(payload)
         init(self, radius, points, np.arange(len(payload)))
     return newinit
 
