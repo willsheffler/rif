@@ -1,7 +1,8 @@
 import pytest
 from rif import rcl
 from rif.hash import XformHash_bt24_BCC6_X3f, RosettaStubHash
-from rif.rcl import Stub
+if rcl.HAVE_PYROSETTA:
+    from rif.rcl import Stub
 
 
 def test_XformHash_bt24_BCC6_X3f():
