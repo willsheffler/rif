@@ -1,0 +1,152 @@
+#### the block below comes from the bottom of the log file from rif generation, just copy it
+#### if you are running the docking in a different place than where you ran rif generation,
+#### you will have to adjust these paths!
+
+########################################### what you need for docking ###########################################
+-rif_dock:target_pdb            rifgen_fz7_v4/rif_64_fz7_v4_sca0.7_noKR.rif_target.pdb.gz
+-rif_dock:target_res            test_input/fz7/Fz7_model.res
+-rif_dock:target_rf_resl        0.125
+-rif_dock:target_rf_cache       rifgen_fz7_v4/__RF_Fz7_model.pdb_CEN_trhash12511471_resl0.125_osamp2_replonlybdry
+-rif_dock:target_bounding_xmaps rifgen_fz7_v4/rif_64_fz7_v4_sca0.7_noKR.rif_BOUNDING_RIF_16.xmap.gz
+-rif_dock:target_bounding_xmaps rifgen_fz7_v4/rif_64_fz7_v4_sca0.7_noKR.rif_BOUNDING_RIF_08.xmap.gz
+-rif_dock:target_bounding_xmaps rifgen_fz7_v4/rif_64_fz7_v4_sca0.7_noKR.rif_BOUNDING_RIF_04.xmap.gz
+-rif_dock:target_bounding_xmaps rifgen_fz7_v4/rif_64_fz7_v4_sca0.7_noKR.rif_BOUNDING_RIF_02.xmap.gz
+-rif_dock:target_bounding_xmaps rifgen_fz7_v4/rif_64_fz7_v4_sca0.7_noKR.rif_BOUNDING_RIF_01.xmap.gz
+-rif_dock:target_rif            rifgen_fz7_v4/rif_64_fz7_v4_sca0.7_noKR.rif.gz
+-rif_dock:extra_rotamers        0
+-rif_dock:extra_rif_rotamers    1
+#################################################################################################################
+
+
+
+#### this is where the output will go, and how much
+-rif_dock:outdir  rifdock_out_/fz7_test
+-rif_dock:dokfile all.dok
+-rif_dock:n_pdb_out 20 # max number of output pdbs
+-rif_dock:redundancy_filter_mag 1.0
+-rif_dock:align_output_to_scaffold false
+#-rif_dock:target_tag conf01 # optional tag to add to all outputs
+
+
+############# overall time and resolution of search ##################
+-beam_size_M 5
+-hsearch_scale_factor 1.2
+
+
+
+#### to use -beta, ask will if you don't want to use -beta
+-beta
+-score:weights beta_soft
+-add_orbitals false
+
+
+
+################ stuff related to picking designable and fixed positions #################
+
+#### if you DO NOT supply scaffold_res files, this will attempt to pick which residues on the scaffold
+#### can be mutated based on sasa, internal energy, and bb-sc hbonds
+-scaffold_res_use_best_guess true
+
+#### if scaffold_res is NOT used, this option will cause loop residues to be ignored
+#### scaffold_res overrides this
+-rif_dock::dont_use_scaffold_loops True
+
+#### these cause the non-designable scaffold residues to still contribute sterically
+#### and to the 1 body rotamer energies. use these flags if you have a fully-designed scaffold
+-rif_dock:scaffold_to_ala false
+-rif_dock:scaffold_to_ala_selonly true
+-rif_dock:replace_all_with_ala_1bre false
+#### if you don't have a fully designed scaffold, treat non-designable positions as alanine
+# -rif_dock:scaffold_to_ala true
+# -rif_dock:scaffold_to_ala_selonly false
+# -rif_dock:replace_all_with_ala_1bre true
+
+
+
+
+-rif_dock:hbond_weight 1.0
+-rif_dock:upweight_multi_hbond 1.0 # value of 1.0 could up to double hbscore if bidentate, triple if tridentate... best in conjunction with low-ish starting hbweight
+
+#### weight interactions with the target more than intra-scaffold interactions
+#### kinda like the rosetta_score_*_weight flags, but applies to the rif calculations
+-rif_dock:upweight_iface 2.0
+
+
+
+
+
+
+
+
+################ rif packing options, probably don't change
+-hack_pack true
+-rif_dock:pack_n_iters    2
+-rif_dock:pack_iter_mult  2.0
+-rif_dock:hack_pack_frac  0.1
+-rif_dock:packing_use_rif_rotamers        true
+-rif_dock:extra_rotamers                  false
+-rif_dock:always_available_rotamers_level 0
+
+-rif_dock::rf_resl 0.5
+-rif_dock::rf_oversample 2
+-rif_dock:use_scaffold_bounding_grids 0
+
+
+
+################## rosetta re-scoring / min stuff #####################
+
+#### negative interactions are always full-weight, this is positive only
+-rif_dock:rosetta_score_rifres_rifres_weight   0.6
+-rif_dock:rosetta_score_rifres_scaffold_weight 0.4
+
+#### score cut for the rosetta "score," which is kinda a ddg, but with hbond weighs highern
+-rif_dock:rosetta_score_cut -15.0
+
+-rif_dock:rosetta_score_fraction 0.006
+-rif_dock:rosetta_min_fraction 0.07
+-rif_dock:rosetta_min_scaffoldbb false
+-rif_dock:rosetta_min_targetbb   false
+-rif_dock:rosetta_hard_min false
+#-rif_dock:rosetta_score_then_min_below_thresh -20.0 # this is in "rif docking score units"
+#-rif_dock:rosetta_score_at_least 3000
+#-rif_dock:rosetta_score_at_most  30000
+
+
+
+
+
+#### details for how twobody rotamer energies are computed and stored, don't change
+-rif_dock:rotrf_resl   0.25
+-rif_dock:rotrf_spread 0.0
+-rif_dock:rotrf_scale_atr 1.0
+-rif_dock:rotrf_cache_dir /work/sheffler/data/scheme_data_exrots2_by_structure/rot_rf_tables_025_0_atr1
+-rif_dock:data_cache_dir  ./rifdock_v4_scaffdata_025_0_atr1
+-rif_dock:cache_scaffold_data true
+
+
+
+
+#### options to favor existing scaffold residues
+-add_native_scaffold_rots_when_packing 0 # 1
+-bonus_to_native_scaffold_res          0 # -0.5
+
+
+
+
+-rif_dock:pdb_info_pikaa false # this is default I think
+
+
+-rif_dock:global_score_cut -0.0
+
+ # disulfides seem to cause problems... ignoring them isn't really an issue unless
+ # you do bbmin where there should be disulfides
+-detect_disulf 0
+
+-database /work/sheffler/rosetta/librosetta_update/database
+
+
+
+-rif_dock:target_rf_oversample 2
+
+-mute core.scoring.ScoreFunctionFactory
+-mute core.io.pose_from_sfr.PoseFromSFRBuilder

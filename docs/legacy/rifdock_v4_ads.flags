@@ -1,0 +1,111 @@
+########################################### what you need for docking ###########################################
+-rif_dock:target_pdb            ./rifgen_v4_ads/rif_v4_ads.rif.gz_target.pdb.gz
+-in:file:extra_res_fa           test_input/ads/ADS.fa.params
+-rif_dock:target_rf_resl        0.125
+-rif_dock:target_rf_cache       ./rifgen_v4_ads/__RF_ADS.pdb_CEN_trhash54435770_resl0.125_osamp2_replonlybdry
+-rif_dock:target_bounding_xmaps ./rifgen_v4_ads/rif_v4_ads.rif.gz_BOUNDING_RIF_16.xmap.gz
+-rif_dock:target_bounding_xmaps ./rifgen_v4_ads/rif_v4_ads.rif.gz_BOUNDING_RIF_08.xmap.gz
+-rif_dock:target_bounding_xmaps ./rifgen_v4_ads/rif_v4_ads.rif.gz_BOUNDING_RIF_04.xmap.gz
+-rif_dock:target_bounding_xmaps ./rifgen_v4_ads/rif_v4_ads.rif.gz_BOUNDING_RIF_02.xmap.gz
+-rif_dock:target_bounding_xmaps ./rifgen_v4_ads/rif_v4_ads.rif.gz_BOUNDING_RIF_01.xmap.gz
+-rif_dock:target_rif            ./rifgen_v4_ads/rif_v4_ads.rif.gz
+-rif_dock:extra_rotamers        1
+-rif_dock:extra_rif_rotamers    1
+#################################################################################################################
+
+
+-beta
+-score:weights beta_soft
+-add_orbitals false
+
+-rif_dock:replace_orig_scaffold_res false
+
+# this is where the output will go, and how much
+-rif_dock:outdir rifdock_v4_out/ads_test
+-rif_dock:dokfile all.dok
+-rif_dock:n_pdb_out 20 # max number of output pdbs
+
+# set this to the number of hbonds to the target which are required
+# no way yet to explicity say which hbonds are required, but this gives
+# some control. searches will be much faster if this number is higher
+# of course, don't make it higher than the number of hbonds that can
+# actually be made
+-require_satisfaction 5
+
+###################################################################################################
+# these flags control the overall time the search will take. a few alternte options are included
+# setting the require_satisfaction flag above to a high vaule will make search faster across the
+# board, so experiment with that also
+
+# reasonable defaults:
+-beam_size_M 5
+-hsearch_scale_factor 1.2
+
+# # very fast search, probably with low quality results
+# -beam_size_M 1
+# -hsearch_scale_factor 1.6
+
+# # slow thorough search
+# -beam_size_M 30
+# -hsearch_scale_factor 1.0
+
+####################################################################################################
+
+
+# score cut for the rosetta "score," which is kinda a ddg, but with hbond weighs highern
+-rif_dock:rosetta_score_cut -10.0
+
+# make this number higher to have less redundant results or lower to have more similar results
+# this is NOT a proper rmsd (yet), unfortunately, so if you want to tweak it you'll have to experiment
+-rif_dock:redundancy_filter_mag 1.5
+
+
+# probably don't change the rest of this stuff...
+
+-rif_dock::pack_iter_mult 1.0
+-rif_dock:hack_pack_frac 0.025
+-hack_pack true
+
+-rif_dock::rf_resl 0.5
+-rif_dock::rf_oversample 2
+
+-rif_dock:rotrf_resl   0.25
+-rif_dock:rotrf_spread 0.0
+-rif_dock:rotrf_scale_atr 1.0
+-rif_dock:rotrf_cache_dir /work/sheffler/data/scheme_data_exrots2_by_structure/rot_rf_tables_025_0_atr1
+
+-rif_dock:data_cache_dir  ./rifdock_scaffold_data_atr1_v4
+-rif_dock:cache_scaffold_data true
+
+-rif_dock:use_scaffold_bounding_grids 0
+
+-rif_dock:upweight_iface 1.3
+-rif_dock:hbond_weight 3.0
+-rif_dock:upweight_multi_hbond 1.0 # value of 1.0 could up to double hbscore if bidentate, triple if tridentate... best in conjunction with low-ish starting hbweight
+
+-rif_dock:rosetta_score_fraction 0.015
+#-rif_dock:rosetta_score_then_min_below_thresh -20.0 # this is in "rif docking score units"
+#-rif_dock:rosetta_score_at_least 3000
+#-rif_dock:rosetta_score_at_most  30000
+-rif_dock:rosetta_min_fraction 0.10
+-rif_dock:rosetta_min_scaffoldbb false
+-rif_dock:rosetta_min_targetbb   false
+-rif_dock:rosetta_hard_min false
+
+-rif_dock:pdb_info_pikaa false # this is default I think
+-rif_dock:align_output_to_scaffold true
+
+-rif_dock:global_score_cut -10.0
+
+-rif_dock:scaffold_to_ala true
+-rif_dock:scaffold_to_ala_selonly false
+
+-add_native_scaffold_rots_when_packing 0 # 1
+-bonus_to_native_scaffold_res          0 # -0.5
+
+-database /work/sheffler/rosetta/librosetta_update/database
+
+#-rif_dock:target_tag conf01
+
+-rif_dock:target_rf_oversample 2
+-mute core.scoring.ScoreFunctionFactory

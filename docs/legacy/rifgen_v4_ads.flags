@@ -1,0 +1,68 @@
+# target and params here
+-rifgen:target test_input/ads/ADS.pdb
+-extra_res_fa  test_input/ads/ADS.fa.params
+
+# names of output file and directory
+# change the rifgen_hbi and outfile to whatever is appropriate
+-rifgen:outdir         ./rifgen_v4_ads
+-rifgen:data_cache_dir ./rifgen_v4_ads
+-rifgen:outfile rif_v4_ads.rif.gz
+
+-rifgen:apores VAL ILE LEU MET PHE TRP					# apolar residue types
+-rifgen:donres ADS SER THR TYR GLN ASN HIS HIS_D TRP	# donor residue types
+-rifgen:accres ADS SER THR TYR ASP GLU GLN ASN HIS HIS_D 		# acceptor residue types
+
+# options for dumping pdbs condaining a small fraction of the RIF residues for inspection
+-rifgen:rif_hbond_dump_fraction  0.00001
+-rifgen:rif_apo_dump_fraction    0.00001
+
+# mutiplier for default hydrophobic residue score cut
+# this will largely determine how long rif generation takes and
+# how large the resulting rif is. lowering this number will cause
+# more possible hydrophobic interactions to be found, but will make
+# the rif bigger and make the search take longer. if you don't care
+# much about hydrophobic interactions, or only want a few good ones
+# raise this number to maybe 1.2 (fine to play with it) OR if you
+# aren't getting good hydrophobic packing, lower it to maybe 0.8 or 0.7.
+-rifgen:score_cut_adjust 0.7
+
+-rifgen:score_threshold -0.5       # max acceptable score to go in rif
+-rifgen:hbond_weight 2.0           # max score per-hbond
+-rifgen:upweight_multi_hbond 1.0   # extra score factor for bidentate hbonds
+
+
+-rifgen:tip_tol_deg         40.0   # hbonds off-ideal by this much angle
+-rifgen:rot_samp_resl        4.0   # angular sampling covering radius
+
+-hbond_cart_sample_hack_range 0.6  # cart search for hbonders up to this far away
+-hbond_cart_sample_hack_resl  0.3 # cart search for hbonders at this resl
+
+-hash_cart_resl    0.6     # main rif hash table cart resolution
+-hash_angle_resl  12.0     # main rif hash table angle resolution
+
+-rifgen::rif_type RotScoreSat # if you don't want satisfaction constraints, use "RotScore"
+
+-rifgen::rf_oversample 2                    # number of samples per base-grid cell
+-rifgen::rosetta_field_resl 0.125           # base resolution of energy grids
+#-rifgen::search_resolutions 4.0 2.0 1.0 0.5 # apo residue position 6D search resls
+-rifgen::search_resolutions 3.0 1.5 0.75 # apo residue position 6D search resls
+
+
+# probably don't change this stuff
+
+-rif_accum_scratch_size_M 24000 # 250gb, jojo only!
+
+-rifgen:beam_size_M 10000.0
+-rifgen:hash_preallocate_mult 0.125
+-rifgen:max_rf_bounding_ratio 4.0
+
+-add_orbitals
+-renumber_pdb
+
+-database /work/sheffler/rosetta/librosetta_update/database
+
+-rifgen:hash_cart_resls   16.0   8.0   4.0   2.0   1.0
+-rifgen:hash_cart_bounds   512   512   512   512   512
+-rifgen:lever_bounds      16.0   8.0   4.0   2.0   1.0
+-rifgen:hash_ang_resls     38.8  24.4  17.2  13.6  11.8 # yes worky worky
+-rifgen:lever_radii        23.6 18.785501 13.324600  8.425850  4.855575
