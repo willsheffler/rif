@@ -2,6 +2,7 @@
 Legacy
 --------
 
+
 This section documents the original RIF docking method and the legacy C++ implementation. Docs are here because (1) this is a convenient place for me to put them, and (2) the current library has grown out of the C++ implementation.
 
 Prototype one-sided design implementation
@@ -128,7 +129,7 @@ like most rosetta-based programs, usage is: rifgen @flags_file
 
 rifgen makes use of a fair amount of NON-TARGET-SPECIFIC cached data. In most cases, this data will be generated if it is not available. This means the first time you run rifgen, it could take a *long* time. This data is stored and accessed in the location passed to '-rifgen:data_cache_dir'. As this data is not target specific, it can be shared between runs, projects, and users. Most people in the baker lab point to one such directory, for example.
 
-_flags you will likely need to modify_
+**flags you will likely need to modify:**
 
 ::
 
@@ -145,7 +146,7 @@ _flags you will likely need to modify_
 
     -rifgen:beam_size_M 10.0
 
-flags you may want need to tweak:
+**flags you may want need to tweak:**
 
 ::
 
@@ -175,7 +176,7 @@ flags you may want need to tweak:
     -rifgen:rif_apo_dump_fraction    0.000001
 
 
-flags you must have but probably shouldn't change:
+**flags you must have but probably shouldn't change:**
 
 ::
 
@@ -203,6 +204,29 @@ flags you must have but probably shouldn't change:
     -rifgen:lever_bounds      16.0   8.0   4.0   2.0   1.0
     -rifgen:hash_ang_resls     38.8  24.4  17.2  13.6  11.8 # yes worky worky
     -rifgen:lever_radii        23.6 18.785501 13.324600  8.425850  4.855575
+
+
+**Output**
+
+All products of rifgen will be in the directory specified by the '-output_dir' flag. In addition, rifgen will dump output like the following at the end of the run. You can copy and paste this output into your rif_dock_test flags file to avoid some tedious and error-prone editing.
+
+::
+
+    ########################################### what you need for docking ###########################################
+    -rif_dock:target_pdb            rifgen_fz7_v4/rif_64_fz7_v4_sca0.7_noKR.rif_target.pdb.gz
+    -rif_dock:target_res            test_input/fz7/Fz7_model.res
+    -rif_dock:target_rf_resl        0.125
+    -rif_dock:target_rf_cache       rifgen_fz7_v4/__RF_Fz7_model.pdb_CEN_trhash12511471_resl0.125_osamp2_replonlybdry
+    -rif_dock:target_bounding_xmaps rifgen_fz7_v4/rif_64_fz7_v4_sca0.7_noKR.rif_BOUNDING_RIF_16.xmap.gz
+    -rif_dock:target_bounding_xmaps rifgen_fz7_v4/rif_64_fz7_v4_sca0.7_noKR.rif_BOUNDING_RIF_08.xmap.gz
+    -rif_dock:target_bounding_xmaps rifgen_fz7_v4/rif_64_fz7_v4_sca0.7_noKR.rif_BOUNDING_RIF_04.xmap.gz
+    -rif_dock:target_bounding_xmaps rifgen_fz7_v4/rif_64_fz7_v4_sca0.7_noKR.rif_BOUNDING_RIF_02.xmap.gz
+    -rif_dock:target_bounding_xmaps rifgen_fz7_v4/rif_64_fz7_v4_sca0.7_noKR.rif_BOUNDING_RIF_01.xmap.gz
+    -rif_dock:target_rif            rifgen_fz7_v4/rif_64_fz7_v4_sca0.7_noKR.rif.gz
+    -rif_dock:extra_rotamers        0
+    -rif_dock:extra_rif_rotamers    1
+    #################################################################################################################
+
 
 
 
