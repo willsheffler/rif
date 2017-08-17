@@ -9,6 +9,8 @@ package _rif:
 -------------------
 .. automodule:: _rif
 
+Doxygen test:
+
 .. doxygen test:
 .. ------------------
 .. .. doxygenfile:: NEST.hpp

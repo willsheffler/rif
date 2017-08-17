@@ -29,7 +29,7 @@ def build_rif_and_add_path():
     print('sphinx conf.py: rebuilding rif module for py' + version)
     # if os.path.exists('../build_docs'):
     # shutil.rmtree('../build_docs')
-    print('=' * 40, 'sphinx conf.py BUILDING RIF', '=' * 40)
+    print('=' * 20, 'sphinx conf.py BUILDING RIF', '=' * 20)
     sys.stdout.flush()
 
     for itry in range(5):
@@ -44,7 +44,7 @@ def build_rif_and_add_path():
             sys.path.insert(0, rifpath)
             import rif
             print("sphinx conf.py imported rif successfully")
-            print('=' * 40, 'sphinx conf.py DONE BUILDING RIF', '=' * 40)
+            print('=' * 20, 'sphinx conf.py DONE BUILDING RIF', '=' * 20)
             break
         except:
             print('build try', itry, 'failed')
@@ -358,9 +358,11 @@ def generate_doxygen_xml(app):
         subprocess.call(['doxygen', '--version'])
         retcode = subprocess.call(['doxygen'])
         if retcode < 0:
-            sys.stderr.write(("doxygen error code: {} " + os.linesep).format(-retcode))
+            sys.stderr.write(("doxygen error code: {} " +
+                             os.linesep).format(-retcode))
     except OSError as e:
-        sys.stderr.write(("doxygen execution failed: {} " + os.linesep).format(e))
+        sys.stderr.write(
+            ("doxygen execution failed: {} " + os.linesep).format(e))
 
 
 def setup(app):

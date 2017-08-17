@@ -12,7 +12,7 @@ RIF Documentation
 
    examples
 
-   rif
+   rif_module_docs
 
-
+   legacy
 

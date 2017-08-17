@@ -28,7 +28,7 @@
 		},
 		{
 			"name": "build_docs",
-			"shell_cmd": "cd $folder/docs && make html 2>&1 | tee ../log/subl_build.log && google-chrome _build/html/index.html &> /dev/null"
+			"shell_cmd": "cd $folder/docs && make html 2>&1 | tee ../log/subl_build.log && google-chrome 'file:///home/sheffler/rifsrc/docs/_build/html/legacy.html#building' &> /dev/null"
 		},
 		{
 			"file_regex": "^[ ]*File \"(...*?)\", line ([0-9]*)",
@@ -101,6 +101,7 @@
 		],
 		"python_interpreter": "/home/sheffler/.conda/envs/sheffler/bin/python",
 		"tab_size": 4,
-		"translate_tabs_to_spaces": true
+		"translate_tabs_to_spaces": true,
+		"spell_check": true,
 	}
 }
