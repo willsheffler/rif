@@ -2,7 +2,7 @@ RIF Documentation
 ================================
 
 .. toctree::
-   :maxdepth: 5
+   :maxdepth: 4
 
    readme_include
 
@@ -12,7 +12,11 @@ RIF Documentation
 
    examples
 
-   rif_module_docs
+   apidoc/modules.rst
 
    legacy
 
+
+test link: :py:mod:`rif.legacy.xyzMath`
+
+test link: :py:class:`rif.legacy.xyzMath.Xform`

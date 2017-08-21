@@ -1,40 +1,42 @@
 from rif. rcl import atoms, stubs, rays
 from rif.index import Stripe3DIndex
 
-# shift NH index down by one
-pept0 = rcl.atoms(peptpose, 'N ca c o')  # 344 ires,iatm,crd
 
-# 2224 ires, conh, orgdirn,crd
-rays0 = rcl.rays(pept, 'c->o n->h', shift=(0, -1))
+def main():
+    # shift NH index down by one
+    pept0 = rcl.atoms(peptpose, 'N ca c o')  # 344 ires,iatm,crd
 
-raycen0 = rays0[..., 'orig'].sum(axis='conh') / 2.0  # 24 ires,crd
+    # 2224 ires, conh, orgdirn,crd
+    rays0 = rcl.rays(pept, 'c->o n->h', shift=(0, -1))
 
-bbcoords = rcl. atoms(scafpose, 'N CA c o cb (ca)')
-bbstubs = rcl.stubs(bbcoords, 'N ca c')
-clasher = Stripe3DIndex(bbcoords, 3.5)
-contacter = Stripe3DIndex(bbcoords, stubs, 5.0)
+    raycen0 = rays0[..., 'orig'].sum(axis='conh') / 2.0  # 24 ires,crd
 
-haxis = helix axis in pept cpept = atoms(peptpose, 'N ca c o')
-rays = rays(pept, 'c->o n->h')
+    bbcoords = rcl. atoms(scafpose, 'N CA c o cb (ca)')
+    bbstubs = rcl.stubs(bbcoords, 'N ca c')
+    clasher = Stripe3DIndex(bbcoords, 3.5)
+    contacter = Stripe3DIndex(bbcoords, stubs, 5.0)
 
-samppos0 = xforms_around_axis(
-    axis=haxis, cen=hcen, name='sampcyl',
-    radius=(4, 8), resl=0.5, bounds=(-10, 10),
+    haxis = helix axis in pept cpept = atoms(peptpose, 'N ca c o')
+    rays = rays(pept, 'c->o n->h')
 
-)
-pept = samppos0 * pept0  # outer n344
+    samppos0 = xforms_around_axis(
+        axis=haxis, cen=hcen, name='sampcyl',
+        radius=(4, 8), resl=0.5, bounds=(-10, 10),
 
-sampclash = clasher.clashes(pept).any(axis=('ires', iatm'))
-samppos = samppos[!sampclash]
-pept = samppos * pept0  # m344
+    )
+    pept = samppos0 * pept0  # outer n344
 
-raycen = sampos * raycen0  # m24 sampcyl, ires, crd
-jagged_stubs = contacter.contacts(raycen)  # jagged m*2*x,44
+    sampclash = clasher.clashes(pept).any(axis=('ires', iatm'))
+    samppos = samppos[!sampclash]
+    pept = samppos * pept0  # m344
 
-rays = samppos * rays0  # m2224 sampcyl, ires, conh, origdirn, crd
-stublocalrays = jagged_stubs * rays  # m*2*x,224
-raykeys = ray_hasher10d.get_index(stublocalrays)  # m*2*x
-rayraykeys.dictmap(whateverhash)  # ? How to merge?
+    raycen = sampos * raycen0  # m24 sampcyl, ires, crd
+    jagged_stubs = contacter.contacts(raycen)  # jagged m*2*x,44
+
+    rays = samppos * rays0  # m2224 sampcyl, ires, conh, origdirn, crd
+    stublocalrays = jagged_stubs * rays  # m*2*x,224
+    raykeys = ray_hasher10d.get_index(stublocalrays)  # m*2*x
+    rayraykeys.dictmap(whateverhash)  # ? How to merge?
 
 
 Class Jagged:
@@ -45,3 +47,7 @@ Class Jagged:
         Check da marches req. Dims
         Remap dims to linear on index
         return self * daflat[index]
+
+
+if __name__ == '__main__':
+    main()

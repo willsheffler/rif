@@ -65,25 +65,29 @@ void main()
 }
 """
 
-window = app.Window(width=800, height=800, color=(1, 1, 1, 1))
 
-protein = gloo.Program(vertex, fragment)
-protein['light_position'] = 0., 0., 2.
-protein["transform"] = Trackball(Position())
-protein.bind(data.get("protein.npy").view(gloo.VertexBuffer))
-protein['color'] *= .25
-protein['color'] += .75
+def main():
+    window = app.Window(width=800, height=800, color=(1, 1, 1, 1))
+
+    protein = gloo.Program(vertex, fragment)
+    protein['light_position'] = 0., 0., 2.
+    protein["transform"] = Trackball(Position())
+    protein.bind(data.get("protein.npy").view(gloo.VertexBuffer))
+    protein['color'] *= .25
+    protein['color'] += .75
+
+    @window.event
+    def on_draw(dt):
+        window.clear()
+        protein.draw(gl.GL_POINTS)
+
+    @window.event
+    def on_init():
+        gl.glEnable(gl.GL_DEPTH_TEST)
+
+    window.attach(protein["transform"])
+    app.run()
 
 
-@window.event
-def on_draw(dt):
-    window.clear()
-    protein.draw(gl.GL_POINTS)
-
-
-@window.event
-def on_init():
-    gl.glEnable(gl.GL_DEPTH_TEST)
-
-window.attach(protein["transform"])
-app.run()
+if __name__ == '__main__':
+    main()
