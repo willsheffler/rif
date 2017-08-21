@@ -46,7 +46,7 @@ def build_rif_and_add_path():
         import rif
         print("sphinx conf.py imported rif successfully")
         print('=' * 20, 'sphinx conf.py DONE BUILDING RIF', '=' * 20)
-        break
+        # break
         # except:
         # print('build try', itry, 'failed')
 
