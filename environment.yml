@@ -1,11 +1,11 @@
 name: rif
 dependencies:
- - python>2
+ - python=3
+ - numpy=1.13
  - PyYAML
  - colorama
  - future
  - jinja2
- - numpy
  - pandas
  - xarray
  - pytest
@@ -19,4 +19,3 @@ dependencies:
    - hypothesis
    - pytest-sugar
    - pytest-xdist
- 
