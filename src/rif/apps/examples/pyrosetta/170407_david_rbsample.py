@@ -1,7 +1,9 @@
-import pyrosetta
-from rosetta import *
-
-import rosetta
+try:
+    import pyrosetta
+    from rosetta import *
+    import rosetta
+except ImportError:
+    print('no pyrosetta!')
 
 
 def main():

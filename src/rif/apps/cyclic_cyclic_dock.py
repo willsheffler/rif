@@ -1,8 +1,11 @@
 from builtins import *
 
-from pyrosetta import *
-from rosetta.numeric import xyzVector_double_t as Vec
-from rosetta.protocols.sic_dock import trans_pose
+try:
+    from pyrosetta import *
+    from rosetta.numeric import xyzVector_double_t as Vec
+    from rosetta.protocols.sic_dock import trans_pose
+except ImportError:
+    print('no pyrosetta!')
 
 nfold = 3
 
@@ -102,6 +105,7 @@ class AxleDock(object):
             if in_contact != moving_away:
                 delta *= -1.0
             delta /= 2.0
+
 
 if __name__ == '__main__':
     init('-corrections:beta_nov16')

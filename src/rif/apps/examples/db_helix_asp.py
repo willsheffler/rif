@@ -1,5 +1,7 @@
-from rif. rcl import atoms, stubs, rays
-from rif.index import stripe_index_3d
+from rif import rcl
+if rcl.HAVE_PYROSETTA:
+    from rif.rcl import atoms, stubs, rays
+    from rif.index import stripe_index_3d
 
 
 def main():

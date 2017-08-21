@@ -1,6 +1,7 @@
 from rif import stripe_index_3d, rcl
-from rosetta.numeric import xyzVector_float_t
-from rosetta.core.kinematics import Stub
+if rcl.HAVE_PYROSETTA:
+    from rosetta.numeric import xyzVector_float_t
+    from rosetta.core.kinematics import Stub
 
 
 class PoseResnumIndex(object):

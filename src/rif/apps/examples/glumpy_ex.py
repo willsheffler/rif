@@ -2,9 +2,12 @@
 # Copyright (c) 2009-2016 Nicolas P. Rougier. All rights reserved.
 # Distributed under the (new) BSD License.
 # -----------------------------------------------------------------------------
-from glumpy import app, gloo, gl, data
-from glumpy.transforms import Position, Trackball
-from glumpy.graphics.filter import Filter
+try:
+    from glumpy import app, gloo, gl, data
+    from glumpy.transforms import Position, Trackball
+    from glumpy.graphics.filter import Filter
+except ImportError:
+    print('no glumpy!')
 
 vertex = """
 uniform vec3 light_position;

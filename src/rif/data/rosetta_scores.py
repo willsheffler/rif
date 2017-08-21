@@ -14,7 +14,8 @@ import pandas as pd
 
 import rif
 from rif import rcl
-from rif.rcl import AtomID
+if rcl.HAVE_PYROSETTA:
+    from rif.rcl import AtomID
 
 
 def make_atype_charges():
