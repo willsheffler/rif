@@ -4,6 +4,7 @@ hypothesis
 jinja2
 numpy
 pandas
+seaborn
 xarray
 pytest
 pytest-cov

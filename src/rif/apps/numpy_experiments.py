@@ -2,8 +2,6 @@ import numpy as np
 import pandas as pd
 import xarray as xr
 
-from rif.actor import atom_t
-
 
 def numpy_array_dtype():
     x = np.zeros(2, dtype='(4,4)f4')
@@ -66,13 +64,15 @@ def xr_attempt1():
     xdat1 = xr.DataArray([37, 45], coords=[('x', [1, 2])])
     print(xdat1)
 
-    xdat2 = xr.DataArray([r1, r2], [('x', [1, 2]), ('y0', [1, 2, 3]), ('y1', [1, 2])])
+    xdat2 = xr.DataArray(
+        [r1, r2], [('x', [1, 2]), ('y0', [1, 2, 3]), ('y1', [1, 2])])
     print(xdat2)
 
 
 def main():
     # xr_attempt2()
     numpy_array_dtype()
+
 
 if __name__ == '__main__':
     main()

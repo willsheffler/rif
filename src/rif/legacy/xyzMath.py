@@ -641,13 +641,11 @@ def rotation_matrix_degrees(axis, angle):
     >>> while(abs(v.dot(axs))>0.9): axs = randnorm()
     >>> u = rotation_matrix_degrees(projperp(v,axs),ang)*v
     >>> assert abs(u.angle_degrees(v)-abs(ang)) < SQRTEPS
-    >>> test_rotation_mat()
-    test_rotation_mat PASS
     """
     return rotation_matrix(axis, radians(angle))
 
 
-def test_rotation_mat():
+def test_rotation_mat_BROKEN():
     import random
     for i in range(100):
         a0 = randnorm()

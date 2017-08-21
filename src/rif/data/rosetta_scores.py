@@ -21,7 +21,7 @@ def make_atype_charges():
     rcl.init_check()
     avg_iatype_charge = dict()
     atomic_charges = defaultdict(list)
-    for resn in rif.biochem.aa_name3s:
+    for resn in rif.chem.biochem.aa_name3s:
         res = rcl.make_res(resn)
         for ia in range(res.natoms()):
             iatype = res.atom_type_index(ia + 1)
@@ -81,15 +81,18 @@ FIRST_SIDECHAIN_ATOM ALL
     for atype in rif.biochem.rif_atype_names:
         content = singe_atom_res_template.format(
             name=atype, charge=atype_charges[atype], mmname='X', mock=mock_atom)
-        db_changed = rif.rcl.add_files_to_rosettaDB(dbpath + atype + '.params', content)
+        db_changed = rif.rcl.add_files_to_rosettaDB(
+            dbpath + atype + '.params', content)
         up_to_date = up_to_date and not db_changed
 
     params_file = 'residue_types/single_atoms/%s.params'
-    params_files = [params_file % x for x in rif.biochem.rif_atype_names]
-    db_changed = rif.rcl.add_residue_types_to_rosettaDB(params_files, '## single atoms')
+    params_files = [params_file % x for x in rif.chem.biochem.rif_atype_names]
+    db_changed = rif.rcl.add_residue_types_to_rosettaDB(
+        params_files, '## single atoms')
     up_to_date = up_to_date and not db_changed
 
-    db_changed = rcl.add_atom_types_to_rosettaDB(new_atom_types_txt, new_extras)
+    db_changed = rcl.add_atom_types_to_rosettaDB(
+        new_atom_types_txt, new_extras)
     up_to_date = up_to_date and not db_changed
 
     if not up_to_date:
@@ -183,8 +186,8 @@ def make_eframe_for_atoms(iat1, iat2, atype1, atype2, spec):
 
 
 def make_eframes(spec, multiprocess=False,
-                 atypes1=rif.biochem.rif_atype_names,
-                 atypes2=rif.biochem.rif_atype_names):
+                 atypes1=rif.chem.biochem.rif_atype_names,
+                 atypes2=rif.chem.biochem.rif_atype_names):
     # type: (EtableSpec, bool, list[str], list[str]) -> pd.DataFrame
     jobs = list()
     for iat1, atype1 in enumerate(atypes1):
@@ -206,7 +209,8 @@ if __name__ == '__main__':
     rcl.init_check()
     mock_atom = 'mock'
     patch_database_with_single_atom_params_files(mock_atom=mock_atom)
-    spec = EtableSpec(mn=0.0, mx=6, n=64, label='beta_nov15', map=(square, sqrt))
+    spec = EtableSpec(mn=0.0, mx=6, n=64,
+                      label='beta_nov15', map=(square, sqrt))
     # print(spec.dists)
     # sys.exit(0)
     sfunc = rcl.create_score_function(spec.label)

@@ -326,7 +326,7 @@ def build_and_test():
         ncpu = get_ncpu()
         args = list(testfiles)
         if not (testfiles or gtests):
-            args = ['.', '--pyargs', 'rif']
+            args = ['buildR', '--pyargs', 'rif', '--doctest-modules']
         args.extend(['--ignore', 'build'])
         args.extend(['--ignore', 'src'])
         if not no_xdist:

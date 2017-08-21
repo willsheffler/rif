@@ -1,5 +1,5 @@
 from rif. rcl import atoms, stubs, rays
-from rif.index import Stripe3DIndex
+from rif.index import stripe_index_3d
 
 
 def main():
@@ -13,10 +13,10 @@ def main():
 
     bbcoords = rcl. atoms(scafpose, 'N CA c o cb (ca)')
     bbstubs = rcl.stubs(bbcoords, 'N ca c')
-    clasher = Stripe3DIndex(bbcoords, 3.5)
-    contacter = Stripe3DIndex(bbcoords, stubs, 5.0)
+    clasher = stripe_index_3d(bbcoords, 3.5)
+    contacter = stripe_index_3d(bbcoords, stubs, 5.0)
 
-    haxis = helix axis in pept cpept = atoms(peptpose, 'N ca c o')
+    # haxis = helix axis in pept cpept = atoms(peptpose, 'N ca c o')
     rays = rays(pept, 'c->o n->h')
 
     samppos0 = xforms_around_axis(
@@ -26,8 +26,8 @@ def main():
     )
     pept = samppos0 * pept0  # outer n344
 
-    sampclash = clasher.clashes(pept).any(axis=('ires', iatm'))
-    samppos = samppos[!sampclash]
+    sampclash = clasher.clashes(pept).any(axis=('ires', 'iatm'))
+    samppos = samppos[~sampclash]
     pept = samppos * pept0  # m344
 
     raycen = sampos * raycen0  # m24 sampcyl, ires, crd
@@ -39,13 +39,13 @@ def main():
     rayraykeys.dictmap(whateverhash)  # ? How to merge?
 
 
-Class Jagged:
+class Jagged:
     # DataArray source
     # n44 array data
     # nx array index, x is prefix of source dims?
-    def __mul__(self, dataarray da):
-        Check da marches req. Dims
-        Remap dims to linear on index
+    def __mul__(self, dataarray_da):
+        # Check da marches req. Dims
+        # Remap dims to linear on index
         return self * daflat[index]
 
 
