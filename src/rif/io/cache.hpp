@@ -2,9 +2,12 @@
 #define INCLUDED_io_cache_HH
 
 #include <boost/exception/all.hpp>
-#include <boost/filesystem.hpp>
-#include <boost/iostreams/filter/gzip.hpp>
-#include <boost/iostreams/filtering_streambuf.hpp>
+
+// remove boost filesys dependency
+// #include <boost/filesystem.hpp>
+// #include <boost/iostreams/filter/gzip.hpp>
+// #include <boost/iostreams/filtering_streambuf.hpp>
+
 #include <fstream>
 #include <iostream>
 
