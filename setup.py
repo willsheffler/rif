@@ -172,6 +172,8 @@ class CMakeBuild(build_ext):
         ncpu = multiprocessing.cpu_count()
         if 'CI' in os.environ or 'READTHEDOCS' in os.environ:
             ncpu = 4
+            if 'READTHEDOCS' in os.environ:
+                ncpu = 1
             os.system('uname -a')
             print('setup.py: multiprocessing.cpu_count() is ',
                   multiprocessing.cpu_count())
