@@ -12,5 +12,13 @@ dependencies:
 - pip
 - boost
 - cmake
+- pytest
+- pandas
+- parsimonious
+- seaborn
+- xarray
+- jinja2
+- PyYAML
 - pip:
   - breathe
+  - hypothesis
