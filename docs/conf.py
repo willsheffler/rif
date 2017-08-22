@@ -18,6 +18,8 @@ import os
 import subprocess
 import glob
 
+on_rtd = os.environ.get('READTHEDOCS', None) == 'True'
+
 version = str(sys.version_info.major) + '.' + str(sys.version_info.minor)
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
@@ -27,6 +29,15 @@ version = str(sys.version_info.major) + '.' + str(sys.version_info.minor)
 def build_rif_and_add_path():
     print('sphinx conf.py: python', sys.executable)
     print('sphinx conf.py: rebuilding rif module for py' + version)
+    if on_rtd:
+        assert sys.executable.startswith(
+            '/home/docs/checkouts/readthedocs.org/user_builds/rif/conda')
+        condalibpath = sys.executable.rstrip('3')
+        condalibpath = sys.executable.replace('bin/python', 'lib')
+        for d in os.listdir(condalibpath):
+            print('in condalibpath:', d)
+        print('os.putenv LD_LIBRARY_PATH', condalibpath)
+        os.putenv("LD_LIBRARY_PATH", condalibpath)
     # if os.path.exists('../build_docs'):
     # shutil.rmtree('../build_docs')
     print('=' * 20, 'sphinx conf.py BUILDING RIF', '=' * 20)
@@ -155,7 +166,6 @@ todo_include_todos = False
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 
-on_rtd = os.environ.get('READTHEDOCS', None) == 'True'
 
 if not on_rtd:  # only import and set the theme if we're building docs locally
     import sphinx_rtd_theme
