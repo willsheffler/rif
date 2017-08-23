@@ -12,6 +12,12 @@ namespace py = pybind11;
 using namespace rif;
 using namespace rif::util;
 using namespace pyutil;
+using namespace py::literals;
+
+template <class T>
+static std::string str_of_type() {
+  return "YELL_AT_WILL";
+}
 
 template <class Point>
 bool is_simple_point() {
@@ -27,49 +33,66 @@ void bind_rest(py::class_<Index>& cls) {
   cls.def("_raw_point", [](Index const& self, size_t i) {
     return get_first_if_pair(self.values_[i]);
   });
-  cls.def("neighbor_count", py::vectorize(&Index::template nbcount<Point>));
+  cls.def("neighbor_count", py::vectorize(&Index::template nbcount<Point>),
+          "**returns number of neighbors for input points**", "query"_a);
   cls.def("neighbor_count", [](Index const& self, py::object obj) {
     return self.nbcount(sequence_to<Point, F>(obj, 3));
   });
-  cls.def("neighbor_count_brute_force",
-          py::vectorize(&Index::template brute_nbcount<Point>));
-  cls.def("neighbor_count_brute_force", [](Index const& self, py::object obj) {
+  cls.def("neighbor_count_brute",
+          py::vectorize(&Index::template brute_nbcount<Point>),
+          "**brute force version of neighbor_count**", "query"_a);
+  cls.def("neighbor_count_brute", [](Index const& self, py::object obj) {
     return self.brute_nbcount(sequence_to<Point, F>(obj, 3));
   });
-  cls.def("neighbor_exists", py::vectorize(&Index::template nbcount<Point>));
+  cls.def("neighbor_exists", py::vectorize(&Index::template nbcount<Point>),
+          "**return array true if a neighbor exists for corresponding input "
+          "point**",
+          "query"_a);
   cls.def("neighbor_exists", [](Index const& self, py::object obj) {
 
     return self.nbexists(sequence_to<Point, F>(obj, 3));
   });
-  cls.def("neighbor_exists_brute_force",
-          py::vectorize(&Index::template brute_nbexists<Point>));
-  cls.def("neighbor_exists_brute_force", [](Index const& self, py::object obj) {
+  cls.def("neighbor_exists_brute",
+          py::vectorize(&Index::template brute_nbexists<Point>),
+          "**brute force version of neighbor_exists**", "query"_a);
+  cls.def("neighbor_exists_brute", [](Index const& self, py::object obj) {
     return self.brute_nbexists(sequence_to<Point, F>(obj, 3));
   });
-  cls.def_readonly("translation", &Index::translation_);
+  cls.def_readonly(
+      "translation", &Index::translation_,
+      "translation applied to internal storage (so that it is compact)");
 }
 
 template <class Point>
 void bind_stripe_index_3d(py::module& m, std::string name) {
   using Index = rif::index::stripe_index_3d<Point>;
   using F = typename Point::Scalar;
-  py::class_<Index> cls(m, name.c_str(), py::dynamic_attr());
+  std::string doc =
+      "Extension Class wrapping stripe_index template with Point type";
+  doc += str_of_type<Point>();
+  py::class_<Index> cls(m, name.c_str(), py::dynamic_attr(), doc.c_str());
   cls.def("__init__", [](Index& instance, F width,
                          py::array_t<Point> const& points, py::none) {
     new (&instance) Index();
     instance.init(width, points.data(), points.size());
   });
-  cls.def("neighbors", [](Index const& self, Point query) {
-    return pyutil::to_pyarray(self.neighboring_points(query));
-  });
-  cls.def("neighbors", [](Index const& self, py::object obj) {
-    Point query = pyutil::sequence_to<Point, F>(obj, 3);
-    return pyutil::to_pyarray(self.neighboring_points(query));
-  });
-  cls.def("neighbors", [](Index const& self, Point query) {
+  cls.def("neighbors",
+          [](Index const& self, Point query) {
+            return pyutil::to_pyarray(self.neighboring_points(query));
+          },
+          "**return neighboring points for input point(s)? as custom "
+          "JaggedArray**",
+          "query"_a);
+  cls.def("neighbors",
+          [](Index const& self, py::object obj) {
+            Point query = pyutil::sequence_to<Point, F>(obj, 3);
+            return pyutil::to_pyarray(self.neighboring_points(query));
+          },
+          "**return neighboring points for input point**", "query"_a);
+  cls.def("neighbors_brute", [](Index const& self, Point query) {
     return pyutil::to_pyarray(self.neighboring_points_brute(query));
   });
-  cls.def("neighbors_brute_force", [](Index const& self, py::object obj) {
+  cls.def("neighbors_brute", [](Index const& self, py::object obj) {
     Point query = pyutil::sequence_to<Point, F>(obj, 3);
     return pyutil::to_pyarray(self.neighboring_points_brute(query));
   });
@@ -80,7 +103,9 @@ template <class Point, class Payload>
 void bind_stripe_index_3d(py::module& m, std::string name) {
   using Index = rif::index::stripe_index_3d<Point, Payload>;
   using F = typename Point::Scalar;
-  py::class_<Index> cls(m, name.c_str(), py::dynamic_attr());
+  std::string doc = "Extension Class wrapping stripe_index template mapping ";
+  doc += str_of_type<Point>() + "to payload " + str_of_type<Payload>();
+  py::class_<Index> cls(m, name.c_str(), py::dynamic_attr(), doc.c_str());
   cls.def("__init__",
           [](Index& instance, F width, py::array_t<Point> const& points,
              py::array_t<Payload> const& payload) {
@@ -92,9 +117,11 @@ void bind_stripe_index_3d(py::module& m, std::string name) {
   cls.def("_raw_payload", [](Index const& self, size_t i) {
     return get_second_if_pair(self.values_[i]);
   });
-  cls.def("neighbors", [](Index const& self, Point query) {
-    return pyutil::to_pyarray(self.neighboring_payloads(query));
-  });
+  cls.def("neighbors",
+          [](Index const& self, Point query) {
+            return pyutil::to_pyarray(self.neighboring_payloads(query));
+          },
+          "**return neighboring *payloads* for input point**", "query"_a);
   cls.def("neighbors", [](Index const& self, py::object obj) {
     Point query = pyutil::sequence_to<Point, float>(obj, 3);
     return pyutil::to_pyarray(self.neighboring_payloads(query));

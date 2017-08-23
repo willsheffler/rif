@@ -65,6 +65,8 @@ def _init_dispatch():
                         for dt2 in dtmap[t2]:
                             k = dt1, dt2, _opmap2[op]
                             _NPY_RIF_OP2MAP[k] = getattr(module, fn)
+
+
 _init_dispatch()
 
 
@@ -104,6 +106,7 @@ def rif_operators_are_enabled():
 
 
 def global_rif_operators_enable(quiet=False):
+    "enable rif operators via numpy.set_numeric_opts"
     global _ORIG_NUMPY_OPS
     if rif_operators_are_enabled():
         print('warning: global_rif_ops is already enabled')
@@ -116,6 +119,7 @@ def global_rif_operators_enable(quiet=False):
 
 
 def global_rif_operators_disable(quiet=False):
+    "disable rif operators via numpy.set_numeric_opts"
     global _ORIG_NUMPY_OPS
     assert _ORIG_NUMPY_OPS
     np.set_numeric_ops(**_ORIG_NUMPY_OPS)
@@ -168,6 +172,7 @@ def with_rifops_disabled(f):
         with RifOperatorsDisabled():
             return f(*args, **kwargs)
     return wrap
+
 
 _ORIG_WRAPPED_BROKEN_FUNCTIONS = None
 

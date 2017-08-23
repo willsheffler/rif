@@ -7,14 +7,48 @@ sys.path.append(os.path.dirname(__file__))  # not sure why sometimes necessary
 from build_utils import build_and_test, build_and_run_gtest_auto, _VERBOSE
 
 
+def run_test():
+    try:
+        build_and_run_gtest_auto()
+        gtest_ran = True
+    except NotImplementedError:
+        gtest_ran = False
+    # print("gtest_ran:", gtest_ran)
+    if not gtest_ran:
+        build_and_test()
+
+
+def isdocfile(fname):
+    return fname.endswith('/docs/conf.py') or fname.endswith('.rst')
+
+
+def run_docs():
+    rstfiles = [arg for arg in sys.argv[1:] if isdocfile(arg)]
+    assert rstfiles
+    rstfile = rstfiles[0]
+    docsloc = rstfile[:rstfile.rfind('/docs/') + 5]
+    print(docsloc)
+    shell_cmd = f"cd {docsloc} && make html 2>&1 | tee ../log/subl_build.log"
+    print(shell_cmd)
+    return os.system(shell_cmd)
+
+
+def run():
+    if any(isdocfile(arg) for arg in sys.argv[1:]):
+        return run_docs()
+    else:
+        return run_test()
+
+
 if __name__ == '__main__':
     if _VERBOSE:
         print('== build_and_test.py start ==')
         print('== in ci ==')
-        try:
-            sys.exit(build_and_test())
-        except Exception as e:
-            t, v, tb = sys.exc_info()
+    try:
+        sys.exit(run())
+    except Exception as e:
+        t, v, tb = sys.exc_info()
+        if _VERBOSE:
             with open('.ERROR', 'w') as out:
                 out.write(str(e))
             print('==========================================================')
@@ -22,12 +56,3 @@ if __name__ == '__main__':
             print('==========================================================')
             print(e)
             traceback.print_tb(tb)
-    else:
-        try:
-            build_and_run_gtest_auto()
-            gtest_ran = True
-        except NotImplementedError:
-            gtest_ran = False
-        # print("gtest_ran:", gtest_ran)
-        if not gtest_ran:
-            build_and_test()

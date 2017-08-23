@@ -4,8 +4,8 @@ hypothesis
 jinja2
 numpy
 pandas
-seaborn
 xarray
+seaborn
 pytest
 pytest-cov
 pytest-sugar
@@ -13,6 +13,7 @@ pytest-xdist
 sphinx
 breathe
 sphinx_rtd_theme
+sphinxcontrib-napoleon
 mock
 parsimonious
 -e external/hacked_packages/pytest-cpp-0.4
