@@ -27,13 +27,24 @@ void bind_rest(py::class_<Index>& cls) {
   cls.def("_raw_point", [](Index const& self, size_t i) {
     return get_first_if_pair(self.values_[i]);
   });
-  cls.def("neighbor_count", &Index::template nbcount<Point>);
+  cls.def("neighbor_count", py::vectorize(&Index::template nbcount<Point>));
   cls.def("neighbor_count", [](Index const& self, py::object obj) {
     return self.nbcount(sequence_to<Point, F>(obj, 3));
   });
-  cls.def("neighbor_exists", &Index::template nbcount<Point>);
+  cls.def("neighbor_count_brute_force",
+          py::vectorize(&Index::template brute_nbcount<Point>));
+  cls.def("neighbor_count_brute_force", [](Index const& self, py::object obj) {
+    return self.brute_nbcount(sequence_to<Point, F>(obj, 3));
+  });
+  cls.def("neighbor_exists", py::vectorize(&Index::template nbcount<Point>));
   cls.def("neighbor_exists", [](Index const& self, py::object obj) {
+
     return self.nbexists(sequence_to<Point, F>(obj, 3));
+  });
+  cls.def("neighbor_exists_brute_force",
+          py::vectorize(&Index::template brute_nbexists<Point>));
+  cls.def("neighbor_exists_brute_force", [](Index const& self, py::object obj) {
+    return self.brute_nbexists(sequence_to<Point, F>(obj, 3));
   });
   cls.def_readonly("translation", &Index::translation_);
 }
@@ -54,6 +65,13 @@ void bind_stripe_index_3d(py::module& m, std::string name) {
   cls.def("neighbors", [](Index const& self, py::object obj) {
     Point query = pyutil::sequence_to<Point, F>(obj, 3);
     return pyutil::to_pyarray(self.neighboring_points(query));
+  });
+  cls.def("neighbors", [](Index const& self, Point query) {
+    return pyutil::to_pyarray(self.neighboring_points_brute(query));
+  });
+  cls.def("neighbors_brute_force", [](Index const& self, py::object obj) {
+    Point query = pyutil::sequence_to<Point, F>(obj, 3);
+    return pyutil::to_pyarray(self.neighboring_points_brute(query));
   });
   bind_rest<Index>(cls);
 }
@@ -80,6 +98,13 @@ void bind_stripe_index_3d(py::module& m, std::string name) {
   cls.def("neighbors", [](Index const& self, py::object obj) {
     Point query = pyutil::sequence_to<Point, float>(obj, 3);
     return pyutil::to_pyarray(self.neighboring_payloads(query));
+  });
+  cls.def("neighbors_brute", [](Index const& self, Point query) {
+    return pyutil::to_pyarray(self.neighboring_payloads_brute(query));
+  });
+  cls.def("neighbors_brute", [](Index const& self, py::object obj) {
+    Point query = pyutil::sequence_to<Point, float>(obj, 3);
+    return pyutil::to_pyarray(self.neighboring_payloads_brute(query));
   });
   bind_rest<Index>(cls);
 }

@@ -95,7 +95,7 @@ struct stripe_index_3d {
     return myvisitor.result;
   }
   template <class Point>
-  int brute_contact(Point query) const {
+  int brute_nbexists(Point query) const {
     NBExistsVisitor myvisitor;
     brute_visit(query, myvisitor);
     return myvisitor.result;
@@ -156,6 +156,13 @@ struct stripe_index_3d {
     visit(query, myvisitor);
     return result;
   }
+  template <class Point>
+  std::vector<Pt> neighboring_points_brute(Point query) const {
+    std::vector<Point> result;
+    auto myvisitor = neighboring_points_visitor(std::back_inserter(result));
+    brute_visit(query, myvisitor);
+    return result;
+  }
 
   //////////// neighbor payloads lookup ///////////
 
@@ -178,6 +185,13 @@ struct stripe_index_3d {
     std::vector<Payload> result;
     auto myvisitor = neighboring_payloads_visitor(std::back_inserter(result));
     visit(query, myvisitor);
+    return result;
+  }
+  template <class Point>
+  std::vector<Payload> neighboring_payloads_brute(Point query) const {
+    std::vector<Payload> result;
+    auto myvisitor = neighboring_payloads_visitor(std::back_inserter(result));
+    brute_visit(query, myvisitor);
     return result;
   }
 

@@ -34,8 +34,8 @@ def build_rif_and_add_path():
             '/home/docs/checkouts/readthedocs.org/user_builds/rif/conda')
         condalibpath = sys.executable.rstrip('3')
         condalibpath = sys.executable.replace('bin/python', 'lib')
-        for d in os.listdir(condalibpath):
-            print('in condalibpath:', d)
+        # for d in os.listdir(condalibpath):
+        # print('in condalibpath:', d)
         print('os.putenv LD_LIBRARY_PATH', condalibpath)
         os.putenv("LD_LIBRARY_PATH", condalibpath)
     # if os.path.exists('../build_docs'):
@@ -64,7 +64,6 @@ def build_rif_and_add_path():
 
 build_rif_and_add_path()
 
-
 # -- General configuration ------------------------------------------------
 
 # If your documentation needs a minimal Sphinx version, state it here.
@@ -79,6 +78,7 @@ extensions = [
     'sphinx.ext.viewcode',
     'sphinx.ext.autodoc',
     'sphinx.ext.autosummary',
+    'sphinx.ext.doctest',
     'breathe',
 ]
 
@@ -131,7 +131,7 @@ language = None
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
-exclude_patterns = ['.build', 'release.rst', '**/test_*', '**/*_test.py']
+exclude_patterns = ['.build', 'release.rst', '**/test_*', '**/_test*']
 
 # The reST default role (used for this markup: `text`) to use for all
 # documents.
@@ -358,6 +358,9 @@ texinfo_documents = [
 
 # If true, do not generate a @detailsmenu in the "Top" node's menu.
 #texinfo_no_detailmenu = False
+
+
+autodoc_mock_imports = ["pyrosetta"]
 
 
 def generate_doxygen_xml(app):

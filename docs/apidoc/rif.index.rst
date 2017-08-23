@@ -12,14 +12,6 @@ rif\.index\.stripe\_index module
     :undoc-members:
     :show-inheritance:
 
-rif\.index\.stripe\_index\_3d module
-------------------------------------
-
-.. automodule:: rif.index.stripe_index_3d
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
 rif\.index\.stripe\_index\_test module
 --------------------------------------
 
@@ -36,3 +28,11 @@ Module contents
     :members:
     :undoc-members:
     :show-inheritance:
+
+
+C++ Module contents
+---------------------
+
+.. toctree::
+
+    _rif._index

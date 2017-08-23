@@ -4,6 +4,8 @@ RIF Documentation
 .. toctree::
    :maxdepth: 4
 
+   changelog
+
    readme_include
 
    contributing_include
@@ -12,7 +14,7 @@ RIF Documentation
 
    examples
 
-   apidoc/modules.rst
+   apidoc/rif.rst
 
    legacy
 

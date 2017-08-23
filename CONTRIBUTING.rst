@@ -15,12 +15,12 @@ Build System
 -------------
 
 This project *should* support
-- python setup.py
-- pip
-- cmake (needs help finding a numpy library)
-- tools/build_and_test.py
- - should be refactored to use click (or other)
- - should dispatch on file pattern (use a library?) \*.pybind.cpp \*_test.py
+    - python setup.py
+    - pip
+    - cmake (needs help finding a numpy library)
+    - tools/build_and_test.py
+        - should be re-factored to use click (or other)
+        - should dispatch on file pattern (use a library?) \*.pybind.cpp \*_test.py
 
 Adding wrapped c++ code
 --------------------------

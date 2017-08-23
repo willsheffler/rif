@@ -267,16 +267,25 @@ def build_and_test():
     # print("== build_and_test ==")
     cfg = 'Release'
     srcdir = abspath('src')
-    testfiles = [x for x in sys.argv[1:] if x.endswith('.py') and
-                 basename(x).startswith('test') or x.endswith('test.py')]
-    testfiles.extend(x.replace('.py', '_test.py') for x in sys.argv[1:]
-                     if x.endswith('.py') and
-                     exists(x.replace('.py', '_test.py')))
+    testfiles = set()
+    for argfile in sys.argv[1:]:
+        if not argfile.endswith('.py') and not argfile.startswith('-'):
+            # testfiles.add(argfile)
+            continue
+        candidate_mod = argfile.replace('_test.py', '.py')
+        candidate_tst = candidate_mod.replace('.py', '_test.py')
+        if exists(candidate_mod) and exists(candidate_tst):
+            testfiles.add(candidate_mod)
+            testfiles.add(candidate_tst)
+    testfiles = list(testfiles)
     # print(testfiles)
     # sys.exit(-1)
     testfiles.extend(x.replace('.pybind.cpp', '_test.py') for x in sys.argv[1:]
                      if x.endswith('.pybind.cpp') and
                      exists(x.replace('.pybind.cpp', '_test.py')))
+    testfiles.extend(x.replace('.pybind.cpp', '.py') for x in sys.argv[1:]
+                     if x.endswith('.pybind.cpp') and
+                     exists(x.replace('.pybind.cpp', '.py')))
     pybindfiles = [x for x in sys.argv[1:] if x.endswith('.pybind.cpp')]
     gtests = get_gtests(sys.argv[1:])
     apps = [x for x in sys.argv[1:] if '/rif/apps/' in x]
@@ -326,7 +335,8 @@ def build_and_test():
         ncpu = get_ncpu()
         args = list(testfiles)
         if not (testfiles or gtests):
-            args = ['buildR', '--pyargs', 'rif', '--doctest-modules']
+            args = ['buildR', '--pyargs', 'rif', ]
+        args.extend(['--doctest-modules'])
         args.extend(['--ignore', 'build'])
         args.extend(['--ignore', 'src'])
         if not no_xdist:

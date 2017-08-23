@@ -1,5 +1,7 @@
-rif package
-===========
+.. _rif-package-doc:
+
+Rif Module Documentation
+=========================
 
 Subpackages
 -----------
