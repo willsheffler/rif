@@ -9,7 +9,7 @@ import math
 import operator as op
 from functools import reduce
 
-EPS = 0.00001
+EPS = 0.0001
 SQRTEPS = sqrt(EPS)
 ATET = 54.735610317245360079  # asin(sr2/sr3)
 AOCT = 35.264389682754668343  # asin(sr1/sr3)

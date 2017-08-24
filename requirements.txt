@@ -1,19 +1,20 @@
-PyYAML
-colorama
-hypothesis
-jinja2
 numpy
+scipy
 pandas
 xarray
+pyyaml
+jinja2
 seaborn
+matplotlib
+parsimonious
 pytest
 pytest-cov
 pytest-sugar
 pytest-xdist
+-e external/hacked_packages/pytest-cpp-0.4
+mock
+hypothesis
 sphinx
 breathe
 sphinx_rtd_theme
 sphinxcontrib-napoleon
-mock
-parsimonious
--e external/hacked_packages/pytest-cpp-0.4

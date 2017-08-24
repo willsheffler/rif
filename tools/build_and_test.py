@@ -7,7 +7,7 @@ sys.path.append(os.path.dirname(__file__))  # not sure why sometimes necessary
 from build_utils import build_and_test, build_and_run_gtest_auto, _VERBOSE
 
 
-def run_test():
+def run_tests():
     try:
         build_and_run_gtest_auto()
         gtest_ran = True
@@ -28,16 +28,18 @@ def run_docs():
     rstfile = rstfiles[0]
     docsloc = rstfile[:rstfile.rfind('/docs/') + 5]
     print(docsloc)
-    shell_cmd = f"cd {docsloc} && make html 2>&1 | tee ../log/subl_build.log"
+    shell_cmd = "cd %s && make html 2>&1 | tee ../log/subl_build.log" % docsloc
     print(shell_cmd)
-    return os.system(shell_cmd)
+    assert not os.system(shell_cmd)
+    url = docsloc + "/_build/html"
+    os.system('google-chrome %s' % url)
 
 
 def run():
     if any(isdocfile(arg) for arg in sys.argv[1:]):
         return run_docs()
     else:
-        return run_test()
+        return run_tests()
 
 
 if __name__ == '__main__':

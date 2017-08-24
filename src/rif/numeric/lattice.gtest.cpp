@@ -339,7 +339,7 @@ TEST(lattice, neighbors) {
   double v5 = test_bcc_neighbors<7, double, uint64_t>(NITER);
   EXPECT_LE(0.71, v1);  // these are total approximations
   EXPECT_LE(0.67, v2);  // these are total approximations
-  EXPECT_LE(0.62, v3);  // these are total approximations
+  EXPECT_LE(0.60, v3);  // these are total approximations
   EXPECT_LE(0.53, v4);  // these are total approximations
   EXPECT_LE(0.49, v5);  // these are total approximations this one in particular
   // cout << test_bcc_neighbors<3,double,size_t>(1000000) << endl; // 0.779427
