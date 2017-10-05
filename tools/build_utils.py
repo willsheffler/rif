@@ -265,10 +265,11 @@ def rebuild_fast(target='_rif', cfg='Release', force_redo_cmake=False):
 def build_and_test():
     assert exists('CMakeLists.txt') and exists('setup.py')
     # print("== build_and_test ==")
+    argfiles = sys.argv[1:]
     cfg = 'Release'
     srcdir = abspath('src')
     testfiles = set()
-    for argfile in sys.argv[1:]:
+    for argfile in argfiles:
         if not argfile.endswith('.py') and not argfile.startswith('-'):
             # testfiles.add(argfile)
             continue
@@ -280,16 +281,22 @@ def build_and_test():
     testfiles = list(testfiles)
     # print(testfiles)
     # sys.exit(-1)
-    testfiles.extend(x.replace('.pybind.cpp', '_test.py') for x in sys.argv[1:]
+    testfiles.extend(x.replace('.pybind.cpp', '_test.py') for x in argfiles
                      if x.endswith('.pybind.cpp') and
                      exists(x.replace('.pybind.cpp', '_test.py')))
-    testfiles.extend(x.replace('.pybind.cpp', '.py') for x in sys.argv[1:]
+    testfiles.extend(x.replace('.pybind.cpp', '.py') for x in argfiles
                      if x.endswith('.pybind.cpp') and
                      exists(x.replace('.pybind.cpp', '.py')))
-    pybindfiles = [x for x in sys.argv[1:] if x.endswith('.pybind.cpp')]
-    gtests = get_gtests(sys.argv[1:])
-    apps = [x for x in sys.argv[1:] if '/rif/apps/' in x]
-    tests = [x for x in sys.argv[1:] if '/rif/apps/' not in x]
+    for x in argfiles:
+        if x.endswith('.hpp'):
+            if not exists(x.replace('.hpp', '.gtest.cpp')):
+                candidate = x.replace('.hpp', '_test.py')
+                if exists(candidate):
+                    testfiles.append(candidate)
+    pybindfiles = [x for x in argfiles if x.endswith('.pybind.cpp')]
+    gtests = get_gtests(argfiles)
+    apps = [x for x in argfiles if '/rif/apps/' in x]
+    tests = [x for x in argfiles if '/rif/apps/' not in x]
     # print('== calling rebuild_fast ==')
     no_xdist = len(testfiles) or len(gtests)
     no_xdist |= os.system('egrep "#.*cpp_files" pytest.ini') == 0
