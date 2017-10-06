@@ -10,12 +10,198 @@
 
 namespace rif {
 namespace hash {
-template <class Float, int MODE, int OPT>
-void get_transform_rotation(Eigen::Transform<Float, 3, MODE, OPT> const &x,
-                            Eigen::Matrix<Float, 3, 3> &rotation) {
-  // for (int i = 0; i < 9; ++i) rotation.data()[i] = x.data()[i];
-  rotation = x.linear();
+
+template <class A>
+void clamp01(A &a) {
+  for (int i = 0; i < A::N; ++i) {
+    a[i] = fmin(1.0, fmax(0.0, a[i]));
+  }
 }
+
+template <class _Xform>
+struct XformHash_bt24_BCC6 {
+  using Xform = _Xform;
+  typedef uint64_t Key;
+  typedef typename Xform::Scalar Float;
+  typedef typename Xform::Scalar Scalar;
+  typedef rif::nest::pmap::TetracontoctachoronMap<> OriMap;
+  typedef rif::numeric::BCC<6, Float, uint64_t> Grid;
+  typedef rif::util::SimpleArray<3, Float> F3;
+  typedef rif::util::SimpleArray<3, uint64_t> I3;
+  typedef rif::util::SimpleArray<6, Float> F6;
+  typedef rif::util::SimpleArray<6, uint64_t> I6;
+
+  Float grid_size_;
+  Float grid_spacing_;
+  OriMap ori_map_;
+  Grid grid_;
+  Float cart_resl_, ang_resl_, cart_bound_;
+
+  static std::string name() { return "XformHash_bt24_BCC6"; }
+
+  XformHash_bt24_BCC6() {}
+
+  XformHash_bt24_BCC6(Float cart_resl, Float ang_resl,
+                      Float cart_bound = 512.0) {
+    init(cart_resl, ang_resl, cart_bound);
+  }
+
+  int get_ori_nside() {
+    static float const covrad[64] = {
+        49.66580, 25.99805, 17.48845, 13.15078, 10.48384, 8.76800, 7.48210,
+        6.56491,  5.84498,  5.27430,  4.78793,  4.35932,  4.04326, 3.76735,
+        3.51456,  3.29493,  3.09656,  2.92407,  2.75865,  2.62890, 2.51173,
+        2.39665,  2.28840,  2.19235,  2.09949,  2.01564,  1.94154, 1.87351,
+        1.80926,  1.75516,  1.69866,  1.64672,  1.59025,  1.54589, 1.50077,
+        1.46216,  1.41758,  1.38146,  1.35363,  1.31630,  1.28212, 1.24864,
+        1.21919,  1.20169,  1.17003,  1.14951,  1.11853,  1.09436, 1.07381,
+        1.05223,  1.02896,  1.00747,  0.99457,  0.97719,  0.95703, 0.93588,
+        0.92061,  0.90475,  0.89253,  0.87480,  0.86141,  0.84846, 0.83677,
+        0.82164};
+    int ori_nside = 1;
+    while (covrad[ori_nside - 1] * 1.45 > ang_resl_ && ori_nside < 62)
+      ++ori_nside;  // TODO: HACK multiplier!
+    return ori_nside;
+  }
+
+  void init(Float cart_resl, Float ang_resl, Float cart_bound = 512.0) {
+    cart_resl_ = cart_resl;
+    ang_resl_ = ang_resl;
+    cart_bound_ = cart_bound;
+    init2(cart_resl, get_ori_nside(), cart_bound);
+  }
+  void init2(Float cart_resl, int ori_nside, Float cart_bound) {
+    cart_resl /= sqrt(3.0) / 2.0;  // TODO: HACK multiplier!
+    F6 lb, ub;
+    I6 nside = get_bounds(cart_resl, ori_nside, cart_bound, lb, ub);
+    grid_.init(nside, lb, ub);
+  }
+
+  I6 get_bounds(Float cart_resl, int ori_nside, float cart_bound, F6 &lb,
+                F6 &ub) {
+    I6 nside;
+    if (2 * (int)(cart_bound / cart_resl) > 8192) {
+      throw std::out_of_range("can have at most 8192 cart cells!");
+    }
+    nside[0] = nside[1] = nside[2] = 2.0 * cart_bound / cart_resl;
+    nside[3] = nside[4] = nside[5] = ori_nside + 1;
+    lb[0] = lb[1] = lb[2] = -cart_bound;
+    ub[0] = ub[1] = ub[2] = cart_bound;
+    lb[3] = lb[4] = lb[5] = -1.0 / ori_nside;
+    ub[3] = ub[4] = ub[5] = 1.0;
+    return nside;
+  }
+
+  XformHash_bt24_BCC6(Float cart_resl, int ori_nside, Float cart_bound) {
+    // std::cout << "ori_nside c'tor" << std::endl;
+    init2(cart_resl, ori_nside, cart_bound);
+  }
+
+  F6 xfrom_to_F6(Xform x, Key &cell_index) const {
+    Eigen::Matrix<Float, 3, 3> rotation = x.linear();
+    Eigen::Quaternion<Float> q(rotation);
+    numeric::get_cell_48cell_half(q.coeffs(), cell_index);
+    q = nest::pmap::hbt24_cellcen<Float>(cell_index).inverse() * q;
+    q = numeric::to_half_cell(q);
+    F3 params(
+        params[0] = q.x() / q.w() / nest::pmap::cell_width<Float>() + 0.5,
+        params[1] = q.y() / q.w() / nest::pmap::cell_width<Float>() + 0.5,
+        params[2] = q.z() / q.w() / nest::pmap::cell_width<Float>() + 0.5);
+    assert(cell_index < 24);
+    clamp01(params);
+    F6 params6;
+    for (int i = 0; i < 3; ++i) {
+      params6[i] = x.translation()[i];
+      params6[i + 3] = params[i];
+    }
+    return params6;
+  }
+
+  Xform F6_to_xform(F6 params6, Key cell_index) const {
+    F3 params = params6.template last<3>();
+    Float const &w(nest::pmap::cell_width<Float>());
+    clamp01(params);
+    params = w * (params - 0.5);  // now |params| < sqrt(2)-1
+    Eigen::Quaternion<Float> q(1.0, params[0], params[1], params[2]);
+    q.normalize();
+    q = nest::pmap::hbt24_cellcen<Float>(cell_index) * q;
+    Xform center(q.matrix());
+    for (int i = 0; i < 3; ++i) center.translation()[i] = params6[i];
+    return center;
+  }
+
+  Key get_key(Xform const &x) const {
+    Key cell_index;
+    F6 params6 = xfrom_to_F6(x, cell_index);
+    return cell_index << 59 | grid_[params6];
+  }
+
+  Xform get_center(Key key) const {
+    Key cell_index = key >> 59;
+    F6 params6 = grid_[key & (((Key)1 << 59) - (Key)1)];
+    return F6_to_xform(params6, cell_index);
+  }
+
+  Key approx_size() const { return grid_.size() * 24; }
+
+  Key approx_nori() const {
+    static int const nori[18] = {192,   648,   1521,  2855,   4990,   7917,
+                                 11682, 16693, 23011, 30471,  39504,  50464,
+                                 62849, 77169, 93903, 112604, 133352, 157103};
+    return nori[grid_.nside_[3] - 2];  // -1 for 0-index, -1 for ori_side+1
+  }
+};
+
+template <class _Xform>
+struct XformHash_bt24_BCC6_Phi : public XformHash_bt24_BCC6<_Xform> {
+  using Key = uint64_t;
+  using Xform = _Xform;
+  using Float = typename Xform::Scalar;
+  using Scalar = typename Xform::Scalar;
+  using OriMap = rif::nest::pmap::TetracontoctachoronMap<>;
+  using Grid7 = rif::numeric::BCC<7, Float, uint64_t>;
+  using F3 = rif::util::SimpleArray<3, Float>;
+  using I3 = rif::util::SimpleArray<3, uint64_t>;
+  using F6 = rif::util::SimpleArray<6, Float>;
+  using I6 = rif::util::SimpleArray<6, uint64_t>;
+  using F7 = rif::util::SimpleArray<7, Float>;
+  using I7 = rif::util::SimpleArray<7, uint64_t>;
+  Grid7 grid7_;
+  float phi_resl_;
+  static std::string name() { return "XformHash_bt24_BCC6_Phi"; }
+  XformHash_bt24_BCC6_Phi() {}
+  XformHash_bt24_BCC6_Phi(Float phi_resl, Float cart_resl, Float ang_resl,
+                          Float cart_bound = 256.0) {
+    this->init(cart_resl, ang_resl, cart_bound);
+    phi_resl_ = phi_resl_;
+  }
+
+  void init2(Float cart_resl, int ori_nside, Float cart_bound) {
+    std::cout << "init2 subclass" << std::endl;
+    cart_resl /= sqrt(3.0) / 2.0;  // TODO: HACK multiplier!
+    F6 lb, ub;
+    I6 ns = get_bounds(cart_resl, ori_nside, cart_bound, lb, ub);
+    grid7_.init(concat(ns, uint64_t(360.0 / phi_resl_)), concat(lb, -180.0),
+                concat(ub, 180.0));
+  }
+
+  Key get_key(Xform const &x, float phi) const {
+    assert(phi <= 180.0);
+    assert(phi >= -180.0);
+    Key cell_index;
+    F6 params6 = xfrom_to_F6(x, cell_index);
+    F7 params7 = params6;
+    params7[6] = phi;
+    return cell_index << 59 | grid7_[params7];
+  }
+
+  std::pair<Xform, float> get_center(Key key) const {
+    Key cell_index = key >> 59;
+    F7 params7 = grid7_[key & (((Key)1 << 59) - (Key)1)];
+    F6 params6 = params7;
+    return std::make_pair(F6_to_xform(params6, cell_index), params7[6]);
+  }
+};
 
 template <class _Xform>
 struct XformHash_Quat_BCC7_Zorder {
@@ -103,8 +289,7 @@ struct XformHash_Quat_BCC7_Zorder {
   }
 
   Key get_key(Xform const &x) const {
-    Eigen::Matrix<Float, 3, 3> rotation;
-    get_transform_rotation(x, rotation);
+    Eigen::Matrix<Float, 3, 3> rotation = x.linear();
     Eigen::Quaternion<Float> q(rotation);
     q = numeric::to_half_cell(q);
     F7 f7;
@@ -352,8 +537,7 @@ struct XformHash_Quat_BCC7 {
   }
 
   Key get_key(Xform const &x) const {
-    Eigen::Matrix<Float, 3, 3> rotation;
-    get_transform_rotation(x, rotation);
+    Eigen::Matrix<Float, 3, 3> rotation = x.linear();
     Eigen::Quaternion<Float> q(rotation);
     q = numeric::to_half_cell(q);
     F7 f7;
@@ -464,8 +648,7 @@ struct XformHash_bt24_BCC3_Zorder {
   // 36 bits 6*6 zorder cart/ori
   // 2 bits cart/ori even/odd
   Key get_key(Xform const &x) const {
-    Eigen::Matrix3d rotation;
-    get_transform_rotation(x, rotation);
+    Eigen::Matrix3d rotation = x.linear();
 
     uint64_t cell_index;
     F3 params;
@@ -606,8 +789,7 @@ struct XformHash_bt24_BCC3 {
   }
 
   Key get_key(Xform const &x) const {
-    Eigen::Matrix3d rotation;
-    get_transform_rotation(x, rotation);
+    Eigen::Matrix3d rotation = x.linear();
 
     uint64_t cell_index;
     F3 params;
@@ -662,187 +844,6 @@ struct XformHash_bt24_BCC3 {
   Key approx_nori() const { throw std::logic_error("not implemented"); }
 };
 
-// TODO: make _Zorder version of XformHash_bt24_BCC6
-template <class Xform>
-struct XformHash_bt24_BCC6 {
-  typedef uint64_t Key;
-  typedef typename Xform::Scalar Float;
-  typedef typename Xform::Scalar Scalar;
-  typedef rif::nest::pmap::TetracontoctachoronMap<> OriMap;
-  typedef rif::numeric::BCC<6, Float, uint64_t> Grid;
-  typedef rif::util::SimpleArray<3, Float> F3;
-  typedef rif::util::SimpleArray<3, uint64_t> I3;
-  typedef rif::util::SimpleArray<6, Float> F6;
-  typedef rif::util::SimpleArray<6, uint64_t> I6;
-
-  Float grid_size_;
-  Float grid_spacing_;
-  OriMap ori_map_;
-  Grid grid_;
-  Float cart_resl_, ang_resl_, cart_bound_;
-
-  static std::string name() { return "XformHash_bt24_BCC6"; }
-
-  XformHash_bt24_BCC6() {}
-
-  XformHash_bt24_BCC6(Float cart_resl, Float ang_resl,
-                      Float cart_bound = 512.0) {
-    init(cart_resl, ang_resl, cart_bound);
-  }
-
-  void init(Float cart_resl, Float ang_resl, Float cart_bound = 512.0) {
-    cart_resl_ = cart_resl;
-    ang_resl_ = ang_resl;
-    cart_bound_ = cart_bound;
-    // bcc orientation grid covering radii
-    static float const covrad[64] = {
-        49.66580, 25.99805, 17.48845, 13.15078, 10.48384, 8.76800, 7.48210,
-        6.56491,  5.84498,  5.27430,  4.78793,  4.35932,  4.04326, 3.76735,
-        3.51456,  3.29493,  3.09656,  2.92407,  2.75865,  2.62890, 2.51173,
-        2.39665,  2.28840,  2.19235,  2.09949,  2.01564,  1.94154, 1.87351,
-        1.80926,  1.75516,  1.69866,  1.64672,  1.59025,  1.54589, 1.50077,
-        1.46216,  1.41758,  1.38146,  1.35363,  1.31630,  1.28212, 1.24864,
-        1.21919,  1.20169,  1.17003,  1.14951,  1.11853,  1.09436, 1.07381,
-        1.05223,  1.02896,  1.00747,  0.99457,  0.97719,  0.95703, 0.93588,
-        0.92061,  0.90475,  0.89253,  0.87480,  0.86141,  0.84846, 0.83677,
-        0.82164};
-    uint64_t ori_nside = 1;
-    while (covrad[ori_nside - 1] * 1.45 > ang_resl && ori_nside < 62)
-      ++ori_nside;  // TODO: HACK multiplier!
-
-    // std::cout <<
-    // "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" <<
-    // std::endl;
-    // std::cout << "ori_nside: " << ori_nside << std::endl;
-    // std::cout <<
-    // "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" <<
-    // std::endl;
-
-    init(cart_resl, (int)ori_nside, cart_bound);
-  }
-
-  XformHash_bt24_BCC6(Float cart_resl, int ori_nside, Float cart_bound) {
-    // std::cout << "ori_nside c'tor" << std::endl;
-    init(cart_resl, ori_nside, cart_bound);
-  }
-
-  void init(Float cart_resl, int ori_nside, Float cart_bound) {
-    cart_resl /= sqrt(3.0) / 2.0;  // TODO: HACK multiplier!
-    // std::cout << "requested ang_resl: " << ang_resl << " got " <<
-    // covrad[ori_nside-1] << std::endl;
-    if (2 * (int)(cart_bound / cart_resl) > 8192) {
-      throw std::out_of_range("can have at most 8192 cart cells!");
-    }
-    I6 nside;
-    nside[0] = nside[1] = nside[2] = 2.0 * cart_bound / cart_resl;
-    nside[3] = nside[4] = nside[5] = ori_nside + 1;
-    F6 lb, ub;
-    lb[0] = lb[1] = lb[2] = -cart_bound;
-    ub[0] = ub[1] = ub[2] = cart_bound;
-    lb[3] = lb[4] = lb[5] = -1.0 / ori_nside;
-    ub[3] = ub[4] = ub[5] = 1.0;
-    grid_.init(nside, lb, ub);
-  }
-
-  Key get_key(Xform const &x) const {
-    Eigen::Matrix<Float, 3, 3> rotation;
-    get_transform_rotation(x, rotation);
-
-    uint64_t cell_index;
-    F3 params;
-    // ori_map_.value_to_params( rotation, 0, params, cell_index );
-    {  // from TetracontoctachoronMap.hh
-      Eigen::Quaternion<Float> q(rotation);
-
-      numeric::get_cell_48cell_half(q.coeffs(), cell_index);
-
-      q = nest::pmap::hbt24_cellcen<Float>(cell_index).inverse() * q;
-      q = numeric::to_half_cell(q);
-
-      params[0] = q.x() / q.w() / nest::pmap::cell_width<Float>() + 0.5;
-      params[1] = q.y() / q.w() / nest::pmap::cell_width<Float>() + 0.5;
-      params[2] = q.z() / q.w() / nest::pmap::cell_width<Float>() + 0.5;
-
-      // assert( -0.0001 <= params[0] && params[0] <= 1.0001 );
-      // assert( -0.0001 <= params[1] && params[1] <= 1.0001 );
-      // assert( -0.0001 <= params[2] && params[2] <= 1.0001 );
-    }
-    assert(cell_index < 24);
-    params[0] = fmax(0.0, params[0]);
-    params[1] = fmax(0.0, params[1]);
-    params[2] = fmax(0.0, params[2]);
-    params[0] = fmin(1.0, params[0]);
-    params[1] = fmin(1.0, params[1]);
-    params[2] = fmin(1.0, params[2]);
-
-    F6 params6;
-    params6[0] = x.translation()[0];
-    params6[1] = x.translation()[1];
-    params6[2] = x.translation()[2];
-    params6[3] = params[0];
-    params6[4] = params[1];
-    params6[5] = params[2];
-
-    return cell_index << 59 | grid_[params6];
-  }
-
-  Xform get_center(Key key) const {
-    Key cell_index = key >> 59;
-    F6 params6 = grid_[key & (((Key)1 << 59) - (Key)1)];
-
-    F3 params;
-    params[0] = params6[3];
-    params[1] = params6[4];
-    params[2] = params6[5];
-    Eigen::Matrix<Float, 3, 3> m;
-    // ori_map_.params_to_value( params, cell_index, 0, m );
-    {
-      Float const &w(nest::pmap::cell_width<Float>());
-
-      // assert( params[0] >= -0.0001 && params[0] <= 1.0001 );
-      // assert( params[1] >= -0.0001 && params[1] <= 1.0001 );
-      // assert( params[2] >= -0.0001 && params[2] <= 1.0001 );
-      params[0] = fmax(0.0, params[0]);
-      params[1] = fmax(0.0, params[1]);
-      params[2] = fmax(0.0, params[2]);
-      params[0] = fmin(1.0, params[0]);
-      params[1] = fmin(1.0, params[1]);
-      params[2] = fmin(1.0, params[2]);
-
-      // std::cout << cell_index << " " << p << " " << p << std::endl;
-      // static int count = 0; if( ++count > 30 ) std::exit(-1);
-
-      params = w * (params - 0.5);  // now |params| < sqrt(2)-1
-
-      // Eigen::Quaternion<Float> q( sqrt(1.0-p.squaredNorm()), p[0], p[1],
-      // p[2]
-      // );
-      // assert( fabs(q.squaredNorm()-1.0) < 0.000001 );
-      Eigen::Quaternion<Float> q(1.0, params[0], params[1], params[2]);
-      q.normalize();
-
-      q = nest::pmap::hbt24_cellcen<Float>(cell_index) * q;
-
-      m = q.matrix();
-    }
-    Xform center(m);
-    center.translation()[0] = params6[0];
-    center.translation()[1] = params6[1];
-    center.translation()[2] = params6[2];
-
-    return center;
-  }
-
-  Key approx_size() const { return grid_.size() * 24; }
-
-  Key approx_nori() const {
-    static int const nori[18] = {192,   648,   1521,  2855,   4990,   7917,
-                                 11682, 16693, 23011, 30471,  39504,  50464,
-                                 62849, 77169, 93903, 112604, 133352, 157103};
-    return nori[grid_.nside_[3] - 2];  // -1 for 0-index, -1 for ori_side+1
-  }
-};
-
 template <class Xform>
 struct XformHash_bt24_Cubic_Zorder {
   typedef uint64_t Key;
@@ -893,8 +894,7 @@ struct XformHash_bt24_Cubic_Zorder {
   }
 
   Key get_key(Xform const &x) const {
-    Eigen::Matrix3d rotation;
-    get_transform_rotation(x, rotation);
+    Eigen::Matrix3d rotation = x.linear();
 
     uint64_t cell_index;
     F3 params;
@@ -1024,8 +1024,7 @@ struct XformHash_Quatgrid_Cubic {
   }
 
   Key get_key(Xform const &x) const {
-    Eigen::Matrix3d rotation;
-    get_transform_rotation(x, rotation);
+    Eigen::Matrix3d rotation = x.linear();
 
     uint64_t cell_index;
     F3 params;

@@ -146,8 +146,7 @@ struct XformMap {
     x_lever_coord[0] = x.translation()[0];
     x_lever_coord[1] = x.translation()[1];
     x_lever_coord[2] = x.translation()[2];
-    Eigen::Matrix<Float, 3, 3> rot;
-    hash::get_transform_rotation(x, rot);
+    Eigen::Matrix<Float, 3, 3> rot = x.linear();
     Eigen::Quaternion<Float> q(rot);
     x_lever_coord[3] = q.w() * 2.0 * lever;
     x_lever_coord[4] = q.x() * 2.0 * lever;

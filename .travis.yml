@@ -140,16 +140,16 @@ install:
     if [[ $PY == "3" ]]; then
       if [[ $TRAVIS_OS_NAME == "osx" ]]; then brew install python3; fi
       python3 -m ensurepip
-      export PIP=$(which pip3)
-      export PYTHON=$(which python3)
-    else
       export PIP=$(which pip)
+      export PYTHON=$(which python)
+    else
+      export PIP=$(which pip2)
       export PYTHON=$(which python2)
     fi
   - echo "!!!!!! travis.yml install using pip $PIP"
   - echo "!!!!!! travis.yml install using python $PYTHON"
   - head $PIP
-  - $PIP install -rrequirements.txt codecov
+  - pip3 install -rrequirements.txt codecov
   - pip install jinja2
   - pip2 install jinja2
   - if [ $(which pip3) ]; then pip3 install jinja2; fi

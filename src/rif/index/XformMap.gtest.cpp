@@ -82,8 +82,7 @@ double get_ident_lever_dis(Xform x, double lever_dis) {
   x_lever_coord[0] = x.translation()[0];
   x_lever_coord[1] = x.translation()[1];
   x_lever_coord[2] = x.translation()[2];
-  Eigen::Matrix<double, 3, 3> rot;
-  get_transform_rotation(x, rot);
+  Eigen::Matrix<double, 3, 3> rot = x.linear();
   Eigen::Quaternion<double> q(rot);
   bool neg = q.w() < 0.0;
   x_lever_coord[3] = (neg ? -q.w() : q.w()) * 2.0 * lever_dis;

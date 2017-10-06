@@ -26,8 +26,9 @@ struct NoInit {};
 ///@brief minimal fixed size array with element-wise operations
 ///@note used this instead of Eigen Array in NEST to speed compilation by
 /// 20%-50%
-template <int N, class F = double, bool init0 = false>
+template <int _N, class F = double, bool init0 = false>
 struct SimpleArray {
+  static const int N = _N;
   typedef SimpleArray<N, F> THIS;
   typedef F value_type;
   typedef F Scalar;
@@ -225,19 +226,19 @@ struct SimpleArray {
     for (int i = 0; i < l; ++i) p += D[i];
     return p;
   }
-  bool operator==(THIS const &o) const {
+  bool operator==(THIS that) const {
     bool r = true;
-    for (int i = 0; i < N; ++i) r &= D[i] == o.D[i];
+    for (int i = 0; i < N; ++i) r &= D[i] == that.D[i];
     return r;
   }
-  bool operator!=(THIS const &o) const { return !(*this == o); }
+  bool operator!=(THIS that) const { return !(*this == that); }
   F squaredNorm() const {
     F n = 0;
     for (int i = 0; i < N; ++i) n += D[i] * D[i];
     return n;
   }
   template <class THAT>
-  bool isApprox(THAT const &that) const {
+  bool isApprox(THAT that) const {
     bool r = true;
     static F eps = sqrt(NL::epsilon());
     for (int i = 0; i < N; ++i) r &= abs(D[i] - that.D[i]) < eps;
@@ -310,6 +311,12 @@ struct SimpleArray {
   SimpleArray<N, F> &operator-=(THIS const &o) {
     for (int i = 0; i < N; ++i) D[i] -= o[i];
     return *this;
+  }
+  template <int L>
+  SimpleArray<N - L, value_type> last() const {
+    SimpleArray<N - L, value_type> r;
+    for (int i = 0; i < N - L; ++i) r[i] = (*this)[N - L + i];
+    return r;
   }
 };
 template <int N, class F>
@@ -423,6 +430,29 @@ SimpleArray<N, uint64_t> operator<(SimpleArray<N, F> const &a,
   SimpleArray<N, uint64_t> r;
   for (int i = 0; i < N; ++i) r[i] = a[i] < b[i];
   return r;
+}
+
+template <int M, int N, class T>
+SimpleArray<M + N, T> concat(SimpleArray<M, T> a, SimpleArray<N, T> b) {
+  SimpleArray<M + N, T> c;
+  for (int i = 0; i < M; ++i) c[i] = a[i];
+  for (int i = 0; i < N; ++i) c[i + M] = b[i];
+  return c;
+}
+template <int M, class T>
+SimpleArray<M + 1, T> concat(SimpleArray<M, T> a, T b) {
+  SimpleArray<M + 1, T> c;
+  for (int i = 0; i < M; ++i) c[i] = a[i];
+  c[M] = b;
+  return c;
+}
+
+template <int M, class T>
+SimpleArray<1 + M, T> concat(T a, SimpleArray<M, T> b) {
+  SimpleArray<1 + M, T> c;
+  c[0] = a;
+  for (int i = 0; i < M; ++i) c[i + 1] = b[i];
+  return c;
 }
 
 template <int N, class F = double, bool init0 = false>
