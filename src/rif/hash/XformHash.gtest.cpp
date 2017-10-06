@@ -496,11 +496,11 @@ TEST(XformHash, XformHash_Quat_BCC7_Zorder_cart_shift) {
   ASSERT_EQ(h.cart_shift_key(3451, 0, 0, 0, 1), 3450);
 }
 
-TEST(XformHash, with_phi) {
-  using XH = XformHash_bt24_BCC6_Phi<Xform>;
+TEST(XformHash, with_ang1) {
+  using XH = XformAngHash_bt24_BCC6<Xform>;
   std::mt19937 rng((unsigned int)time(0) + 23908457);
   std::uniform_real_distribution<> runif;
-  for (int i = 0; i < 100; ++i) {
+  for (int i = 0; i < 1; ++i) {
     XH h(11.0, 0.1 + runif(rng), 11.0, 300.0 * runif(rng) + 100.0);
   }
 }

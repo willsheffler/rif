@@ -31,11 +31,12 @@ struct XformHash_bt24_BCC6 {
   typedef rif::util::SimpleArray<6, Float> F6;
   typedef rif::util::SimpleArray<6, uint64_t> I6;
 
-  Float grid_size_;
-  Float grid_spacing_;
+  Float grid_size_ = -1;
+  Float grid_spacing_ = -1;
   OriMap ori_map_;
   Grid grid_;
-  Float cart_resl_, ang_resl_, cart_bound_;
+  Float phi_resl_ = -1, cart_resl_ = -1, ang_resl_ = -1, cart_bound_ = -1;
+  int ori_nside_ = -1;
 
   static std::string name() { return "XformHash_bt24_BCC6"; }
 
@@ -65,12 +66,13 @@ struct XformHash_bt24_BCC6 {
   }
 
   void init(Float cart_resl, Float ang_resl, Float cart_bound = 512.0) {
-    cart_resl_ = cart_resl;
     ang_resl_ = ang_resl;
-    cart_bound_ = cart_bound;
     init2(cart_resl, get_ori_nside(), cart_bound);
   }
   void init2(Float cart_resl, int ori_nside, Float cart_bound) {
+    cart_resl_ = cart_resl;
+    cart_bound_ = cart_bound;
+    ori_nside_ = ori_nside;
     cart_resl /= sqrt(3.0) / 2.0;  // TODO: HACK multiplier!
     F6 lb, ub;
     I6 nside = get_bounds(cart_resl, ori_nside, cart_bound, lb, ub);
@@ -176,11 +178,20 @@ struct XformAngHash_bt24_BCC6 : public XformHash_bt24_BCC6<_Xform> {
     phi_resl_ = phi_resl_;
   }
 
-  void init2(Float cart_resl, int ori_nside, Float cart_bound) {
-    std::cout << "init2 subclass" << std::endl;
-    cart_resl /= sqrt(3.0) / 2.0;  // TODO: HACK multiplier!
+  void init(Float _phi_resl, Float _cart_resl, Float _ang_resl,
+            Float _cart_bound = 512.0) {
+    this->ang_resl_ = _ang_resl;
+    init2(_phi_resl, _cart_resl, this->get_ori_nside(), _cart_bound);
+  }
+  void init2(Float _phi_resl, Float _cart_resl, int _ori_nside,
+             Float _cart_bound) {
+    this->phi_resl_ = _phi_resl;
+    this->ori_nside_ = _ori_nside;
+    this->cart_bound_ = _cart_bound;
+    this->cart_resl_ = _cart_resl / (sqrt(3.0) / 2.0);
     F6 lb, ub;
-    I6 ns = get_bounds(cart_resl, ori_nside, cart_bound, lb, ub);
+    I6 ns = this->get_bounds(this->cart_resl_, this->ori_nside_,
+                             this->cart_bound_, lb, ub);
     grid7_.init(concat(ns, uint64_t(360.0 / phi_resl_)), concat(lb, -180.0),
                 concat(ub, 180.0));
   }
