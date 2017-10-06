@@ -153,7 +153,7 @@ struct XformHash_bt24_BCC6 {
 };
 
 template <class _Xform>
-struct XformHash_bt24_BCC6_Phi : public XformHash_bt24_BCC6<_Xform> {
+struct XformAngHash_bt24_BCC6 : public XformHash_bt24_BCC6<_Xform> {
   using Key = uint64_t;
   using Xform = _Xform;
   using Float = typename Xform::Scalar;
@@ -168,10 +168,10 @@ struct XformHash_bt24_BCC6_Phi : public XformHash_bt24_BCC6<_Xform> {
   using I7 = rif::util::SimpleArray<7, uint64_t>;
   Grid7 grid7_;
   float phi_resl_;
-  static std::string name() { return "XformHash_bt24_BCC6_Phi"; }
-  XformHash_bt24_BCC6_Phi() {}
-  XformHash_bt24_BCC6_Phi(Float phi_resl, Float cart_resl, Float ang_resl,
-                          Float cart_bound = 256.0) {
+  static std::string name() { return "XformAngHash_bt24_BCC6"; }
+  XformAngHash_bt24_BCC6() {}
+  XformAngHash_bt24_BCC6(Float phi_resl, Float cart_resl, Float ang_resl,
+                         Float cart_bound = 256.0) {
     this->init(cart_resl, ang_resl, cart_bound);
     phi_resl_ = phi_resl_;
   }
@@ -202,6 +202,10 @@ struct XformHash_bt24_BCC6_Phi : public XformHash_bt24_BCC6<_Xform> {
     return std::make_pair(F6_to_xform(params6, cell_index), params7[6]);
   }
 };
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////
+/// below may be "out of date" XformHash_bt24_BCC6 is the "official" one.
+//////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 template <class _Xform>
 struct XformHash_Quat_BCC7_Zorder {

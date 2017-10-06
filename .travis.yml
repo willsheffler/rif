@@ -149,7 +149,7 @@ install:
   - echo "!!!!!! travis.yml install using pip $PIP"
   - echo "!!!!!! travis.yml install using python $PYTHON"
   - head $PIP
-  - pip3 install -rrequirements.txt codecov
+  - $PIP install -rrequirements.txt codecov
   - pip install jinja2
   - pip2 install jinja2
   - if [ $(which pip3) ]; then pip3 install jinja2; fi
