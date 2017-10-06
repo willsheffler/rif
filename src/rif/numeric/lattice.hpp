@@ -163,7 +163,9 @@ struct BCC {
 
 template <int DIM, class Float, class Index>
 std::ostream &operator<<(std::ostream &out, BCC<DIM, Float, Index> bcc) {
-  return out << "lb " << bcc.lower_ << " w " << bcc.width_;
+  return out << "lb " << bcc.lower_ << " ub "
+             << (bcc.width_ * bcc.nside_.template cast<Float>() + bcc.lower_)
+             << " w " << bcc.width_ << " nc " << bcc.nside_;
 }
 
 template <int DIM, class Float, class Index = uint64_t>

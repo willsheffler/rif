@@ -318,6 +318,13 @@ struct SimpleArray {
     for (int i = 0; i < N - L; ++i) r[i] = (*this)[N - L + i];
     return r;
   }
+  template <int L>
+  SimpleArray<L, value_type> first() const {
+    static_assert(L <= N);
+    SimpleArray<L, value_type> r;
+    for (int i = 0; i < L; ++i) r[i] = (*this)[i];
+    return r;
+  }
 };
 template <int N, class F>
 std::ostream &operator<<(std::ostream &out, SimpleArray<N, F> const &a) {
@@ -445,6 +452,14 @@ SimpleArray<M + 1, T> concat(SimpleArray<M, T> a, T b) {
   for (int i = 0; i < M; ++i) c[i] = a[i];
   c[M] = b;
   return c;
+}
+template <int M, class T>
+SimpleArray<M + 2, T> concat(SimpleArray<M, T> a, T b, T c) {
+  SimpleArray<M + 2, T> r;
+  for (int i = 0; i < M; ++i) r[i] = a[i];
+  r[M] = b;
+  r[M + 1] = c;
+  return r;
 }
 
 template <int M, class T>

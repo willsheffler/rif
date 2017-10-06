@@ -30,7 +30,7 @@ int get_num_ori_cells(int ori_nside, double &xcov) {
     int NSAMP = std::max(1000000, 500 * ori_nside * ori_nside * ori_nside);
     Xform x;
     for (int i = 0; i < NSAMP; ++i) {
-      geom::rand_xform(rng, x);
+      geom::rand_xform(rng, x, 512.0);
       x.translation()[0] = x.translation()[1] = x.translation()[2] = 0;
       idx_seen.insert(xh.get_key(x));
     }
@@ -322,7 +322,7 @@ void test_xform_hash_perf(double cart_resl, double ang_resl,
 
   std::vector<Xform> samples(N2), centers(N2);
 
-  for (int i = 0; i < N2; ++i) geom::rand_xform(rng, samples[i]);
+  for (int i = 0; i < N2; ++i) geom::rand_xform(rng, samples[i], 512.0);
 
   util::Timer tk;
   std::vector<uint64_t> keys(N2);
@@ -358,6 +358,8 @@ void test_xform_hash_perf(double cart_resl, double ang_resl,
     ASSERT_LT(dt, cart_resl);
     ASSERT_LT(da, ang_resl);
   }
+  ASSERT_GT(max_dt * 1.2, cart_resl);
+  ASSERT_GT(max_da * 1.4, ang_resl);  // multiplier of 1.4??
 
   double tot_cell_vol = covrad * covrad * covrad * covrad * covrad * covrad *
                         xh.approx_nori() / (cart_resl * cart_resl * cart_resl);
@@ -371,7 +373,7 @@ void test_xform_hash_perf(double cart_resl, double ang_resl,
   // cout << " rate " << N1*N2/time_key << "  " << N1*N2/time_cen << endl;
 }
 
-TEST(XformHash, XformHash_Quat_BCC7_Zorder) {
+TEST(XformHash, DISABLED_XformHash_Quat_BCC7_Zorder) {
   unsigned int s = 0;
   int N = 10 * 1000;
 #ifdef SCHEME_BENCHMARK
@@ -496,12 +498,133 @@ TEST(XformHash, XformHash_Quat_BCC7_Zorder_cart_shift) {
   ASSERT_EQ(h.cart_shift_key(3451, 0, 0, 0, 1), 3450);
 }
 
-TEST(XformHash, with_phi) {
-  using XH = XformHash_bt24_BCC6_Phi<Xform>;
-  std::mt19937 rng((unsigned int)time(0) + 23908457);
+TEST(XformHash, XformAngHash_bt24_BCC) {
+  using XH = XformAngHash_bt24_BCC6<Xform>;
+  int N1 = 5;
+  int N2 = 10000;
+  std::mt19937 rng((unsigned int)time(0) + 34979234);
   std::uniform_real_distribution<> runif;
-  for (int i = 0; i < 100; ++i) {
-    XH h(11.0, 0.1 + runif(rng), 11.0, 300.0 * runif(rng) + 100.0);
+  double time_key = 0.0, time_cen = 0.0;
+  for (int i = 0; i < N1; ++i) {
+    float phi_resl = 5.0 + runif(rng) * 20.0;
+    float cart_resl = 0.1 + runif(rng);
+    float ang_resl = 5.0 + runif(rng) * 20.0;
+    float cart_bound = 100.0 * runif(rng) + 100.0;
+    float cart_resl2 = cart_resl * cart_resl;
+    float ang_resl2 = ang_resl * ang_resl;
+    XH xh(phi_resl, cart_resl, ang_resl, cart_bound);
+
+    std::vector<std::pair<Xform, float>> samples(N2), centers(N2);
+    for (int i = 0; i < N2; ++i) {
+      geom::rand_xform(rng, samples[i].first, cart_bound * 0.9);
+      samples[i].second = runif(rng) * 360.0 - 180.0;
+    }
+
+    util::Timer tk;
+    std::vector<uint64_t> keys(N2);
+    for (int i = 0; i < N2; ++i) {
+      keys[i] = xh.get_key(samples[i]);
+    }
+    time_key += (double)tk.elapsed_nano();
+
+    util::Timer tc;
+    for (int i = 0; i < N2; ++i) {
+      centers[i] = xh.get_center(keys[i]);
+      // auto k = xh.get_key(centers[i]);
+      // ASSERT_EQ(k, keys[i]);
+    }
+    time_cen += (double)tc.elapsed_nano();
+
+    google::dense_hash_set<size_t> idx_seen;
+    idx_seen.set_empty_key(std::numeric_limits<uint64_t>::max());
+    for (int i = 0; i < N2; ++i) idx_seen.insert(keys[i]);
+
+    double covrad = 0, max_dt = 0, max_da = 0, max_dp = 0;
+    for (int i = 0; i < N2; ++i) {
+      Xform l = centers[i].first.inverse() * samples[i].first;
+      float dp = fabs(centers[i].second - samples[i].second);
+      double dt = l.translation().norm();
+      double da = Eigen::AngleAxisd(l.linear()).angle() * 180.0 / M_PI;
+      // double da = Eigen::AngleAxisd(l.rotation()).angle()*180.0/M_PI;
+      // double err =
+      // sqrt(da * da / ang_resl2 * cart_resl2 + dt * dt + dp / phi_resl);
+      // covrad = fmax(covrad, err);
+      max_dt = fmax(max_dt, dt);
+      max_da = fmax(max_da, da);
+      max_dp = fmax(max_dp, dp);
+      ASSERT_LT(dt, cart_resl);
+      ASSERT_LT(da, ang_resl);
+      ASSERT_LT(dp, phi_resl);
+    }
+    ASSERT_GT(max_dt * 1.2, cart_resl);
+    ASSERT_GT(max_da * 1.6, ang_resl);  // multiplier of 1.4??
+    ASSERT_GT(max_dp * 1.2, phi_resl);
+  }
+}
+
+TEST(XformHash, Xform2AngHash_bt24_BCC6) {
+  using XH = Xform2AngHash_bt24_BCC6<Xform>;
+  int N1 = 5;
+  int N2 = 10000;
+  std::mt19937 rng((unsigned int)time(0) + 34979234);
+  std::uniform_real_distribution<> runif;
+  double time_key = 0.0, time_cen = 0.0;
+  for (int i = 0; i < N1; ++i) {
+    float phi_resl = 5.0 + runif(rng) * 20.0;
+    float cart_resl = 0.1 + runif(rng);
+    float ang_resl = 5.0 + runif(rng) * 20.0;
+    float cart_bound = 100.0 * runif(rng) + 100.0;
+    float cart_resl2 = cart_resl * cart_resl;
+    float ang_resl2 = ang_resl * ang_resl;
+    XH xh(phi_resl, cart_resl, ang_resl, cart_bound);
+
+    std::vector<std::tuple<Xform, float, float>> samples(N2), centers(N2);
+    for (int i = 0; i < N2; ++i) {
+      geom::rand_xform(rng, std::get<0>(samples[i]), cart_bound * 0.9);
+      std::get<1>(samples[i]) = runif(rng) * 360.0 - 180.0;
+      std::get<2>(samples[i]) = runif(rng) * 360.0 - 180.0;
+    }
+
+    util::Timer tk;
+    std::vector<uint64_t> keys(N2);
+    for (int i = 0; i < N2; ++i) {
+      keys[i] = xh.get_key(samples[i]);
+    }
+    time_key += (double)tk.elapsed_nano();
+
+    util::Timer tc;
+    for (int i = 0; i < N2; ++i) {
+      centers[i] = xh.get_center(keys[i]);
+      // auto k = xh.get_key(centers[i]);
+      // ASSERT_EQ(k, keys[i]);
+    }
+    time_cen += (double)tc.elapsed_nano();
+
+    google::dense_hash_set<size_t> idx_seen;
+    idx_seen.set_empty_key(std::numeric_limits<uint64_t>::max());
+    for (int i = 0; i < N2; ++i) idx_seen.insert(keys[i]);
+
+    double covrad = 0, max_dt = 0, max_da = 0, max_dp = 0;
+    for (int i = 0; i < N2; ++i) {
+      Xform l = std::get<0>(centers[i]).inverse() * std::get<0>(samples[i]);
+      float dp = fabs(std::get<1>(centers[i]) - std::get<1>(samples[i]));
+      float dp2 = fabs(std::get<2>(centers[i]) - std::get<2>(samples[i]));
+      double dt = l.translation().norm();
+      double da = Eigen::AngleAxisd(l.linear()).angle() * 180.0 / M_PI;
+      // double da = Eigen::AngleAxisd(l.rotation()).angle()*180.0/M_PI;
+      // double err =
+      // sqrt(da * da / ang_resl2 * cart_resl2 + dt * dt + dp / phi_resl);
+      // covrad = fmax(covrad, err);
+      max_dt = fmax(max_dt, dt);
+      max_da = fmax(max_da, da);
+      max_dp = fmax(max_dp, dp);
+      ASSERT_LT(dt, cart_resl);
+      ASSERT_LT(da, ang_resl);
+      ASSERT_LT(dp, phi_resl);
+    }
+    ASSERT_GT(max_dt * 1.2, cart_resl);
+    ASSERT_GT(max_da * 1.6, ang_resl);  // multiplier of 1.4??
+    ASSERT_GT(max_dp * 1.2, phi_resl);
   }
 }
 

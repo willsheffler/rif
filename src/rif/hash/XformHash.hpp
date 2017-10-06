@@ -4,6 +4,7 @@
 #include "numeric/lattice.hpp"
 #include "numeric/util.hpp"
 #include "util/SimpleArray.hpp"
+#include "util/assert.hpp"
 #include "util/dilated_int.hpp"
 
 #include <boost/utility/binary.hpp>
@@ -31,11 +32,12 @@ struct XformHash_bt24_BCC6 {
   typedef rif::util::SimpleArray<6, Float> F6;
   typedef rif::util::SimpleArray<6, uint64_t> I6;
 
-  Float grid_size_;
-  Float grid_spacing_;
+  Float grid_size_ = -1;
+  Float grid_spacing_ = -1;
   OriMap ori_map_;
   Grid grid_;
-  Float cart_resl_, ang_resl_, cart_bound_;
+  Float phi_resl_ = -1, cart_resl_ = -1, ang_resl_ = -1, cart_bound_ = -1;
+  int ori_nside_ = -1;
 
   static std::string name() { return "XformHash_bt24_BCC6"; }
 
@@ -46,7 +48,7 @@ struct XformHash_bt24_BCC6 {
     init(cart_resl, ang_resl, cart_bound);
   }
 
-  int get_ori_nside() {
+  int get_ori_nside(float fudge = 1.45) {
     static float const covrad[64] = {
         49.66580, 25.99805, 17.48845, 13.15078, 10.48384, 8.76800, 7.48210,
         6.56491,  5.84498,  5.27430,  4.78793,  4.35932,  4.04326, 3.76735,
@@ -59,18 +61,19 @@ struct XformHash_bt24_BCC6 {
         0.92061,  0.90475,  0.89253,  0.87480,  0.86141,  0.84846, 0.83677,
         0.82164};
     int ori_nside = 1;
-    while (covrad[ori_nside - 1] * 1.45 > ang_resl_ && ori_nside < 62)
+    while (covrad[ori_nside - 1] * fudge > ang_resl_ && ori_nside < 62)
       ++ori_nside;  // TODO: HACK multiplier!
     return ori_nside;
   }
 
   void init(Float cart_resl, Float ang_resl, Float cart_bound = 512.0) {
-    cart_resl_ = cart_resl;
     ang_resl_ = ang_resl;
-    cart_bound_ = cart_bound;
     init2(cart_resl, get_ori_nside(), cart_bound);
   }
   void init2(Float cart_resl, int ori_nside, Float cart_bound) {
+    cart_resl_ = cart_resl;
+    cart_bound_ = cart_bound;
+    ori_nside_ = ori_nside;
     cart_resl /= sqrt(3.0) / 2.0;  // TODO: HACK multiplier!
     F6 lb, ub;
     I6 nside = get_bounds(cart_resl, ori_nside, cart_bound, lb, ub);
@@ -130,10 +133,11 @@ struct XformHash_bt24_BCC6 {
     return center;
   }
 
-  Key get_key(Xform const &x) const {
+  Key get_key(Xform x) const {
     Key cell_index;
-    F6 params6 = xfrom_to_F6(x, cell_index);
-    return cell_index << 59 | grid_[params6];
+    F6 p6 = xfrom_to_F6(x, cell_index);
+    assert((grid_[p6] >> 59) == 0);
+    return cell_index << 59 | grid_[p6];
   }
 
   Xform get_center(Key key) const {
@@ -167,39 +171,142 @@ struct XformAngHash_bt24_BCC6 : public XformHash_bt24_BCC6<_Xform> {
   using F7 = rif::util::SimpleArray<7, Float>;
   using I7 = rif::util::SimpleArray<7, uint64_t>;
   Grid7 grid7_;
-  float phi_resl_;
+  float phi_resl_ = -1;
   static std::string name() { return "XformAngHash_bt24_BCC6"; }
   XformAngHash_bt24_BCC6() {}
   XformAngHash_bt24_BCC6(Float phi_resl, Float cart_resl, Float ang_resl,
                          Float cart_bound = 256.0) {
-    this->init(cart_resl, ang_resl, cart_bound);
+    this->init(phi_resl, cart_resl, ang_resl, cart_bound);
     phi_resl_ = phi_resl_;
   }
 
-  void init2(Float cart_resl, int ori_nside, Float cart_bound) {
-    std::cout << "init2 subclass" << std::endl;
-    cart_resl /= sqrt(3.0) / 2.0;  // TODO: HACK multiplier!
+  void init(Float _phi_resl, Float _cart_resl, Float _ang_resl,
+            Float _cart_bound = 256.0) {
+    this->ang_resl_ = _ang_resl;
+    init2(_phi_resl, _cart_resl, this->get_ori_nside(1.55), _cart_bound);
+  }
+  void init2(Float _phi_resl, Float _cart_resl, int _ori_nside,
+             Float _cart_bound) {
+    this->phi_resl_ = _phi_resl;
+    this->ori_nside_ = _ori_nside;
+    this->cart_bound_ = _cart_bound;
+    this->cart_resl_ = _cart_resl / (sqrt(3.0) / 2.0);
     F6 lb, ub;
-    I6 ns = get_bounds(cart_resl, ori_nside, cart_bound, lb, ub);
-    grid7_.init(concat(ns, uint64_t(360.0 / phi_resl_)), concat(lb, -180.0),
-                concat(ub, 180.0));
+    I6 ns = this->get_bounds(this->cart_resl_, this->ori_nside_,
+                             this->cart_bound_, lb, ub);
+    grid7_.init(concat(ns, uint64_t(180.0 / this->phi_resl_) + 2),
+                concat(lb, -180.0 - 1 * this->phi_resl_), concat(ub, 180.0));
+    // std::cout << "cr " << this->cart_resl_ << std::endl;
+    // std::cout << grid7_ << std::endl;
   }
-
-  Key get_key(Xform const &x, float phi) const {
-    assert(phi <= 180.0);
-    assert(phi >= -180.0);
+  Key get_key(std::pair<Xform, Float> xa) {
+    return get_key(xa.first, xa.second);
+  }
+  Key get_key(Xform x, Float torsion) const {
+    assert(torsion <= 180.0);
+    assert(torsion >= -180.0);
+    // std::cout << "get_key    (" << x.translation().transpose() << ") ("
+    // << x.linear().row(0) << ") " << torsion << std::endl;
     Key cell_index;
-    F6 params6 = xfrom_to_F6(x, cell_index);
-    F7 params7 = params6;
-    params7[6] = phi;
-    return cell_index << 59 | grid7_[params7];
+    F6 p6 = this->xfrom_to_F6(x, cell_index);
+    // std::cout << "get_key    ci" << cell_index << " " << p6 << " " << torsion
+    // << std::endl;
+    // std::cout << concat(p6, torsion) << std::endl;
+    // std::cout << (grid7_[concat(p6, torsion)] >> 59) << " "
+    // << grid7_[concat(p6, torsion)] << " " << std::endl;
+    ALWAYS_ASSERT((grid7_[concat(p6, torsion)] >> 59) == 0);
+    return cell_index << 59 | grid7_[concat(p6, torsion)];
   }
 
-  std::pair<Xform, float> get_center(Key key) const {
+  std::pair<Xform, Float> get_center(Key key) const {
     Key cell_index = key >> 59;
-    F7 params7 = grid7_[key & (((Key)1 << 59) - (Key)1)];
-    F6 params6 = params7;
-    return std::make_pair(F6_to_xform(params6, cell_index), params7[6]);
+    F7 p7 = grid7_[key & (((Key)1 << 59) - (Key)1)];  // zero bits 59-63
+    F6 p6 = p7.template first<6>();
+    // std::cout << "get_center ci" << cell_index << " " << p6 << " " << p7[6]
+    // << std::endl;
+    Xform x = this->F6_to_xform(p6, cell_index);
+    // std::cout << "get_center (" << x.translation().transpose() << ") ("
+    // << x.linear().row(0) << ") " << p7[6] << std::endl;
+    return std::make_pair(x, p7[6]);
+  }
+};
+
+template <class _Xform>
+struct Xform2AngHash_bt24_BCC6 : public XformHash_bt24_BCC6<_Xform> {
+  using Key = uint64_t;
+  using Xform = _Xform;
+  using Float = typename Xform::Scalar;
+  using Scalar = typename Xform::Scalar;
+  using OriMap = rif::nest::pmap::TetracontoctachoronMap<>;
+  using Grid8 = rif::numeric::BCC<8, Float, uint64_t>;
+  using F3 = rif::util::SimpleArray<3, Float>;
+  using I3 = rif::util::SimpleArray<3, uint64_t>;
+  using F6 = rif::util::SimpleArray<6, Float>;
+  using I6 = rif::util::SimpleArray<6, uint64_t>;
+  using F8 = rif::util::SimpleArray<8, Float>;
+  using I8 = rif::util::SimpleArray<8, uint64_t>;
+  Grid8 grid8_;
+  float phi_resl_ = -1;
+  static std::string name() { return "Xform2AngHash_bt24_BCC6"; }
+  Xform2AngHash_bt24_BCC6() {}
+  Xform2AngHash_bt24_BCC6(Float phi_resl, Float cart_resl, Float ang_resl,
+                          Float cart_bound = 256.0) {
+    this->init(phi_resl, cart_resl, ang_resl, cart_bound);
+    phi_resl_ = phi_resl_;
+  }
+
+  void init(Float _phi_resl, Float _cart_resl, Float _ang_resl,
+            Float _cart_bound = 256.0) {
+    this->ang_resl_ = _ang_resl;
+    init2(_phi_resl, _cart_resl, this->get_ori_nside(1.55), _cart_bound);
+  }
+  void init2(Float _phi_resl, Float _cart_resl, int _ori_nside,
+             Float _cart_bound) {
+    this->phi_resl_ = _phi_resl;
+    this->ori_nside_ = _ori_nside;
+    this->cart_bound_ = _cart_bound;
+    this->cart_resl_ = _cart_resl / (sqrt(3.0) / 2.0);
+    F6 lb, ub;
+    I6 ns = this->get_bounds(this->cart_resl_, this->ori_nside_,
+                             this->cart_bound_, lb, ub);
+    uint64_t nphi = (180.0 / this->phi_resl_) + 2;
+    grid8_.init(concat(ns, nphi, nphi), concat(lb, -180.0 - 2 * this->phi_resl_,
+                                               -180.0 - 2 * this->phi_resl_),
+                concat(ub, 180.0, 180.0));
+    // std::cout << "cr " << this->cart_resl_ << std::endl;
+    // std::cout << grid8_ << std::endl;
+  }
+  Key get_key(std::tuple<Xform, Float, Float> xaa) {
+    return get_key(std::get<0>(xaa), std::get<1>(xaa), std::get<2>(xaa));
+  }
+  Key get_key(Xform x, Float torsion1, Float torsion2) const {
+    assert(torsion1 <= 180.0);
+    assert(torsion1 >= -180.0);
+    assert(torsion2 <= 180.0);
+    assert(torsion2 >= -180.0);
+    // std::cout << "get_key    (" << x.translation().transpose() << ") ("
+    // << x.linear().row(0) << ") " << torsion << std::endl;
+    Key cell_index;
+    F6 p6 = this->xfrom_to_F6(x, cell_index);
+    // std::cout << "get_key    ci" << cell_index << " " << p6 << " " << torsion
+    // << std::endl;
+    // std::cout << concat(p6, torsion) << std::endl;
+    // std::cout << (grid8_[concat(p6, torsion)] >> 59) << " "
+    // << grid8_[concat(p6, torsion)] << " " << std::endl;
+    ALWAYS_ASSERT((grid8_[concat(p6, torsion1, torsion2)] >> 59) == 0);
+    return cell_index << 59 | grid8_[concat(p6, torsion1, torsion2)];
+  }
+
+  std::tuple<Xform, Float, Float> get_center(Key key) const {
+    Key cell_index = key >> 59;
+    F8 p8 = grid8_[key & (((Key)1 << 59) - (Key)1)];  // zero bits 59-63
+    F6 p6 = p8.template first<6>();
+    // std::cout << "get_center ci" << cell_index << " " << p6 << " " << p8[6]
+    // << std::endl;
+    Xform x = this->F6_to_xform(p6, cell_index);
+    // std::cout << "get_center (" << x.translation().transpose() << ") ("
+    // << x.linear().row(0) << ") " << p8[6] << std::endl;
+    return std::make_tuple(x, p8[6], p8[7]);
   }
 };
 
