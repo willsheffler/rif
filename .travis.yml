@@ -74,13 +74,6 @@ matrix:
       addons:
         apt:
           sources: *sources
-          packages: [g++-5, libboost-iostreams-dev, libboost-system-dev]
-    - os:   linux
-      dist: trusty
-      env:  OS=LU14 UNIT=T LLVM=3.9.0 PY=3 CACHE_NAME=LU14_LLVM390_PY3
-      addons:
-        apt:
-          sources: *sources
           packages: [g++-5, libboost-iostreams-dev, libboost-system-dev, python3]
 
 ####################### 12.04 ####################################3
@@ -131,8 +124,7 @@ before_install:
   - rm -f ${TRAVIS_BUILD_DIR}/.ERROR
 
 install:
-  - if [[ $TRAVIS_OS_NAME == "osx" ]]; then brew install python3; fi
-  - pyenv global system 3.5
+  - if [[ $TRAVIS_OS_NAME == "osx" ]]; then brew install python3; else pyenv global system 3.5; fi
   - travis_get_cmake $DEPS_DIR
   - which cmake
   - if [[ "$LLVM" ]]; then get_clang $DEPS_DIR $LLVM; fi
@@ -156,7 +148,6 @@ before_script:
   - export PATH=$(whereis -b ccache |grep -o '\\S*lib\\S*'):$PATH
 
 script:
-  - pyenv global system 3.5
   - |
     if [[ $UNIT == T ]]; then
       ($PYTHON tools/build_and_test.py --inplace && codecov --required -X **gcov**)
