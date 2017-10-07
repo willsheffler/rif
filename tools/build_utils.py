@@ -9,7 +9,7 @@ import shutil
 import re
 import filecmp
 print(sys.version)
-for p in os.path:
+for p in sys.path:
     print(" ", p)
 import pytest
 
