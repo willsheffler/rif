@@ -138,15 +138,10 @@ install:
   - if [[ "$BOOST" ]]; then get_boost $DEPS_DIR $BOOST; fi
   - if [ ! -z ${DOCS+x} ]; then get_doxygen; fi
   - |
-    if [[ $PY == "3" ]]; then
-      if [[ $TRAVIS_OS_NAME == "osx" ]]; then brew install python3; fi
-      python3 -m ensurepip
-      export PIP=$(which pip3)
-      export PYTHON=$(which python3)
-    else
-      export PIP=$(which pip2)
-      export PYTHON=$(which python2)
-    fi
+    if [[ $TRAVIS_OS_NAME == "osx" ]]; then brew install python3; fi
+    python3 -m ensurepip
+    export PIP=$(which pip3.5)
+    export PYTHON=$(which python3.5)
   - echo "!!!!!! travis.yml install using pip $PIP"
   - echo "!!!!!! travis.yml install using python $PYTHON"
   - head $PIP
@@ -164,7 +159,7 @@ script:
   - pyenv global system 3.5
   - |
     if [[ $UNIT == T ]]; then
-      (python$PY tools/build_and_test.py --inplace && codecov --required -X **gcov**)
+      ($PYTHON tools/build_and_test.py --inplace && codecov --required -X **gcov**)
       if [ -f .ERROR ]; then exit 1; fi
     elif [[ $DOSC == T ]]; then
       (cd docs && make html)
