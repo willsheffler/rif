@@ -320,7 +320,7 @@ struct SimpleArray {
   }
   template <int L>
   SimpleArray<L, value_type> first() const {
-    static_assert(L <= N);
+    static_assert(L <= N, "L > N!!!");
     SimpleArray<L, value_type> r;
     for (int i = 0; i < L; ++i) r[i] = (*this)[i];
     return r;

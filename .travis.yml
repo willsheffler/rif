@@ -151,9 +151,7 @@ install:
   - echo "!!!!!! travis.yml install using python $PYTHON"
   - head $PIP
   - $PIP install -rrequirements.txt codecov
-  - pip install jinja2
-  - pip2 install jinja2
-  - if [ $(which pip3) ]; then pip3 install jinja2; fi
+  - $PIP install jinja2
 
 before_script:
   - unset CCACHE_DISABLE
