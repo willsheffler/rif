@@ -145,6 +145,9 @@ install:
   - head $PIP
   - $PIP install -rrequirements.txt codecov
   - $PIP install jinja2
+  - pip2 install jinja2
+  - pip3 install jinja2
+  - pip install jinja2
 
 before_script:
   - unset CCACHE_DISABLE
