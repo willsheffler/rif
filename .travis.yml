@@ -145,9 +145,7 @@ install:
   - head $PIP
   - $PIP install -rrequirements.txt codecov
   - $PIP install jinja2
-  - pip2 install jinja2
-  - pip3 install jinja2
-  - pip install jinja2
+  - if [[ $TRAVIS_OS_NAME == "osx" ]]; then pip2 install jinja2; pip3 install jinja2; pip install jinja2; fi
 
 before_script:
   - unset CCACHE_DISABLE
