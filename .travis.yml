@@ -124,16 +124,22 @@ before_install:
   - rm -f ${TRAVIS_BUILD_DIR}/.ERROR
 
 install:
-  - if [[ $TRAVIS_OS_NAME == "osx" ]]; then brew install python3; else pyenv global system 3.5; fi
   - travis_get_cmake $DEPS_DIR
   - which cmake
   - if [[ "$LLVM" ]]; then get_clang $DEPS_DIR $LLVM; fi
   - if [[ "$BOOST" ]]; then get_boost $DEPS_DIR $BOOST; fi
   - if [ ! -z ${DOCS+x} ]; then get_doxygen; fi
   - |
-    python3 -m ensurepip
-    export PIP=$(which pip3.5)
-    export PYTHON=$(which python3.5)
+    if [[ $TRAVIS_OS_NAME == "osx" ]]; then
+      brew install python3
+      export PIP=$(which pip3)
+      export PYTHON=$(which python3)
+    else # linux
+      pyenv global system 3.5
+      export PIP=$(which pip3.5)
+      export PYTHON=$(which python3.5)
+    fi
+  - $PYTHON -m ensurepip
   - echo "!!!!!! travis.yml install using pip $PIP"
   - echo "!!!!!! travis.yml install using python $PYTHON"
   - head $PIP
