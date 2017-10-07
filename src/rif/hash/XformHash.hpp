@@ -71,12 +71,11 @@ struct XformHash_bt24_BCC6 {
     init2(cart_resl, get_ori_nside(), cart_bound);
   }
   void init2(Float cart_resl, int ori_nside, Float cart_bound) {
-    cart_resl_ = cart_resl;
+    cart_resl_ = cart_resl / (sqrt(3.0) / 2.0);
     cart_bound_ = cart_bound;
     ori_nside_ = ori_nside;
-    cart_resl /= sqrt(3.0) / 2.0;  // TODO: HACK multiplier!
     F6 lb, ub;
-    I6 nside = get_bounds(cart_resl, ori_nside, cart_bound, lb, ub);
+    I6 nside = get_bounds(cart_resl_, ori_nside_, cart_bound_, lb, ub);
     grid_.init(nside, lb, ub);
   }
 
@@ -171,7 +170,7 @@ struct XformAngHash_bt24_BCC6 : public XformHash_bt24_BCC6<_Xform> {
   using F7 = rif::util::SimpleArray<7, Float>;
   using I7 = rif::util::SimpleArray<7, uint64_t>;
   Grid7 grid7_;
-  float phi_resl_ = -1;
+  Float phi_resl_ = -1;
   static std::string name() { return "XformAngHash_bt24_BCC6"; }
   XformAngHash_bt24_BCC6() {}
   XformAngHash_bt24_BCC6(Float phi_resl, Float cart_resl, Float ang_resl,
@@ -195,11 +194,11 @@ struct XformAngHash_bt24_BCC6 : public XformHash_bt24_BCC6<_Xform> {
     I6 ns = this->get_bounds(this->cart_resl_, this->ori_nside_,
                              this->cart_bound_, lb, ub);
     grid7_.init(concat(ns, uint64_t(180.0 / this->phi_resl_) + 2),
-                concat(lb, -180.0 - 1 * this->phi_resl_), concat(ub, 180.0));
+                concat(lb, -180.0 - 1.0 * this->phi_resl_), concat(ub, 180.0));
     // std::cout << "cr " << this->cart_resl_ << std::endl;
     // std::cout << grid7_ << std::endl;
   }
-  Key get_key(std::pair<Xform, Float> xa) {
+  Key get_key(std::pair<Xform, Float> xa) const {
     return get_key(xa.first, xa.second);
   }
   Key get_key(Xform x, Float torsion) const {
@@ -229,6 +228,7 @@ struct XformAngHash_bt24_BCC6 : public XformHash_bt24_BCC6<_Xform> {
     // << x.linear().row(0) << ") " << p7[6] << std::endl;
     return std::make_pair(x, p7[6]);
   }
+  void test(Xform x) const { std::cout << "TEST" << std::endl; }
 };
 
 template <class _Xform>
@@ -246,7 +246,7 @@ struct Xform2AngHash_bt24_BCC6 : public XformHash_bt24_BCC6<_Xform> {
   using F8 = rif::util::SimpleArray<8, Float>;
   using I8 = rif::util::SimpleArray<8, uint64_t>;
   Grid8 grid8_;
-  float phi_resl_ = -1;
+  Float phi_resl_ = -1;
   static std::string name() { return "Xform2AngHash_bt24_BCC6"; }
   Xform2AngHash_bt24_BCC6() {}
   Xform2AngHash_bt24_BCC6(Float phi_resl, Float cart_resl, Float ang_resl,
@@ -276,7 +276,7 @@ struct Xform2AngHash_bt24_BCC6 : public XformHash_bt24_BCC6<_Xform> {
     // std::cout << "cr " << this->cart_resl_ << std::endl;
     // std::cout << grid8_ << std::endl;
   }
-  Key get_key(std::tuple<Xform, Float, Float> xaa) {
+  Key get_key(std::tuple<Xform, Float, Float> xaa) const {
     return get_key(std::get<0>(xaa), std::get<1>(xaa), std::get<2>(xaa));
   }
   Key get_key(Xform x, Float torsion1, Float torsion2) const {

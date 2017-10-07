@@ -446,15 +446,15 @@ SimpleArray<M + N, T> concat(SimpleArray<M, T> a, SimpleArray<N, T> b) {
   for (int i = 0; i < N; ++i) c[i + M] = b[i];
   return c;
 }
-template <int M, class T>
-SimpleArray<M + 1, T> concat(SimpleArray<M, T> a, T b) {
+template <int M, class T, class T2>
+SimpleArray<M + 1, T> concat(SimpleArray<M, T> a, T2 b) {
   SimpleArray<M + 1, T> c;
   for (int i = 0; i < M; ++i) c[i] = a[i];
   c[M] = b;
   return c;
 }
-template <int M, class T>
-SimpleArray<M + 2, T> concat(SimpleArray<M, T> a, T b, T c) {
+template <int M, class T, class T2>
+SimpleArray<M + 2, T> concat(SimpleArray<M, T> a, T2 b, T2 c) {
   SimpleArray<M + 2, T> r;
   for (int i = 0; i < M; ++i) r[i] = a[i];
   r[M] = b;
@@ -462,8 +462,8 @@ SimpleArray<M + 2, T> concat(SimpleArray<M, T> a, T b, T c) {
   return r;
 }
 
-template <int M, class T>
-SimpleArray<1 + M, T> concat(T a, SimpleArray<M, T> b) {
+template <int M, class T, class T2>
+SimpleArray<1 + M, T> concat(T2 a, SimpleArray<M, T> b) {
   SimpleArray<1 + M, T> c;
   c[0] = a;
   for (int i = 0; i < M; ++i) c[i + 1] = b[i];

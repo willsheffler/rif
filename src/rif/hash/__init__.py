@@ -3,4 +3,4 @@
 """
 
 from _rif._hash import *
-from rif.hash.xform_hash_6d import *
+from rif.hash.xform_hash import *
