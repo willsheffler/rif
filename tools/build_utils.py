@@ -8,7 +8,7 @@ import multiprocessing
 import shutil
 import re
 import filecmp
-print(os.version)
+print(sys.version)
 for p in os.path:
     print(" ", p)
 import pytest
