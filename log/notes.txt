@@ -7,3 +7,16 @@ unit area hex radius = 0.621
 unit area square radius = sqrt(2)/2.0
 sr/hr = 1.13865826278027
 
+docker manylinux1:
+   export PATH=/opt/python/cp35-cp35m/bin:$PATH
+   pip install -rrequirements.txt
+
+   wget https://cmake.org/files/v3.9/cmake-3.9.4.tar.gz --no-check-certificate
+   tar -xzf cmake-3.9.4.tar.gz
+   cd cmake-3.9.4
+   ls
+   ./configure
+   gmake -j8
+
+   need to get download_boost working....nn
+

@@ -1,24 +1,49 @@
 from rif.cluster.cookie_cutter import *
 import pandas as pd
 
-# store = pd.HDFStore(
-# '/home/sheffler/Dropbox/project/hbsat/test_data/scott_427_0001_sol.h5')
-# x = store['s'].copy()
-# x = x.drop(x.columns[np.min(x, axis=0) == np.max(x, axis=0)], axis=1)
-# x = x.head(10000)
-
 
 def test_cookie_cutter():
     x = np.arange(100).reshape((10, 10))
     x = np.concatenate((x, x), axis=0)
-    clust = cookie_cutter(x, 3, 'ndiff')
-    clust = x[clust, :]
-    assert clust.shape == (10, 10)
+    clusters = cookie_cutter(x, 3, 'ndiff')
+    assert len(clusters) == 10
 
 
 def test_cookie_cutter_cpp():
     x = np.arange(10000).reshape((100, 100))
     x = np.concatenate((x, x, x, x, x), axis=0)
-    clust = cookie_cutter_i2(x, 3, 'ndiff')
-    clust = x[clust, :]
-    assert clust.shape == (100, 100)
+    clusters = cookie_cutter_i2(x, 3, 'ndiff')
+    assert len(clusters) == 100
+
+
+def test_cookie_cutter_update_cpp():
+    x = np.arange(100).reshape((10, 10))
+    x = np.concatenate((x, x, x, x, x), axis=0)
+    clusters = cookie_cutter_i2(x, 3, 'ndiff')
+    assert len(clusters) == 10
+
+    x = np.concatenate((x[clusters, :],
+                        np.arange(60).reshape((6, 10))), axis=0)
+    clusters = range(len(clusters))  # renumber clusters
+    clusters = cookie_cutter_update_i2(x, 3, clusters, 'ndiff')
+    assert len(clusters) == 10
+
+    x = np.concatenate((x[clusters, :],
+                        np.arange(300).reshape((30, 10))), axis=0)
+    clusters = range(len(clusters))
+    clusters = cookie_cutter_update_i2(x, 3, clusters, 'ndiff')
+    assert len(clusters) == 30
+
+    x = np.concatenate((x[clusters, :],
+                        np.arange(10).reshape((1, 10))), axis=0)
+    clusters = range(len(clusters))
+    print(x)
+    clusters = cookie_cutter_update_i2(x, 3, clusters, 'ndiff')
+    print(clusters)
+    assert len(clusters) == 30
+
+    x = np.concatenate((x[clusters, :],
+                        np.arange(300, 1000).reshape((70, 10))), axis=0)
+    clusters = range(len(clusters))
+    clusters = cookie_cutter_update_i2(x, 3, clusters, 'ndiff')
+    assert len(clusters) == 100

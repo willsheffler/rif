@@ -34,16 +34,15 @@ struct Ndiff : public Metric<T> {
 };
 
 template <class T>
-EigV<size_t> cookie_cutter(
+std::vector<size_t> cookie_cutter_update(
     Ref<const Matrix<T, Dynamic, Dynamic, RowMajor>> data, double thresh,
-    std::string metricstr) {
+    std::vector<size_t>& centers, std::string metricstr) {
   // std::cout << "foo " << data.rows() << " " << data.cols() << std::endl;
   Metric<T>* metricp;
   if (metricstr == "L2") metricp = new L2<T>;
   if (metricstr == "hamming") metricp = new Hamming<T>;
   if (metricstr == "ndiff") metricp = new Ndiff<T>;
   Metric<T>& metric(*metricp);
-  std::vector<size_t> centers;
   for (int i = 0; i < data.rows(); ++i) {
     bool dup = false;
     for (auto j : centers) {
@@ -57,9 +56,18 @@ EigV<size_t> cookie_cutter(
     if (!dup) centers.push_back(i);
   }
   delete metricp;
-  EigV<size_t> clust(centers.size());
-  for (int i = 0; i < clust.size(); ++i) clust[i] = centers[i];
-  return clust;
+  return centers;
+  // EigV<size_t> clust(centers.size());
+  // for (int i = 0; i < clust.size(); ++i) clust[i] = centers[i];
+  // return clust;
+}
+
+template <class T>
+std::vector<size_t> cookie_cutter(
+    Ref<const Matrix<T, Dynamic, Dynamic, RowMajor>> data, double thresh,
+    std::string metricstr) {
+  std::vector<size_t> centers;
+  return cookie_cutter_update(data, thresh, centers, metricstr);
 }
 
 //
