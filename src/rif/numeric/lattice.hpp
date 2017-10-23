@@ -8,6 +8,8 @@
 namespace rif {
 namespace numeric {
 
+// TODO: add bounds checking .at methods!
+
 /**
  * @brief      n-dimensional BCC lattice
  *

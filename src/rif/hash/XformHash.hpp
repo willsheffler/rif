@@ -19,6 +19,8 @@ void clamp01(A &a) {
   }
 }
 
+// TODO: add bounds check angles version!
+
 template <class _Xform>
 struct XformHash_bt24_BCC6 {
   using Xform = _Xform;
@@ -153,6 +155,8 @@ struct XformHash_bt24_BCC6 {
                                  62849, 77169, 93903, 112604, 133352, 157103};
     return nori[grid_.nside_[3] - 2];  // -1 for 0-index, -1 for ori_side+1
   }
+  Float lb_phi() { return -180.0 - 2 * this->phi_resl_; }
+  uint64_t ns_phi() { return uint64_t(180.0 / this->phi_resl_) + 2; }
 };
 
 template <class _Xform>
@@ -170,13 +174,12 @@ struct XformAngHash_bt24_BCC6 : public XformHash_bt24_BCC6<_Xform> {
   using F7 = rif::util::SimpleArray<7, Float>;
   using I7 = rif::util::SimpleArray<7, uint64_t>;
   Grid7 grid7_;
-  Float phi_resl_ = -1;
   static std::string name() { return "XformAngHash_bt24_BCC6"; }
   XformAngHash_bt24_BCC6() {}
   XformAngHash_bt24_BCC6(Float phi_resl, Float cart_resl, Float ang_resl,
                          Float cart_bound = 256.0) {
     this->init(phi_resl, cart_resl, ang_resl, cart_bound);
-    phi_resl_ = phi_resl_;
+    this->phi_resl_ = phi_resl;
   }
 
   void init(Float _phi_resl, Float _cart_resl, Float _ang_resl,
@@ -193,13 +196,14 @@ struct XformAngHash_bt24_BCC6 : public XformHash_bt24_BCC6<_Xform> {
     F6 lb, ub;
     I6 ns = this->get_bounds(this->cart_resl_, this->ori_nside_,
                              this->cart_bound_, lb, ub);
-    grid7_.init(concat(ns, uint64_t(180.0 / this->phi_resl_) + 2),
-                concat(lb, -180.0 - 1.0 * this->phi_resl_), concat(ub, 180.0));
+    grid7_.init(concat(ns, this->ns_phi()), concat(lb, this->lb_phi()),
+                concat(ub, 180.0));
     // std::cout << "cr " << this->cart_resl_ << std::endl;
     // std::cout << grid7_ << std::endl;
   }
   Key get_key(std::pair<Xform, Float> xa) const {
     return get_key(xa.first, xa.second);
+    ;
   }
   Key get_key(Xform x, Float torsion) const {
     assert(torsion <= 180.0);
@@ -246,13 +250,12 @@ struct Xform2AngHash_bt24_BCC6 : public XformHash_bt24_BCC6<_Xform> {
   using F8 = rif::util::SimpleArray<8, Float>;
   using I8 = rif::util::SimpleArray<8, uint64_t>;
   Grid8 grid8_;
-  Float phi_resl_ = -1;
   static std::string name() { return "Xform2AngHash_bt24_BCC6"; }
   Xform2AngHash_bt24_BCC6() {}
   Xform2AngHash_bt24_BCC6(Float phi_resl, Float cart_resl, Float ang_resl,
                           Float cart_bound = 256.0) {
     this->init(phi_resl, cart_resl, ang_resl, cart_bound);
-    phi_resl_ = phi_resl_;
+    this->phi_resl_ = phi_resl;
   }
 
   void init(Float _phi_resl, Float _cart_resl, Float _ang_resl,
@@ -269,9 +272,8 @@ struct Xform2AngHash_bt24_BCC6 : public XformHash_bt24_BCC6<_Xform> {
     F6 lb, ub;
     I6 ns = this->get_bounds(this->cart_resl_, this->ori_nside_,
                              this->cart_bound_, lb, ub);
-    uint64_t nphi = (180.0 / this->phi_resl_) + 2;
-    grid8_.init(concat(ns, nphi, nphi), concat(lb, -180.0 - 2 * this->phi_resl_,
-                                               -180.0 - 2 * this->phi_resl_),
+    grid8_.init(concat(ns, this->ns_phi(), this->ns_phi()),
+                concat(lb, this->lb_phi(), this->lb_phi()),
                 concat(ub, 180.0, 180.0));
     // std::cout << "cr " << this->cart_resl_ << std::endl;
     // std::cout << grid8_ << std::endl;
