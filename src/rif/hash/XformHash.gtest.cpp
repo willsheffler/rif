@@ -358,7 +358,7 @@ void test_xform_hash_perf(double cart_resl, double ang_resl,
     ASSERT_LT(dt, cart_resl);
     ASSERT_LT(da, ang_resl);
   }
-  ASSERT_GT(max_dt * 1.2, cart_resl);
+  ASSERT_GT(max_dt * 1.25, cart_resl);
   ASSERT_GT(max_da * 1.4, ang_resl);  // multiplier of 1.4??
 
   double tot_cell_vol = covrad * covrad * covrad * covrad * covrad * covrad *
@@ -556,7 +556,7 @@ TEST(XformHash, XformAngHash_bt24_BCC) {
       ASSERT_LT(da, ang_resl);
       ASSERT_LT(dp, phi_resl);
     }
-    ASSERT_GT(max_dt * 1.2, cart_resl);
+    ASSERT_GT(max_dt * 1.25, cart_resl);
     ASSERT_GT(max_da * 1.6, ang_resl);  // multiplier of 1.4??
     ASSERT_GT(max_dp * 1.2, phi_resl);
   }
@@ -622,7 +622,7 @@ TEST(XformHash, Xform2AngHash_bt24_BCC6) {
       ASSERT_LT(da, ang_resl);
       ASSERT_LT(dp, phi_resl);
     }
-    ASSERT_GT(max_dt * 1.2, cart_resl);
+    ASSERT_GT(max_dt * 1.25, cart_resl);
     ASSERT_GT(max_da * 1.6, ang_resl);  // multiplier of 1.4??
     ASSERT_GT(max_dp * 1.2, phi_resl);
   }

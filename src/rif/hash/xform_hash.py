@@ -4,8 +4,8 @@ import numpy as np
 
 
 class RosettaStubHash(XformHash_bt24_BCC6_X3f):
-    def __init__(self, cart_resl, ang_resl, cart_bound=512):
-        super().__init__(cart_resl, ang_resl, cart_bound)
+    def __init__(self, cart_resl, ori_resl, cart_bound=512):
+        super().__init__(cart_resl, ori_resl, cart_bound)
 
     def get_key(self, x):
         return super().get_key(rcl.to_rif_stub(x))[0]
@@ -21,8 +21,8 @@ class RosettaStubHash(XformHash_bt24_BCC6_X3f):
 
 
 class RosettaStubTorsionHash(XformAngHash_bt24_BCC6_X3f):
-    def __init__(self, phi_resl, cart_resl, ang_resl, cart_bound=512):
-        super().__init__(phi_resl, cart_resl, ang_resl, cart_bound)
+    def __init__(self, phi_resl, cart_resl, ori_resl, cart_bound=32.0):
+        super().__init__(phi_resl, cart_resl, ori_resl, cart_bound)
 
     def get_key(self, x, ang):
         return super().get_key(rcl.to_rif_stub(x), ang)[0]
@@ -38,8 +38,8 @@ class RosettaStubTorsionHash(XformAngHash_bt24_BCC6_X3f):
 
 
 class RosettaStubTwoTorsionHash(Xform2AngHash_bt24_BCC6_X3f):
-    def __init__(self, phi_resl, cart_resl, ang_resl, cart_bound=512):
-        super().__init__(phi_resl, cart_resl, ang_resl, cart_bound)
+    def __init__(self, phi_resl, cart_resl, ori_resl, cart_bound=32.0):
+        super().__init__(phi_resl, cart_resl, ori_resl, cart_bound)
 
     def get_key(self, x, ang1, ang2):
         return super().get_key(rcl.to_rif_stub(x), ang1, ang2)[0]

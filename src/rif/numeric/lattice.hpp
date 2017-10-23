@@ -1,5 +1,6 @@
 #pragma once
 
+#include <util/str.hpp>
 #include "util/SimpleArray.hpp"
 #include "util/template_loop.hpp"
 
@@ -31,6 +32,12 @@ struct BCC {
 
   Indices nside_, nside_prefsum_;
   Floats lower_, width_, lower_cen_, half_width_;
+  Indices nside() const { return nside_; }
+  Floats lower() const { return lower_; }
+  Floats width() const { return width_; }
+  Floats upper() const {
+    return lower_ + width_ * (nside().template cast<Float>());
+  }
 
   bool operator!=(BCC<DIM, Float, Index> o) const { return !(*this == o); }
   bool operator==(BCC<DIM, Float, Index> o) const {
@@ -165,9 +172,12 @@ struct BCC {
 
 template <int DIM, class Float, class Index>
 std::ostream &operator<<(std::ostream &out, BCC<DIM, Float, Index> bcc) {
-  return out << "lb " << bcc.lower_ << " ub "
+  using namespace util;
+  std::string name = "BCC" + str(DIM) + short_str<Float>() + short_str<Index>();
+  return out << name << "(lb=[" << bcc.lower_ << "], ub=["
              << (bcc.width_ * bcc.nside_.template cast<Float>() + bcc.lower_)
-             << " w " << bcc.width_ << " nc " << bcc.nside_;
+             << "], width=[" << bcc.width_ << "], nside=[" << bcc.nside_
+             << "])";
 }
 
 template <int DIM, class Float, class Index = uint64_t>

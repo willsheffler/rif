@@ -45,3 +45,8 @@ def test_bcc_bounds():
         assert np.min(np.abs(s + 1)) < 0.000001  # have -1.0
 
         assert len(s) == 2 * nc[-1]
+
+
+def test_return_convert():
+    bcc = return_test_convert_cpp()
+    assert repr(bcc).startswith("BCC6f4u8")
