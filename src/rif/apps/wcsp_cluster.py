@@ -1,4 +1,4 @@
-#/usr/bin/env python
+#!/usr/bin/env python
 
 from rif.cluster.cookie_cutter import *
 import pandas as pd
@@ -21,6 +21,7 @@ def update_clusters(thresh, lines, clusters, centers):
         if i >= norig:
             # print(i, len(clusters))
             sys.stdout.write(lines[i - norig])
+            sys.stdout.flush()
     centers = xincr[clusters, :]
     clusters = list(range(len(clusters)))
     lines.clear()
@@ -48,19 +49,21 @@ def main():
         try:
             thresh = int(sys.argv[1])
         except IndexError:
-            thresh = 30
+            thresh = 10
         lines = list()
         clusters = list()
         centers = None
         for line in sys.stdin:
-            icolon = line.find(':')
-            tag = line[:icolon].split()
-            if len(tag) != 2:
-                continue
-            tag = tag[1]
-            if not tag.startswith('solution'):
-                continue
-            lines.append(line[icolon + 3:])
+            # icolon = line.find(':')
+            # tag = line[:icolon].split()
+            # if len(tag) != 2:
+                # continue
+            # tag = tag[1]
+            # if not tag.startswith('solution'):
+                # continue
+            # lines.append(line[icolon + 3:])
+            if line.startswith('New rotamers: '):
+                lines.append(line[14:])
             if len(lines) >= 1000:
                 lines, clusters, centers = update_clusters(
                     thresh, lines, clusters, centers)
