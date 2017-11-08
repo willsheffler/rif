@@ -7,7 +7,7 @@ import sys
 from io import StringIO
 
 
-def update_clusters(thresh, lines, clusters, centers):
+def update_clusters(thresh, lines, seqs, clusters, centers, showseqs=0):
     norig = len(clusters)
     xincr = pd.read_csv(StringIO(''.join(lines)), ' ', header=None,
                         dtype='i4', engine='c').as_matrix()
@@ -20,12 +20,16 @@ def update_clusters(thresh, lines, clusters, centers):
     for i in clusters:
         if i >= norig:
             # print(i, len(clusters))
-            sys.stdout.write(lines[i - norig])
-            sys.stdout.flush()
+            if showseqs:
+                sys.stdout.write(seqs[i - norig])
+                sys.stdout.flush()
+            else:
+                sys.stdout.write(lines[i - norig])
+                sys.stdout.flush()
     centers = xincr[clusters, :]
     clusters = list(range(len(clusters)))
     lines.clear()
-    return lines, clusters, centers
+    return lines, seqs, clusters, centers
 
 
 def main():
@@ -46,11 +50,13 @@ def main():
                          str(clust.shape[0]) + ".wcsp", ' ', header=None,
                          index=False)
     else:
+        showseqs = 0
         try:
             thresh = int(sys.argv[1])
         except IndexError:
             thresh = 10
         lines = list()
+        seqs = list()
         clusters = list()
         centers = None
         for line in sys.stdin:
@@ -64,12 +70,14 @@ def main():
             # lines.append(line[icolon + 3:])
             if line.startswith('New rotamers: '):
                 lines.append(line[14:])
+            if line.startswith('New sequence: '):
+                seqs.append(line[14:].replace('G', "."))
             if len(lines) >= 1000:
-                lines, clusters, centers = update_clusters(
-                    thresh, lines, clusters, centers)
+                lines, seqs, clusters, centers = update_clusters(
+                    thresh, lines, seqs, clusters, centers, showseqs)
         if lines:
-            lines, clusters, centers = update_clusters(
-                thresh, lines, clusters, centers)
+            lines, seqs, clusters, centers = update_clusters(
+                thresh, lines, seqs, clusters, centers, showseqs)
 
 
 if __name__ == '__main__':

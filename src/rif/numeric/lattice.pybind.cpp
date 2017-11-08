@@ -55,10 +55,10 @@ void bind_bcc_N_F_I(py::module& m) {
       /**/;
 }
 
-std::unique_ptr<BCC<6, float, unsigned long>> return_test_convert_cpp() {
+std::unique_ptr<BCC<6, float, uint64_t>> return_test_convert_cpp() {
   SimpleArray<6, int> nc(10);
   SimpleArray<6, float> lb(-10), ub(10);
-  return std::make_unique<BCC<6, float, unsigned long>>(nc, lb, ub);
+  return std::make_unique<BCC<6, float, uint64_t>>(nc, lb, ub);
 }
 
 template <int N>
