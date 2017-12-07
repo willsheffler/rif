@@ -1,4 +1,0 @@
-"""
-docstring for rif.visual
-"""
-

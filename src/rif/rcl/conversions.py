@@ -181,9 +181,22 @@ def rays(pose, sele, shifts=None, protein_only=True, **kwargs):
     return rays
 
 
-def stubs():
+def bbstubs(pose):
     'extract rif style stubs from rosetta pose'
-    raise NotImplementedError
+    n_prot_res = 0
+    for ir in range(pose.size()):
+        n_prot_res += pose.residue(ir+1).is_protein()
+    rif_stubs = np.zeros(n_prot_res, dtype='4,4f')
+    n_prot_res = 0
+    for ir in range(pose.size()):
+        r = pose.residue(ir+1)
+        if not r.is_protein():
+            continue
+        ros_stub = rcl.Stub(r.xyz('CA'), r.xyz('N'), r.xyz('CA'), r.xyz('C'))
+        rif_stub = to_rif_stub(ros_stub)
+        rif_stubs[n_prot_res, :, :] = rif_stub['raw']
+        n_prot_res += 1
+    return rif_stubs
 
 
 def to_rif_stub(rosstub):

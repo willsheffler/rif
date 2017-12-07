@@ -19,6 +19,13 @@ def datadir(rootdir):
 
 
 @pytest.fixture(scope='session')
+def pdbdir(datadir):
+    d = join(datadir, 'pdb')
+    assert exists(d)
+    return d
+
+
+@pytest.fixture(scope='session')
 def pdbfname(datadir):
     f = join(datadir, 'pdb', '3uc7A.pdb')
     assert exists(f)
@@ -26,15 +33,15 @@ def pdbfname(datadir):
 
 
 @pytest.fixture(scope='session')
-def cleanpdbfname(datadir):
-    f = join(datadir, 'pdb', '3uc7A_clean.pdb')
+def cleanpdbfname(pdbdir):
+    f = join(pdbdir, '3uc7A_clean.pdb')
     assert exists(f)
     return f
 
 
 @pytest.fixture(scope='session')
-def pdbsmallfname(datadir):
-    f = join(datadir, 'pdb', 'small.pdb')
+def pdbsmallfname(pdbdir):
+    f = join(pdbdir, 'small.pdb')
     assert exists(f)
     return f
 
@@ -56,24 +63,32 @@ def bigpose(cleanpdbfname):
     pose = rcl.pose_from_file(cleanpdbfname)
     return pose
 
-
-def get_smalltrimer(datadir, suffix=''):
+@pytest.fixture(scope='session')
+def curved_helix_pose(pdbdir):
     if not rcl.HAVE_PYROSETTA:
         return None
     rcl.init_check(strict=False)
-    return rcl.pose_from_file(join(datadir, 'pdb', '1coi%s.pdb' % suffix))
+    pose = rcl.pose_from_file(join(pdbdir,'curved_helix.pdb'))
+    return pose
+
+
+def get_smalltrimer(pdbdir, suffix=''):
+    if not rcl.HAVE_PYROSETTA:
+        return None
+    rcl.init_check(strict=False)
+    return rcl.pose_from_file(join(pdbdir, '1coi%s.pdb' % suffix))
 
 
 @pytest.fixture(scope='session')
-def small_trimer_A(datadir):
-    return get_smalltrimer(datadir, suffix='_A')
+def small_trimer_A(pdbdir):
+    return get_smalltrimer(pdbdir, suffix='_A')
 
 
 @pytest.fixture(scope='session')
-def small_trimer_B(datadir):
-    return get_smalltrimer(datadir, suffix='_B')
+def small_trimer_B(pdbdir):
+    return get_smalltrimer(pdbdir, suffix='_B')
 
 
 @pytest.fixture(scope='session')
-def small_trimer_C(datadir):
-    return get_smalltrimer(datadir, suffix='_C')
+def small_trimer_C(pdbdir):
+    return get_smalltrimer(pdbdir, suffix='_C')

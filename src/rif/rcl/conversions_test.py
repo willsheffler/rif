@@ -57,3 +57,13 @@ def test_rosetta_stub_to_matrix():
     assert np.all(stub144[0, 3, :] == [0, 0, 0, 1])
     rosstub = to_rosetta_stub(rifstub)
     assert rosstub == stub
+
+
+@pytest.mark.skipif('not rcl.HAVE_PYROSETTA')
+def test_bbstubs(pose):
+    bb = bbstubs(pose)
+    assert bb.shape == (pose.size(), 4, 4)
+    for ir in range(pose.size()):
+        assert abs(bb[ir, 0, 3] - pose.residue(ir+1).xyz('CA')[0]) < 0.001
+        assert abs(bb[ir, 1, 3] - pose.residue(ir+1).xyz('CA')[1]) < 0.001
+        assert abs(bb[ir, 2, 3] - pose.residue(ir+1).xyz('CA')[2]) < 0.001

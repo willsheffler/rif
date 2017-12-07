@@ -1,4 +1,4 @@
-from builtins import bytes
+# from builtins import bytes
 
 import glob
 import os
@@ -19,6 +19,7 @@ import pytest
 # and importing from setup.py is problematic....
 ###############################################################################
 
+_VERBOSE = True # in_CI_environment()
 
 def get_my_compiler():
     my_compiler = os.getenv('CXX', '').replace('/', '')
@@ -103,7 +104,6 @@ def in_CI_environment():
     return 'CI' in os.environ or 'READTHEDOCS' in os.environ
 
 
-_VERBOSE = in_CI_environment()
 
 
 def get_proj_root():
@@ -369,7 +369,6 @@ def build_and_test():
             for p in sys.path:
                 print('       ', p)
             print('    cwd:', os.getcwd())
-            # sys.argv[0] = 'py.test'
         sys.argv[1:] = args
         assert not pytest.main()
 

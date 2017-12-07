@@ -3,28 +3,13 @@
 	[
 		{
 			"file_regex": "^[ ]*File \"(...*?)\", line ([0-9]*)",
-			"name": "py3_build_and_test",
-			"shell_cmd": "cd $folder && python3 tools/build_and_test.py $file --inplace 2>&1 | tee log/subl_build.log"
-		},
-		{
-			"file_regex": "^[ ]*File \"(...*?)\", line ([0-9]*)",
-			"name": "py35_build_and_test",
-			"shell_cmd": "cd $folder && python3.5 tools/build_and_test.py $file --inplace 2>&1 | tee log/subl_build.log"
-		},
-		{
-			"file_regex": "^[ ]*File \"(...*?)\", line ([0-9]*)",
-			"name": "conda3_build_and_test",
-			"shell_cmd": "cd $folder && /home/sheffler/anaconda3/bin/python3 tools/build_and_test.py $file --inplace 2>&1 | tee log/subl_build.log"
+			"name": "build_and_test",
+			"shell_cmd": "cd $folder && python tools/build_and_test.py $file --inplace 2>&1 | tee log/subl_build.log"
 		},
 		{
 			"file_regex": "^[ ]*File \"(...*?)\", line ([0-9]*)",
 			"name": "build_and_test_noargs",
 			"shell_cmd": "cd $folder && python tools/build_and_test.py --inplace 2>&1 | tee log/subl_build.log"
-		},
-		{
-			"file_regex": "^[ ]*File \"(...*?)\", line ([0-9]*)",
-			"name": "run_tox",
-			"shell_cmd": "cd $folder && tox 2>&1 | tee log/subl_build.log"
 		},
 		{
 			"name": "build_docs",
@@ -34,7 +19,7 @@
 			"file_regex": "^[ ]*File \"(...*?)\", line ([0-9]*)",
 			"name": "Anaconda Python Builder",
 			"selector": "source.python",
-			"shell_cmd": "\"/home/sheffler/.conda/envs/sheffler/bin/python\" -u \"$file\""
+			"shell_cmd": "\"/home/sheffler/.conda/envs/rif/bin/python\" -u \"$file\""
 		}
 	],
 	"folders":
@@ -72,8 +57,7 @@
 				"external/pybind11",
 				"deps",
 				"dist",
-				"*.egg-info"
-			],
+				"*.egg-info"			],
 			"path": ".."
 		}
 	],
@@ -86,10 +70,6 @@
 			},
 			"Linux":
 			{
-				"CC": "clang-4.0",
-				"CXX": "clang++-4.0"
-				// "CC": "gcc-5",
-				// "CXX": "g++-5"
 			},
 			"Windows":
 			{
@@ -97,11 +77,10 @@
 		},
 		"extra_paths":
 		[
-			"/home/sheffler/rif/buildR/lib.linux-x86_64-3.6-H.ceshefflerBPy3-C40"
 		],
-		"python_interpreter": "/home/sheffler/.conda/envs/sheffler/bin/python",
-		"tab_size": 4,
-		"translate_tabs_to_spaces": true,
+		"python_interpreter": "/home/sheffler/.conda/envs/rif/bin/python",
 		"spell_check": true,
+		"tab_size": 4,
+		"translate_tabs_to_spaces": true
 	}
 }

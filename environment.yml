@@ -12,6 +12,7 @@ dependencies:
  - pytest-cov
  - sphinx_rtd_theme
  - mock
+ - seaborn
  - pip
  - pip:
    - external/hacked_packages/pytest-cpp-0.4
@@ -19,3 +20,4 @@ dependencies:
    - hypothesis
    - pytest-sugar
    - pytest-xdist
+   - parsimonious

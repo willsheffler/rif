@@ -36,8 +36,11 @@ def run_docs():
 
 
 def run():
-    if any(isdocfile(arg) for arg in sys.argv[1:]):
+    args = sys.argv[1:]
+    if all(isdocfile(arg) for arg in args):
         return run_docs()
+    elif any(isdocfile(arg) for arg in args):
+        raise NotImplementedError('mixed docs and code!')
     else:
         return run_tests()
 
