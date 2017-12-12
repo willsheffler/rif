@@ -26,7 +26,6 @@ def test_pandas_del_bug():
         a.cumsum()  # todo: this is still broken!
 
 
-
 def test_dtype_hash():
     # python2 breaks on hashing
     if sys.version_info.major is 3:
@@ -34,27 +33,28 @@ def test_dtype_hash():
 
 
 def test_V3_numpy():
-    # print([V3()] * 5)
-    a = np.array([(V3((7, 8, 9)),)] * 4, dtype=V3)
-    assert np.all(a['raw'][:, 0] == 7)
-    assert np.all(a['raw'][:, 1] == 8)
-    assert np.all(a['raw'][:, 2] == 9)
+    with RifOperators():
+        # print([V3()] * 5)
+        a = np.array([(V3((7, 8, 9)),)] * 4, dtype=V3)
+        assert np.all(a['raw'][:, 0] == 7)
+        assert np.all(a['raw'][:, 1] == 8)
+        assert np.all(a['raw'][:, 2] == 9)
 
-    if sys.version_info.major is 3:
-        assert np.all(abs(a) == np.linalg.norm(a['raw'], axis=1))
+        if sys.version_info.major is 3:
+            assert np.all(abs(a) == np.linalg.norm(a['raw'], axis=1))
 
-    # print(a.dtype)
-    # print(a[0])
-    # assert repr(a[0]) == ''
+        # print(a.dtype)
+        # print(a[0])
+        # assert repr(a[0]) == ''
 
-    # print(type(a[0]))
-    # print(type(np.asscalar(a[0])))
-    assert V3(a[2][0]) == a[2]
+        # print(type(a[0]))
+        # print(type(np.asscalar(a[0])))
+        assert V3(a[2][0]) == a[2]
 
-    u = V3([1, 2, 3])
-    v = V3([1, 2, 3])
-    assert u == v
-    assert len(v) == 3
+        u = V3([1, 2, 3])
+        v = V3([1, 2, 3])
+        assert u == v
+        assert len(v) == 3
 
 
 def eigen_V3_test_helper():

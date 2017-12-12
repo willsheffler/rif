@@ -359,7 +359,7 @@ void test_xform_hash_perf(double cart_resl, double ang_resl,
     ASSERT_LT(da, ang_resl);
   }
   ASSERT_GT(max_dt * 1.25, cart_resl);
-  ASSERT_GT(max_da * 1.4, ang_resl);  // multiplier of 1.4??
+  ASSERT_GT(max_da * 1.41, ang_resl);  // multiplier of 1.41??
 
   double tot_cell_vol = covrad * covrad * covrad * covrad * covrad * covrad *
                         xh.approx_nori() / (cart_resl * cart_resl * cart_resl);

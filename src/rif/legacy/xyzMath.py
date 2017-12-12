@@ -640,7 +640,7 @@ def rotation_matrix_degrees(axis, angle):
     >>> axs = randnorm()
     >>> while(abs(v.dot(axs))>0.9): axs = randnorm()
     >>> u = rotation_matrix_degrees(projperp(v,axs),ang)*v
-    >>> assert abs(u.angle_degrees(v)-abs(ang)) < SQRTEPS
+    >>> assert abs(u.angle_degrees(v)-abs(ang)) < 10*SQRTEPS
     """
     return rotation_matrix(axis, radians(angle))
 

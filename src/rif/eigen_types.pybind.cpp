@@ -122,6 +122,8 @@ void print_numpy_info(py::array a) {
   std::cout << "format: '" << b.format << "'" << std::endl;
 }
 
+X3f x3f_inverse(X3f x) { return x.inverse(); }
+
 void RIFLIB_PYBIND_eigen_types(py::module& m) {
   bind_eigen_matrix_fixed<V3f>(m, "V3");
   bind_eigen_matrix_fixed<V3d>(m, "V3d");
@@ -134,6 +136,7 @@ void RIFLIB_PYBIND_eigen_types(py::module& m) {
   bind_eigen_xform<Xc3f>(m, "Xc3");
   bind_eigen_xform<Xc3d>(m, "Xc3d");
 
+  m.def("x3_inverse", py::vectorize(x3f_inverse));
   /*
     for o in "add sub mul div".split():
         for t1 in "float V3f M3f X3f".split():

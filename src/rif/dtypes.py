@@ -194,5 +194,5 @@ def unwrap_broken_functions():
     _ORIG_WRAPPED_BROKEN_FUNCTIONS = None
 
 
-global_rif_operators_enable()
-assert rif_operators_are_enabled()
+# global_rif_operators_enable()
+# assert rif_operators_are_enabled()

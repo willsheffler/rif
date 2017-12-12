@@ -75,12 +75,9 @@
 			{
 			}
 		},
-		"extra_paths":
-		[
-		],
-		"python_interpreter": "/home/sheffler/.conda/envs/rif/bin/python",
 		"spell_check": true,
 		"tab_size": 4,
-		"translate_tabs_to_spaces": true
+		"translate_tabs_to_spaces": true,
+		"autoformat_on_save": true,
 	}
 }

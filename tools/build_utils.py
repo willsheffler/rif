@@ -19,7 +19,6 @@ import pytest
 # and importing from setup.py is problematic....
 ###############################################################################
 
-_VERBOSE = True # in_CI_environment()
 
 def get_my_compiler():
     my_compiler = os.getenv('CXX', '').replace('/', '')
@@ -104,6 +103,7 @@ def in_CI_environment():
     return 'CI' in os.environ or 'READTHEDOCS' in os.environ
 
 
+_VERBOSE = in_CI_environment()
 
 
 def get_proj_root():
@@ -227,7 +227,8 @@ def get_gtests(args_in):
             print("    get_gtests", gtestfile)
         with open(gtestfile) as file:
             contents = file.read()
-            for match in re.findall("TEST\(\s*(\S+?),\s*(\S+?)\s*\)", contents):
+            for match in re.findall(
+                    "TEST\(\s*(\S+?),\s*(\S+?)\s*\)", contents):
                 assert len(match) is 2
                 gtests.add(match[0])
     return gtests
@@ -259,7 +260,8 @@ def rebuild_fast(target='_rif', cfg='Release', force_redo_cmake=False):
         if not which('ninja'):
             makeexe = 'make'
         ncpu = multiprocessing.cpu_count()
-        return os.system('cd ' + cmake_dir + '; ' + makeexe + ' -j%i ' % ncpu + target)
+        return os.system('cd ' + cmake_dir + '; ' +
+                         makeexe + ' -j%i ' % ncpu + target)
     except (OSError, TypeError):
         return rebuild_rif(cfg=cfg)
 

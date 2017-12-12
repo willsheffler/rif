@@ -1,8 +1,10 @@
 import _rif
 from _rif._eigen_types import *
+import numpy as np
 
 __all__ = 'V3 M3 X3'.split()
 
+x3_identity = np.array([1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1],dtype='f').view(X3)
 
 for cls in vars(_rif._eigen_types):
     prefix = "V3".split()
