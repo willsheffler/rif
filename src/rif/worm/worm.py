@@ -1,134 +1,148 @@
 from rif import rcl
-from rif.eigen_types import x3_identity, x3_inverse
 import numpy as np
 
 
-class SplicePositions:
+class XformCheck:
 
-    def __init__(self, residue_numbers, direction):
-        self.residue_numbers = list(residue_numbers)
-        self.direction = direction
+    def __init__(self, *, sym=None, origin_segment=None,
+                 is_exactly=None, z_axes_intersection=None, lever=100.0):
+        if 1 is not ((None is not sym) +
+                     (None is not is_exactly) +
+                     (None is not z_axes_intersection)):
+            raise ValueError(
+                'required: exactly one of sym, is_exactly, or z_axes_intersection')
+        if origin_segment is not None and sym is None:
+            raise ValueError('origin_segment requires sym')
+        self.sym = sym
+        self.origin_segment = origin_segment
+        self.is_exactly = is_exactly
+        self.lever = lever
 
-    def __len__(self):
-        return len(self.residue_numbers)
+    def __call__(self, xform):
+        # todo: this should probably do something...i
+        return np.ones(xform.shape[:-2])
 
-    def __iter__(self):
-        return iter(self.residue_numbers)
+
+class GeomCheck:
+
+    def __init__(self, *, from_segment=0, to_segment=-1, tol=1.0, **kwargs):
+        self.from_segment = from_segment
+        self.to_segment = to_segment
+        self.check_xform = XformCheck(**kwargs)
+
+    def __call__(self, positions):
+        x_from = positions[self.from_segment]
+        x_to = positions[self.to_segment]
+        x = np.linarg.inv(x_from) @ x_to
+        return self.check_xform(x)
+
+
+class SpliceSite:
+
+    def __init__(self, resids, polarity):
+        self.resids = list(resids)
+        self.polarity = polarity
+
+
+class Splicable:
+
+    def __init__(self, body, sites, *, bodyid=None):
+        self.body = body
+        self.bodyid = bodyid
+        if callable(sites):
+            sites = sites(body)
+        self.sites = list(sites)
+
+    def splicable_positions(self):
+        """selection of resids, and map 'global' index to selected index"""
+        resid_subset = set()
+        for site in self.sites:
+            resid_subset |= set(site.resids)
+        resid_subset = np.array(list(resid_subset))
+        # really? must be an easier way to 'invert' a mapping in numpy?
+        N = len(self.body) + 1
+        val, idx = np.where(0 == (np.arange(N)[np.newaxis, :] -
+                                  resid_subset[:, np.newaxis]))
+        to_subset = np.array(N * [-1])
+        to_subset[idx] = val
+        assert (to_subset[resid_subset] == np.arange(len(resid_subset))).all()
+        return resid_subset, to_subset
 
 
 class Segment:
 
-    def __init__(self, pose, splice_groups, entry_dir=None, exit_dir=None):
-        assert entry_dir or exit_dir
-        self.pose = pose
-        self.splice_groups = list(splice_groups)
-        self.entry_dir = entry_dir
-        self.exit_dir = exit_dir
-        self.update_geometry()
+    def __init__(self, splicables, *, entry=None, egress=None):
+        self.entrypol = entry
+        self.egrespol = egress
+        self.init(splicables, entry, egress)
 
-    def splice_position_map(self):
-        """selection of resis, and map 'global' index to selected index"""
-        resi_sele = set()
-        for splice_positions in self.splice_groups:
-            resi_sele |= set(splice_positions)
-        resi_sele = np.array(list(resi_sele))
-        # really? must be an easier way to 'invert' a selection in numpy
-        idx_range = np.arange(self.pose.size() + 1)
-        val, idx = np.where((np.expand_dims(idx_range, 0) -
-                             np.expand_dims(resi_sele, 1)) == 0)
-        sele_inv = np.array((self.pose.size() + 1) * [-1])
-        sele_inv[idx] = val
-        assert (sele_inv[resi_sele] == np.arange(len(resi_sele))).all()
-        return resi_sele, sele_inv
-
-    def update_geometry(self):
-        resi_sele, sele_inv = self.splice_position_map()
-        # extract 'stubs' from pose at selected positions
-        # rif 'stubs' have 'extra' 'features'... the raw field is
-        # just bog-standard homogeneous matrices
-        bbstubs = rcl.bbstubs(self.pose, resi_sele)['raw']
-        assert len(resi_sele) is bbstubs.shape[
-            0], "no funny residues supported"
-        bbstubs_inv = np.linalg.inv(bbstubs)
-        self.entry2exit = list()  # all in/out xforms
-        self.entry2cntr = list()  # all in to centry (redundant)
-        self.entry_resi = list()
-        self.exit_resi = list()
-        if self.entry_dir is None:  # beginning of 'worm'
-            for group in self.splice_groups:
-                if group.direction == self.exit_dir:
-                    for jr in group:
-                        self.entry2exit.append(bbstubs[sele_inv[jr]])
-                        self.entry2cntr.append(x3_identity)
-                        self.entry_resi.append(np.nan)
-                        self.exit_resi.append(jr)
-        elif self.exit_dir is None:  # at end of 'worm'
-            for group in self.splice_groups:
-                if group.direction == self.entry_dir:
-                    for ir in group:
-                        self.entry2exit.append(bbstubs_inv[sele_inv[ir]])
-                        self.entry2cntr.append(bbstubs_inv[sele_inv[ir]])
-                        self.entry_resi.append(ir)
-                        self.exit_resi.append(np.nan)
-        else:  # in middle of worm
-            for i, group1 in enumerate(self.splice_groups):
-                if group1.direction != self.entry_dir:
-                    continue
-                for j, group2 in enumerate(self.splice_groups):
-                    if group2.direction != self.exit_dir:
-                        continue
-                    if i == j:
-                        continue
-                    for ir in group1:
-                        print(ir)
-                        print(sele_inv[ir])
-                        istub = bbstubs_inv[sele_inv[ir]]
-                        for jr in group2:
-                            jstub = bbstubs[sele_inv[jr]]
-                            self.entry2exit.append(istub @ jstub)
-                            self.entry2cntr.append(istub)
-                            self.entry_resi.append(ir)
-                            self.exit_resi.append(jr)
-        assert len(self.entry2exit) > 0
+    def init(self, splicables=None, entry=None, egress=None):
+        if not (entry or egress):
+            raise ValueError('at least one of entry/egress required')
+        self.splicables = list(splicables) or self.splicables
+        self.entrypol = entry or self.entrypol
+        self.egrespol = egress or self.egrespol
+        # each array has all in/out pairs
+        self.entry2exit, self.entry2orig = list(), list()
+        self.entryresid, self.exitresid, self.bodyid = list(), list(), list()
+        # this whole loop is pretty inefficient, but that probably
+        # doesn't matter much given the cost subsequent operations (?)
+        for bodyid, splicable in enumerate(self.splicables):
+            resid_subset, to_subset = splicable.splicable_positions()
+            # extract 'stubs' from body at selected positions
+            # rif 'stubs' have 'extra' 'features'... the raw field is
+            # just bog-standard homogeneous matrices
+            bbstubs = rcl.bbstubs(splicable.body, resid_subset)['raw']
+            if len(resid_subset) != bbstubs.shape[0]:
+                raise ValueError("no funny residdues supported")
+            bbstubs_inv = np.linalg.inv(bbstubs)
+            entry_sites = (list(enumerate(splicable.sites)) if self.entrypol else
+                           [(-1, SpliceSite(resids=[np.nan],
+                                            polarity=self.entrypol))])
+            exit_sites = (list(enumerate(splicable.sites)) if self.egrespol else
+                          [(-1, SpliceSite(resids=[np.nan],
+                                           polarity=self.egrespol))])
+            for isite, entry_site in entry_sites:
+                if entry_site.polarity == self.entrypol:
+                    for jsite, exit_site in exit_sites:
+                        if isite != jsite and exit_site.polarity == self.egrespol:
+                            for ires in entry_site.resids:
+                                istub_inv = (np.identity(4) if np.isnan(ires)
+                                             else bbstubs_inv[to_subset[ires]])
+                                for jres in exit_site.resids:
+                                    jstub = (np.identity(4) if np.isnan(jres)
+                                             else bbstubs[to_subset[jres]])
+                                    self.entry2exit.append(istub_inv @ jstub)
+                                    self.entry2orig.append(istub_inv)
+                                    self.entryresid.append(ires)
+                                    self.exitresid.append(jres)
+                                    self.bodyid.append(bodyid)
+        if len(self.entry2exit) is 0:
+            raise ValueError('no valid splices found')
         self.entry2exit = np.stack(self.entry2exit)
-        self.entry2cntr = np.stack(self.entry2cntr)
-        self.entry_resi = np.array(self.entry_resi)
-        self.exit_resi = np.array(self.exit_resi)
+        self.entry2orig = np.stack(self.entry2orig)
+        self.entryresid = np.array(self.entryresid)
+        self.exitresid = np.array(self.exitresid)
+        self.bodyid = np.array(self.bodyid)
 
 
-class SegmentSet:
+class Worms:
 
-    def __init__(self, segments):
-        assert len(segments) > 0
-        self.entry_dir = segments[0].entry_dir
-        self.exit_dir = segments[0].exit_dir
-        for s in segments:
-            assert s.entry_dir == self.entry_dir
-            assert s.exit_dir == self.exit_dir
+    def __init__(self, segments, score, solutions):
         self.segments = segments
+        self.score = score
+        self.solutions = solutions
 
 
-class SegmentSets:
-
-    def __init__(segment_sets):
-        self.segment_sets = segment_sets
-
-
-class TransformConstraint:
-
-    def __init__(self, from_segment=0, to_segment=-1, sym='C1',
-                 has_same_sym_as=None, is_exactly=None, tol=0.1, lever=100.0):
-        self.from_segment = from_segment
-        self.to_segment = to_segment
-        self.sym = sym
-        self.has_same_sym_as = has_same_sym_as
-        self.is_exactly = is_exactly
-        self.tol = tol
-        self.lever = lever
-
-    def is_satisfactory(positions):
-        return False
-
-
-def grow_worms(segment_sets, constraints, score_funcs=None, cache=None):
+def grow(segments, *, criteria, cache=None):
+    if segments[0].entrypol is not None:
+        raise ValueError('beginning of worm cant have entrypol')
+    if segments[-1].egrespol is not None:
+        raise ValueError('end of worm cant have egrespol')
+    for a, b in zip(segments[:-1], segments[1:]):
+        if not (a.egrespol and b.entrypol and a.egrespol != b.entrypol):
+            raise ValueError('incompatible egrespol->entrypol: '
+                             + str(a.egrespol) + '->'
+                             + str(b.entrypol) + ' on pair: '
+                             + str((segments.index(a), segments.index(b))))
     return None
