@@ -19,7 +19,17 @@ class XformCheck:
         self.lever = lever
 
     def __call__(self, xform):
+
         # todo: this should probably do something...i
+
+        # todo: this should probably do something...i
+
+        # todo: this should probably do something...i
+
+        # todo: this should probably do something...i
+
+        # todo: this should probably do something...i
+
         return np.ones(xform.shape[:-2])
 
 
@@ -44,9 +54,9 @@ class SpliceSite:
         self.polarity = polarity
 
 
-class Splicable:
+class Spliceable:
 
-    def __init__(self, body, sites, *, bodyid=None):
+    def __init__(self, body, *, sites, bodyid=None):
         self.body = body
         self.bodyid = bodyid
         if callable(sites):
@@ -71,24 +81,25 @@ class Splicable:
 
 class Segment:
 
-    def __init__(self, splicables, *, entry=None, egress=None):
+    def __init__(self, splicables, *, entry=None, exit=None):
         self.entrypol = entry
-        self.egrespol = egress
-        self.init(splicables, entry, egress)
+        self.exitpol = exit
+        self.init(splicables, entry, exit)
 
-    def init(self, splicables=None, entry=None, egress=None):
-        if not (entry or egress):
-            raise ValueError('at least one of entry/egress required')
+    def init(self, splicables=None, entry=None, exit=None):
+        if not (entry or exit):
+            raise ValueError('at least one of entry/exit required')
         self.splicables = list(splicables) or self.splicables
         self.entrypol = entry or self.entrypol
-        self.egrespol = egress or self.egrespol
+        self.exitpol = exit or self.exitpol
         # each array has all in/out pairs
-        self.entry2exit, self.entry2orig = list(), list()
+        self.x2exit, self.x2orig = list(), list()
         self.entryresid, self.exitresid, self.bodyid = list(), list(), list()
         # this whole loop is pretty inefficient, but that probably
         # doesn't matter much given the cost subsequent operations (?)
-        for bodyid, splicable in enumerate(self.splicables):
+        for ibody, splicable in enumerate(self.splicables):
             resid_subset, to_subset = splicable.splicable_positions()
+            bodyid = ibody if splicable.bodyid is None else splicable.bodyid
             # extract 'stubs' from body at selected positions
             # rif 'stubs' have 'extra' 'features'... the raw field is
             # just bog-standard homogeneous matrices
@@ -99,28 +110,28 @@ class Segment:
             entry_sites = (list(enumerate(splicable.sites)) if self.entrypol else
                            [(-1, SpliceSite(resids=[np.nan],
                                             polarity=self.entrypol))])
-            exit_sites = (list(enumerate(splicable.sites)) if self.egrespol else
+            exit_sites = (list(enumerate(splicable.sites)) if self.exitpol else
                           [(-1, SpliceSite(resids=[np.nan],
-                                           polarity=self.egrespol))])
+                                           polarity=self.exitpol))])
             for isite, entry_site in entry_sites:
                 if entry_site.polarity == self.entrypol:
                     for jsite, exit_site in exit_sites:
-                        if isite != jsite and exit_site.polarity == self.egrespol:
+                        if isite != jsite and exit_site.polarity == self.exitpol:
                             for ires in entry_site.resids:
                                 istub_inv = (np.identity(4) if np.isnan(ires)
                                              else bbstubs_inv[to_subset[ires]])
                                 for jres in exit_site.resids:
                                     jstub = (np.identity(4) if np.isnan(jres)
                                              else bbstubs[to_subset[jres]])
-                                    self.entry2exit.append(istub_inv @ jstub)
-                                    self.entry2orig.append(istub_inv)
+                                    self.x2exit.append(istub_inv @ jstub)
+                                    self.x2orig.append(istub_inv)
                                     self.entryresid.append(ires)
                                     self.exitresid.append(jres)
                                     self.bodyid.append(bodyid)
-        if len(self.entry2exit) is 0:
+        if len(self.x2exit) is 0:
             raise ValueError('no valid splices found')
-        self.entry2exit = np.stack(self.entry2exit)
-        self.entry2orig = np.stack(self.entry2orig)
+        self.x2exit = np.stack(self.x2exit)
+        self.x2orig = np.stack(self.x2orig)
         self.entryresid = np.array(self.entryresid)
         self.exitresid = np.array(self.exitresid)
         self.bodyid = np.array(self.bodyid)
@@ -134,15 +145,51 @@ class Worms:
         self.solutions = solutions
 
 
+def all_chained_xforms(x2exit, x2orig):
+    fullaxes = (np.newaxis,) * (len(x2exit) - 1)
+    xexit = [x2exit[0][fullaxes], ]
+    xorig = [x2orig[0][fullaxes], ]
+    for iseg in range(1, len(x2exit)):
+        fullaxes = (slice(None),) + (np.newaxis,) * iseg
+        xexit.append(x2exit[iseg][fullaxes] @ xexit[iseg - 1])
+        xorig.append(x2orig[iseg][fullaxes] @ xexit[iseg - 1]
+                     # for last in chain, exit==orig
+                     if iseg != len(x2exit) - 1 else xexit[-1])
+    return xexit, xorig
+
+
 def grow(segments, *, criteria, cache=None):
     if segments[0].entrypol is not None:
-        raise ValueError('beginning of worm cant have entrypol')
-    if segments[-1].egrespol is not None:
-        raise ValueError('end of worm cant have egrespol')
+        raise ValueError('beginning of worm cant have entry')
+    if segments[-1].exitpol is not None:
+        raise ValueError('end of worm cant have exit')
     for a, b in zip(segments[:-1], segments[1:]):
-        if not (a.egrespol and b.entrypol and a.egrespol != b.entrypol):
-            raise ValueError('incompatible egrespol->entrypol: '
-                             + str(a.egrespol) + '->'
-                             + str(b.entrypol) + ' on pair: '
+        if not (a.exitpol and b.entrypol and a.exitpol != b.entrypol):
+            raise ValueError('incompatible exit->entry polarity: '
+                             + str(a.exitpol) + '->'
+                             + str(b.entrypol) + ' on segment pair: '
                              + str((segments.index(a), segments.index(b))))
+    import time
+    t = time.clock()
+    xexit, xorig = all_chained_xforms([s.x2exit for s in segments],
+                                      [s.x2orig for s in segments])
+    t = time.clock() - t
+
+    for ep, bp in zip(xexit, xorig):
+        assert len(ep.shape) == len(segments) + 2
+        assert ep.shape == bp.shape
+    assert np.all(xexit[-1] == xorig[-1])
+
+    xdist = np.sqrt(np.sum(xorig[-1][..., :3, 3]**2, axis=-1))
+    print("%7.3f %7.1f %10.6f %7.0f/s %9d %7d mb" %
+          (np.min(xdist),
+           np.max(xdist),
+           t,
+           xexit[-1].size / 16 / t,
+           xexit[-1].size / 16,
+           xexit[-1].size * xexit[-1].itemsize * 4 / 1_000_000.0))
+
+    # raise NotImplementedError('display with pymol here.... check
+    # ordering...')
+
     return None
