@@ -6,16 +6,11 @@ import numpy as np
 
 
 def test_geom_check():
-    with pytest.raises(ValueError):
-        GeomCheck()
-    with pytest.raises(ValueError):
-        GeomCheck(is_exactly='dummy', sym='dummy')
-    with pytest.raises(ValueError):
-        GeomCheck(is_exactly='dummy', z_axes_intersection='dummy')
-    with pytest.raises(ValueError):
-        GeomCheck(is_exactly='dummy', origin_segment='dummy')
-    with pytest.raises(ValueError):
-        GeomCheck(is_exactly='dummy', origin_segment='dummy')
+    symcheck = SegmentSymmetry('C3')
+    x = np.arange(16).reshape((4, 4))
+    print(x)
+    print(x[2, 1])
+    # assert 0
 
 
 @pytest.mark.skipif('not rcl.HAVE_PYROSETTA')
@@ -114,18 +109,21 @@ def test_exmple(curved_helix_pose):
     nsplice = SpliceSite(resids=[1, 2], polarity='N')
     csplice = SpliceSite(resids=[11, 12, 13, ], polarity='C')
     splicable = Spliceable(body=curved_helix_pose, sites=[nsplice, csplice])
+    # yangdb.get_splicabled('het_C3_C')
+    # tjdb.get_junctions()
+
     splicables = [splicable, ]
     segments = [Segment(splicables, exit='C'),
                 Segment(splicables, entry='N', exit='C'),
                 Segment(splicables, entry='N')]
-    checkc3 = GeomCheck(from_segment=0, to_segment=-1, sym='C3')
+    checkc3 = SegmentSymmetry('C3', from_segment=0, to_segment=-1)
     grow(segments, criteria=checkc3)
 
 
 @pytest.mark.skipif('not rcl.HAVE_PYROSETTA')
 def test_grow(curved_helix_pose, N=6):
-    nsplice = SpliceSite(resids=[1, 2, ], polarity='N')
-    csplice = SpliceSite(resids=[9, 10, 11, 12, 13, ], polarity='C')
+    nsplice = SpliceSite(resids=[1, 2], polarity='N')
+    csplice = SpliceSite(resids=[13, ], polarity='C')
     splicable1 = Spliceable(body=curved_helix_pose, sites=[nsplice, csplice])
     splicable2 = Spliceable(body=curved_helix_pose, sites=[nsplice, csplice])
     splicables = [splicable1]
@@ -133,10 +131,10 @@ def test_grow(curved_helix_pose, N=6):
         segments = ([Segment(splicables, exit='C'), ] +
                     [Segment(splicables, entry='N', exit='C'), ] * i +
                     [Segment(splicables, entry='N'), ])
-        checkc3 = GeomCheck(from_segment=0, to_segment=-1, sym='C3')
+        checkc3 = SegmentSymmetry('C3', from_segment=0, to_segment=-1)
         grow(segments, criteria=checkc3)
 
-    assert 0  # temporary!!!
+    # assert 0  # temporary!!!
 
     # make sure incorrect begin/end throws error
     with pytest.raises(ValueError):

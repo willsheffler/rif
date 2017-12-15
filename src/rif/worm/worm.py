@@ -1,50 +1,43 @@
 from rif import rcl
+from rif.homo import homo_rotation
 import numpy as np
+import math
+
+identity44f4 = np.identity(4, dtype='f4')
+identity44f8 = np.identity(4, dtype='f8')
 
 
-class XformCheck:
-
-    def __init__(self, *, sym=None, origin_segment=None,
-                 is_exactly=None, z_axes_intersection=None, lever=100.0):
-        if 1 is not ((None is not sym) +
-                     (None is not is_exactly) +
-                     (None is not z_axes_intersection)):
-            raise ValueError(
-                'required: exactly one of sym, is_exactly, or z_axes_intersection')
-        if origin_segment is not None and sym is None:
-            raise ValueError('origin_segment requires sym')
-        self.sym = sym
-        self.origin_segment = origin_segment
-        self.is_exactly = is_exactly
-        self.lever = lever
-
-    def __call__(self, xform):
-
-        # todo: this should probably do something...i
-
-        # todo: this should probably do something...i
-
-        # todo: this should probably do something...i
-
-        # todo: this should probably do something...i
-
-        # todo: this should probably do something...i
-
-        return np.ones(xform.shape[:-2])
+class AxesIntersect:
+    pass
 
 
-class GeomCheck:
+class GeomIsExactly:
+    pass
 
-    def __init__(self, *, from_segment=0, to_segment=-1, tol=1.0, **kwargs):
+
+class SegmentSymmetry:
+
+    def __init__(self, symmetry, *, tolerance=1.0, from_segment=0,
+                 origin_segment=None, lever=10.0, to_segment=-1):
+        self.symmetry = symmetry
+        self.tolerance = tolerance
         self.from_segment = from_segment
+        self.origin_segment = origin_segment
+        self.lever = lever
         self.to_segment = to_segment
-        self.check_xform = XformCheck(**kwargs)
+        if self.symmetry[0] in 'cC':
+            self.nfold = int(self.symmetry[1:])
+            self.symangle = math.pi * 2.0 / self.nfold
+        else: raise ValueError('can only do Cx symmetry for now')
 
     def __call__(self, positions):
-        x_from = positions[self.from_segment]
-        x_to = positions[self.to_segment]
-        x = np.linarg.inv(x_from) @ x_to
-        return self.check_xform(x)
+        x_from = numpy.linalg.inv(positions[self.from_segment])
+        x = x_from @ position[self.to_segment]
+        axis = axis_of_xforms(x)
+        trans = x[..., 3, :3]
+        four_sin2 = np.sum(axis, axis=-1)
+        print(axis.shape)
+        print(trans.shape)
 
 
 class SpliceSite:
@@ -105,7 +98,7 @@ class Segment:
             # just bog-standard homogeneous matrices
             bbstubs = rcl.bbstubs(splicable.body, resid_subset)['raw']
             if len(resid_subset) != bbstubs.shape[0]:
-                raise ValueError("no funny residdues supported")
+                raise ValueError("no funny residues supported")
             bbstubs_inv = np.linalg.inv(bbstubs)
             entry_sites = (list(enumerate(splicable.sites)) if self.entrypol else
                            [(-1, SpliceSite(resids=[np.nan],
@@ -118,10 +111,10 @@ class Segment:
                     for jsite, exit_site in exit_sites:
                         if isite != jsite and exit_site.polarity == self.exitpol:
                             for ires in entry_site.resids:
-                                istub_inv = (np.identity(4) if np.isnan(ires)
+                                istub_inv = (identity44f4 if np.isnan(ires)
                                              else bbstubs_inv[to_subset[ires]])
                                 for jres in exit_site.resids:
-                                    jstub = (np.identity(4) if np.isnan(jres)
+                                    jstub = (identity44f4 if np.isnan(jres)
                                              else bbstubs[to_subset[jres]])
                                     self.x2exit.append(istub_inv @ jstub)
                                     self.x2orig.append(istub_inv)
@@ -181,11 +174,11 @@ def grow(segments, *, criteria, cache=None):
     assert np.all(xexit[-1] == xorig[-1])
 
     xdist = np.sqrt(np.sum(xorig[-1][..., :3, 3]**2, axis=-1))
-    print("%7.3f %7.1f %10.6f %7.0f/s %9d %7d mb" %
+    print("%7.3f %7.1f %10.6f %7.3fk/s %9d %7d mb" %
           (np.min(xdist),
            np.max(xdist),
            t,
-           xexit[-1].size / 16 / t,
+           xexit[-1].size / 16 / 1000 / t,
            xexit[-1].size / 16,
            xexit[-1].size * xexit[-1].itemsize * 4 / 1_000_000.0))
 
