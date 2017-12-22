@@ -8,9 +8,9 @@ import multiprocessing
 import shutil
 import re
 import filecmp
-print(sys.version)
-for p in sys.path:
-    print(" ", p)
+# print(sys.version)
+# for p in sys.path:
+# print(" ", p)
 import pytest
 
 ###############################################################################

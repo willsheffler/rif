@@ -14,16 +14,18 @@ def test_geom_check():
     transx10 = htrans([10, 0, 0])
     randaxes = np.random.randn(1, 3)
 
-    assert 0 == SX('c1').relerr([I, I])
-    assert 0.001 > abs(100 - SX('c1').relerr([I, rotx1rad]))
-    assert 1e-5 > abs(SX('c2').relerr([I, hrot([1, 0, 0], np.pi)]))
+    assert 0 == SX('c1').score([I, I])
+    assert 0.001 > abs(100 - SX('c1').score([I, rotx1rad]))
+    assert 1e-5 > abs(SX('c2').score([I, hrot([1, 0, 0], np.pi)]))
 
-    assert_allclose(0, SX('c2').relerr(
-        [I, hrot(randaxes, np.pi)]), atol=1e-5, rtol=1)
-    assert_allclose(0, SX('c3').relerr(
-        [I, hrot(randaxes, np.pi * 2 / 3)]), atol=1e-5, rtol=1)
-    assert_allclose(0, SX('c4').relerr(
-        [I, hrot(randaxes, np.pi / 2)]), atol=1e-5, rtol=1)
+    score = SegmentXform('c2').score([I, hrot(randaxes, np.pi)])
+    assert_allclose(0, score, atol=1e-5, rtol=1)
+
+    score = SegmentXform('c3').score([I, hrot(randaxes, np.pi * 2 / 3)])
+    assert_allclose(0, score, atol=1e-5, rtol=1)
+
+    score = SegmentXform('c4').score([I, hrot(randaxes, np.pi / 2)])
+    assert_allclose(0, score, atol=1e-5, rtol=1)
 
 
 @pytest.mark.skipif('not rcl.HAVE_PYROSETTA')
@@ -134,8 +136,8 @@ def test_exmple(curved_helix_pose):
 
 
 @pytest.mark.skipif('not rcl.HAVE_PYROSETTA')
-def test_grow(curved_helix_pose, N=6):
-    nsplice = SpliceSite(resids=[1, 2], polarity='N')
+def test_grow(curved_helix_pose, N=4):
+    nsplice = SpliceSite(resids=[1, 2, 3, 4, 5, 6], polarity='N')
     csplice = SpliceSite(resids=[13, ], polarity='C')
     splicable1 = Spliceable(body=curved_helix_pose, sites=[nsplice, csplice])
     splicable2 = Spliceable(body=curved_helix_pose, sites=[nsplice, csplice])
@@ -144,7 +146,7 @@ def test_grow(curved_helix_pose, N=6):
         segments = ([Segment(splicables, exit='C'), ] +
                     [Segment(splicables, entry='N', exit='C'), ] * i +
                     [Segment(splicables, entry='N'), ])
-        checkc3 = SegmentXform('C3', from_seg=0, to_seg=-1)
+        checkc3 = SegmentXform('C2', from_seg=0, to_seg=-1)
         grow(segments, criteria=checkc3)
 
     # make sure incorrect begin/end throws error

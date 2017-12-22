@@ -8,11 +8,15 @@ identity44f4 = np.identity(4, dtype='f4')
 identity44f8 = np.identity(4, dtype='f8')
 
 
-class AxesIntersect:
+class WormCriteria:
     pass
 
 
-class SegmentXform:
+class AxesIntersect(WormCriteria):
+    pass
+
+
+class SegmentXform(WormCriteria):
 
     def __init__(self, symmetry, *, tol=1.0, from_seg=0,
                  origin_seg=None, lever=100.0, to_seg=-1):
@@ -32,9 +36,9 @@ class SegmentXform:
         assert not origin_seg
         if self.tol <= 0: raise ValueError('tol should be > 0')
 
-    def relerr(self, positions):
-        x_from = positions[self.from_seg]
-        x_to = positions[self.to_seg]
+    def score(self, segment_pos, *args, **kwarge):
+        x_from = segment_pos[self.from_seg]
+        x_to = segment_pos[self.to_seg]
         xhat = inv(x_from) @ x_to
         rot = xhat[..., :3, :3]
         trans = xhat[..., 3, :3]
@@ -149,49 +153,47 @@ class Worms:
         self.solutions = solutions
 
 
-def all_chained_xforms(x2exit, x2orig):
+def chain_xforms(x2exit, x2orig):
     fullaxes = (np.newaxis,) * (len(x2exit) - 1)
-    xexit = [x2exit[0][fullaxes], ]
-    xorig = [x2orig[0][fullaxes], ]
+    xconn = [x2exit[0][fullaxes], ]
+    xbody = [x2orig[0][fullaxes], ]
     for iseg in range(1, len(x2exit)):
         fullaxes = (slice(None),) + (np.newaxis,) * iseg
-        xexit.append(x2exit[iseg][fullaxes] @ xexit[iseg - 1])
-        xorig.append(x2orig[iseg][fullaxes] @ xexit[iseg - 1]
+        xconn.append(x2exit[iseg][fullaxes] @ xconn[iseg - 1])
+        xbody.append(x2orig[iseg][fullaxes] @ xconn[iseg - 1]
                      # for last in chain, exit==orig
-                     if iseg != len(x2exit) - 1 else xexit[-1])
-    return xexit, xorig
+                     if iseg != len(x2exit) - 1 else xconn[-1])
+    return xbody, xconn
 
 
-def grow(segments, *, criteria, cache=None):
+def grow(segments, *, criteria, cache=None, threshold=1):
     if segments[0].entrypol is not None:
         raise ValueError('beginning of worm cant have entry')
     if segments[-1].exitpol is not None:
         raise ValueError('end of worm cant have exit')
+    criteria = [criteria] if isinstance(criteria, WormCriteria) else criteria
     for a, b in zip(segments[:-1], segments[1:]):
         if not (a.exitpol and b.entrypol and a.exitpol != b.entrypol):
             raise ValueError('incompatible exit->entry polarity: '
                              + str(a.exitpol) + '->'
                              + str(b.entrypol) + ' on segment pair: '
                              + str((segments.index(a), segments.index(b))))
-    import time
-    t = time.clock()
-    xexit, xorig = all_chained_xforms([s.x2exit for s in segments],
-                                      [s.x2orig for s in segments])
-    t = time.clock() - t
 
-    for ep, bp in zip(xexit, xorig):
-        assert len(ep.shape) == len(segments) + 2
-        assert ep.shape == bp.shape
-    assert np.all(xexit[-1] == xorig[-1])
+    segment_pos, connect_pos = chain_xforms([s.x2exit for s in segments],
+                                            [s.x2orig for s in segments])
+    score = sum(c.score(segment_pos, connect_pos) for c in criteria)
+    imin = np.argmin(score)
 
-    xdist = np.sqrt(np.sum(xorig[-1][..., :3, 3]**2, axis=-1))
-    print("%7.3f %7.1f %10.6f %7.3fk/s %9d %7d mb" %
-          (np.min(xdist),
-           np.max(xdist),
-           t,
-           xexit[-1].size / 16 / 1000 / t,
-           xexit[-1].size / 16,
-           xexit[-1].size * xexit[-1].itemsize * 4 / 1_000_000.0))
+    print(imin, score.flat[imin], np.max(score))
+
+    # xdist = np.sqrt(np.sum(segment_pos[-1][..., :3, 3]**2, axis=-1))
+    # print("%7.3f %7.1f %10.6f %7.3fk/s %9d %7d mb" %
+    # (np.min(xdist),
+    # np.max(xdist),
+    # t,
+    # connect_pos[-1].size / 16 / 1000 / t,
+    # connect_pos[-1].size / 16,
+    # connect_pos[-1].size * connect_pos[-1].itemsize * 4 / 1_000_000.0))
 
     # raise NotImplementedError('display with pymol here.... check
     # ordering...')
