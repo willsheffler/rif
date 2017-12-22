@@ -1,16 +1,29 @@
 from rif.worm import *
+from rif.homo import hrot, htrans, axis_angle_of
 from rif.vis import showme
 from rif import rcl
+from numpy.testing import assert_allclose
 import pytest
 import numpy as np
 
 
 def test_geom_check():
-    symcheck = SegmentSymmetry('C3')
-    x = np.arange(16).reshape((4, 4))
-    print(x)
-    print(x[2, 1])
-    # assert 0
+    SX = SegmentXform
+    I = np.identity(4, 'f4')
+    rotx1rad = hrot([1, 0, 0], 1)
+    transx10 = htrans([10, 0, 0])
+    randaxes = np.random.randn(1, 3)
+
+    assert 0 == SX('c1').relerr([I, I])
+    assert 0.001 > abs(100 - SX('c1').relerr([I, rotx1rad]))
+    assert 1e-5 > abs(SX('c2').relerr([I, hrot([1, 0, 0], np.pi)]))
+
+    assert_allclose(0, SX('c2').relerr(
+        [I, hrot(randaxes, np.pi)]), atol=1e-5, rtol=1)
+    assert_allclose(0, SX('c3').relerr(
+        [I, hrot(randaxes, np.pi * 2 / 3)]), atol=1e-5, rtol=1)
+    assert_allclose(0, SX('c4').relerr(
+        [I, hrot(randaxes, np.pi / 2)]), atol=1e-5, rtol=1)
 
 
 @pytest.mark.skipif('not rcl.HAVE_PYROSETTA')
@@ -116,7 +129,7 @@ def test_exmple(curved_helix_pose):
     segments = [Segment(splicables, exit='C'),
                 Segment(splicables, entry='N', exit='C'),
                 Segment(splicables, entry='N')]
-    checkc3 = SegmentSymmetry('C3', from_segment=0, to_segment=-1)
+    checkc3 = SegmentXform('C3', from_seg=0, to_seg=-1)
     grow(segments, criteria=checkc3)
 
 
@@ -131,10 +144,8 @@ def test_grow(curved_helix_pose, N=6):
         segments = ([Segment(splicables, exit='C'), ] +
                     [Segment(splicables, entry='N', exit='C'), ] * i +
                     [Segment(splicables, entry='N'), ])
-        checkc3 = SegmentSymmetry('C3', from_segment=0, to_segment=-1)
+        checkc3 = SegmentXform('C3', from_seg=0, to_seg=-1)
         grow(segments, criteria=checkc3)
-
-    # assert 0  # temporary!!!
 
     # make sure incorrect begin/end throws error
     with pytest.raises(ValueError):

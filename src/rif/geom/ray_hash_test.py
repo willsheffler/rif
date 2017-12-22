@@ -5,7 +5,7 @@ from rif.geom import Ray, rayorig, raydirn
 from pprint import pprint
 import numpy as np
 import pytest
-
+from numpy.testing import assert_allclose
 
 # def test_ray_pyarray():
 #     a = np.array([Ray()], dtype=Ray)
@@ -15,7 +15,28 @@ import pytest
 #     assert rif.geom.ray_hash.pyarray_Ray_test(a, a) == 7
 
 
-@pytest.mark.skipif('sys.version_info.major is 2')
+def test_brian():
+    h = rh.RayToRay4dHash(1.0, 40.0, bound=1000)
+    r = np.zeros((4, 4, 2), dtype='f4')
+    r[..., 3, 0] = 1
+    r[..., 0, 1] = 1
+
+    s = np.zeros((4, 4, 2), dtype='f4')
+    s[..., 3, 0] = 1
+    s[..., 2, 1] = 1
+    s[..., 1, 0] = 7
+    s[2, 2, 1] = 0
+    s[2, 0, 1] = 1
+    s[2, 0, 0] = 94
+
+    x = r.reshape((4, 8)).view(Ray)
+    k = h.get_keys(r.reshape((4, 8)).view(Ray), s.reshape((4, 8)).view(Ray))
+    bincen = h.get_centers(k)['_m42']['raw'].squeeze()
+    print(s)
+    print(bincen)
+    assert_allclose(s, bincen, atol=1e-5)  # 7 and 94 happen to be centers...
+
+
 def test_RayToRay4dHash(resl=2, n=100, lever=10):
     h = rh.RayToRay4dHash(resl, lever, bound=1000)
     for i in range(n):
@@ -33,7 +54,6 @@ def test_RayToRay4dHash(resl=2, n=100, lever=10):
         assert d <= resl
 
 
-@pytest.mark.skipif('sys.version_info.major is 2')
 def test_Ray5dHash(resl=2, n=100, lever=10):
     h = rh.Ray5dHash(resl, lever, bound=1000)
     for i in range(n):

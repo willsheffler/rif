@@ -33,9 +33,16 @@ using namespace rif::numeric;
 template <class F>
 Ray<F> align_ray_pair(Ray<F> a, Ray<F> b) {
   // todo: should this be made symmetrical???
+
   M3<F> rotation;
   V3<F> basis1 = a.dirn();
   V3<F> basis3 = basis1.cross(b.orig() - a.orig()).normalized();
+  if (basis3.squaredNorm() < std::numeric_limits<F>::epsilon()) {
+    // std::cout << "asriotndernsatiern " << basis3 << std::endl;
+    basis3 = basis1.cross(
+        V3<F>(0.93203948659004586, 0.60278029809804564, 0.920386704986138457)
+            .normalized());
+  }
   V3<F> basis2 = basis3.cross(basis1).normalized();
   rotation.row(0) = basis1;
   rotation.row(1) = basis2;
@@ -143,7 +150,7 @@ struct RayToRay4dHash {
     return face * bcc_[face].size() + bcc_key;
   }
   R get_center(K k) const noexcept {
-    K face = k / bcc_[face].size();
+    K face = k / bcc_[1].size();
     K bcc_key = k % bcc_[face].size();
     // std::cout << "get_cen: " << face << " " << bcc_key << std::endl;
     Fs bcrd = bcc_[face][bcc_key];

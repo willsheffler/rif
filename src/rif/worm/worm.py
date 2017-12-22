@@ -1,6 +1,7 @@
 from rif import rcl
-from rif.homo import homo_rotation
+from rif.homo import axis_angle_of, angle_of
 import numpy as np
+from numpy.linalg import inv, norm
 import math
 
 identity44f4 = np.identity(4, dtype='f4')
@@ -11,33 +12,43 @@ class AxesIntersect:
     pass
 
 
-class GeomIsExactly:
-    pass
+class SegmentXform:
 
-
-class SegmentSymmetry:
-
-    def __init__(self, symmetry, *, tolerance=1.0, from_segment=0,
-                 origin_segment=None, lever=10.0, to_segment=-1):
+    def __init__(self, symmetry, *, tol=1.0, from_seg=0,
+                 origin_seg=None, lever=100.0, to_seg=-1):
         self.symmetry = symmetry
-        self.tolerance = tolerance
-        self.from_segment = from_segment
-        self.origin_segment = origin_segment
+        self.tol = tol
+        self.from_seg = from_seg
+        self.origin_seg = origin_seg
         self.lever = lever
-        self.to_segment = to_segment
+        self.to_seg = to_seg
+        self.rot_tol = tol / lever
         if self.symmetry[0] in 'cC':
             self.nfold = int(self.symmetry[1:])
+            if self.nfold <= 0:
+                raise ValueError('invalid symmetry: ' + symmetry)
             self.symangle = math.pi * 2.0 / self.nfold
         else: raise ValueError('can only do Cx symmetry for now')
+        assert not origin_seg
+        if self.tol <= 0: raise ValueError('tol should be > 0')
 
-    def __call__(self, positions):
-        x_from = numpy.linalg.inv(positions[self.from_segment])
-        x = x_from @ position[self.to_segment]
-        axis = axis_of_xforms(x)
-        trans = x[..., 3, :3]
-        four_sin2 = np.sum(axis, axis=-1)
-        print(axis.shape)
-        print(trans.shape)
+    def relerr(self, positions):
+        x_from = positions[self.from_seg]
+        x_to = positions[self.to_seg]
+        xhat = inv(x_from) @ x_to
+        rot = xhat[..., :3, :3]
+        trans = xhat[..., 3, :3]
+        if self.origin_seg:
+            raise NotImplementedError
+        elif self.nfold is 1:
+            angle = angle_of(xhat)
+            cart_part = norm(trans) / self.tol
+            rot_part = angle / self.rot_tol
+        else:
+            axis, angle = axis_angle_of(xhat)
+            cart_part = np.sum(trans * axis, axis=-1) / self.tol
+            rot_part = abs(angle - self.symangle) / self.rot_tol
+        return np.sqrt(cart_part**2 + rot_part**2)
 
 
 class SpliceSite:
@@ -99,7 +110,7 @@ class Segment:
             bbstubs = rcl.bbstubs(splicable.body, resid_subset)['raw']
             if len(resid_subset) != bbstubs.shape[0]:
                 raise ValueError("no funny residues supported")
-            bbstubs_inv = np.linalg.inv(bbstubs)
+            bbstubs_inv = inv(bbstubs)
             entry_sites = (list(enumerate(splicable.sites)) if self.entrypol else
                            [(-1, SpliceSite(resids=[np.nan],
                                             polarity=self.entrypol))])
