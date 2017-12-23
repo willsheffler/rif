@@ -46,17 +46,17 @@ def pymol_load(to_show, state=None):
     return state
 
 
-def showme_pymol(what, headless=False):
+def showme_pymol(what, headless=False, block=False):
     import pymol
     pymol.pymol_argv = ['pymol']
     if headless:
         pymol.pymol_argv = ['pymol', '-c']
-    import sys
-    print(sys.stdout)
     pymol.finish_launching()
-    print(sys.stdout)
-    from pymol import cmd
-    return pymol_load(what)
+    r = pymol_load(what)
+    import time
+    while block:
+        time.sleep(1)
+    return r
 
 
 def showme(*args, how='pymol', **kwargs):

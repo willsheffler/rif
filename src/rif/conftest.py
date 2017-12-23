@@ -48,8 +48,7 @@ def pdbsmallfname(pdbdir):
 
 @pytest.fixture(scope='session')
 def pose(pdbsmallfname):
-    if not rcl.HAVE_PYROSETTA:
-        return None
+    if not rcl.HAVE_PYROSETTA: return None
     rcl.init_check(strict=False)
     pose = rcl.pose_from_file(pdbsmallfname)
     return pose
@@ -57,24 +56,38 @@ def pose(pdbsmallfname):
 
 @pytest.fixture(scope='session')
 def bigpose(cleanpdbfname):
-    if not rcl.HAVE_PYROSETTA:
-        return None
+    if not rcl.HAVE_PYROSETTA: return None
     rcl.init_check(strict=False)
     pose = rcl.pose_from_file(cleanpdbfname)
     return pose
 
+
 @pytest.fixture(scope='session')
 def curved_helix_pose(pdbdir):
-    if not rcl.HAVE_PYROSETTA:
-        return None
+    if not rcl.HAVE_PYROSETTA: return None
     rcl.init_check(strict=False)
-    pose = rcl.pose_from_file(join(pdbdir,'curved_helix.pdb'))
+    pose = rcl.pose_from_file(join(pdbdir, 'curved_helix.pdb'))
+    return pose
+
+
+@pytest.fixture(scope='session')
+def strand_pose(pdbdir):
+    if not rcl.HAVE_PYROSETTA: return None
+    rcl.init_check(strict=False)
+    pose = rcl.pose_from_file(join(pdbdir, 'strand.pdb'))
+    return pose
+
+
+@pytest.fixture(scope='session')
+def loop_pose(pdbdir):
+    if not rcl.HAVE_PYROSETTA: return None
+    rcl.init_check(strict=False)
+    pose = rcl.pose_from_file(join(pdbdir, 'loop.pdb'))
     return pose
 
 
 def get_smalltrimer(pdbdir, suffix=''):
-    if not rcl.HAVE_PYROSETTA:
-        return None
+    if not rcl.HAVE_PYROSETTA: return None
     rcl.init_check(strict=False)
     return rcl.pose_from_file(join(pdbdir, '1coi%s.pdb' % suffix))
 

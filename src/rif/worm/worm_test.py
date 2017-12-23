@@ -7,6 +7,22 @@ import pytest
 import numpy as np
 
 
+def test_SpliceSite(pose):
+    assert len(pose) == 7
+    ss = SpliceSite(1, 'N')
+    assert 1 == ss.resid(1, pose)
+    assert pose.size() == ss.resid(-1, pose)
+    assert ss.resids(pose) == [1]
+    assert SpliceSite('1:7', 'N').resids(pose) == [1, 2, 3, 4, 5, 6, 7]
+    assert SpliceSite('-3:-1', 'N').resids(pose) == [5, 6, 7]
+    assert SpliceSite('-3:', 'N').resids(pose) == [5, 6, 7]
+    assert SpliceSite(':2', 'N').resids(pose) == [1, 2]
+    assert SpliceSite(':-5', 'N').resids(pose) == [1, 2, 3]
+    assert SpliceSite('::2', 'N').resids(pose) == [1, 3, 5, 7]
+    with pytest.raises(ValueError): SpliceSite('-1:-3', 'N').resids(pose)
+    with pytest.raises(ValueError): SpliceSite('-1:3', 'N').resids(pose)
+
+
 def test_geom_check():
     SX = SegmentXform
     I = np.identity(4, 'f4')
@@ -32,9 +48,12 @@ def test_geom_check():
 def test_segment_geom(curved_helix_pose):
     "currently only a basic sanity checkb... only checks translation distances"
     body = curved_helix_pose
-    nsplice = SpliceSite(polarity='N', resids=[1, 2, ])
-    csplice = SpliceSite(polarity='C', resids=[9, 10, 11, 12, 13])
-    Npairs0 = len(nsplice.resids) * len(csplice.resids)
+    stubs = rcl.bbstubs(body)['raw']
+    assert stubs.shape == (body.size(), 4, 4)
+
+    nsplice = SpliceSite(polarity='N', sele=[1, 2, ])
+    csplice = SpliceSite(polarity='C', sele=[9, 10, 11, 12, 13])
+    Npairs0 = len(nsplice.selections) * len(csplice.selections)
 
     # N to N and C to C invalid, can't splice to same
     splicable = Spliceable(body, sites=[nsplice, csplice])
@@ -49,53 +68,45 @@ def test_segment_geom(curved_helix_pose):
 
     # test beginning segment.. only has exit
     seg = Segment([splicable], exit='C')
-    assert seg.x2exit.shape == (Nexsite * len(csplice.resids), 4, 4)
-    assert seg.x2orig.shape == (Nexsite * len(csplice.resids), 4, 4)
+    assert seg.x2exit.shape == (Nexsite * len(csplice.selections), 4, 4)
+    assert seg.x2orgn.shape == (Nexsite * len(csplice.selections), 4, 4)
     assert np.all(seg.x2exit[..., 3, :3] == 0)
     assert np.all(seg.x2exit[..., 3, 3] == 1)
-    for e2x, e2o, ir, jr in zip(seg.x2exit, seg.x2orig,
+    for e2x, e2o, ir, jr in zip(seg.x2exit, seg.x2orgn,
                                 seg.entryresid, seg.exitresid):
-        assert np.isnan(ir)
-        jdis = np.sqrt(np.sum((e2x[..., :3, 3]**2)))
-        cadis = body.residue(jr).xyz('CA').length()
-        assert np.all(e2o == np.identity(4))
-        assert abs(jdis - cadis) < 0.001
+        assert ir == -1
+        assert_allclose(e2o, np.eye(4))
+        assert_allclose(e2x, stubs[jr - 1])
 
     # test middle segment with entry and exit
     seg = Segment([splicable], entry='N', exit='C')
     assert seg.x2exit.shape == (Nexsite**2 * Npairs0, 4, 4)
-    assert seg.x2orig.shape == (Nexsite**2 * Npairs0, 4, 4)
+    assert seg.x2orgn.shape == (Nexsite**2 * Npairs0, 4, 4)
     assert np.all(seg.x2exit[..., 3, :3] == 0)
     assert np.all(seg.x2exit[..., 3, 3] == 1)
-    for e2x, e2o, ir, jr in zip(seg.x2exit, seg.x2orig,
+    for e2x, e2o, ir, jr in zip(seg.x2exit, seg.x2orgn,
                                 seg.entryresid, seg.exitresid):
-        ijdis = np.sqrt(np.sum((e2x[..., :3, 3]**2)))
-        cadis = body.residue(ir).xyz('CA').distance(body.residue(jr).xyz('CA'))
-        assert abs(ijdis - cadis) < 0.001
-        odis = np.sqrt(np.sum((e2o[..., :3, 3]**2)))
-        caodis = body.residue(ir).xyz('CA').length()
-        assert abs(odis - caodis) < 0.001
+        assert_allclose(e2o @ stubs[ir - 1], np.eye(4), atol=1e-5)
+        assert_allclose(e2x @ stubs[ir - 1], stubs[jr - 1], atol=1e-5)
 
     # test ending segment.. only has entry
     seg = Segment([splicable], entry='N')
-    assert seg.x2exit.shape == (Nexsite * len(nsplice.resids), 4, 4)
-    assert seg.x2orig.shape == (Nexsite * len(nsplice.resids), 4, 4)
+    assert seg.x2exit.shape == (Nexsite * len(nsplice.selections), 4, 4)
+    assert seg.x2orgn.shape == (Nexsite * len(nsplice.selections), 4, 4)
     assert np.all(seg.x2exit[..., 3, :3] == 0)
     assert np.all(seg.x2exit[..., 3, 3] == 1)
-    for e2x, e2o, ir, jr in zip(seg.x2exit, seg.x2orig,
+    for e2x, e2o, ir, jr in zip(seg.x2exit, seg.x2orgn,
                                 seg.entryresid, seg.exitresid):
-        assert np.isnan(jr)
-        idis = np.sqrt(np.sum((e2x[..., :3, 3]**2)))
-        cadis = body.residue(ir).xyz('CA').length()
-        assert abs(idis - cadis) < 0.001
-        assert np.all(e2o == e2x)
+        assert jr == -1
+        assert_allclose(e2o, e2x)
+        assert_allclose(e2o @ stubs[ir - 1], np.eye(4), atol=1e-5)
 
     # test now with multiple splicables input to segment
     Nexbody = 3
     seg = Segment([splicable] * Nexbody, entry='N', exit='C')
     Npairs_expected = Nexbody * Nexsite**2 * Npairs0
     assert seg.x2exit.shape == (Npairs_expected, 4, 4)
-    assert seg.x2orig.shape == (Npairs_expected, 4, 4)
+    assert seg.x2orgn.shape == (Npairs_expected, 4, 4)
     assert len(seg.entryresid) == Npairs_expected
     assert len(seg.exitresid) == Npairs_expected
     assert len(seg.bodyid) == Npairs_expected
@@ -103,14 +114,19 @@ def test_segment_geom(curved_helix_pose):
         assert i == seg.bodyid[0 + i * Npairs0 * Nexsite**2]
     assert np.all(seg.x2exit[..., 3, :3] == 0)
     assert np.all(seg.x2exit[..., 3, 3] == 1)
-    for e2x, e2o, ir, jr in zip(seg.x2exit, seg.x2orig,
+    for e2x, e2o, ir, jr in zip(seg.x2exit, seg.x2orgn,
                                 seg.entryresid, seg.exitresid):
-        ijdis = np.sqrt(np.sum((e2x[..., :3, 3]**2)))
-        cadis = body.residue(ir).xyz('CA').distance(body.residue(jr).xyz('CA'))
-        assert abs(ijdis - cadis) < 0.001
-        odis = np.sqrt(np.sum((e2o[..., :3, 3]**2)))
-        caodis = body.residue(ir).xyz('CA').length()
-        assert abs(odis - caodis) < 0.001
+        assert_allclose(e2o @ stubs[ir - 1], np.eye(4), atol=1e-5)
+        assert_allclose(e2x @ stubs[ir - 1], stubs[jr - 1], atol=1e-5)
+
+        # this is incorrect... translation includes
+        # cart motion due to non-zero rotation center
+        # ijdis = np.sqrt(np.sum((e2x[..., :3, 3]**2)))
+        # cadis = body.residue(ir).xyz('CA').distance(body.residue(jr).xyz('CA'))
+        # assert abs(ijdis - cadis) < 0.001
+        # odis = np.sqrt(np.sum((e2o[..., :3, 3]**2)))
+        # caodis = body.residue(ir).xyz('CA').length()
+        # assert abs(odis - caodis) < 0.001
 
 
 # todo: move elsewhere???
@@ -120,34 +136,33 @@ def test_all_xform_combinations(curved_helix_pose):
 
 
 @pytest.mark.skipif('not rcl.HAVE_PYROSETTA')
-def test_exmple(curved_helix_pose):
-    nsplice = SpliceSite(resids=[1, 2], polarity='N')
-    csplice = SpliceSite(resids=[11, 12, 13, ], polarity='C')
-    splicable = Spliceable(body=curved_helix_pose, sites=[nsplice, csplice])
-    # yangdb.get_splicabled('het_C3_C')
-    # tjdb.get_junctions()
-
-    splicables = [splicable, ]
-    segments = [Segment(splicables, exit='C'),
-                Segment(splicables, entry='N', exit='C'),
-                Segment(splicables, entry='N')]
+def test_grow_simple(curved_helix_pose, strand_pose, loop_pose):
+    nsplice = SpliceSite(sele=[1, ], polarity='N')
+    csplice = SpliceSite(sele=[-1, ], polarity='C')
+    splicable1 = Spliceable(body=curved_helix_pose, sites=[nsplice, csplice])
+    splicable2 = Spliceable(body=strand_pose, sites=[nsplice, csplice])
+    splicable3 = Spliceable(body=loop_pose, sites=[nsplice, csplice])
+    segments = [Segment([splicable1], exit='C'),
+                # Segment([splicable2], entry='N', exit='C'),
+                Segment([splicable3], entry='N')]
     checkc3 = SegmentXform('C3', from_seg=0, to_seg=-1)
     grow(segments, criteria=checkc3)
+    assert 0
 
 
 @pytest.mark.skipif('not rcl.HAVE_PYROSETTA')
 def test_grow(curved_helix_pose, N=4):
-    nsplice = SpliceSite(resids=[1, 2, 3, 4, 5, 6], polarity='N')
-    csplice = SpliceSite(resids=[13, ], polarity='C')
+    nsplice = SpliceSite(sele=[1, 2, 3, 4, 5, 6], polarity='N')
+    csplice = SpliceSite(sele=[13, ], polarity='C')
     splicable1 = Spliceable(body=curved_helix_pose, sites=[nsplice, csplice])
     splicable2 = Spliceable(body=curved_helix_pose, sites=[nsplice, csplice])
     splicables = [splicable1]
-    for i in range(N):
+    for i in range(N - 1, N):
         segments = ([Segment(splicables, exit='C'), ] +
                     [Segment(splicables, entry='N', exit='C'), ] * i +
                     [Segment(splicables, entry='N'), ])
         checkc3 = SegmentXform('C2', from_seg=0, to_seg=-1)
-        grow(segments, criteria=checkc3)
+        # grow(segments, criteria=checkc3)
 
     # make sure incorrect begin/end throws error
     with pytest.raises(ValueError):
