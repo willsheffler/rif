@@ -14,6 +14,7 @@ def test_SpliceSite(pose):
     assert pose.size() == ss.resid(-1, pose)
     assert ss.resids(pose) == [1]
     assert SpliceSite('1:7', 'N').resids(pose) == [1, 2, 3, 4, 5, 6, 7]
+    assert SpliceSite(':7', 'N').resids(pose) == [1, 2, 3, 4, 5, 6, 7]
     assert SpliceSite('-3:-1', 'N').resids(pose) == [5, 6, 7]
     assert SpliceSite('-3:', 'N').resids(pose) == [5, 6, 7]
     assert SpliceSite(':2', 'N').resids(pose) == [1, 2]
@@ -86,8 +87,8 @@ def test_segment_geom(curved_helix_pose):
     assert np.all(seg.x2exit[..., 3, 3] == 1)
     for e2x, e2o, ir, jr in zip(seg.x2exit, seg.x2orgn,
                                 seg.entryresid, seg.exitresid):
-        assert_allclose(e2o @ stubs[ir - 1], np.eye(4), atol=1e-5)
-        assert_allclose(e2x @ stubs[ir - 1], stubs[jr - 1], atol=1e-5)
+        assert_allclose(stubs[ir - 1] @ e2o, np.eye(4), atol=1e-5)
+        assert_allclose(stubs[ir - 1] @ e2x, stubs[jr - 1], atol=1e-5)
 
     # test ending segment.. only has entry
     seg = Segment([splicable], entry='N')
@@ -116,8 +117,8 @@ def test_segment_geom(curved_helix_pose):
     assert np.all(seg.x2exit[..., 3, 3] == 1)
     for e2x, e2o, ir, jr in zip(seg.x2exit, seg.x2orgn,
                                 seg.entryresid, seg.exitresid):
-        assert_allclose(e2o @ stubs[ir - 1], np.eye(4), atol=1e-5)
-        assert_allclose(e2x @ stubs[ir - 1], stubs[jr - 1], atol=1e-5)
+        assert_allclose(stubs[ir - 1] @ e2o, np.eye(4), atol=1e-5)
+        assert_allclose(stubs[ir - 1] @ e2x, stubs[jr - 1], atol=1e-5)
 
         # this is incorrect... translation includes
         # cart motion due to non-zero rotation center
@@ -137,17 +138,18 @@ def test_all_xform_combinations(curved_helix_pose):
 
 @pytest.mark.skipif('not rcl.HAVE_PYROSETTA')
 def test_grow_simple(curved_helix_pose, strand_pose, loop_pose):
-    nsplice = SpliceSite(sele=[1, ], polarity='N')
-    csplice = SpliceSite(sele=[-1, ], polarity='C')
-    splicable1 = Spliceable(body=curved_helix_pose, sites=[nsplice, csplice])
-    splicable2 = Spliceable(body=strand_pose, sites=[nsplice, csplice])
-    splicable3 = Spliceable(body=loop_pose, sites=[nsplice, csplice])
-    segments = [Segment([splicable1], exit='C'),
-                # Segment([splicable2], entry='N', exit='C'),
-                Segment([splicable3], entry='N')]
-    checkc3 = SegmentXform('C3', from_seg=0, to_seg=-1)
-    grow(segments, criteria=checkc3)
-    assert 0
+    # nsplice = SpliceSite(sele=[':5', ], polarity='N')
+    # csplice = SpliceSite(sele=['-5:', ], polarity='C')
+    helix = Spliceable(curved_helix_pose, sites=[(1, 'N'), ('-4:', 'C')])
+
+    # strand = Spliceable(strand_pose, sites=[(':3', 'N'), ('-3:', 'C')])
+    # loop = Spliceable(loop_pose, sites=[(':3', 'N'), ('-3:', 'C')])
+    # splicables = [helix, strand, loop]
+    segments = ([Segment([helix], exit='C'), ]
+                + [Segment([helix], entry='N', exit='C')] * 7
+                + [Segment([helix], entry='N')])
+    grow(segments, SegmentXform('C1', from_seg=0, to_seg=-1, lever=20))
+    # assert 0
 
 
 @pytest.mark.skipif('not rcl.HAVE_PYROSETTA')

@@ -38,23 +38,22 @@ class SegmentXform(WormCriteria):
         assert not orgnin_seg
         if self.tol <= 0: raise ValueError('tol should be > 0')
 
-    def score(self, segment_pos, *args, **kwarge):
+    def score(self, segment_pos, *, debug=False, **kwarge):
         x_from = segment_pos[self.from_seg]
         x_to = segment_pos[self.to_seg]
         xhat = inv(x_from) @ x_to
-        rot = xhat[..., :3, :3]
-        trans = xhat[..., 3, :3]
+        trans = xhat[..., :3, 3]
         if self.orgnin_seg:
             raise NotImplementedError
         elif self.nfold is 1:
             angle = angle_of(xhat)
-            cart_part = norm(trans) / self.tol
-            rot_part = angle / self.rot_tol
+            carterrsq = np.sum(trans**2, axis=-1)
+            roterrsq = angle**2
         else:
             axis, angle = axis_angle_of(xhat)
-            cart_part = np.sum(trans * axis, axis=-1) / self.tol
-            rot_part = abs(angle - self.symangle) / self.rot_tol
-        return np.sqrt(cart_part**2 + rot_part**2)
+            carterrsq = np.sum(trans * axis, axis=-1)**2
+            roterrsq = (angle - self.symangle)**2
+        return np.sqrt(carterrsq / self.tol**2 + roterrsq / self.rot_tol**2)
 
 
 class SpliceSite:
@@ -66,7 +65,7 @@ class SpliceSite:
         self.polarity = polarity
 
     def resid(self, id, body):
-        resid = id if id >= 0 else body.size() + 1 + id
+        resid = id if id >= 0 else len(body) + 1 + id
         if not 0 < resid <= len(body):
             raise ValueError('resid ' + str(resid)
                              + ' invalid for body of size ' + str(len(body)))
@@ -83,7 +82,7 @@ class SpliceSite:
                     start = self.resid(int(s[0] or 1), body)
                     stop = self.resid(int(s[1] or -1), body)
                     step = int(s[2]) if len(s) > 2 else 1
-                    print(start, stop + 1, step)
+                    # print(start, stop + 1, step)
                     for ir in range(start, stop + 1, step):
                         resids.add(ir)
                 elif sele is None:
@@ -106,7 +105,13 @@ class Spliceable:
         self.bodyid = bodyid
         if callable(sites):
             sites = sites(body)
+        if isinstance(sites, SpliceSite):
+            sites = [sites]
         self.sites = list(sites)
+        for i in range(len(self.sites)):
+            if not isinstance(self.sites[i], SpliceSite):
+                assert len(self.sites[i]) is 2
+                self.sites[i] = SpliceSite(*self.sites[i])
 
     def splicable_positions(self):
         """selection of resids, and map 'global' index to selected index"""
@@ -120,7 +125,7 @@ class Spliceable:
                                   resid_subset[:, np.newaxis]))
         to_subset = np.array(N * [-1])
         to_subset[idx] = val
-        assert (to_subset[resid_subset] == np.arange(len(resid_subset))).all()
+        assert np.all(to_subset[resid_subset] == np.arange(len(resid_subset)))
         return resid_subset, to_subset
 
 
@@ -168,7 +173,7 @@ class Segment:
                                     jstub = (identity44f4 if not jres
                                              else stubs[to_subset[jres]])
                                     jres = jres or -1
-                                    self.x2exit.append(jstub @ istub_inv)
+                                    self.x2exit.append(istub_inv @ jstub)
                                     self.x2orgn.append(istub_inv)
                                     self.entryresid.append(ires)
                                     self.exitresid.append(jres)
@@ -182,22 +187,26 @@ class Segment:
         self.bodyid = np.array(self.bodyid)
 
     def make_pose(self, index, append_to=None, position=None):
+        append_to = append_to or Pose()
         pose = self.splicables[self.bodyid[index]].body
         lb = self.entryresid[index]
         ub = self.exitresid[index]
-        lb = lb or 1
-        assert ub <= pose.size()
-        ub = ub or pose.size() + 1
-        assert lb < ub
-        append_to = append_to or Pose()
-        rosetta.core.pose.append_subpose_to_pose(append_to, pose, lb, ub - 1)
-        # print('xform_pose', append_to.size() - ub + lb + 1, append_to.size())
-        # print(position)
+        # print('make_pose', lb, ub)
+        lb = lb if lb > 0 else 1
+        ub = ub if ub > 0 else len(pose)
+        if append_to and self.exitresid[index] > 0: ub = ub - 1
+        # lb, ub = 1, len(pose) + 1
+
+        assert 0 < lb <= ub - 1 <= len(pose)
+        # print('append_subpose', lb, ub - 1)
+        rosetta.core.pose.append_subpose_to_pose(append_to, pose, lb, ub)
+
         if position is not None:
             x = to_rosetta_stub(position)
-            xub = append_to.size()
-            xlb = xub - ub + lb + 1
-            assert 0 < xlb < xub <= append_to.size()
+            xub = len(append_to)
+            xlb = xub - ub + lb
+            assert 0 < xlb <= xub <= len(append_to)
+            # print('xform_pose', xlb, xub)
             rosetta.protocols.sic_dock.xform_pose(append_to, x, xlb, xub)
         return append_to
 
@@ -217,16 +226,15 @@ def chain_xforms(x2exit, x2orgn):
     for iseg in range(1, len(x2exit)):
         fullaxes = (slice(None),) + (np.newaxis,) * iseg
         xconn.append(xconn[iseg - 1] @ x2exit[iseg][fullaxes])
-        # for last in chain, exit==orgn
-        xbody.append(xconn[iseg - 1] if iseg != len(x2exit) - 1 else xconn[-1]
-                     @ x2orgn[iseg][fullaxes])
+        xbody.append(xconn[iseg - 1] @ x2orgn[iseg][fullaxes]
+                     if iseg + 1 < len(x2exit) else xconn[iseg])
     perm = list(range(len(xbody) - 1, -1, -1)) + [len(xbody), len(xbody) + 1]
     xbody = [np.transpose(x, perm) for x in xbody]
     xconn = [np.transpose(x, perm) for x in xconn]
     return xbody, xconn
 
 
-def grow(segments, *, criteria, cache=None, threshold=1):
+def grow(segments, criteria, *, cache=None, threshold=1):
     if segments[0].entrypol is not None:
         raise ValueError('beginning of worm cant have entry')
     if segments[-1].exitpol is not None:
@@ -239,61 +247,46 @@ def grow(segments, *, criteria, cache=None, threshold=1):
                              + str(b.entrypol) + ' on segment pair: '
                              + str((segments.index(a), segments.index(b))))
 
+    sizes = [len(s.bodyid) for s in segments]
+    print('grow: size', sizes, np.prod(sizes))
+
     segment_pos, connect_pos = chain_xforms([s.x2exit for s in segments],
                                             [s.x2orgn for s in segments])
-    score = sum(c.score(segment_pos, connect_pos) for c in criteria)
+    assert segment_pos[-1].shape[:-2] == tuple(len(s.bodyid) for s in segments)
+
+    score = sum(c.score(segment_pos=segment_pos) for c in criteria)
     imin = np.unravel_index(np.argmin(score), score.shape)
-    print(segment_pos[1].shape)
 
-    p = Pose()
+    print('best:', score[imin], imin)
+
+    # return
+
+    poses = list()
+    # poses = Pose()
+    positions = list()
     for iseg, seg in enumerate(segments):
-        assert iseg < 3
-        assert seg.x2orgn.shape == (1, 4, 4)
-        assert seg.x2exit.shape == (1, 4, 4)
-        stubs = bbstubs(seg.splicables[0].body)['raw']
-        print(iseg, segments[iseg].entryresid[0], segments[iseg].exitresid[0])
-
         i = imin[iseg]
         pos = segment_pos[iseg]
-        print('segment %2i body %3i entry %-04i exit %-04i' % (
-            iseg, seg.bodyid[i], seg.entryresid[i], seg.exitresid[i]))
+        # print('segment %2i body %3i entry %-04i exit %-04i' % (
+        # iseg, seg.bodyid[i], seg.entryresid[i], seg.exitresid[i]))
         ipos = tuple(np.minimum(np.array(pos.shape[:-2]) - 1, imin))
         position = pos[ipos]
-        # print(position)
+        positions.append(position)
+        poses.append(seg.make_pose(i, position=position))
+        # poses = seg.make_pose(i, position=position, append_to=poses)
 
-        if iseg is 1:
-            position = stubs[12 - 1] @ inv(stubs[0])
-            print(position)
-            position = segments[0].x2exit[0] @ segments[1].x2orgn[0]
-            print(position)
+    score2 = criteria[0].score(positions, debug=1)
+    print('rescore', score2)
 
-        if iseg is 2:
-            position = stubs[12 - 1] @ inv(stubs[0]) @ stubs[13 - 1] @ inv(stubs[0])
-            print(position)
-            position = segments[0].x2exit[0] @ segments[1].x2orgn[0]
-            print(position)
-        p = seg.make_pose(i, append_to=p, position=position)
-        # print('pose.size()', p.size())
     return
-    print(p)
-    showme(p)
+
+    print(poses)
+    showme(poses)
     from pymol import cmd
     cmd.hide('ev')
     cmd.show('lines', 'name n+ca+c')
     import time
     while 1:
         time.sleep(1)
-
-    # xdist = np.sqrt(np.sum(segment_pos[-1][..., :3, 3]**2, axis=-1))
-    # print("%7.3f %7.1f %10.6f %7.3fk/s %9d %7d mb" %
-    # (np.min(xdist),
-    # np.max(xdist),
-    # t,
-    # connect_pos[-1].size / 16 / 1000 / t,
-    # connect_pos[-1].size / 16,
-    # connect_pos[-1].size * connect_pos[-1].itemsize * 4 / 1_000_000.0))
-
-    # raise NotImplementedError('display with pymol here.... check
-    # ordering...')
 
     return None
