@@ -146,14 +146,14 @@ def test_grow_simple(curved_helix_pose, strand_pose, loop_pose):
     # loop = Spliceable(loop_pose, sites=[(':3', 'N'), ('-3:', 'C')])
     # splicables = [helix, strand, loop]
     segments = ([Segment([helix], exit='C'), ]
-                + [Segment([helix], entry='N', exit='C')] * 7
+                + [Segment([helix], entry='N', exit='C')] * 3  # 7
                 + [Segment([helix], entry='N')])
     grow(segments, SegmentXform('C1', from_seg=0, to_seg=-1, lever=20))
     # assert 0
 
 
 @pytest.mark.skipif('not rcl.HAVE_PYROSETTA')
-def test_grow(curved_helix_pose, N=4):
+def test_grow(curved_helix_pose, N=2):
     nsplice = SpliceSite(sele=[1, 2, 3, 4, 5, 6], polarity='N')
     csplice = SpliceSite(sele=[13, ], polarity='C')
     splicable1 = Spliceable(body=curved_helix_pose, sites=[nsplice, csplice])
@@ -178,6 +178,16 @@ def test_grow(curved_helix_pose, N=4):
     with pytest.raises(ValueError):
         grow(segments_polarity_mismatch, criteria=checkc3)
 
+
+def test_csym(c2pose, c3pose, c4pose, c5pose, c6pose):
+    pass
+    # print(c2pose)
+    # print(c3pose)
+    # print(c4pose)
+    # print(c5pose)
+    # print(c6pose)
+
+    # assert 0
 
 if __name__ == '__main__':
     import pyrosetta

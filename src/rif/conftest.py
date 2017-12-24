@@ -62,46 +62,68 @@ def bigpose(cleanpdbfname):
     return pose
 
 
-@pytest.fixture(scope='session')
-def curved_helix_pose(pdbdir):
+def get_pose(pdbdir, fname):
     if not rcl.HAVE_PYROSETTA: return None
     rcl.init_check(strict=False)
-    pose = rcl.pose_from_file(join(pdbdir, 'curved_helix.pdb'))
+    pose = rcl.pose_from_file(join(pdbdir, fname))
     return pose
+
+
+@pytest.fixture(scope='session')
+def curved_helix_pose(pdbdir):
+    return get_pose(pdbdir, 'curved_helix.pdb')
 
 
 @pytest.fixture(scope='session')
 def strand_pose(pdbdir):
-    if not rcl.HAVE_PYROSETTA: return None
-    rcl.init_check(strict=False)
-    pose = rcl.pose_from_file(join(pdbdir, 'strand.pdb'))
-    return pose
+    return get_pose(pdbdir, 'strand.pdb')
 
 
 @pytest.fixture(scope='session')
 def loop_pose(pdbdir):
-    if not rcl.HAVE_PYROSETTA: return None
-    rcl.init_check(strict=False)
-    pose = rcl.pose_from_file(join(pdbdir, 'loop.pdb'))
-    return pose
-
-
-def get_smalltrimer(pdbdir, suffix=''):
-    if not rcl.HAVE_PYROSETTA: return None
-    rcl.init_check(strict=False)
-    return rcl.pose_from_file(join(pdbdir, '1coi%s.pdb' % suffix))
+    return get_pose(pdbdir, 'loop.pdb')
 
 
 @pytest.fixture(scope='session')
-def small_trimer_A(pdbdir):
-    return get_smalltrimer(pdbdir, suffix='_A')
+def trimer_pose(pdbdir):
+    return get_pose(pdbdir, '1coi.pdb')
 
 
 @pytest.fixture(scope='session')
-def small_trimer_B(pdbdir):
-    return get_smalltrimer(pdbdir, suffix='_B')
+def trimerA_pose(pdbdir):
+    return get_pose(pdbdir, '1coi_A.pdb')
 
 
 @pytest.fixture(scope='session')
-def small_trimer_C(pdbdir):
-    return get_smalltrimer(pdbdir, suffix='_C')
+def trimerB_pose(pdbdir):
+    return get_pose(pdbdir, '1coi_B.pdb')
+
+
+@pytest.fixture(scope='session')
+def trimerC_pose(pdbdir):
+    return get_pose(pdbdir, '1coi_C.pdb')
+
+
+@pytest.fixture(scope='session')
+def c2pose(pdbdir):
+    return get_pose(pdbdir, 'C2_4agh_1_full.pdb')
+
+
+@pytest.fixture(scope='session')
+def c3pose(pdbdir):
+    return get_pose(pdbdir, 'C3_1wp8_1_full.pdb')
+
+
+@pytest.fixture(scope='session')
+def c4pose(pdbdir):
+    return get_pose(pdbdir, 'C4_1gcl_1_full.pdb')
+
+
+@pytest.fixture(scope='session')
+def c5pose(pdbdir):
+    return get_pose(pdbdir, 'C5_3mxg_1_full.pdb')
+
+
+@pytest.fixture(scope='session')
+def c6pose(pdbdir):
+    return get_pose(pdbdir, 'C6_2xf5_1_full.pdb')

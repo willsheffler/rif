@@ -52,7 +52,11 @@ def showme_pymol(what, headless=False, block=False):
     if headless:
         pymol.pymol_argv = ['pymol', '-c']
     pymol.finish_launching()
+    from pymol import cmd
     r = pymol_load(what)
+    cmd.set('internal_gui_width', '20')
+    cmd.do('full')
+    cmd.zoom()
     import time
     while block:
         time.sleep(1)
