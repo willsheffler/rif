@@ -10,12 +10,10 @@ identity44f4 = np.identity(4, dtype='f4')
 identity44f8 = np.identity(4, dtype='f8')
 
 
-class WormCriteria:
-    pass
+class WormCriteria: pass
 
 
-class AxesIntersect(WormCriteria):
-    pass
+class AxesIntersect(WormCriteria): pass
 
 
 class SegmentXform(WormCriteria):

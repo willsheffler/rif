@@ -55,8 +55,8 @@ def showme_pymol(what, headless=False, block=False):
     from pymol import cmd
     r = pymol_load(what)
     cmd.set('internal_gui_width', '20')
-    cmd.do('full')
-    cmd.zoom()
+    cmd.do('full')  # todo: doesn't work!
+    cmd.zoom()  # todo: doesn't work
     import time
     while block:
         time.sleep(1)
