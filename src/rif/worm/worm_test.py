@@ -1,5 +1,5 @@
 from rif.worm import *
-from rif.homo import hrot, htrans, axis_angle_of
+from rif.homog import hrot, htrans, axis_angle_of
 from rif.vis import showme
 from rif import rcl
 from numpy.testing import assert_allclose

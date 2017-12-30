@@ -31,13 +31,6 @@ def angle_of(xforms):
     return angl
 
 
-def center_of(xforms):
-    # (X-I) * x == 0
-    c = np.identity(4)
-    raise NotImplementedError
-    return c
-
-
 def rot(axis, angle, degrees='auto', dtype='f4', shape=(3, 3)):
     axis = np.array(axis, dtype=dtype)
     angle = np.array(angle, dtype=dtype)
@@ -80,11 +73,13 @@ def hrot(axis, angle, center=None, dtype='f4', **args):
 
 
 def hray(origin, direction):
+    assert origin.shape[-1] in (3, 4)
+    assert direction.shape[-1] in (3, 4)
     s = np.broadcast(origin, direction).shape
     r = np.empty(s[:-1] + (2, 4))
-    r[..., 0, :3] = origin
+    r[..., 0, :origin.shape[-1]] = origin
     r[..., 0, 3] = 1
-    r[..., 1, :3] = hnormalized(direction)
+    r[..., 1, :direction.shape[-1]] = hnormalized(direction)
     r[..., 1, 3] = 0
     return r
 
@@ -139,6 +134,10 @@ def random_rays(shape=(), cen=(0, 0, 0), sdev=1):
     return np.concatenate([a, b], axis=-1)
 
 
+def random_xforms(shape=()):
+    raise NotImplementedError
+
+
 def proj_perp(u, v):
     u = np.asanyarray(u)
     v = np.asanyarray(v)
@@ -161,7 +160,7 @@ def intersect_planes(plane1, plane2):
        Return: rays shape=(...,2,4), status
                0 = intersection returned
                1 = disjoint (no intersection)
-               2 = the two  planes coincide
+               2 = the two planes coincide
 
     """
     if not is_valid_rays(plane1): raise ValueError('invalid plane1')
@@ -169,29 +168,20 @@ def intersect_planes(plane1, plane2):
     shape1, shape2 = np.array(plane1.shape), np.array(plane2.shape)
     if np.any((shape1 != shape2) * (shape1 != 1) * (shape2 != 1)):
         raise ValueError('incompatible shapes for plane1, plane2:')
-
     p1, n1 = plane1[..., 0, :3], plane1[..., 1, :3]
     p2, n2 = plane2[..., 0, :3], plane2[..., 1, :3]
     shape = tuple(np.maximum(plane1.shape, plane2.shape))
-
-    # print('n1', n1.shape)
-    # print('n2', n2.shape)
     u = np.cross(n1, n2)
     abs_u = np.abs(u)
-    # print('u', u.shape)
     planes_parallel = np.sum(abs_u, axis=-1) < 0.000001
     p2_in_plane1 = point_in_plane(plane1, p2)
-    # print('pp', planes_parallel.shape)
-    # print('pinp', p2_in_plane1.shape)
     status = np.zeros(shape[:-2])
     status[planes_parallel] = 1
     status[planes_parallel * p2_in_plane1] = 2
-
     d1 = -hdot(n1, p1)
     d2 = -hdot(n2, p2)
     amax = np.argmax(abs_u, axis=-1)
     sel0, sel1, sel2 = amax == 0, amax == 1, amax == 2
-    # print('u', u, 'sels', np.sum(sel0), np.sum(sel1), np.sum(sel2))
     n1a, n2a, d1a, d2a, ua = (x[sel0] for x in (n1, n2, d1, d2, u))
     n1b, n2b, d1b, d2b, ub = (x[sel1] for x in (n1, n2, d1, d2, u))
     n1c, n2c, d1c, d2c, uc = (x[sel2] for x in (n1, n2, d1, d2, u))
@@ -201,10 +191,7 @@ def intersect_planes(plane1, plane2):
     bx = (d1b * n2b[..., 2] - d2b * n1b[..., 2]) / ub[..., 1]
     cx = (d2c * n1c[..., 1] - d1c * n2c[..., 1]) / uc[..., 2]
     cy = (d1c * n2c[..., 0] - d2c * n1c[..., 0]) / uc[..., 2]
-    # print(shape[:-2] + (3,))
     isect_pt = np.empty(shape[:-2] + (3,), dtype=plane1.dtype)
-    # print('sel0', sel0.shape)
-    # print('isect_pt', isect_pt.shape)
     isect_pt[sel0, 0] = 0
     isect_pt[sel0, 1] = ay
     isect_pt[sel0, 2] = az
@@ -218,63 +205,17 @@ def intersect_planes(plane1, plane2):
     return isect, status
 
 
-#    switch (maxc) {  # select max coordinate
-#      case 1:        # intersect with x=0
-#        iP.x() = 0;
-#        iP.y() = (d2 * norm1.z() - d1 * norm2.z()) / u.x();
-#        iP.z() = (d1 * norm2.y() - d2 * norm1.y()) / u.x();
-#        break;
-#      case 2:  # intersect with y=0
-#        iP.x() = (d1 * norm2.z() - d2 * norm1.z()) / u.y();
-#        iP.y() = 0;
-#        iP.z() = (d2 * norm1.x() - d1 * norm2.x()) / u.y();
-#        break;
-#      case 3:  # intersect with z=0
-#        iP.x() = (d2 * norm1.y() - d1 * norm2.y()) / u.z();
-#        iP.y() = (d1 * norm2.x() - d2 * norm1.x()) / u.z();
-#        iP.z() = 0;
-#    }
-#    L->P0 = iP;
-#    L->P1 = iP + u;
-#    return 2;
-#  }
-#
-#  void rotation_axis(Vector &axis, Vector &cen, T &angle) const {
-#    axis = numeric::rotation_axis<T>(R, angle);
-#    Vector const p1((T)-32.09501046777237, (T)03.36227004372687,
-#                    (T)35.34672781477340);  # random...
-#    Vector const p2((T)21.15113978202345, (T)12.55664537217840,
-#                    (T)-37.48294301885574);  # random...
-#    Vector const q1((*this) * p1);
-#    Vector const q2((*this) * p2);
-#    Vector const n1 = (q1 - p1).normalized();
-#    Vector const n2 = (q2 - p2).normalized();
-#    Vector const c1 = (p1 + q1) / T(2.0);
-#    Vector const c2 = (p2 + q2) / T(2.0);
-#    Plane Pn1 = {n1, c1};
-#    Plane Pn2 = {n2, c2};
-#    Line Linter;
-#    int inter_case = intersect3D_2Planes(Pn1, Pn2, &Linter);
-#    switch (inter_case) {
-#      case 0:
-#        cen =
-#            Vector(std::numeric_limits<T>::max(), std::numeric_limits<T>::max(),
-#                   std::numeric_limits<T>::max());
-#        break;
-#      case 1:
-#        cen =
-#            Vector(std::numeric_limits<T>::min(), std::numeric_limits<T>::min(),
-#                   std::numeric_limits<T>::min());
-#        break;
-#      case 2:
-#        Vector Laxis = (Linter.P1 - Linter.P0).normalized();
-#        if (-0.9999 < Laxis.dot(axis) && Laxis.dot(axis) < 0.9999) {
-#          # std::cout << Laxis << std::endl;
-#          # std::cout << axis  << std::endl;
-#          # std::cout << angle << std::endl;
-#          utility_exit_with_message("bad axis");
-#        }
-#        cen = Linter.P0;
-#        break;
-#    }
-#  }
+def axis_ang_cen_of(xforms):
+    axis, angle = axis_angle_of(xforms)
+    p1 = (-32.09501046777237, 03.36227004372687, 35.34672781477340, 1)
+    p2 = (21.15113978202345, 12.55664537217840, -37.48294301885574, 1)
+    q1 = xforms @ p1
+    q2 = xforms @ p2
+    n1 = hnormalized(q1 - p1)
+    n2 = hnormalized(q2 - p2)
+    c1 = (p1 + q1) / 2.0
+    c2 = (p2 + q2) / 2.0
+    plane1 = hray(c1, n1)
+    plane2 = hray(c2, n2)
+    isect, status = intersect_planes(plane1, plane2)
+    return axis, angle, isect[..., 0, :]

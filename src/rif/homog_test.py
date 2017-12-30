@@ -1,16 +1,15 @@
-from rif.homo import *
+from rif.homog import *
 import numpy as np
 from numpy.testing import assert_allclose
 import pytest
 
 
 def test_homo_rotation_single():
-    axis0 = np.random.randn(3)
-    axis0 = axis0 / np.linalg.norm(axis0, axis=-1)
+    axis0 = hnormalized(np.random.randn(3))
     ang0 = np.pi / 4.0
     r = hrot(list(axis0), float(ang0))
     a = fast_axis_of(r)
-    n = np.linalg.norm(a, axis=-1)
+    n = hnorm(a)
     assert np.all(abs(a / n - axis0) < 0.001)
     assert np.all(abs(np.arcsin(n / 2) - ang0) < 0.001)
 
@@ -20,26 +19,16 @@ def test_homo_rotation_center():
     AAC([0, 2, 0, 1], hrot([1, 0, 0], 180, [0, 1, 0]) @ (0, 0, 0, 1), atol=1e-5)
     AAC([0, 1, -1, 1], hrot([1, 0, 0], 90, [0, 1, 0]) @ (0, 0, 0, 1), atol=1e-5)
     AAC([-1, 1, 2, 1], hrot([1, 1, 0], 180, [0, 1, 1]) @ (0, 0, 0, 1), atol=1e-5)
-    # print(center_of(hrot([1, 0, 0], 90, [0, 1, 0])))
-    # assert 0
 
 
 def test_homo_rotation_array():
     shape = (1, 2, 1, 3, 4, 1, 1)
-    axis0 = np.random.randn(*(shape + (3,)))
-    axis0 = axis0 / np.linalg.norm(axis0, axis=-1)[..., np.newaxis]
-    # todo: proper test taking neg angles into account
-    #       must consider reversed axis direction
-    #       also not considering close to 0 and pi/2
+    axis0 = hnormalized(np.random.randn(*(shape + (3,))))
     ang0 = np.random.rand(*shape) * (0.99 * np.pi / 2 + 0.005 * np.pi / 2)
     r = hrot(axis0, ang0)
-    # print('r', r.shape)
     a = fast_axis_of(r)
-    # print('a', a.shape)
-    n = np.linalg.norm(a, axis=-1)[..., np.newaxis]
+    n = hnorm(a)[..., np.newaxis]
     assert np.all(abs(a / n - axis0) < 0.001)
-    # print('asin', np.arcsin(n / 2).shape)
-    # print('ang0', ang0)
     assert np.all(abs(np.arcsin(n[..., 0] / 2) - ang0) < 0.001)
 
 
@@ -82,13 +71,10 @@ def test_axis_angle_of():
 
 def test_axis_angle_of_rand():
     shape = (4, 5, 6, 7, 8,)
-    axis = np.random.randn(*shape, 3)
-    axis = axis / np.linalg.norm(axis, axis=-1)[..., np.newaxis]
+    axis = hnormalized(np.random.randn(*shape, 3))
     angl = np.random.random(shape) * np.pi / 2
-
     rot = hrot(axis, angl, dtype='f8')
     ax, an = axis_angle_of(rot)
-
     assert_allclose(axis, ax, rtol=1e-5)
     assert_allclose(angl, an, rtol=1e-5)
 
@@ -104,12 +90,12 @@ def test_random_rays():
     r = random_rays()
     assert np.all(r[..., :, 3] == (1, 0))
     assert r.shape == (2, 4)
-    assert_allclose(np.linalg.norm(r[..., 1, :3], axis=-1), 1)
+    assert_allclose(hnorm(r[..., 1, :3]), 1)
 
     r = random_rays(shape=(5, 6, 7))
     assert np.all(r[..., :, 3] == (1, 0))
     assert r.shape == (5, 6, 7, 2, 4)
-    assert_allclose(np.linalg.norm(r[..., 1, :3], axis=-1), 1)
+    assert_allclose(hnorm(r[..., 1, :3]), 1)
 
 
 def test_proj_prep():
@@ -136,17 +122,21 @@ def test_ray_in_plane():
 
 def test_intersect_planes():
     with pytest.raises(ValueError):
-        intersect_planes(np.array([[0, 0, 0, 2], [0, 0, 0, 0]]),
-                         np.array([[0, 0, 0, 1], [0, 0, 0, 0]]))
+        intersect_planes(
+            np.array([[0, 0, 0, 2], [0, 0, 0, 0]]),
+            np.array([[0, 0, 0, 1], [0, 0, 0, 0]]))
     with pytest.raises(ValueError):
-        intersect_planes(np.array([[0, 0, 0, 1], [0, 0, 0, 0]]),
-                         np.array([[0, 0, 0, 1], [0, 0, 0, 1]]))
+        intersect_planes(
+            np.array([[0, 0, 0, 1], [0, 0, 0, 0]]),
+            np.array([[0, 0, 0, 1], [0, 0, 0, 1]]))
     with pytest.raises(ValueError):
-        intersect_planes(np.array([[0, 0, 1], [0, 0, 0, 0]]),
-                         np.array([[0, 0, 1], [0, 0, 0, 1]]))
+        intersect_planes(
+            np.array([[0, 0, 1], [0, 0, 0, 0]]),
+            np.array([[0, 0, 1], [0, 0, 0, 1]]))
     with pytest.raises(ValueError):
-        intersect_planes(np.array(9 * [[[0, 0, 0, 1], [0, 0, 0, 0]]]),
-                         np.array(2 * [[[0, 0, 0, 1], [0, 0, 0, 0]]]))
+        intersect_planes(
+            np.array(9 * [[[0, 0, 0, 1], [0, 0, 0, 0]]]),
+            np.array(2 * [[[0, 0, 0, 1], [0, 0, 0, 0]]]))
 
     # isct, sts = intersect_planes(np.array(9 * [[[0, 0, 0, 1], [1, 0, 0, 0]]]),
         # np.array(9 * [[[0, 0, 0, 1], [1, 0, 0, 0]]]))
@@ -157,32 +147,37 @@ def test_intersect_planes():
         # np.array([[0, 0, 0, 1], [1, 0, 0, 0]]))
     # assert sts == 1
 
-    isct, sts = intersect_planes(np.array([[0, 0, 0, 1], [1, 0, 0, 0]]),
-                                 np.array([[0, 0, 0, 1], [0, 1, 0, 0]]))
+    isct, sts = intersect_planes(
+        np.array([[0, 0, 0, 1], [1, 0, 0, 0]]),
+        np.array([[0, 0, 0, 1], [0, 1, 0, 0]]))
     assert sts == 0
     assert isct[0, 2] == 0
     assert np.all(abs(isct[1, :3]) == (0, 0, 1))
 
-    isct, sts = intersect_planes(np.array([[0, 0, 0, 1], [1, 0, 0, 0]]),
-                                 np.array([[0, 0, 0, 1], [0, 0, 1, 0]]))
+    isct, sts = intersect_planes(
+        np.array([[0, 0, 0, 1], [1, 0, 0, 0]]),
+        np.array([[0, 0, 0, 1], [0, 0, 1, 0]]))
     assert sts == 0
     assert isct[0, 1] == 0
     assert np.all(abs(isct[1, :3]) == (0, 1, 0))
 
-    isct, sts = intersect_planes(np.array([[0, 0, 0, 1], [0, 1, 0, 0]]),
-                                 np.array([[0, 0, 0, 1], [0, 0, 1, 0]]))
+    isct, sts = intersect_planes(
+        np.array([[0, 0, 0, 1], [0, 1, 0, 0]]),
+        np.array([[0, 0, 0, 1], [0, 0, 1, 0]]))
     assert sts == 0
     assert isct[0, 0] == 0
     assert np.all(abs(isct[1, :3]) == (1, 0, 0))
 
-    isct, sts = intersect_planes(np.array([[7, 0, 0, 1], [1, 0, 0, 0]]),
-                                 np.array([[0, 9, 0, 1], [0, 1, 0, 0]]))
+    isct, sts = intersect_planes(
+        np.array([[7, 0, 0, 1], [1, 0, 0, 0]]),
+        np.array([[0, 9, 0, 1], [0, 1, 0, 0]]))
     assert sts == 0
     assert_allclose(isct[0, :3], [7, 9, 0])
     assert_allclose(abs(isct[1, :3]), [0, 0, 1])
 
-    isct, sts = intersect_planes(np.array([[0, 0, 0, 1], hnormalized([1, 1, 0, 0])]),
-                                 np.array([[0, 0, 0, 1], hnormalized([0, 1, 1, 0])]))
+    isct, sts = intersect_planes(
+        np.array([[0, 0, 0, 1], hnormalized([1, 1, 0, 0])]),
+        np.array([[0, 0, 0, 1], hnormalized([0, 1, 1, 0])]))
     assert sts == 0
     assert_allclose(abs(isct[1, :3]), hnormalized([1, 1, 1]))
 
@@ -204,6 +199,7 @@ def test_intersect_planes():
 
 
 def test_intersect_planes_rand():
+    # origin case
     plane1, plane2 = random_rays(shape=(2, 1))
     plane1[..., 0, :3] = 0
     plane2[..., 0, :3] = 0
@@ -212,6 +208,7 @@ def test_intersect_planes_rand():
     assert np.all(ray_in_plane(plane1, isect))
     assert np.all(ray_in_plane(plane2, isect))
 
+    # orthogonal case
     plane1, plane2 = random_rays(shape=(2, 1))
     plane1[..., 1, :3] = hnormalized([0, 0, 1])
     plane2[..., 1, :3] = hnormalized([0, 1, 0])
@@ -220,8 +217,24 @@ def test_intersect_planes_rand():
     assert np.all(ray_in_plane(plane1, isect))
     assert np.all(ray_in_plane(plane2, isect))
 
+    # general case
     plane1, plane2 = random_rays(shape=(2, 5, 6, 7, 8, 9))
     isect, status = intersect_planes(plane1, plane2)
     assert np.all(status == 0)
     assert np.all(ray_in_plane(plane1, isect))
     assert np.all(ray_in_plane(plane2, isect))
+
+
+def test_axis_ang_cen_of_rand():
+    shape = (5, 6, 7, 8, 9,)
+    axis0 = hnormalized(np.random.randn(*shape, 3))
+    ang0 = np.random.random(shape) * np.pi / 2
+    cen0 = np.random.randn(*shape, 3) * 100.0
+
+    rot = hrot(axis0, ang0, cen0, dtype='f8')
+    axis, ang, cen = axis_ang_cen_of(rot)
+
+    assert_allclose(axis0, axis, rtol=1e-5)
+    assert_allclose(ang0, ang, rtol=1e-5)
+    cenhat = (rot @ cen[..., None]).squeeze()
+    assert_allclose(cen, cenhat, rtol=1e-5, atol=1e-5)

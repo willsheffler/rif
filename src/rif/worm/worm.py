@@ -1,6 +1,6 @@
 from rif.rcl import Pose, bbstubs, to_rosetta_stub
 import rosetta
-from rif.homo import axis_angle_of, angle_of, hrot
+from rif.homog import axis_angle_of, angle_of, hrot
 from rif.vis import showme
 import numpy as np
 from numpy.linalg import inv
