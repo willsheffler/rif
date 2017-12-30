@@ -3,7 +3,7 @@ import rosetta
 from rif.homo import axis_angle_of, angle_of, hrot
 from rif.vis import showme
 import numpy as np
-from numpy.linalg import inv, norm
+from numpy.linalg import inv
 import math
 
 identity44f4 = np.identity(4, dtype='f4')

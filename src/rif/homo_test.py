@@ -91,3 +91,137 @@ def test_axis_angle_of_rand():
 
     assert_allclose(axis, ax, rtol=1e-5)
     assert_allclose(angl, an, rtol=1e-5)
+
+
+def test_is_valid_rays():
+    assert not is_valid_rays([[0, 0, 0, 0], [1, 0, 0, 0]])
+    assert not is_valid_rays([[0, 0, 0, 1], [0, 0, 0, 0]])
+    assert not is_valid_rays([[0, 0, 0, 1], [0, 3, 0, 0]])
+    assert is_valid_rays([[0, 0, 0, 1], [0, 1, 0, 0]])
+
+
+def test_random_rays():
+    r = random_rays()
+    assert np.all(r[..., :, 3] == (1, 0))
+    assert r.shape == (2, 4)
+    assert_allclose(np.linalg.norm(r[..., 1, :3], axis=-1), 1)
+
+    r = random_rays(shape=(5, 6, 7))
+    assert np.all(r[..., :, 3] == (1, 0))
+    assert r.shape == (5, 6, 7, 2, 4)
+    assert_allclose(np.linalg.norm(r[..., 1, :3], axis=-1), 1)
+
+
+def test_proj_prep():
+    assert_allclose([2, 3, 0], proj_perp([0, 0, 1], [2, 3, 99]))
+    assert_allclose([2, 3, 0], proj_perp([0, 0, 2], [2, 3, 99]))
+    a, b = np.random.randn(2, 5, 6, 7, 3)
+    pp = proj_perp(a, b)
+    assert_allclose(hdot(a, pp), 0, atol=1e-5)
+
+
+def test_point_in_plane():
+    plane = random_rays((5, 6, 7))
+    assert np.all(point_in_plane(plane, plane[..., 0, :3]))
+    pt = proj_perp(plane[..., 1, :3], np.random.randn(3))
+    assert np.all(point_in_plane(plane, plane[..., 0, :3] + pt))
+
+
+def test_ray_in_plane():
+    plane = random_rays((5, 6, 7))
+    dirn = proj_perp(plane[..., 1, :3], np.random.randn(5, 6, 7, 3))
+    ray = hray(plane[..., 0, :3] + np.cross(plane[..., 1, :3], dirn) * 7, dirn)
+    assert np.all(ray_in_plane(plane, ray))
+
+
+def test_intersect_planes():
+    with pytest.raises(ValueError):
+        intersect_planes(np.array([[0, 0, 0, 2], [0, 0, 0, 0]]),
+                         np.array([[0, 0, 0, 1], [0, 0, 0, 0]]))
+    with pytest.raises(ValueError):
+        intersect_planes(np.array([[0, 0, 0, 1], [0, 0, 0, 0]]),
+                         np.array([[0, 0, 0, 1], [0, 0, 0, 1]]))
+    with pytest.raises(ValueError):
+        intersect_planes(np.array([[0, 0, 1], [0, 0, 0, 0]]),
+                         np.array([[0, 0, 1], [0, 0, 0, 1]]))
+    with pytest.raises(ValueError):
+        intersect_planes(np.array(9 * [[[0, 0, 0, 1], [0, 0, 0, 0]]]),
+                         np.array(2 * [[[0, 0, 0, 1], [0, 0, 0, 0]]]))
+
+    # isct, sts = intersect_planes(np.array(9 * [[[0, 0, 0, 1], [1, 0, 0, 0]]]),
+        # np.array(9 * [[[0, 0, 0, 1], [1, 0, 0, 0]]]))
+    # assert isct.shape[:-2] == sts.shape == (9,)
+    # assert np.all(sts == 2)
+
+    # isct, sts = intersect_planes(np.array([[1, 0, 0, 1], [1, 0, 0, 0]]),
+        # np.array([[0, 0, 0, 1], [1, 0, 0, 0]]))
+    # assert sts == 1
+
+    isct, sts = intersect_planes(np.array([[0, 0, 0, 1], [1, 0, 0, 0]]),
+                                 np.array([[0, 0, 0, 1], [0, 1, 0, 0]]))
+    assert sts == 0
+    assert isct[0, 2] == 0
+    assert np.all(abs(isct[1, :3]) == (0, 0, 1))
+
+    isct, sts = intersect_planes(np.array([[0, 0, 0, 1], [1, 0, 0, 0]]),
+                                 np.array([[0, 0, 0, 1], [0, 0, 1, 0]]))
+    assert sts == 0
+    assert isct[0, 1] == 0
+    assert np.all(abs(isct[1, :3]) == (0, 1, 0))
+
+    isct, sts = intersect_planes(np.array([[0, 0, 0, 1], [0, 1, 0, 0]]),
+                                 np.array([[0, 0, 0, 1], [0, 0, 1, 0]]))
+    assert sts == 0
+    assert isct[0, 0] == 0
+    assert np.all(abs(isct[1, :3]) == (1, 0, 0))
+
+    isct, sts = intersect_planes(np.array([[7, 0, 0, 1], [1, 0, 0, 0]]),
+                                 np.array([[0, 9, 0, 1], [0, 1, 0, 0]]))
+    assert sts == 0
+    assert_allclose(isct[0, :3], [7, 9, 0])
+    assert_allclose(abs(isct[1, :3]), [0, 0, 1])
+
+    isct, sts = intersect_planes(np.array([[0, 0, 0, 1], hnormalized([1, 1, 0, 0])]),
+                                 np.array([[0, 0, 0, 1], hnormalized([0, 1, 1, 0])]))
+    assert sts == 0
+    assert_allclose(abs(isct[1, :3]), hnormalized([1, 1, 1]))
+
+    p1 = np.array([[2, 0, 0, 1], hnormalized([1, 0, 0, 0])])
+    p2 = np.array([[0, 0, 0, 1], hnormalized([0, 0, 1, 0])])
+    isct, sts = intersect_planes(p1, p2)
+    assert sts == 0
+    assert np.all(ray_in_plane(p1, isct))
+    assert np.all(ray_in_plane(p2, isct))
+
+    p1 = np.array([[0.39263901, 0.57934885, -0.7693232, 1.],
+                   [-0.80966465, -0.18557869, 0.55677976, 0.]])
+    p2 = np.array([[0.14790894, -1.333329, 0.45396509, 1.],
+                   [-0.92436319, -0.0221499, 0.38087016, 0.]])
+    isct, sts = intersect_planes(p1, p2)
+    assert sts == 0
+    assert np.all(ray_in_plane(p1, isct))
+    assert np.all(ray_in_plane(p2, isct))
+
+
+def test_intersect_planes_rand():
+    plane1, plane2 = random_rays(shape=(2, 1))
+    plane1[..., 0, :3] = 0
+    plane2[..., 0, :3] = 0
+    isect, status = intersect_planes(plane1, plane2)
+    assert np.all(status == 0)
+    assert np.all(ray_in_plane(plane1, isect))
+    assert np.all(ray_in_plane(plane2, isect))
+
+    plane1, plane2 = random_rays(shape=(2, 1))
+    plane1[..., 1, :3] = hnormalized([0, 0, 1])
+    plane2[..., 1, :3] = hnormalized([0, 1, 0])
+    isect, status = intersect_planes(plane1, plane2)
+    assert np.all(status == 0)
+    assert np.all(ray_in_plane(plane1, isect))
+    assert np.all(ray_in_plane(plane2, isect))
+
+    plane1, plane2 = random_rays(shape=(2, 5, 6, 7, 8, 9))
+    isect, status = intersect_planes(plane1, plane2)
+    assert np.all(status == 0)
+    assert np.all(ray_in_plane(plane1, isect))
+    assert np.all(ray_in_plane(plane2, isect))
