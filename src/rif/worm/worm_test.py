@@ -130,12 +130,6 @@ def test_segment_geom(curved_helix_pose):
         # assert abs(odis - caodis) < 0.001
 
 
-# todo: move elsewhere???
-@pytest.mark.skipif('not rcl.HAVE_PYROSETTA')
-def test_all_xform_combinations(curved_helix_pose):
-    pass
-
-
 @pytest.mark.skipif('not rcl.HAVE_PYROSETTA')
 def test_grow_simple(curved_helix_pose, strand_pose, loop_pose):
     # nsplice = SpliceSite(sele=[':5', ], polarity='N')
@@ -146,14 +140,14 @@ def test_grow_simple(curved_helix_pose, strand_pose, loop_pose):
     # loop = Spliceable(loop_pose, sites=[(':3', 'N'), ('-3:', 'C')])
     # splicables = [helix, strand, loop]
     segments = ([Segment([helix], exit='C'), ]
-                + [Segment([helix], entry='N', exit='C')] * 3  # 7
+                + [Segment([helix], entry='N', exit='C')] * 3
                 + [Segment([helix], entry='N')])
-    grow(segments, SegmentXform('C1', from_seg=0, to_seg=-1, lever=20))
-    # assert 0
+    worms = grow(segments, SegmentXform('C2', lever=20), memlim=1e6)
+    assert 0.14112763 < np.min(worms.scores) < 0.14112764
 
 
 @pytest.mark.skipif('not rcl.HAVE_PYROSETTA')
-def test_grow(curved_helix_pose, N=2):
+def test_grow_errors(curved_helix_pose, N=2):
     nsplice = SpliceSite(sele=[1, 2, 3, 4, 5, 6], polarity='N')
     csplice = SpliceSite(sele=[13, ], polarity='C')
     splicable1 = Spliceable(body=curved_helix_pose, sites=[nsplice, csplice])
@@ -179,15 +173,20 @@ def test_grow(curved_helix_pose, N=2):
         grow(segments_polarity_mismatch, criteria=checkc3)
 
 
-def test_csym(c2pose, c3pose, c4pose, c5pose, c6pose):
-    pass
-    # print(c2pose)
-    # print(c3pose)
-    # print(c4pose)
-    # print(c5pose)
-    # print(c6pose)
+@pytest.mark.skipif('not rcl.HAVE_PYROSETTA')
+def test_memlimit(curved_helix_pose, size=3):
+    helix = Spliceable(curved_helix_pose, sites=[((1, 2), 'N'), ('-2:', 'C')])
+    segments = ([Segment([helix], exit='C'), ]
+                + [Segment([helix], entry='N', exit='C')] * 3
+                + [Segment([helix], entry='N')])
+    for i in range(2, 7):
+        w1 = grow(segments, SegmentXform('c2'), memlim=10**i, thresh=30)
+        assert i == 2 or np.allclose(w0.scores, w1.scores)
+        w0 = w1
 
-    # assert 0
+
+# def test_cage(c2pose, c3pose, c4pose, c5pose, c6pose):
+    # pass
 
 if __name__ == '__main__':
     import pyrosetta

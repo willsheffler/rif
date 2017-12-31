@@ -1,10 +1,13 @@
+import rosetta as ros
+import itertools as it
+import functools as ft
+
 from rif.rcl import Pose, bbstubs, to_rosetta_stub
-import rosetta
+
 from rif.homog import axis_angle_of, angle_of, hrot
 from rif.vis import showme
 import numpy as np
 from numpy.linalg import inv
-import math
 
 identity44f4 = np.identity(4, dtype='f4')
 identity44f8 = np.identity(4, dtype='f8')
@@ -31,14 +34,14 @@ class SegmentXform(WormCriteria):
             self.nfold = int(self.symmetry[1:])
             if self.nfold <= 0:
                 raise ValueError('invalid symmetry: ' + symmetry)
-            self.symangle = math.pi * 2.0 / self.nfold
+            self.symangle = np.pi * 2.0 / self.nfold
         else: raise ValueError('can only do Cx symmetry for now')
         assert not orgnin_seg
         if self.tol <= 0: raise ValueError('tol should be > 0')
 
-    def score(self, segment_pos, *, debug=False, **kwarge):
-        x_from = segment_pos[self.from_seg]
-        x_to = segment_pos[self.to_seg]
+    def score(self, segpos, *, debug=False, **kwarge):
+        x_from = segpos[self.from_seg]
+        x_to = segpos[self.to_seg]
         xhat = inv(x_from) @ x_to
         trans = xhat[..., :3, 3]
         if self.orgnin_seg:
@@ -141,8 +144,9 @@ class Segment:
         self.entrypol = entry or self.entrypol
         self.exitpol = exit or self.exitpol
         # each array has all in/out pairs
-        self.x2exit, self.x2orgn = list(), list()
-        self.entryresid, self.exitresid, self.bodyid = list(), list(), list()
+        self.x2exit, self.x2orgn, self.bodyid = [], [], []
+        self.entryresid, self.exitresid = [], []
+        self.entrysiteid, self.exitsiteid = [], []
         # this whole loop is pretty inefficient, but that probably
         # doesn't matter much given the cost subsequent operations (?)
         for ibody, splicable in enumerate(self.splicables):
@@ -173,14 +177,18 @@ class Segment:
                                     jres = jres or -1
                                     self.x2exit.append(istub_inv @ jstub)
                                     self.x2orgn.append(istub_inv)
+                                    self.entrysiteid.append(isite)
                                     self.entryresid.append(ires)
+                                    self.exitsiteid.append(jsite)
                                     self.exitresid.append(jres)
                                     self.bodyid.append(bodyid)
         if len(self.x2exit) is 0:
             raise ValueError('no valid splices found')
         self.x2exit = np.stack(self.x2exit)
         self.x2orgn = np.stack(self.x2orgn)
+        self.entrysiteid = np.stack(self.entrysiteid)
         self.entryresid = np.array(self.entryresid)
+        self.exitsiteid = np.array(self.exitsiteid)
         self.exitresid = np.array(self.exitresid)
         self.bodyid = np.array(self.bodyid)
 
@@ -197,7 +205,7 @@ class Segment:
 
         assert 0 < lb <= ub - 1 <= len(pose)
         # print('append_subpose', lb, ub - 1)
-        rosetta.core.pose.append_subpose_to_pose(append_to, pose, lb, ub)
+        ros.core.pose.append_subpose_to_pose(append_to, pose, lb, ub)
 
         if position is not None:
             x = to_rosetta_stub(position)
@@ -205,19 +213,22 @@ class Segment:
             xlb = xub - ub + lb
             assert 0 < xlb <= xub <= len(append_to)
             # print('xform_pose', xlb, xub)
-            rosetta.protocols.sic_dock.xform_pose(append_to, x, xlb, xub)
+            ros.protocols.sic_dock.xform_pose(append_to, x, xlb, xub)
         return append_to
 
 
 class Worms:
 
-    def __init__(self, segments, score, solutions):
+    def __init__(self, segments, scores, indices, positions):
         self.segments = segments
-        self.score = score
-        self.solutions = solutions
+        self.scores = scores
+        self.indices = indices
+        self.positions = positions
 
 
-def chain_xforms(x2exit, x2orgn):
+def chain_xforms(segments):
+    x2exit = [s.x2exit for s in segments]
+    x2orgn = [s.x2orgn for s in segments]
     fullaxes = (np.newaxis,) * (len(x2exit) - 1)
     xconn = [x2exit[0][fullaxes], ]
     xbody = [x2orgn[0][fullaxes], ]
@@ -232,11 +243,16 @@ def chain_xforms(x2exit, x2orgn):
     return xbody, xconn
 
 
-def grow(segments, criteria, *, cache=None, threshold=1):
+def grow(segments, criteria, *, last_body_same_as=None,
+         cache=None, thresh=10, expert=False, memlim=1e9):
     if segments[0].entrypol is not None:
         raise ValueError('beginning of worm cant have entry')
     if segments[-1].exitpol is not None:
         raise ValueError('end of worm cant have exit')
+    if last_body_same_as is not None and not expert and (
+            segments[last_body_same_as] is not segments[-1]):
+        raise ValueError("segments[last_body_same_as] not same as segments[-1], "
+                         + "if you're sure, pass expert=True")
     criteria = [criteria] if isinstance(criteria, WormCriteria) else criteria
     for a, b in zip(segments[:-1], segments[1:]):
         if not (a.exitpol and b.entrypol and a.exitpol != b.entrypol):
@@ -244,47 +260,78 @@ def grow(segments, criteria, *, cache=None, threshold=1):
                              + str(a.exitpol) + '->'
                              + str(b.entrypol) + ' on segment pair: '
                              + str((segments.index(a), segments.index(b))))
+    if last_body_same_as is not None:
+        raise NotImplementedError('must implement subselection for last seg')
 
     sizes = [len(s.bodyid) for s in segments]
-    print('grow: size', sizes, np.prod(sizes))
+    end = len(segments) - 1
+    while end > 1 and memlim <= 64 * sum(np.prod(sizes[:e + 1])
+                                         for e in range(end)): end -= 1
+    segpos, connpos = chain_xforms(segments[:end])
+    # print('memuse:', sum(x.nbytes for x in segpos[:end]) / 1000000, 'M')
+    # print('sizes:', [len(s.bodyid) for s in segments])
+    # print('      ', [len(s.bodyid) for s in segments[:end]])
+    best = 9e9
+    scores, lowidx, lowpos = [], [], []
+    for samp in it.product(*(range(len(s.bodyid)) for s in segments[end:])):
+        segpos, connpos = segpos[:end], connpos[:end]
+        for iseg, seg in enumerate(segments[end:]):
+            segpos.append(connpos[-1] @ seg.x2orgn[samp[iseg]])
+            connpos.append(connpos[-1] @ seg.x2exit[samp[iseg]])
+        score = sum(c.score(segpos=segpos) for c in criteria)
+        ilow0 = np.where(score < thresh)
+        sampidx = tuple(np.repeat(i, len(ilow0[0])) for i in samp)
+        lowidx.append(np.array(ilow0 + sampidx).T)
+        # if len(lowidx[-1][0]):
+        # print('   ', samp)
+        # print('   ', score[ilow0])
+        # print('   ', lowidx[-1])
+        scores.append(score[ilow0])
+        lowpostmp = []
+        for iseg in range(len(segpos)):
+            ilow = ilow0[:iseg + 1] + (0,) * (segpos[0].ndim - 2 - (iseg + 1))
+            # print(segpos[iseg].shape, '\t', segpos[iseg][ilow].shape)
+            lowpostmp.append(segpos[iseg][ilow])
+        lowpos.append(np.stack(lowpostmp, axis=1))
+        # print('lowpos', lowpos[-1].shape)
+        # print('lowidx', lowidx[-1].shape)
+    scores = np.concatenate(scores)
+    order = np.argsort(scores)
+    scores = scores[order]
+    lowidx = np.concatenate(lowidx)[order]
+    lowpos = np.concatenate(lowpos)[order]
+    # print('lowpos', lowpos.shape)
+    # print('lowidx:', lowidx.shape)
+    # for idx, scr in zip(lowidx, scores): print(scr, idx)
+    worms = Worms(segments, scores, lowidx, lowpos)
+    return worms
 
-    segment_pos, connect_pos = chain_xforms([s.x2exit for s in segments],
-                                            [s.x2orgn for s in segments])
-    assert segment_pos[-1].shape[:-2] == tuple(len(s.bodyid) for s in segments)
+#     poses = list()
+#     # poses = Pose()
+#     positions = list()
+#     for iseg, seg in enumerate(segments):
+#         i = imin[iseg]
+#         pos = segpos[iseg]
+#         # print('segment %2i body %3i entry %-04i exit %-04i' % (
+#         # iseg, seg.bodyid[i], seg.entryresid[i], seg.exitresid[i]))
+#         ipos = tuple(np.minimum(np.array(pos.shape[:-2]) - 1, imin))
+#         position = pos[ipos]
+#         positions.append(position)
+#         poses.append(seg.make_pose(i, position=position))
+#         # poses = seg.make_pose(i, position=position, append_to=poses)
+#
+#     score2 = criteria[0].score(positions, debug=1)
+#     print('rescore', score2)
+#
+#     return score[imin]
 
-    score = sum(c.score(segment_pos=segment_pos) for c in criteria)
-    imin = np.unravel_index(np.argmin(score), score.shape)
-
-    print('best:', score[imin], imin)
-
-    # return
-
-    poses = list()
-    # poses = Pose()
-    positions = list()
-    for iseg, seg in enumerate(segments):
-        i = imin[iseg]
-        pos = segment_pos[iseg]
-        # print('segment %2i body %3i entry %-04i exit %-04i' % (
-        # iseg, seg.bodyid[i], seg.entryresid[i], seg.exitresid[i]))
-        ipos = tuple(np.minimum(np.array(pos.shape[:-2]) - 1, imin))
-        position = pos[ipos]
-        positions.append(position)
-        poses.append(seg.make_pose(i, position=position))
-        # poses = seg.make_pose(i, position=position, append_to=poses)
-
-    score2 = criteria[0].score(positions, debug=1)
-    print('rescore', score2)
-
-    return
-
-    print(poses)
-    showme(poses)
-    from pymol import cmd
-    cmd.hide('ev')
-    cmd.show('lines', 'name n+ca+c')
-    import time
-    while 1:
-        time.sleep(1)
-
-    return None
+#     print(poses)
+#     showme(poses)
+#     from pymol import cmd
+#     cmd.hide('ev')
+#     cmd.show('lines', 'name n+ca+c')
+#     import time
+#     while 1:
+#         time.sleep(1)
+#
+#     return score[imin]
