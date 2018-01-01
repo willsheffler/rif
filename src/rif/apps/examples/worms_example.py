@@ -21,10 +21,13 @@ def main():
                 + [Segment([helix], entry='N')])
     worms = grow(segments,
                  SegmentXform('C1', lever=20),
-                 thresh=20, max_workers=Nworker,
+                 thresh=5, max_workers=Nworker,
                  executor=ProcessPoolExecutor)
-    print(worms.scores)
+    s = worms.scores
 
+    print('npass', len(s))
+    print('ptile', np.percentile(s, range(0, 100, 20)))
+    print('best5', s[:5])
 
 if __name__ == '__main__':
     main()
