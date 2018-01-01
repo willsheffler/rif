@@ -1,5 +1,6 @@
 from rif.worm import *
 from rif.data import poselib
+from concurrent.futures import ThreadPoolExecutor, ProcessPoolExecutor
 
 
 def main():
@@ -11,11 +12,11 @@ def main():
     # loop = Spliceable(loop_pose, sites=[(':3', 'N'), ('-3:', 'C')])
     # splicables = [helix, strand, loop]
     segments = ([Segment([helix], exit='C'), ]
-                + [Segment([helix], entry='N', exit='C')] * 13
+                + [Segment([helix], entry='N', exit='C')] * 12
                 + [Segment([helix], entry='N')])
     worms = grow(segments,
                  SegmentXform('C1', lever=20),
-                 memlim=float(sys.argv[-1][1:]))
+                 thresh=20, executor=ThreadPoolExecutor)
     print(worms.scores)
 
 

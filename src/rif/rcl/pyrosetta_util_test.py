@@ -33,24 +33,24 @@ def test_atomic_charge_deviation():
     pass
 
 
-@pytest.mark.skipif('not rcl.HAVE_PYROSETTA')
-def test_generate_canonical_residue():
-    rcl.init_check()
-    k = rcl.generate_canonical_residue('LYS')
-    assert k.name1() == 'K'
-    assert k.nheavyatoms() == 9
+# @pytest.mark.skipif('not rcl.HAVE_PYROSETTA')
+# def test_generate_canonical_residue():
+#     rcl.init_check()
+#     k = rcl.generate_canonical_residue('LYS')
+#     assert k.name1() == 'K'
+#     assert k.nheavyatoms() == 9
 
 
-@pytest.mark.skipif('not rcl.HAVE_PYROSETTA')
-def test_generate_canonical_rotamer_residues():
-    rcl.init_check()
-    rots = rcl.generate_canonical_rotamer_residues('ASN')
-    assert len(rots) in (267, 399)  # WTF Rosetta!
-    # assert len(rots) == 399
-    # for i, rot in enumerate(rots):
-    # p = rcl.Pose()
-    # p.append_residue_by_jump(rot, 0)
-    # print(i)
-    # p.dump_pdb('asn%i.pdb' % i)
-    # print(len(rots))
-    # print(rcl.rosetta.options)
+# @pytest.mark.skipif('not rcl.HAVE_PYROSETTA')
+# def test_generate_canonical_rotamer_residues():
+#     rcl.init_check()
+#     rots = rcl.generate_canonical_rotamer_residues('ASN')
+#     assert len(rots) in (267, 399)  # WTF Rosetta!
+#     # assert len(rots) == 399
+#     # for i, rot in enumerate(rots):
+#     # p = rcl.Pose()
+#     # p.append_residue_by_jump(rot, 0)
+#     # print(i)
+#     # p.dump_pdb('asn%i.pdb' % i)
+#     # print(len(rots))
+#     # print(rcl.rosetta.options)

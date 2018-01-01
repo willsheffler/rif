@@ -8,8 +8,6 @@ from rif.homog import axis_angle_of, angle_of, hrot
 from rif.vis import showme
 import numpy as np
 from numpy.linalg import inv
-from concurrent.futures import ThreadPoolExecutor as pool
-# from concurrent.futures import ProcessPoolExecutor as pool
 
 identity44f4 = np.identity(4, dtype='f4')
 identity44f8 = np.identity(4, dtype='f8')
@@ -260,8 +258,20 @@ def grow_process_chunk(samp, segpos, connpos, segments, end, criteria, thresh):
     return score[ilow0], np.array(ilow0 + sampidx).T, np.stack(lowpostmp, 1)
 
 
+class MapExecutor:
+
+    def __init__(*args, **kw): pass
+
+    def map(self, *args, **kw):
+        return map(*args, **kw)
+
+    def __enter__(self, *args, **kw): return self
+
+    def __exit__(self, *args, **kw): pass
+
+
 def grow(segments, criteria, *, last_body_same_as=None,
-         cache=None, thresh=2, expert=False, memlim=1e8):
+         cache=None, thresh=2, expert=False, memlim=1e9, executor=MapExecutor):
     if segments[0].entrypol is not None:
         raise ValueError('beginning of worm cant have entry')
     if segments[-1].exitpol is not None:
@@ -281,16 +291,20 @@ def grow(segments, criteria, *, last_body_same_as=None,
         raise NotImplementedError('must implement subselection for last seg')
 
     sizes = [len(s.bodyid) for s in segments]
-    print('growing {:,} worms...'.format(np.prod(sizes)))
-    sys.stdout.flush()
     end = len(segments) - 1
     while end > 1 and memlim <= 64 * sum(np.prod(sizes[:e + 1])
                                          for e in range(end)): end -= 1
+    print('growing {:,} worms... chunk={:,}, nchunk={:,}'.format(
+        np.prod(sizes), np.prod(sizes[:end]), np.prod(sizes[end:])))
+    sys.stdout.flush()
     segpos, connpos = chain_xforms(segments[:end])  # common data
+    print('processing chunks...')
+    sys.stdout.flush()
     samples = it.product(*(range(len(s.bodyid)) for s in segments[end:]))
     args = [samples] + [it.repeat(x) for x in (
         segpos, connpos, segments, end, criteria, thresh)]
-    chunks = list(map(grow_process_chunk, *args))
+    with executor(max_workers=4) as pool:
+        chunks = list(pool.map(grow_process_chunk, *args))
     scores = np.concatenate([c[0] for c in chunks])
     order = np.argsort(scores)
     scores = scores[order]

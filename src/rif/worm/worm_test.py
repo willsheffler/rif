@@ -6,6 +6,7 @@ import pytest
 import numpy as np
 if rcl.HAVE_PYROSETTA:
     from rif.worm import *
+from concurrent.futures import ThreadPoolExecutor, ProcessPoolExecutor
 
 
 @pytest.mark.skipif('not rcl.HAVE_PYROSETTA')
@@ -134,18 +135,36 @@ def test_segment_geom(curved_helix_pose):
 
 @pytest.mark.skipif('not rcl.HAVE_PYROSETTA')
 def test_grow_cycle(curved_helix_pose, strand_pose, loop_pose):
-    # nsplice = SpliceSite(sele=[':5', ], polarity='N')
-    # csplice = SpliceSite(sele=['-5:', ], polarity='C')
     helix = Spliceable(curved_helix_pose, sites=[(1, 'N'), ('-4:', 'C')])
-
-    # strand = Spliceable(strand_pose, sites=[(':3', 'N'), ('-3:', 'C')])
-    # loop = Spliceable(loop_pose, sites=[(':3', 'N'), ('-3:', 'C')])
-    # splicables = [helix, strand, loop]
     segments = ([Segment([helix], exit='C'), ]
                 + [Segment([helix], entry='N', exit='C')] * 3
                 + [Segment([helix], entry='N')])
     worms = grow(segments, SegmentXform('C2', lever=20))
     assert 0.14112763 < np.min(worms.scores) < 0.14112764
+
+
+@pytest.mark.skipif('not rcl.HAVE_PYROSETTA')
+def test_grow_cycle_thread_pool(curved_helix_pose, strand_pose, loop_pose):
+    helix = Spliceable(curved_helix_pose, sites=[(1, 'N'), ('-4:', 'C')])
+    segments = ([Segment([helix], exit='C'), ]
+                + [Segment([helix], entry='N', exit='C')] * 3
+                + [Segment([helix], entry='N')])
+    worms = grow(segments, SegmentXform('C2', lever=20),
+                 executor=ThreadPoolExecutor)
+    assert 0.14112763 < np.min(worms.scores) < 0.14112764
+
+
+@pytest.mark.xfail()
+@pytest.mark.skipif('not rcl.HAVE_PYROSETTA')
+def test_grow_cycle_process_pool(curved_helix_pose, strand_pose, loop_pose):
+    helix = Spliceable(curved_helix_pose, sites=[(1, 'N'), ('-4:', 'C')])
+    segments = ([Segment([helix], exit='C'), ]
+                + [Segment([helix], entry='N', exit='C')] * 3
+                + [Segment([helix], entry='N')])
+    assert False, 'ProcessPoolExecutor not working...'
+    worms = grow(segments, SegmentXform('C2', lever=20),
+                 executor=ProcessPoolExecutor)
+    assert 0.1411 < np.min(worms.scores) < 0.1412
 
 
 @pytest.mark.skipif('not rcl.HAVE_PYROSETTA')
