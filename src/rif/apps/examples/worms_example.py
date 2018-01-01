@@ -41,7 +41,13 @@ def main():
     try: Nseg1 = int(sys.argv[-1])
     except: Nseg1 = 0
     for n in range(Nseg0, Nseg1 + 1):
-        doit(n, 0)
+        fail = True
+        while fail:
+            try:
+                doit(n, 0)
+                fail = False
+            except:
+                print('failed run on ' + str(n))
 
 if __name__ == '__main__':
     main()
