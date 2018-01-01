@@ -8,9 +8,30 @@ from rif.homog import axis_angle_of, angle_of, hrot
 from rif.vis import showme
 import numpy as np
 from numpy.linalg import inv
+import multiprocessing
 
 identity44f4 = np.identity(4, dtype='f4')
 identity44f8 = np.identity(4, dtype='f8')
+
+
+def cpu_count():
+    try:
+        return int(os.environ['SLURM_CPUS_ON_NODE'])
+    except:
+        return multiprocessing.cpu_count()
+
+
+class DefaultExecutor:
+    max_workers = 1
+
+    def __init__(*args, **kw): pass
+
+    def map(self, *args, **kw):
+        return map(*args, **kw)
+
+    def __enter__(self, *args, **kw): return self
+
+    def __exit__(self, *args, **kw): pass
 
 
 class WormCriteria: pass
@@ -226,7 +247,7 @@ class Worms:
         self.positions = positions
 
 
-def chain_xforms(segments):
+def _chain_xforms(segments):
     x2exit = [s.x2exit for s in segments]
     x2orgn = [s.x2orgn for s in segments]
     fullaxes = (np.newaxis,) * (len(x2exit) - 1)
@@ -243,9 +264,9 @@ def chain_xforms(segments):
     return xbody, xconn
 
 
-def grow_process_chunk(samp, segpos, connpos, segments, end, criteria, thresh):
+def _grow_chunk(samp, segpos, connpos, segs, end, criteria, thresh):
     segpos, connpos = segpos[:end], connpos[:end]
-    for iseg, seg in enumerate(segments[end:]):
+    for iseg, seg in enumerate(segs[end:]):
         segpos.append(connpos[-1] @ seg.x2orgn[samp[iseg]])
         connpos.append(connpos[-1] @ seg.x2exit[samp[iseg]])
     score = sum(c.score(segpos=segpos) for c in criteria)
@@ -258,20 +279,20 @@ def grow_process_chunk(samp, segpos, connpos, segments, end, criteria, thresh):
     return score[ilow0], np.array(ilow0 + sampidx).T, np.stack(lowpostmp, 1)
 
 
-class MapExecutor:
-
-    def __init__(*args, **kw): pass
-
-    def map(self, *args, **kw):
-        return map(*args, **kw)
-
-    def __enter__(self, *args, **kw): return self
-
-    def __exit__(self, *args, **kw): pass
+def _grow_chunks(ijob, context):
+    sampsizes, njob, segments, end, criteria, thresh = context
+    samples = it.product(*(range(n) for n in sampsizes))
+    segpos, connpos = _chain_xforms(segments[:end])  # common data
+    args = [list(samples)[ijob::njob]] + [it.repeat(x) for x in (
+        segpos, connpos, segments, end, criteria, thresh)]
+    chunk = list(map(_grow_chunk, *args))
+    return [np.concatenate([c[i] for c in chunk])
+            for i in range(3)] if chunk else None
 
 
 def grow(segments, criteria, *, last_body_same_as=None,
-         cache=None, thresh=2, expert=False, memlim=1e9, executor=MapExecutor):
+         cache=None, thresh=2, expert=False, memlim=1e9,
+         executor=DefaultExecutor, max_workers=None):
     if segments[0].entrypol is not None:
         raise ValueError('beginning of worm cant have entry')
     if segments[-1].exitpol is not None:
@@ -292,23 +313,33 @@ def grow(segments, criteria, *, last_body_same_as=None,
 
     sizes = [len(s.bodyid) for s in segments]
     end = len(segments) - 1
-    while end > 1 and memlim <= 64 * sum(np.prod(sizes[:e + 1])
-                                         for e in range(end)): end -= 1
+    while end > 1 and (np.prod(sizes[end:]) < cpu_count() or
+                       memlim <= 64 * np.prod(sizes[:end])): end -= 1
     print('growing {:,} worms... chunk={:,}, nchunk={:,}'.format(
         np.prod(sizes), np.prod(sizes[:end]), np.prod(sizes[end:])))
     sys.stdout.flush()
-    segpos, connpos = chain_xforms(segments[:end])  # common data
-    print('processing chunks...')
-    sys.stdout.flush()
-    samples = it.product(*(range(len(s.bodyid)) for s in segments[end:]))
-    args = [samples] + [it.repeat(x) for x in (
-        segpos, connpos, segments, end, criteria, thresh)]
+
     tmp = [s.splicables for s in segments]
     for s in segments: s.splicables = None
-    with executor(max_workers=2) as pool:
-        chunks = list(pool.map(grow_process_chunk, *args))
-    for i, s in enumerate(segments):
-        s.splicables = tmp[i]
+
+    OLD = 0
+    if OLD:
+        segpos, connpos = _chain_xforms(segments[:end])
+        samples = it.product(*(range(len(s.bodyid)) for s in segments[end:]))
+        args = [samples] + [it.repeat(x) for x in (
+            segpos, connpos, segments, end, criteria, thresh)]
+        with executor() as pool:
+            chunks = list(pool.map(_grow_chunk, *args))
+    else:
+        njob = min(max_workers or cpu_count(), np.prod(sizes[end:]))
+        with executor(max_workers=njob) as pool:
+            context = (sizes[end:], njob, segments, end, criteria, thresh)
+            args = [range(njob)] + [it.repeat(context)]
+            chunks = pool.map(_grow_chunks, *args)
+            chunks = [x for x in chunks if x is not None]
+
+    for s, t in zip(segments, tmp): s.splicables = t
+
     scores = np.concatenate([c[0] for c in chunks])
     order = np.argsort(scores)
     scores = scores[order]

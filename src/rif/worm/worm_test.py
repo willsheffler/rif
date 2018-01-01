@@ -141,6 +141,7 @@ def test_grow_cycle(curved_helix_pose, strand_pose, loop_pose):
                 + [Segment([helix], entry='N')])
     worms = grow(segments, SegmentXform('C2', lever=20))
     assert 0.1411 < np.min(worms.scores) < 0.1412
+    assert np.sum(worms.scores < 0.1412) == 4
 
 
 @pytest.mark.skipif('not rcl.HAVE_PYROSETTA')
@@ -152,6 +153,7 @@ def test_grow_cycle_thread_pool(curved_helix_pose, strand_pose, loop_pose):
     worms = grow(segments, SegmentXform('C2', lever=20),
                  executor=ThreadPoolExecutor)
     assert 0.1411 < np.min(worms.scores) < 0.1412
+    assert np.sum(worms.scores < 0.1412) == 4
 
 
 @pytest.mark.skipif('not rcl.HAVE_PYROSETTA')
@@ -163,6 +165,7 @@ def test_grow_cycle_process_pool(curved_helix_pose, strand_pose, loop_pose):
     worms = grow(segments, SegmentXform('C2', lever=20),
                  executor=ProcessPoolExecutor)
     assert 0.1411 < np.min(worms.scores) < 0.1412
+    assert np.sum(worms.scores < 0.1412) == 4
 
 
 @pytest.mark.skipif('not rcl.HAVE_PYROSETTA')
