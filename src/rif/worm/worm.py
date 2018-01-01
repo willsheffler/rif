@@ -324,9 +324,9 @@ def grow(segments, criteria, *, last_body_same_as=None,
     for s in segments: s.splicables = None
 
     njob = min(max_workers or cpu_count(), np.prod(sizes[end:]))
+    os.environ['NUM_THREADS'] = '1'
+    os.environ['OMP_NUM_THREADS'] = '1'
     with executor(max_workers=njob) as pool:
-        os.environ['NUM_THREADS'] = '1'
-        os.environ['OMP_NUM_THREADS'] = '1'
         context = (sizes[end:], njob, segments, end, criteria, thresh)
         args = [range(njob)] + [it.repeat(context)]
         chunks = pool.map(_grow_chunks, *args)
