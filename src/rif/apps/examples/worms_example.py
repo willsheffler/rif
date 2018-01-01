@@ -36,12 +36,12 @@ def doit(Nseg, Nworker):
 
 
 def main():
-    try: Nseg = int(sys.argv[-2])
-    except: Nseg = 12
-    try: Nworker = int(sys.argv[-1])
-    except: Nworker = 0
-    for n in range(Nseg + 1):
-        doit(n, Nworker)
+    try: Nseg0 = int(sys.argv[-2])
+    except: Nseg0 = 12
+    try: Nseg1 = int(sys.argv[-1])
+    except: Nseg1 = 0
+    for n in range(Nseg0, Nseg1 + 1):
+        doit(n, 0)
 
 if __name__ == '__main__':
     main()
