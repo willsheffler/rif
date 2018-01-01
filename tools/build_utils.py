@@ -352,7 +352,7 @@ def build_and_test():
         args.extend(['--ignore', 'src'])
         if not no_xdist:
             # args.extend('--cov=./src -n{}'.format(ncpu).split())
-            args.extend('-n{}'.format(min(ncpu, 16)).split())
+            args.extend('-n{}'.format(min(ncpu, 8)).split())
         if gtests:
             args.extend(['-k', ' or '.join(gtests)])
         if testfiles and not gtests:

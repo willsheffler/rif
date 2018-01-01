@@ -303,8 +303,12 @@ def grow(segments, criteria, *, last_body_same_as=None,
     samples = it.product(*(range(len(s.bodyid)) for s in segments[end:]))
     args = [samples] + [it.repeat(x) for x in (
         segpos, connpos, segments, end, criteria, thresh)]
-    with executor(max_workers=4) as pool:
+    tmp = [s.splicables for s in segments]
+    for s in segments: s.splicables = None
+    with executor(max_workers=2) as pool:
         chunks = list(pool.map(grow_process_chunk, *args))
+    for i, s in enumerate(segments):
+        s.splicables = tmp[i]
     scores = np.concatenate([c[0] for c in chunks])
     order = np.argsort(scores)
     scores = scores[order]

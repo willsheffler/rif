@@ -16,7 +16,7 @@ def main():
                 + [Segment([helix], entry='N')])
     worms = grow(segments,
                  SegmentXform('C1', lever=20),
-                 thresh=20, executor=ThreadPoolExecutor)
+                 thresh=20, executor=ProcessPoolExecutor)
     print(worms.scores)
 
 
