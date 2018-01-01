@@ -5,12 +5,7 @@ from time import perf_counter
 import sys
 
 
-def main():
-    try: Nseg = int(sys.argv[-2])
-    except: Nseg = 12
-    try: Nworker = int(sys.argv[-1])
-    except: Nworker = 0
-
+def doit(Nseg, Nworker):
     # nsplice = SpliceSite(sele=[':5', ], polarity='N')
     # csplice = SpliceSite(sele=['-5:', ], polarity='C')
     helix = Spliceable(poselib.curved_helix, sites=[(1, 'N'), ('-4:', 'C')])
@@ -24,7 +19,7 @@ def main():
     t = perf_counter()
     worms = grow(segments,
                  SegmentXform('C1', lever=20),
-                 thresh=5, max_workers=Nworker,
+                 thresh=10, max_workers=Nworker,
                  executor=ProcessPoolExecutor)
     t = perf_counter() - t
     s = worms.scores
@@ -33,11 +28,20 @@ def main():
     except: ptile = []
     print('ptile', ptile)
     print('best10', s[:10])
-    print('nseg', Nseg,
-          'npass', len(s),
-          'best', s[0] if s else 999,
-          'tgrow', t)
+    print('nseg %2i' % Nseg,
+          'best %7.3f' % (s[0] if len(s) else 999),
+          'tgrow %7.2f' % t,
+          'npass %8i' % len(s))
     sys.stdout.flush()
+
+
+def main():
+    try: Nseg = int(sys.argv[-2])
+    except: Nseg = 12
+    try: Nworker = int(sys.argv[-1])
+    except: Nworker = 0
+    for n in range(Nseg + 1):
+        doit(n, Nworker)
 
 if __name__ == '__main__':
     main()
