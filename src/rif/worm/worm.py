@@ -1,19 +1,22 @@
-from pyrosetta import rosetta as ros
-import itertools as it
-import functools as ft
-from tqdm import tqdm
-import sys
-from rif.rcl import Pose, bbstubs, to_rosetta_stub
-from rif.homog import axis_angle_of, angle_of, hrot
-from rif.vis import showme
-import numpy as np
 from numpy.linalg import inv
+from pyrosetta import rosetta as ros
+from rif.homog import axis_angle_of, angle_of, hrot
+from rif.rcl import Pose, bbstubs, to_rosetta_stub
+from rif.vis import showme
+from tqdm import tqdm
+import functools as ft
+import itertools as it
+from concurrent.futures import ThreadPoolExecutor, as_completed
 import multiprocessing
+import numpy as np
 import os
+import sys
 
 identity44f4 = np.identity(4, dtype='f4')
 identity44f8 = np.identity(4, dtype='f8')
 
+
+# todo: the following should go elsewhere...
 
 def cpu_count():
     try:
@@ -22,17 +25,10 @@ def cpu_count():
         return multiprocessing.cpu_count()
 
 
-class DefaultExecutor:
-    max_workers = 1
-
-    def __init__(*args, **kw): pass
-
-    def map(self, *args, **kw):
-        return map(*args, **kw)
-
-    def __enter__(self, *args, **kw): return self
-
-    def __exit__(self, *args, **kw): pass
+def tqdm_parallel_map(pool, function, *args, **kw):
+    futures = [pool.submit(function, *a) for a in zip(*args)]
+    return (f.result() for f in tqdm(as_completed(futures),
+                                     total=len(futures), **kw))
 
 
 class WormCriteria: pass
@@ -159,6 +155,9 @@ class Segment:
         self.exitpol = exit
         self.init(splicables, entry, exit)
 
+    def __len__(self):
+        return len(self.bodyid)
+
     def init(self, splicables=None, entry=None, exit=None):
         if not (entry or exit):
             raise ValueError('at least one of entry/exit required')
@@ -247,6 +246,19 @@ class Worms:
         self.indices = indices
         self.positions = positions
 
+    def __init___(self):
+        return len(self.scores)
+
+    def pose(self, which):
+        if hasattr(which, '__iter__'):
+            return (self.pose(w) for w in which)
+        pose = Pose()
+        for iseg, seg in enumerate(self.segments):
+            i = self.indices[which][iseg]
+            position = self.positions[which][iseg]
+            pose = seg.make_pose(i, position=position, append_to=pose)
+        return pose
+
 
 def _chain_xforms(segments):
     x2exit = [s.x2exit for s in segments]
@@ -257,8 +269,7 @@ def _chain_xforms(segments):
     for iseg in range(1, len(x2exit)):
         fullaxes = (slice(None),) + (np.newaxis,) * iseg
         xconn.append(xconn[iseg - 1] @ x2exit[iseg][fullaxes])
-        xbody.append(xconn[iseg - 1] @ x2orgn[iseg][fullaxes]
-                     if iseg + 1 < len(x2exit) else xconn[iseg])
+        xbody.append(xconn[iseg - 1] @ x2orgn[iseg][fullaxes])
     perm = list(range(len(xbody) - 1, -1, -1)) + [len(xbody), len(xbody) + 1]
     xbody = [np.transpose(x, perm) for x in xbody]
     xconn = [np.transpose(x, perm) for x in xconn]
@@ -293,7 +304,8 @@ def _grow_chunks(ijob, context):
 
 def grow(segments, criteria, *, last_body_same_as=None,
          cache=None, thresh=2, expert=False, memlim=1e7,
-         executor=DefaultExecutor, max_workers=None):
+         executor=None, max_workers=None, debug=False):
+    # checks
     if segments[0].entrypol is not None:
         raise ValueError('beginning of worm cant have entry')
     if segments[-1].exitpol is not None:
@@ -302,7 +314,6 @@ def grow(segments, criteria, *, last_body_same_as=None,
             segments[last_body_same_as] is not segments[-1]):
         raise ValueError("segments[last_body_same_as] not same as segments[-1], "
                          + "if you're sure, pass expert=True")
-    criteria = [criteria] if isinstance(criteria, WormCriteria) else criteria
     for a, b in zip(segments[:-1], segments[1:]):
         if not (a.exitpol and b.entrypol and a.exitpol != b.entrypol):
             raise ValueError('incompatible exit->entry polarity: '
@@ -312,61 +323,39 @@ def grow(segments, criteria, *, last_body_same_as=None,
     if last_body_same_as is not None:
         raise NotImplementedError('must implement subselection for last seg')
 
+    # setup
+    criteria = [criteria] if isinstance(criteria, WormCriteria) else criteria
+    if executor is None:
+        executor = ThreadPoolExecutor
+        max_workers = 1
     sizes = [len(s.bodyid) for s in segments]
     end = len(segments) - 1
     while end > 1 and (np.prod(sizes[end:]) < cpu_count() or
                        memlim <= 64 * np.prod(sizes[:end])): end -= 1
-    print('growing {:,} worms... chunk={:,}, nchunk={:,}'.format(
-        np.prod(sizes), np.prod(sizes[:end]), np.prod(sizes[end:])))
-    sys.stdout.flush()
+    nworkers = max_workers or cpu_count()
+    njob = nworkers * 32
+    njob = min(njob, np.prod(sizes[end:]))
 
+    # run the stuff
     tmp = [s.splicables for s in segments]
-    for s in segments: s.splicables = None
-
-    njob = min(max_workers or cpu_count(), np.prod(sizes[end:]))
-    os.environ['NUM_THREADS'] = '1'
-    os.environ['OMP_NUM_THREADS'] = '1'
-    with executor(max_workers=njob) as pool:
+    for s in segments: s.splicables = None  # poses not pickleable...
+    with executor(max_workers=nworkers) as pool:
         context = (sizes[end:], njob, segments, end, criteria, thresh)
         args = [range(njob)] + [it.repeat(context)]
-        chunks = pool.map(_grow_chunks, *args)
+        chunks = tqdm_parallel_map(
+            pool, _grow_chunks, *args,
+            unit='M worms', ascii=0, desc='growing worms',
+            unit_scale=np.prod(sizes[:end]) / 1000000)
         chunks = [x for x in chunks if x is not None]
+    for s, t in zip(segments, tmp): s.splicables = t  # put the poses back
 
-    for s, t in zip(segments, tmp): s.splicables = t
-
+    # compose and sort results
     scores = np.concatenate([c[0] for c in chunks])
     order = np.argsort(scores)
     scores = scores[order]
     lowidx = np.concatenate([c[1] for c in chunks])[order]
     lowpos = np.concatenate([c[2] for c in chunks])[order]
+    score_check = sum(c.score([lowpos[:, i]
+                               for i in range(len(segments))]) for c in criteria)
+    assert np.allclose(score_check, scores)
     return Worms(segments, scores, lowidx, lowpos)
-
-#     poses = list()
-#     # poses = Pose()
-#     positions = list()
-#     for iseg, seg in enumerate(segments):
-#         i = imin[iseg]
-#         pos = segpos[iseg]
-#         # print('segment %2i body %3i entry %-04i exit %-04i' % (
-#         # iseg, seg.bodyid[i], seg.entryresid[i], seg.exitresid[i]))
-#         ipos = tuple(np.minimum(np.array(pos.shape[:-2]) - 1, imin))
-#         position = pos[ipos]
-#         positions.append(position)
-#         poses.append(seg.make_pose(i, position=position))
-#         # poses = seg.make_pose(i, position=position, append_to=poses)
-#
-#     score2 = criteria[0].score(positions, debug=1)
-#     print('rescore', score2)
-#
-#     return score[imin]
-
-#     print(poses)
-#     showme(poses)
-#     from pymol import cmd
-#     cmd.hide('ev')
-#     cmd.show('lines', 'name n+ca+c')
-#     import time
-#     while 1:
-#         time.sleep(1)
-#
-#     return score[imin]
