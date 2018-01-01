@@ -9,6 +9,7 @@ from rif.vis import showme
 import numpy as np
 from numpy.linalg import inv
 import multiprocessing
+import os
 
 identity44f4 = np.identity(4, dtype='f4')
 identity44f8 = np.identity(4, dtype='f8')
@@ -322,21 +323,14 @@ def grow(segments, criteria, *, last_body_same_as=None,
     tmp = [s.splicables for s in segments]
     for s in segments: s.splicables = None
 
-    OLD = 0
-    if OLD:
-        segpos, connpos = _chain_xforms(segments[:end])
-        samples = it.product(*(range(len(s.bodyid)) for s in segments[end:]))
-        args = [samples] + [it.repeat(x) for x in (
-            segpos, connpos, segments, end, criteria, thresh)]
-        with executor() as pool:
-            chunks = list(pool.map(_grow_chunk, *args))
-    else:
-        njob = min(max_workers or cpu_count(), np.prod(sizes[end:]))
-        with executor(max_workers=njob) as pool:
-            context = (sizes[end:], njob, segments, end, criteria, thresh)
-            args = [range(njob)] + [it.repeat(context)]
-            chunks = pool.map(_grow_chunks, *args)
-            chunks = [x for x in chunks if x is not None]
+    njob = min(max_workers or cpu_count(), np.prod(sizes[end:]))
+    with executor(max_workers=njob) as pool:
+        os.environ['NUM_THREADS'] = '1'
+        os.environ['OMP_NUM_THREADS'] = '1'
+        context = (sizes[end:], njob, segments, end, criteria, thresh)
+        args = [range(njob)] + [it.repeat(context)]
+        chunks = pool.map(_grow_chunks, *args)
+        chunks = [x for x in chunks if x is not None]
 
     for s, t in zip(segments, tmp): s.splicables = t
 
