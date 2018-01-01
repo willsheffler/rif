@@ -2,6 +2,7 @@ from rif.worm import *
 from rif.data import poselib
 from concurrent.futures import ThreadPoolExecutor, ProcessPoolExecutor
 from time import perf_counter
+import sys
 
 
 def main():
@@ -36,6 +37,7 @@ def main():
           'npass', len(s),
           'best', s[0] if s else 999,
           'tgrow', t)
+    sys.stdout.flush()
 
 if __name__ == '__main__':
     main()
