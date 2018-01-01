@@ -109,7 +109,8 @@ def get_rtype(res_type_name):
 
 
 def make_res(res_type_name):
-    return core.conformation.ResidueFactory.create_residue(get_rtype(res_type_name))
+    return core.conformation.ResidueFactory.create_residue(
+        get_rtype(res_type_name))
 
 
 def add_files_to_rosettaDB(fname, contents):
@@ -198,6 +199,7 @@ def generate_canonical_residue(residue_name3):
 
 
 def generate_canonical_rotamer_residues_phipsi(residue_name3, target_phi_psi):
+    raise NotImlementedError
     canonical_residue = generate_canonical_residue(residue_name3)
     test_sequence = "AAX[%s]AA" % residue_name3
     target_phi, target_psi = target_phi_psi
