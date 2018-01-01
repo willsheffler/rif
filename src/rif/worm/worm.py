@@ -292,7 +292,7 @@ def _grow_chunks(ijob, context):
 
 
 def grow(segments, criteria, *, last_body_same_as=None,
-         cache=None, thresh=2, expert=False, memlim=1e7,
+         cache=None, thresh=2, expert=False, memlim=1e8,
          executor=DefaultExecutor, max_workers=None):
     if segments[0].entrypol is not None:
         raise ValueError('beginning of worm cant have entry')
