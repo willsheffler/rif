@@ -1,13 +1,15 @@
-import rosetta as ros
+from pyrosetta import rosetta as ros
 import itertools as it
 import functools as ft
-
+from tqdm import tqdm
+import sys
 from rif.rcl import Pose, bbstubs, to_rosetta_stub
-
 from rif.homog import axis_angle_of, angle_of, hrot
 from rif.vis import showme
 import numpy as np
 from numpy.linalg import inv
+from concurrent.futures import ThreadPoolExecutor as pool
+# from concurrent.futures import ProcessPoolExecutor as pool
 
 identity44f4 = np.identity(4, dtype='f4')
 identity44f8 = np.identity(4, dtype='f8')
@@ -243,8 +245,23 @@ def chain_xforms(segments):
     return xbody, xconn
 
 
+def grow_process_chunk(samp, segpos, connpos, segments, end, criteria, thresh):
+    segpos, connpos = segpos[:end], connpos[:end]
+    for iseg, seg in enumerate(segments[end:]):
+        segpos.append(connpos[-1] @ seg.x2orgn[samp[iseg]])
+        connpos.append(connpos[-1] @ seg.x2exit[samp[iseg]])
+    score = sum(c.score(segpos=segpos) for c in criteria)
+    ilow0 = np.where(score < thresh)
+    sampidx = tuple(np.repeat(i, len(ilow0[0])) for i in samp)
+    lowpostmp = []
+    for iseg in range(len(segpos)):
+        ilow = ilow0[:iseg + 1] + (0,) * (segpos[0].ndim - 2 - (iseg + 1))
+        lowpostmp.append(segpos[iseg][ilow])
+    return score[ilow0], np.array(ilow0 + sampidx).T, np.stack(lowpostmp, 1)
+
+
 def grow(segments, criteria, *, last_body_same_as=None,
-         cache=None, thresh=10, expert=False, memlim=1e9):
+         cache=None, thresh=2, expert=False, memlim=1e8):
     if segments[0].entrypol is not None:
         raise ValueError('beginning of worm cant have entry')
     if segments[-1].exitpol is not None:
@@ -264,47 +281,22 @@ def grow(segments, criteria, *, last_body_same_as=None,
         raise NotImplementedError('must implement subselection for last seg')
 
     sizes = [len(s.bodyid) for s in segments]
+    print('growing {:,} worms...'.format(np.prod(sizes)))
+    sys.stdout.flush()
     end = len(segments) - 1
     while end > 1 and memlim <= 64 * sum(np.prod(sizes[:e + 1])
                                          for e in range(end)): end -= 1
-    segpos, connpos = chain_xforms(segments[:end])
-    # print('memuse:', sum(x.nbytes for x in segpos[:end]) / 1000000, 'M')
-    # print('sizes:', [len(s.bodyid) for s in segments])
-    # print('      ', [len(s.bodyid) for s in segments[:end]])
-    best = 9e9
-    scores, lowidx, lowpos = [], [], []
-    for samp in it.product(*(range(len(s.bodyid)) for s in segments[end:])):
-        segpos, connpos = segpos[:end], connpos[:end]
-        for iseg, seg in enumerate(segments[end:]):
-            segpos.append(connpos[-1] @ seg.x2orgn[samp[iseg]])
-            connpos.append(connpos[-1] @ seg.x2exit[samp[iseg]])
-        score = sum(c.score(segpos=segpos) for c in criteria)
-        ilow0 = np.where(score < thresh)
-        sampidx = tuple(np.repeat(i, len(ilow0[0])) for i in samp)
-        lowidx.append(np.array(ilow0 + sampidx).T)
-        # if len(lowidx[-1][0]):
-        # print('   ', samp)
-        # print('   ', score[ilow0])
-        # print('   ', lowidx[-1])
-        scores.append(score[ilow0])
-        lowpostmp = []
-        for iseg in range(len(segpos)):
-            ilow = ilow0[:iseg + 1] + (0,) * (segpos[0].ndim - 2 - (iseg + 1))
-            # print(segpos[iseg].shape, '\t', segpos[iseg][ilow].shape)
-            lowpostmp.append(segpos[iseg][ilow])
-        lowpos.append(np.stack(lowpostmp, axis=1))
-        # print('lowpos', lowpos[-1].shape)
-        # print('lowidx', lowidx[-1].shape)
-    scores = np.concatenate(scores)
+    segpos, connpos = chain_xforms(segments[:end])  # common data
+    samples = it.product(*(range(len(s.bodyid)) for s in segments[end:]))
+    args = [samples] + [it.repeat(x) for x in (
+        segpos, connpos, segments, end, criteria, thresh)]
+    chunks = list(map(grow_process_chunk, *args))
+    scores = np.concatenate([c[0] for c in chunks])
     order = np.argsort(scores)
     scores = scores[order]
-    lowidx = np.concatenate(lowidx)[order]
-    lowpos = np.concatenate(lowpos)[order]
-    # print('lowpos', lowpos.shape)
-    # print('lowidx:', lowidx.shape)
-    # for idx, scr in zip(lowidx, scores): print(scr, idx)
-    worms = Worms(segments, scores, lowidx, lowpos)
-    return worms
+    lowidx = np.concatenate([c[1] for c in chunks])[order]
+    lowpos = np.concatenate([c[2] for c in chunks])[order]
+    return Worms(segments, scores, lowidx, lowpos)
 
 #     poses = list()
 #     # poses = Pose()

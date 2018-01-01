@@ -372,6 +372,8 @@ def build_and_test():
                 print('       ', p)
             print('    cwd:', os.getcwd())
         sys.argv[1:] = args
+        print('handoff to pytest.main()')
+        sys.stdout.flush()
         assert not pytest.main()
 
 

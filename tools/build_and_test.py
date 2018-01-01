@@ -4,7 +4,11 @@ import sys
 import os
 import traceback
 sys.path.append(os.path.dirname(__file__))  # not sure why sometimes necessary
-from build_utils import build_and_test, build_and_run_gtest_auto, _VERBOSE
+from build_utils import (
+    build_and_test,
+    build_and_run_gtest_auto,
+    _VERBOSE,
+    get_cmake_dir)
 
 
 def run_tests():
@@ -35,12 +39,27 @@ def run_docs():
     os.system('google-chrome %s' % url)
 
 
+def isappfile(fname):
+    return -1 != fname.find('/rif/apps/')
+
+
+def run_apps():
+    sys.path.append(get_cmake_dir('lib', 'Release'))
+    args = [a for a in sys.argv[1:] if not a.startswith('-')]
+    for arg in args:
+        exec(open(arg).read(), globals())
+
+
 def run():
-    args = sys.argv[1:]
-    if all(isdocfile(arg) for arg in args):
+    args = [a for a in sys.argv[1:] if not a.startswith('-')]
+    if args and all(isdocfile(arg) for arg in args):
         return run_docs()
-    elif any(isdocfile(arg) for arg in args):
+    if args and all(isappfile(arg) for arg in args):
+        return run_apps()
+    elif args and any(isdocfile(arg) for arg in args):
         raise NotImplementedError('mixed docs and code!')
+    elif args and any(isappfile(arg) for arg in args):
+        raise NotImplementedError('mixed apps and code!')
     else:
         return run_tests()
 
@@ -49,15 +68,16 @@ if __name__ == '__main__':
     if _VERBOSE:
         print('== build_and_test.py start ==')
         print('== in ci ==')
-    try:
-        sys.exit(run())
-    except Exception as e:
-        t, v, tb = sys.exc_info()
-        if _VERBOSE:
-            with open('.ERROR', 'w') as out:
-                out.write(str(e))
-            print('==========================================================')
-            print("error running build_and_test, traceback:")
-            print('==========================================================')
-            print(e)
-            traceback.print_tb(tb)
+    run()
+    # try:
+    # sys.exit(run())
+    # except Exception as e:
+    # t, v, tb = sys.exc_info()
+    # if _VERBOSE:
+    # with open('.ERROR', 'w') as out:
+    # out.write(str(e))
+    # print('==========================================================')
+    # print("error running build_and_test, traceback:")
+    # print('==========================================================')
+    # print(e)
+    # traceback.print_tb(tb)

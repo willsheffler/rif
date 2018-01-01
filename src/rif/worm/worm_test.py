@@ -1,12 +1,14 @@
-from rif.worm import *
+from rif import rcl
 from rif.homog import hrot, htrans, axis_angle_of
 from rif.vis import showme
-from rif import rcl
 from numpy.testing import assert_allclose
 import pytest
 import numpy as np
+if rcl.HAVE_PYROSETTA:
+    from rif.worm import *
 
 
+@pytest.mark.skipif('not rcl.HAVE_PYROSETTA')
 def test_SpliceSite(pose):
     assert len(pose) == 7
     ss = SpliceSite(1, 'N')
@@ -131,7 +133,7 @@ def test_segment_geom(curved_helix_pose):
 
 
 @pytest.mark.skipif('not rcl.HAVE_PYROSETTA')
-def test_grow_simple(curved_helix_pose, strand_pose, loop_pose):
+def test_grow_cycle(curved_helix_pose, strand_pose, loop_pose):
     # nsplice = SpliceSite(sele=[':5', ], polarity='N')
     # csplice = SpliceSite(sele=['-5:', ], polarity='C')
     helix = Spliceable(curved_helix_pose, sites=[(1, 'N'), ('-4:', 'C')])
@@ -142,7 +144,7 @@ def test_grow_simple(curved_helix_pose, strand_pose, loop_pose):
     segments = ([Segment([helix], exit='C'), ]
                 + [Segment([helix], entry='N', exit='C')] * 3
                 + [Segment([helix], entry='N')])
-    worms = grow(segments, SegmentXform('C2', lever=20), memlim=1e6)
+    worms = grow(segments, SegmentXform('C2', lever=20))
     assert 0.14112763 < np.min(worms.scores) < 0.14112764
 
 
