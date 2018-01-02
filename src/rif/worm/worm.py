@@ -356,7 +356,7 @@ def grow(segments, criteria, *, last_body_same_as=None,
         chunks = tqdm_parallel_map(
             pool, _grow_chunks, *args,
             unit='K worms', ascii=0, desc='growing worms',
-            unit_scale=(ntot / njob / 1000))
+            unit_scale=int(ntot / njob / 1000))
         chunks = [x for x in chunks if x is not None]
     for s, t in zip(segments, tmp): s.splicables = t  # put the poses back
 
