@@ -213,7 +213,8 @@ class Segment:
         self.exitresid = np.array(self.exitresid)
         self.bodyid = np.array(self.bodyid)
 
-    def make_pose(self, index, append_to=None, position=None):
+    def make_pose(self, index, append_to=None,
+                  position=None, onechain=True):
         append_to = append_to or Pose()
         pose = self.splicables[self.bodyid[index]].body
         lb = self.entryresid[index]
@@ -226,7 +227,8 @@ class Segment:
 
         assert 0 < lb <= ub - 1 <= len(pose)
         # print('append_subpose', lb, ub - 1)
-        ros.core.pose.append_subpose_to_pose(append_to, pose, lb, ub)
+        ros.core.pose.append_subpose_to_pose(
+            append_to, pose, lb, ub, new_chain=not onechain)
 
         if position is not None:
             x = to_rosetta_stub(position)
@@ -249,15 +251,18 @@ class Worms:
     def __init___(self):
         return len(self.scores)
 
-    def pose(self, which):
+    def pose(self, which, **kw):
         if hasattr(which, '__iter__'):
             return (self.pose(w) for w in which)
         pose = Pose()
         for iseg, seg in enumerate(self.segments):
             i = self.indices[which][iseg]
             position = self.positions[which][iseg]
-            pose = seg.make_pose(i, position=position, append_to=pose)
+            pose = seg.make_pose(i, position=position, append_to=pose, **kw)
         return pose
+
+    def __len__(self):
+        return len(self.scores)
 
 
 def _chain_xforms(segments):
@@ -303,8 +308,8 @@ def _grow_chunks(ijob, context):
 
 
 def grow(segments, criteria, *, last_body_same_as=None,
-         cache=None, thresh=2, expert=False, memlim=1e7,
-         executor=None, max_workers=None, debug=False):
+         cache=None, thresh=2, expert=False, memlim=1e6,
+         executor=None, max_workers=None, debug=False, jobmult=32):
     # checks
     if segments[0].entrypol is not None:
         raise ValueError('beginning of worm cant have entry')
@@ -332,20 +337,26 @@ def grow(segments, criteria, *, last_body_same_as=None,
     end = len(segments) - 1
     while end > 1 and (np.prod(sizes[end:]) < cpu_count() or
                        memlim <= 64 * np.prod(sizes[:end])): end -= 1
-    nworkers = max_workers or cpu_count()
-    njob = nworkers * 32
-    njob = min(njob, np.prod(sizes[end:]))
+    ntot, nchunk, nchunks = (np.product(x)
+                             for x in (sizes, sizes[:end], sizes[end:]))
+    nworker = max_workers or cpu_count()
+    njob = nworker * jobmult
+    njob = min(njob, nchunks)
+    print('tot = {:,}, nchunk = {:,}, nchunks = {:,}, nworker = {}, njob = {}, '
+          'worm/job = {:,}, chunk/job = {}'.format(
+              ntot, nchunk, nchunks, nworker, njob,
+              ntot / njob, nchunks / njob))
 
     # run the stuff
     tmp = [s.splicables for s in segments]
     for s in segments: s.splicables = None  # poses not pickleable...
-    with executor(max_workers=nworkers) as pool:
+    with executor(max_workers=nworker) as pool:
         context = (sizes[end:], njob, segments, end, criteria, thresh)
         args = [range(njob)] + [it.repeat(context)]
         chunks = tqdm_parallel_map(
             pool, _grow_chunks, *args,
-            unit='M worms', ascii=0, desc='growing worms',
-            unit_scale=np.prod(sizes[:end]) / 1000000)
+            unit='K worms', ascii=0, desc='growing worms',
+            unit_scale=(ntot / njob / 1000))
         chunks = [x for x in chunks if x is not None]
     for s, t in zip(segments, tmp): s.splicables = t  # put the poses back
 
