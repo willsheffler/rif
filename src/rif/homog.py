@@ -9,7 +9,8 @@ def fast_axis_of(xforms):
     return np.stack((
         xforms[..., 2, 1] - xforms[..., 1, 2],
         xforms[..., 0, 2] - xforms[..., 2, 0],
-        xforms[..., 1, 0] - xforms[..., 0, 1]), axis=-1)
+        xforms[..., 1, 0] - xforms[..., 0, 1],
+        np.zeros(xforms.shape[:-2])), axis=-1)
 
 
 def axis_angle_of(xforms):
@@ -79,8 +80,7 @@ def hray(origin, direction):
     r = np.empty(s[:-1] + (2, 4))
     r[..., 0, :origin.shape[-1]] = origin
     r[..., 0, 3] = 1
-    r[..., 1, :direction.shape[-1]] = hnormalized(direction)
-    r[..., 1, 3] = 0
+    r[..., 1, :] = hnormalized(direction)
     return r
 
 
@@ -90,14 +90,14 @@ def htrans(trans, dtype='f4'):
         raise ValueError('trans should be shape (..., 3)')
     tileshape = trans.shape[:-1] + (1, 1)
     t = np.tile(np.identity(4, dtype), tileshape)
-    t[..., :3, 3] = trans
+    t[..., :trans.shape[-1], 3] = trans
     return t
 
 
 def hdot(a, b):
     a = np.asanyarray(a)
     b = np.asanyarray(b)
-    return np.sum(a * b, axis=-1)
+    return np.sum(a[..., :3] * b[..., :3], axis=-1)
 
 
 def hnorm(a):
@@ -112,6 +112,9 @@ def hnorm2(a):
 
 def hnormalized(a):
     a = np.asanyarray(a)
+    if a.shape[-1] == 3:
+        a, tmp = np.zeros(a.shape[:-1] + (4,)), a
+        a[..., :3] = tmp
     return a / hnorm(a)[..., None]
 
 

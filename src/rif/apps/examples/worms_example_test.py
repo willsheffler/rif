@@ -7,7 +7,7 @@ from time import perf_counter
 import sys
 
 
-def main(nseg, nworker=0):
+def doit(nseg, nworker):
     # nsplice = SpliceSite(sele=[':5', ], polarity='N')
     # csplice = SpliceSite(sele=['-5:', ], polarity='C')
     helix = Spliceable(poselib.curved_helix, sites=[(1, 'N'), ('-4:', 'C')])
@@ -39,9 +39,23 @@ def main(nseg, nworker=0):
     sys.stdout.flush()
 
     for i in range(min(10, len(worms))):
-        print(i)
         worms.pose(i, onechain=True).dump_pdb('worm_nseg%i_%i.pdb' % (nseg, i))
 
 
+def main():
+    try: Nseg0 = int(sys.argv[-2])
+    except: Nseg0 = 13
+    try: Nseg1 = int(sys.argv[-1])
+    except: Nseg1 = 13
+    for n in range(Nseg0, Nseg1 + 1):
+        fail = True
+        while fail:
+            try:
+                doit(n, 0)
+                fail = False
+            except BrokenProcessPool as e:
+                print('failed run on ' + str(n))
+                print(e)
+
 if __name__ == '__main__':
-    main(13)
+    main()

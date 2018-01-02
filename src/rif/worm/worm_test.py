@@ -28,7 +28,7 @@ def test_SpliceSite(pose):
 
 
 def test_geom_check():
-    SX = SegmentXform
+    SX = SegmentSym
     I = np.identity(4, 'f4')
     rotx1rad = hrot([1, 0, 0], 1)
     transx10 = htrans([10, 0, 0])
@@ -38,13 +38,13 @@ def test_geom_check():
     assert 0.001 > abs(100 - SX('c1').score([I, rotx1rad]))
     assert 1e-5 > abs(SX('c2').score([I, hrot([1, 0, 0], np.pi)]))
 
-    score = SegmentXform('c2').score([I, hrot(randaxes, np.pi)])
+    score = SegmentSym('c2').score([I, hrot(randaxes, np.pi)])
     assert_allclose(0, score, atol=1e-5, rtol=1)
 
-    score = SegmentXform('c3').score([I, hrot(randaxes, np.pi * 2 / 3)])
+    score = SegmentSym('c3').score([I, hrot(randaxes, np.pi * 2 / 3)])
     assert_allclose(0, score, atol=1e-5, rtol=1)
 
-    score = SegmentXform('c4').score([I, hrot(randaxes, np.pi / 2)])
+    score = SegmentSym('c4').score([I, hrot(randaxes, np.pi / 2)])
     assert_allclose(0, score, atol=1e-5, rtol=1)
 
 
@@ -139,7 +139,7 @@ def test_grow_cycle(curved_helix_pose):
     segments = ([Segment([helix], exit='C'), ] +
                 [Segment([helix], entry='N', exit='C')] * 3 +
                 [Segment([helix], entry='N')])
-    worms = grow(segments, SegmentXform('C2', lever=20))
+    worms = grow(segments, SegmentSym('C2', lever=20))
     assert 0.1411 < np.min(worms.scores) < 0.1412
 
 
@@ -149,7 +149,7 @@ def test_grow_cycle_thread_pool(curved_helix_pose):
     segments = ([Segment([helix], exit='C'), ] +
                 [Segment([helix], entry='N', exit='C')] * 3 +
                 [Segment([helix], entry='N')])
-    worms = grow(segments, SegmentXform('C2', lever=20),
+    worms = grow(segments, SegmentSym('C2', lever=20),
                  executor=ThreadPoolExecutor, max_workers=2)
     assert 0.1411 < np.min(worms.scores) < 0.1412
     assert np.sum(worms.scores < 0.1412) == 4
@@ -161,25 +161,23 @@ def test_grow_cycle_process_pool(curved_helix_pose):
     segments = ([Segment([helix], exit='C'), ] +
                 [Segment([helix], entry='N', exit='C')] * 3 +
                 [Segment([helix], entry='N')])
-    worms = grow(segments, SegmentXform('C2', lever=20),
+    worms = grow(segments, SegmentSym('C2', lever=20),
                  executor=ProcessPoolExecutor, max_workers=2)
     assert 0.1411 < np.min(worms.scores) < 0.1412
     assert np.sum(worms.scores < 0.1412) == 4
 
 
 @pytest.mark.skipif('not rcl.HAVE_PYROSETTA')
-def test_grow_errors(curved_helix_pose, N=2):
+def test_grow_errors(curved_helix_pose):
     nsplice = SpliceSite(sele=[1, 2, 3, 4, 5, 6], polarity='N')
     csplice = SpliceSite(sele=[13, ], polarity='C')
     splicable1 = Spliceable(body=curved_helix_pose, sites=[nsplice, csplice])
     splicable2 = Spliceable(body=curved_helix_pose, sites=[nsplice, csplice])
     splicables = [splicable1]
-    for i in range(N - 1, N):
-        segments = ([Segment(splicables, exit='C'), ] +
-                    [Segment(splicables, entry='N', exit='C'), ] * i +
-                    [Segment(splicables, entry='N'), ])
-        checkc3 = SegmentXform('C2', from_seg=0, to_seg=-1)
-        # grow(segments, criteria=checkc3)
+    segments = ([Segment(splicables, exit='C'), ] +
+                [Segment(splicables, entry='N', exit='C'), ] * 3 +
+                [Segment(splicables, entry='N'), ])
+    checkc3 = SegmentSym('C2', from_seg=0, to_seg=-1)
 
     # make sure incorrect begin/end throws error
     with pytest.raises(ValueError):
@@ -195,24 +193,27 @@ def test_grow_errors(curved_helix_pose, N=2):
 
 
 @pytest.mark.skipif('not rcl.HAVE_PYROSETTA')
-def test_memlimit(curved_helix_pose, size=3):
+def test_memlimit(curved_helix_pose):
     helix = Spliceable(curved_helix_pose, sites=[((1, 2), 'N'), ('-2:', 'C')])
-    segments = ([Segment([helix], exit='C'), ]
-                + [Segment([helix], entry='N', exit='C')] * 3
-                + [Segment([helix], entry='N')])
+    segments = ([Segment([helix], exit='C'), ] +
+                [Segment([helix], entry='N', exit='C')] * 3 +
+                [Segment([helix], entry='N')])
     for i in range(2, 7):
-        w1 = grow(segments, SegmentXform('c2'), memlim=10**i, thresh=30)
+        w1 = grow(segments, SegmentSym('c2'), memlim=10**i, thresh=30)
         assert i == 2 or np.allclose(w0.scores, w1.scores)
         w0 = w1
 
 
-# def test_cage(c2pose, c3pose, c4pose, c5pose, c6pose):
-    # pass
-
-if __name__ == '__main__':
-    import pyrosetta
-    pyrosetta.init()
-    pose = pyrosetta.pose_from_file(
-        '/home/sheffler/rifsrc/src/rif/data/pdb/curved_helix.pdb')
-    print('foo')
-    test_grow(pose, 30)
+@pytest.mark.skipif('not rcl.HAVE_PYROSETTA')
+def test_pose_alignment(curved_helix_pose):
+    helix = Spliceable(curved_helix_pose, sites=[(1, 'N'), ('-4:', 'C')])
+    segments = ([Segment([helix], exit='C'), ] +
+                [Segment([helix], entry='N', exit='C')] * 3 +
+                [Segment([helix], entry='N')])
+    w = grow(segments, SegmentSym('c2'), thresh=1)
+    assert len(w)
+    pose = w.pose(0, onechain=True, align=1, withend=1)
+    xyz0 = np.array([pose.residue(1).xyz(2)[i] for i in (0, 1, 2)] + [1])
+    xyz1 = np.array([pose.residue(43).xyz(2)[i] for i in (0, 1, 2)] + [1])
+    xyz1 = hrot([0, 0, 1], 180) @ xyz1
+    assert np.sum((xyz1 - xyz0)**2) < 0.1

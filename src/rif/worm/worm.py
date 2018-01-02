@@ -1,16 +1,16 @@
 from numpy.linalg import inv
 from pyrosetta import rosetta as ros
-from rif.homog import axis_angle_of, angle_of, hrot
-from rif.rcl import Pose, bbstubs, to_rosetta_stub
-from rif.vis import showme
+from rif import rcl, homog, vis
 from tqdm import tqdm
 import functools as ft
 import itertools as it
 from concurrent.futures import ThreadPoolExecutor, as_completed
 import multiprocessing
-import numpy as np
 import os
 import sys
+import abc
+import numpy as np
+import multiprocessing
 
 identity44f4 = np.identity(4, dtype='f4')
 identity44f8 = np.identity(4, dtype='f8')
@@ -31,13 +31,22 @@ def tqdm_parallel_map(pool, function, *args, **kw):
                                      total=len(futures), **kw))
 
 
-class WormCriteria: pass
+class WormCriteria(abc.ABC):
+
+    @abc.abstractmethod
+    def score(self): pass
+
+    def canonical_alignment(self):
+        return None
 
 
-class AxesIntersect(WormCriteria): pass
+class AxesIntersect(WormCriteria):
+
+    def __init__(self, *args, **kw):
+        raise NotImplementedError
 
 
-class SegmentXform(WormCriteria):
+class SegmentSym(WormCriteria):
 
     def __init__(self, symmetry, *, tol=1.0, from_seg=0,
                  orgnin_seg=None, lever=100.0, to_seg=-1):
@@ -61,18 +70,29 @@ class SegmentXform(WormCriteria):
         x_from = segpos[self.from_seg]
         x_to = segpos[self.to_seg]
         xhat = inv(x_from) @ x_to
-        trans = xhat[..., :3, 3]
+        trans = xhat[..., :, 3]
         if self.orgnin_seg:
             raise NotImplementedError
         elif self.nfold is 1:
-            angle = angle_of(xhat)
-            carterrsq = np.sum(trans**2, axis=-1)
+            angle = homog.angle_of(xhat)
+            carterrsq = np.sum(trans[..., :3]**2, axis=-1)
             roterrsq = angle**2
         else:
-            axis, angle = axis_angle_of(xhat)
+            axis, angle = homog.axis_angle_of(xhat)
             carterrsq = np.sum(trans * axis, axis=-1)**2
             roterrsq = (angle - self.symangle)**2
         return np.sqrt(carterrsq / self.tol**2 + roterrsq / self.rot_tol**2)
+
+    def canonical_alignment(self, segpos, **kwargs):
+        x_from = segpos[self.from_seg]
+        x_to = segpos[self.to_seg]
+        xhat = inv(x_from) @ x_to
+        axis, ang, cen = homog.axis_ang_cen_of(xhat)
+        dotz = homog.hdot(axis, [0, 0, 1])[..., None]
+        tgtaxis = np.where(dotz > 0, [0, 0, 1, 0], [0, 0, -1, 0])
+        align = homog.hrot((axis + tgtaxis) / 2, np.pi, cen)
+        align[..., :3, 3] -= cen[..., :3]
+        return align
 
 
 class SpliceSite:
@@ -176,7 +196,7 @@ class Segment:
             # extract 'stubs' from body at selected positions
             # rif 'stubs' have 'extra' 'features'... the raw field is
             # just bog-standard homogeneous matrices
-            stubs = bbstubs(splicable.body, resid_subset)['raw']
+            stubs = rcl.bbstubs(splicable.body, resid_subset)['raw']
             if len(resid_subset) != stubs.shape[0]:
                 raise ValueError("no funny residues supported")
             stubs_inv = inv(stubs)
@@ -213,9 +233,9 @@ class Segment:
         self.exitresid = np.array(self.exitresid)
         self.bodyid = np.array(self.bodyid)
 
-    def make_pose(self, index, append_to=None,
-                  position=None, onechain=True):
-        append_to = append_to or Pose()
+    def make_pose(self, index, append_to=None, position=None,
+                  onechain=True, overlap=False):
+        append_to = append_to or rcl.Pose()
         pose = self.splicables[self.bodyid[index]].body
         lb = self.entryresid[index]
         ub = self.exitresid[index]
@@ -223,7 +243,6 @@ class Segment:
         lb = lb if lb > 0 else 1
         ub = ub if ub > 0 else len(pose)
         if append_to and self.exitresid[index] > 0: ub = ub - 1
-        # lb, ub = 1, len(pose) + 1
 
         assert 0 < lb <= ub - 1 <= len(pose)
         # print('append_subpose', lb, ub - 1)
@@ -231,7 +250,7 @@ class Segment:
             append_to, pose, lb, ub, new_chain=not onechain)
 
         if position is not None:
-            x = to_rosetta_stub(position)
+            x = rcl.to_rosetta_stub(position)
             xub = len(append_to)
             xlb = xub - ub + lb
             assert 0 < xlb <= xub <= len(append_to)
@@ -242,23 +261,34 @@ class Segment:
 
 class Worms:
 
-    def __init__(self, segments, scores, indices, positions):
+    def __init__(self, segments, scores, indices, positions, criteria):
         self.segments = segments
         self.scores = scores
         self.indices = indices
         self.positions = positions
+        self.criteria = criteria
 
     def __init___(self):
         return len(self.scores)
 
-    def pose(self, which, **kw):
+    def pose(self, which, align=True, withend=True, **kw):
         if hasattr(which, '__iter__'):
             return (self.pose(w) for w in which)
-        pose = Pose()
+        pose = rcl.Pose()
+        positions = []
         for iseg, seg in enumerate(self.segments):
             i = self.indices[which][iseg]
-            position = self.positions[which][iseg]
-            pose = seg.make_pose(i, position=position, append_to=pose, **kw)
+            x = self.positions[which][iseg]
+            positions.append(x)
+            if withend or iseg + 1 < len(self.segments):
+                pose = seg.make_pose(i, position=x, append_to=pose, **kw)
+        if align:
+            align = [c.canonical_alignment(positions) for c in self.criteria]
+            align = [x for x in align if x is not None]
+            assert len(align) < 2  # should this be allowed?
+            if len(align) == 1:
+                x = rcl.to_rosetta_stub(align[0])
+                ros.protocols.sic_dock.xform_pose(pose, x)
         return pose
 
     def __len__(self):
@@ -369,4 +399,4 @@ def grow(segments, criteria, *, last_body_same_as=None,
     score_check = sum(c.score([lowpos[:, i]
                                for i in range(len(segments))]) for c in criteria)
     assert np.allclose(score_check, scores)
-    return Worms(segments, scores, lowidx, lowpos)
+    return Worms(segments, scores, lowidx, lowpos, criteria)

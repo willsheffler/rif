@@ -57,11 +57,11 @@ def test_axis_angle_of():
 
     ax, an = axis_angle_of(hrot([0, 1, 0], np.pi * 0.25))
     print(ax, an)
-    assert_allclose(ax, [0, 1, 0], atol=1e-5)
+    assert_allclose(ax, [0, 1, 0, 0], atol=1e-5)
     assert 1e-5 > abs(an - np.pi * 0.25)
     ax, an = axis_angle_of(hrot([0, 1, 0], np.pi * 0.75))
     print(ax, an)
-    assert_allclose(ax, [0, 1, 0], atol=1e-5)
+    assert_allclose(ax, [0, 1, 0, 0], atol=1e-5)
     assert 1e-5 > abs(an - np.pi * 0.75)
 
     ax, an = axis_angle_of(hrot([1, 0, 0], np.pi / 2))
@@ -179,7 +179,7 @@ def test_intersect_planes():
         np.array([[0, 0, 0, 1], hnormalized([1, 1, 0, 0])]),
         np.array([[0, 0, 0, 1], hnormalized([0, 1, 1, 0])]))
     assert sts == 0
-    assert_allclose(abs(isct[1, :3]), hnormalized([1, 1, 1]))
+    assert_allclose(abs(isct[1]), hnormalized([1, 1, 1]))
 
     p1 = np.array([[2, 0, 0, 1], hnormalized([1, 0, 0, 0])])
     p2 = np.array([[0, 0, 0, 1], hnormalized([0, 0, 1, 0])])
@@ -210,8 +210,8 @@ def test_intersect_planes_rand():
 
     # orthogonal case
     plane1, plane2 = random_rays(shape=(2, 1))
-    plane1[..., 1, :3] = hnormalized([0, 0, 1])
-    plane2[..., 1, :3] = hnormalized([0, 1, 0])
+    plane1[..., 1, :] = hnormalized([0, 0, 1])
+    plane2[..., 1, :] = hnormalized([0, 1, 0])
     isect, status = intersect_planes(plane1, plane2)
     assert np.all(status == 0)
     assert np.all(ray_in_plane(plane1, isect))
