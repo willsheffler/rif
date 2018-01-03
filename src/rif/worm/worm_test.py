@@ -83,7 +83,7 @@ def test_segment_geom(curved_helix_pose):
         assert_allclose(e2x, stubs[jr - 1])
 
     # test middle segment with entry and exit
-    seg = Segment([splicable], entry='N', exit='C')
+    seg = Segment([splicable], 'N', 'C')
     assert seg.x2exit.shape == (Nexsite**2 * Npairs0, 4, 4)
     assert seg.x2orgn.shape == (Nexsite**2 * Npairs0, 4, 4)
     assert np.all(seg.x2exit[..., 3, :3] == 0)
@@ -107,7 +107,7 @@ def test_segment_geom(curved_helix_pose):
 
     # test now with multiple splicables input to segment
     Nexbody = 3
-    seg = Segment([splicable] * Nexbody, entry='N', exit='C')
+    seg = Segment([splicable] * Nexbody, 'N', 'C')
     Npairs_expected = Nexbody * Nexsite**2 * Npairs0
     assert seg.x2exit.shape == (Npairs_expected, 4, 4)
     assert seg.x2orgn.shape == (Npairs_expected, 4, 4)
@@ -137,7 +137,7 @@ def test_segment_geom(curved_helix_pose):
 def test_grow_cycle(curved_helix_pose):
     helix = Spliceable(curved_helix_pose, sites=[(1, 'N'), ('-4:', 'C')])
     segments = ([Segment([helix], exit='C'), ] +
-                [Segment([helix], entry='N', exit='C')] * 3 +
+                [Segment([helix], 'N', 'C')] * 3 +
                 [Segment([helix], entry='N')])
     worms = grow(segments, SegmentSym('C2', lever=20))
     assert 0.1411 < np.min(worms.scores) < 0.1412
@@ -147,7 +147,7 @@ def test_grow_cycle(curved_helix_pose):
 def test_grow_cycle_thread_pool(curved_helix_pose):
     helix = Spliceable(curved_helix_pose, sites=[(1, 'N'), ('-4:', 'C')])
     segments = ([Segment([helix], exit='C'), ] +
-                [Segment([helix], entry='N', exit='C')] * 3 +
+                [Segment([helix], 'N', 'C')] * 3 +
                 [Segment([helix], entry='N')])
     worms = grow(segments, SegmentSym('C2', lever=20),
                  executor=ThreadPoolExecutor, max_workers=2)
@@ -159,7 +159,7 @@ def test_grow_cycle_thread_pool(curved_helix_pose):
 def test_grow_cycle_process_pool(curved_helix_pose):
     helix = Spliceable(curved_helix_pose, sites=[(1, 'N'), ('-4:', 'C')])
     segments = ([Segment([helix], exit='C'), ] +
-                [Segment([helix], entry='N', exit='C')] * 3 +
+                [Segment([helix], 'N', 'C')] * 3 +
                 [Segment([helix], entry='N')])
     worms = grow(segments, SegmentSym('C2', lever=20),
                  executor=ProcessPoolExecutor, max_workers=2)
@@ -175,7 +175,7 @@ def test_grow_errors(curved_helix_pose):
     splicable2 = Spliceable(body=curved_helix_pose, sites=[nsplice, csplice])
     splicables = [splicable1]
     segments = ([Segment(splicables, exit='C'), ] +
-                [Segment(splicables, entry='N', exit='C'), ] * 3 +
+                [Segment(splicables, 'N', 'C'), ] * 3 +
                 [Segment(splicables, entry='N'), ])
     checkc3 = SegmentSym('C2', from_seg=0, to_seg=-1)
 
@@ -196,7 +196,7 @@ def test_grow_errors(curved_helix_pose):
 def test_memlimit(curved_helix_pose):
     helix = Spliceable(curved_helix_pose, sites=[((1, 2), 'N'), ('-2:', 'C')])
     segments = ([Segment([helix], exit='C'), ] +
-                [Segment([helix], entry='N', exit='C')] * 3 +
+                [Segment([helix], 'N', 'C')] * 3 +
                 [Segment([helix], entry='N')])
     for i in range(2, 7):
         w1 = grow(segments, SegmentSym('c2'), memlim=10**i, thresh=30)
@@ -208,12 +208,73 @@ def test_memlimit(curved_helix_pose):
 def test_pose_alignment(curved_helix_pose):
     helix = Spliceable(curved_helix_pose, sites=[(1, 'N'), ('-4:', 'C')])
     segments = ([Segment([helix], exit='C'), ] +
-                [Segment([helix], entry='N', exit='C')] * 3 +
+                [Segment([helix], 'N', 'C')] * 3 +
                 [Segment([helix], entry='N')])
     w = grow(segments, SegmentSym('c2'), thresh=1)
     assert len(w)
+    assert tuple(w.indices[0]) == (2, 1, 2, 0, 0)
     pose = w.pose(0, onechain=True, align=1, withend=1)
     xyz0 = np.array([pose.residue(1).xyz(2)[i] for i in (0, 1, 2)] + [1])
+    # resid 43 happens to be the symmetrically related one for this solution
     xyz1 = np.array([pose.residue(43).xyz(2)[i] for i in (0, 1, 2)] + [1])
     xyz1 = hrot([0, 0, 1], 180) @ xyz1
     assert np.sum((xyz1 - xyz0)**2) < 0.1
+
+
+@pytest.mark.xfail()
+@pytest.mark.skipif('not rcl.HAVE_PYROSETTA')
+def test_body_same_as_last(curved_helix_pose):
+    helix = Spliceable(curved_helix_pose, sites=[(1, 'N'), ('-4:', 'C')])
+    segments = ([Segment([helix, helix], exit='C'), ] +
+                [Segment([helix], 'N', 'C')] * 3 +
+                [Segment([helix, helix], entry='N')])
+    w = grow(segments, SegmentSym('c2'), thresh=1)
+    assert len(w)
+    assert tuple(w.indices[0]) == (2, 1, 2, 0, 0)
+    print(w.scores[0])
+    for i, s in zip(w.indices, w.scores):
+        assert segments[0].bodyid[i[0]] == segments[-1].bodyid[i[-1]]
+    w.pose(0)
+
+    segments = ([Segment([helix], exit='C'), ] +
+                [Segment([helix, helix], 'N', 'C'), ] +
+                [Segment([helix], 'N', 'C')] * 3 +
+                [Segment([helix, helix], entry='N')])
+    w = grow(segments, SegmentSym('c2', 1), thresh=1)
+    assert len(w)
+    print(w.scores[0])
+    for i, s in zip(w.indices, w.scores):
+        assert segments[1].bodyid[i[1]] == segments[-1].bodyid[i[-1]]
+    w.pose(0)
+    assert False
+
+    assert tuple(w.indices[0]) == (0, 4, 2, 1, 2, 1)
+
+# def _grow_chunk(samp, segpos, connpos, segs, end, criteria, thresh, matchlast):
+#     #    if matchlast is not None:
+#     #        ndimchunk = segpos[0].ndim - 2
+#     #        if matchlast < ndimchunk:
+#     #            bidA = segs[matchlast].bodyid
+#     #            bidB = segs[-1].bodyid[samp[-1]]
+#     #            idx = (slice(None),) * matchlast + (bidA == bidB,)
+#     #            segpos = [x[idx] for x in segpos]
+#     #            connpos = [x[idx] for x in connpos]
+#     #            idxmap = np.where(bidA == bidB)[0]
+#     #        elif segs[matchlast].bodyid[samp[matchlast - ndimchunk]] != bidB:
+#     #            return  # last body doesn't match for this whole chunk
+#     segpos, connpos = segpos[:end], connpos[:end]
+#     for iseg, seg in enumerate(segs[end:]):
+#         segpos.append(connpos[-1] @ seg.x2orgn[samp[iseg]])
+#         connpos.append(connpos[-1] @ seg.x2exit[samp[iseg]])
+#     score = sum(c.score(segpos=segpos) for c in criteria)
+#     ilow = np.where(score < thresh)
+#     sampidx = tuple(np.repeat(i, len(ilow[0])) for i in samp)
+#     lowpostmp = []
+#     for iseg in range(len(segpos)):
+#         ilow = ilow[:iseg + 1] + (0,) * (segpos[0].ndim - 2 - (iseg + 1))
+#         lowpostmp.append(segpos[iseg][ilow])
+# #    if matchlast is not None:
+# #        # print(ilow[matchlast].dtype)
+# #        ilow[:matchlast] + idxmap[ilow[matchlast]] + ilow[matchlast + 1:]
+#     return score[ilow], np.array(ilow + sampidx).T, np.stack(lowpostmp, 1)
+#

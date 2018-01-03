@@ -8,16 +8,11 @@ import sys
 
 
 def main(nseg, nworker=0):
-    # nsplice = SpliceSite(sele=[':5', ], polarity='N')
-    # csplice = SpliceSite(sele=['-5:', ], polarity='C')
     helix = Spliceable(poselib.curved_helix, sites=[(1, 'N'), ('-4:', 'C')])
-
-    # strand = Spliceable(strand_pose, sites=[(':3', 'N'), ('-3:', 'C')])
-    # loop = Spliceable(loop_pose, sites=[(':3', 'N'), ('-3:', 'C')])
-    # splicables = [helix, strand, loop]
-    segments = ([Segment([helix], exit='C'), ]
-                + [Segment([helix], entry='N', exit='C')] * (nseg - 2)
-                + [Segment([helix], entry='N')])
+    helix2 = Spliceable(poselib.curved_helix, sites=[(1, 'N'), ('-4:', 'C')])
+    segments = ([Segment([helix], exit='C'), ] +
+                [Segment([helix, helix2], entry='N', exit='C')] * (nseg - 2) +
+                [Segment([helix], entry='N')])
     t = perf_counter()
     worms = grow(segments,
                  SegmentSym('C1', lever=20),

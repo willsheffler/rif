@@ -36,8 +36,9 @@ class WormCriteria(abc.ABC):
     @abc.abstractmethod
     def score(self): pass
 
-    def canonical_alignment(self):
-        return None
+    def canonical_alignment(self): return None
+
+    def last_body_same_as(): return None
 
 
 class AxesIntersect(WormCriteria):
@@ -48,7 +49,7 @@ class AxesIntersect(WormCriteria):
 
 class SegmentSym(WormCriteria):
 
-    def __init__(self, symmetry, *, tol=1.0, from_seg=0,
+    def __init__(self, symmetry, from_seg=0, *, tol=1.0,
                  orgnin_seg=None, lever=100.0, to_seg=-1):
         self.symmetry = symmetry
         self.tol = tol
@@ -84,15 +85,20 @@ class SegmentSym(WormCriteria):
         return np.sqrt(carterrsq / self.tol**2 + roterrsq / self.rot_tol**2)
 
     def canonical_alignment(self, segpos, **kwargs):
+        print(self.from_seg, self.to_seg)
         x_from = segpos[self.from_seg]
         x_to = segpos[self.to_seg]
         xhat = inv(x_from) @ x_to
+        print(xhat)
         axis, ang, cen = homog.axis_ang_cen_of(xhat)
         dotz = homog.hdot(axis, [0, 0, 1])[..., None]
         tgtaxis = np.where(dotz > 0, [0, 0, 1, 0], [0, 0, -1, 0])
         align = homog.hrot((axis + tgtaxis) / 2, np.pi, cen)
         align[..., :3, 3] -= cen[..., :3]
         return align
+
+    def last_body_same_as(self):
+        return self.from_seg
 
 
 class SpliceSite:
@@ -170,7 +176,7 @@ class Spliceable:
 
 class Segment:
 
-    def __init__(self, splicables, *, entry=None, exit=None):
+    def __init__(self, splicables, entry=None, exit=None):
         self.entrypol = entry
         self.exitpol = exit
         self.init(splicables, entry, exit)
@@ -258,6 +264,11 @@ class Segment:
             ros.protocols.sic_dock.xform_pose(append_to, x, xlb, xub)
         return append_to
 
+    def same_bodies_as(self, other):
+        bodies1 = [s.body for s in self.splicables]
+        bodies2 = [s.body for s in other.splicables]
+        return bodies1 == bodies2
+
 
 class Worms:
 
@@ -311,11 +322,23 @@ def _chain_xforms(segments):
     return xbody, xconn
 
 
-def _grow_chunk(samp, segpos, connpos, segs, end, criteria, thresh):
-    segpos, connpos = segpos[:end], connpos[:end]
+def _grow_chunk(samp, segpos, conpos, segs, end, criteria, thresh, matchlast):
+    if matchlast is not None:
+        ndimchunk = segpos[0].ndim - 2
+        if matchlast < ndimchunk:
+            bidA = segs[matchlast].bodyid
+            bidB = segs[-1].bodyid[samp[-1]]
+            idx = (slice(None),) * matchlast + (bidA == bidB,)
+            segpos = segpos[:matchlast] + [x[idx] for x in segpos[matchlast:]]
+            conpos = conpos[:matchlast] + [x[idx] for x in conpos[matchlast:]]
+            idxmap = np.where(bidA == bidB)[0]
+        elif segs[matchlast].bodyid[samp[matchlast - ndimchunk]] != bidB:
+            return  # last body doesn't match for this whole chunk
+    segpos, conpos = segpos[:end], conpos[:end]
     for iseg, seg in enumerate(segs[end:]):
-        segpos.append(connpos[-1] @ seg.x2orgn[samp[iseg]])
-        connpos.append(connpos[-1] @ seg.x2exit[samp[iseg]])
+        segpos.append(conpos[-1] @ seg.x2orgn[samp[iseg]])
+        if seg is not segs[-1]:
+            conpos.append(conpos[-1] @ seg.x2exit[samp[iseg]])
     score = sum(c.score(segpos=segpos) for c in criteria)
     ilow0 = np.where(score < thresh)
     sampidx = tuple(np.repeat(i, len(ilow0[0])) for i in samp)
@@ -323,43 +346,41 @@ def _grow_chunk(samp, segpos, connpos, segs, end, criteria, thresh):
     for iseg in range(len(segpos)):
         ilow = ilow0[:iseg + 1] + (0,) * (segpos[0].ndim - 2 - (iseg + 1))
         lowpostmp.append(segpos[iseg][ilow])
-    return score[ilow0], np.array(ilow0 + sampidx).T, np.stack(lowpostmp, 1)
+    ilow1 = (ilow0 if matchlast is None else ilow0[:matchlast] +
+             (idxmap[ilow0[matchlast]],) + ilow0[matchlast + 1:])
+    return score[ilow0], np.array(ilow1 + sampidx).T, np.stack(lowpostmp, 1)
 
 
 def _grow_chunks(ijob, context):
-    sampsizes, njob, segments, end, criteria, thresh = context
+    sampsizes, njob, segments, end, criteria, thresh, matchlast = context
     samples = it.product(*(range(n) for n in sampsizes))
     segpos, connpos = _chain_xforms(segments[:end])  # common data
     args = [list(samples)[ijob::njob]] + [it.repeat(x) for x in (
-        segpos, connpos, segments, end, criteria, thresh)]
+        segpos, connpos, segments, end, criteria, thresh, matchlast)]
     chunk = list(map(_grow_chunk, *args))
     return [np.concatenate([c[i] for c in chunk])
             for i in range(3)] if chunk else None
 
 
-def grow(segments, criteria, *, last_body_same_as=None,
-         cache=None, thresh=2, expert=False, memlim=1e6,
+def grow(segments, criteria, *, thresh=2, expert=False, memlim=1e6,
          executor=None, max_workers=None, debug=False, jobmult=32):
-    # checks
+    criteria = [criteria] if isinstance(criteria, WormCriteria) else criteria
+    # checks and setup
     if segments[0].entrypol is not None:
         raise ValueError('beginning of worm cant have entry')
     if segments[-1].exitpol is not None:
         raise ValueError('end of worm cant have exit')
-    if last_body_same_as is not None and not expert and (
-            segments[last_body_same_as] is not segments[-1]):
-        raise ValueError("segments[last_body_same_as] not same as segments[-1], "
-                         + "if you're sure, pass expert=True")
     for a, b in zip(segments[:-1], segments[1:]):
         if not (a.exitpol and b.entrypol and a.exitpol != b.entrypol):
             raise ValueError('incompatible exit->entry polarity: '
                              + str(a.exitpol) + '->'
                              + str(b.entrypol) + ' on segment pair: '
                              + str((segments.index(a), segments.index(b))))
-    if last_body_same_as is not None:
-        raise NotImplementedError('must implement subselection for last seg')
-
-    # setup
-    criteria = [criteria] if isinstance(criteria, WormCriteria) else criteria
+    matchlast = ([c.last_body_same_as() for c in criteria] or [None])[0]
+    if matchlast is not None and not expert and (
+            not segments[matchlast].same_bodies_as(segments[-1])):
+        raise ValueError("segments[matchlast] not same as segments[-1], "
+                         + "if you're sure, pass expert=True")
     if executor is None:
         executor = ThreadPoolExecutor
         max_workers = 1
@@ -381,7 +402,15 @@ def grow(segments, criteria, *, last_body_same_as=None,
     tmp = [s.splicables for s in segments]
     for s in segments: s.splicables = None  # poses not pickleable...
     with executor(max_workers=nworker) as pool:
-        context = (sizes[end:], njob, segments, end, criteria, thresh)
+        context = (
+            sizes[
+                end:],
+            njob,
+            segments,
+            end,
+            criteria,
+            thresh,
+            matchlast)
         args = [range(njob)] + [it.repeat(context)]
         chunks = tqdm_parallel_map(
             pool, _grow_chunks, *args,
