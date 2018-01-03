@@ -50,11 +50,11 @@ class AxesIntersect(WormCriteria):
 class SegmentSym(WormCriteria):
 
     def __init__(self, symmetry, from_seg=0, *, tol=1.0,
-                 orgnin_seg=None, lever=100.0, to_seg=-1):
+                 origin_seg=None, lever=100.0, to_seg=-1):
         self.symmetry = symmetry
         self.tol = tol
         self.from_seg = from_seg
-        self.orgnin_seg = orgnin_seg
+        self.origin_seg = origin_seg
         self.lever = lever
         self.to_seg = to_seg
         self.rot_tol = tol / lever
@@ -64,7 +64,7 @@ class SegmentSym(WormCriteria):
                 raise ValueError('invalid symmetry: ' + symmetry)
             self.symangle = np.pi * 2.0 / self.nfold
         else: raise ValueError('can only do Cx symmetry for now')
-        assert not orgnin_seg
+        assert not origin_seg
         if self.tol <= 0: raise ValueError('tol should be > 0')
 
     def score(self, segpos, *, debug=False, **kwarge):
@@ -72,7 +72,7 @@ class SegmentSym(WormCriteria):
         x_to = segpos[self.to_seg]
         xhat = inv(x_from) @ x_to
         trans = xhat[..., :, 3]
-        if self.orgnin_seg:
+        if self.origin_seg:
             raise NotImplementedError
         elif self.nfold is 1:
             angle = homog.angle_of(xhat)
@@ -85,12 +85,14 @@ class SegmentSym(WormCriteria):
         return np.sqrt(carterrsq / self.tol**2 + roterrsq / self.rot_tol**2)
 
     def canonical_alignment(self, segpos, **kwargs):
-        print(self.from_seg, self.to_seg)
         x_from = segpos[self.from_seg]
         x_to = segpos[self.to_seg]
         xhat = inv(x_from) @ x_to
-        print(xhat)
         axis, ang, cen = homog.axis_ang_cen_of(xhat)
+        print(axis)
+        print(ang)
+        print(cen)
+
         dotz = homog.hdot(axis, [0, 0, 1])[..., None]
         tgtaxis = np.where(dotz > 0, [0, 0, 1, 0], [0, 0, -1, 0])
         align = homog.hrot((axis + tgtaxis) / 2, np.pi, cen)
@@ -158,7 +160,7 @@ class Spliceable:
                 assert len(self.sites[i]) is 2
                 self.sites[i] = SpliceSite(*self.sites[i])
 
-    def splicable_positions(self):
+    def spliceable_positions(self):
         """selection of resids, and map 'global' index to selected index"""
         resid_subset = set()
         for site in self.sites:
@@ -176,18 +178,18 @@ class Spliceable:
 
 class Segment:
 
-    def __init__(self, splicables, entry=None, exit=None):
+    def __init__(self, spliceables, entry=None, exit=None):
         self.entrypol = entry
         self.exitpol = exit
-        self.init(splicables, entry, exit)
+        self.init(spliceables, entry, exit)
 
     def __len__(self):
         return len(self.bodyid)
 
-    def init(self, splicables=None, entry=None, exit=None):
+    def init(self, spliceables=None, entry=None, exit=None):
         if not (entry or exit):
             raise ValueError('at least one of entry/exit required')
-        self.splicables = list(splicables) or self.splicables
+        self.spliceables = list(spliceables) or self.spliceables
         self.entrypol = entry or self.entrypol
         self.exitpol = exit or self.exitpol
         # each array has all in/out pairs
@@ -196,29 +198,29 @@ class Segment:
         self.entrysiteid, self.exitsiteid = [], []
         # this whole loop is pretty inefficient, but that probably
         # doesn't matter much given the cost subsequent operations (?)
-        for ibody, splicable in enumerate(self.splicables):
-            resid_subset, to_subset = splicable.splicable_positions()
-            bodyid = ibody if splicable.bodyid is None else splicable.bodyid
+        for ibody, spliceable in enumerate(self.spliceables):
+            resid_subset, to_subset = spliceable.spliceable_positions()
+            bodyid = ibody if spliceable.bodyid is None else spliceable.bodyid
             # extract 'stubs' from body at selected positions
             # rif 'stubs' have 'extra' 'features'... the raw field is
             # just bog-standard homogeneous matrices
-            stubs = rcl.bbstubs(splicable.body, resid_subset)['raw']
+            stubs = rcl.bbstubs(spliceable.body, resid_subset)['raw']
             if len(resid_subset) != stubs.shape[0]:
                 raise ValueError("no funny residues supported")
             stubs_inv = inv(stubs)
-            entry_sites = (list(enumerate(splicable.sites)) if self.entrypol else
+            entry_sites = (list(enumerate(spliceable.sites)) if self.entrypol else
                            [(-1, SpliceSite(sele=[None], polarity=self.entrypol))])
-            exit_sites = (list(enumerate(splicable.sites)) if self.exitpol else
+            exit_sites = (list(enumerate(spliceable.sites)) if self.exitpol else
                           [(-1, SpliceSite(sele=[None], polarity=self.exitpol))])
             for isite, entry_site in entry_sites:
                 if entry_site.polarity == self.entrypol:
                     for jsite, exit_site in exit_sites:
                         if isite != jsite and exit_site.polarity == self.exitpol:
-                            for ires in entry_site.resids(splicable.body):
+                            for ires in entry_site.resids(spliceable.body):
                                 istub_inv = (identity44f4 if not ires
                                              else stubs_inv[to_subset[ires]])
                                 ires = ires or -1
-                                for jres in exit_site.resids(splicable.body):
+                                for jres in exit_site.resids(spliceable.body):
                                     jstub = (identity44f4 if not jres
                                              else stubs[to_subset[jres]])
                                     jres = jres or -1
@@ -242,7 +244,7 @@ class Segment:
     def make_pose(self, index, append_to=None, position=None,
                   onechain=True, overlap=False):
         append_to = append_to or rcl.Pose()
-        pose = self.splicables[self.bodyid[index]].body
+        pose = self.spliceables[self.bodyid[index]].body
         lb = self.entryresid[index]
         ub = self.exitresid[index]
         # print('make_pose', lb, ub)
@@ -265,8 +267,8 @@ class Segment:
         return append_to
 
     def same_bodies_as(self, other):
-        bodies1 = [s.body for s in self.splicables]
-        bodies2 = [s.body for s in other.splicables]
+        bodies1 = [s.body for s in self.spliceables]
+        bodies2 = [s.body for s in other.spliceables]
         return bodies1 == bodies2
 
 
@@ -399,8 +401,8 @@ def grow(segments, criteria, *, thresh=2, expert=False, memlim=1e6,
               ntot / njob, nchunks / njob))
 
     # run the stuff
-    tmp = [s.splicables for s in segments]
-    for s in segments: s.splicables = None  # poses not pickleable...
+    tmp = [s.spliceables for s in segments]
+    for s in segments: s.spliceables = None  # poses not pickleable...
     with executor(max_workers=nworker) as pool:
         context = (
             sizes[
@@ -417,7 +419,7 @@ def grow(segments, criteria, *, thresh=2, expert=False, memlim=1e6,
             unit='K worms', ascii=0, desc='growing worms',
             unit_scale=int(ntot / njob / 1000))
         chunks = [x for x in chunks if x is not None]
-    for s, t in zip(segments, tmp): s.splicables = t  # put the poses back
+    for s, t in zip(segments, tmp): s.spliceables = t  # put the poses back
 
     # compose and sort results
     scores = np.concatenate([c[0] for c in chunks])

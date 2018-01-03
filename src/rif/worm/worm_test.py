@@ -60,18 +60,18 @@ def test_segment_geom(curved_helix_pose):
     Npairs0 = len(nsplice.selections) * len(csplice.selections)
 
     # N to N and C to C invalid, can't splice to same
-    splicable = Spliceable(body, sites=[nsplice, csplice])
+    spliceable = Spliceable(body, sites=[nsplice, csplice])
     with pytest.raises(ValueError):
-        seg = Segment([splicable], entry='N', exit='N')
+        seg = Segment([spliceable], entry='N', exit='N')
     with pytest.raises(ValueError):
-        seg = Segment([splicable] * 3, entry='C', exit='C')
+        seg = Segment([spliceable] * 3, entry='C', exit='C')
 
     # add some extra splice sites
     Nexsite = 2
-    splicable = Spliceable(body, sites=[nsplice, csplice] * Nexsite)
+    spliceable = Spliceable(body, sites=[nsplice, csplice] * Nexsite)
 
     # test beginning segment.. only has exit
-    seg = Segment([splicable], exit='C')
+    seg = Segment([spliceable], exit='C')
     assert seg.x2exit.shape == (Nexsite * len(csplice.selections), 4, 4)
     assert seg.x2orgn.shape == (Nexsite * len(csplice.selections), 4, 4)
     assert np.all(seg.x2exit[..., 3, :3] == 0)
@@ -83,7 +83,7 @@ def test_segment_geom(curved_helix_pose):
         assert_allclose(e2x, stubs[jr - 1])
 
     # test middle segment with entry and exit
-    seg = Segment([splicable], 'N', 'C')
+    seg = Segment([spliceable], 'N', 'C')
     assert seg.x2exit.shape == (Nexsite**2 * Npairs0, 4, 4)
     assert seg.x2orgn.shape == (Nexsite**2 * Npairs0, 4, 4)
     assert np.all(seg.x2exit[..., 3, :3] == 0)
@@ -94,7 +94,7 @@ def test_segment_geom(curved_helix_pose):
         assert_allclose(stubs[ir - 1] @ e2x, stubs[jr - 1], atol=1e-5)
 
     # test ending segment.. only has entry
-    seg = Segment([splicable], entry='N')
+    seg = Segment([spliceable], entry='N')
     assert seg.x2exit.shape == (Nexsite * len(nsplice.selections), 4, 4)
     assert seg.x2orgn.shape == (Nexsite * len(nsplice.selections), 4, 4)
     assert np.all(seg.x2exit[..., 3, :3] == 0)
@@ -105,9 +105,9 @@ def test_segment_geom(curved_helix_pose):
         assert_allclose(e2o, e2x)
         assert_allclose(e2o @ stubs[ir - 1], np.eye(4), atol=1e-5)
 
-    # test now with multiple splicables input to segment
+    # test now with multiple spliceables input to segment
     Nexbody = 3
-    seg = Segment([splicable] * Nexbody, 'N', 'C')
+    seg = Segment([spliceable] * Nexbody, 'N', 'C')
     Npairs_expected = Nexbody * Nexsite**2 * Npairs0
     assert seg.x2exit.shape == (Npairs_expected, 4, 4)
     assert seg.x2orgn.shape == (Npairs_expected, 4, 4)
@@ -171,12 +171,12 @@ def test_grow_cycle_process_pool(curved_helix_pose):
 def test_grow_errors(curved_helix_pose):
     nsplice = SpliceSite(sele=[1, 2, 3, 4, 5, 6], polarity='N')
     csplice = SpliceSite(sele=[13, ], polarity='C')
-    splicable1 = Spliceable(body=curved_helix_pose, sites=[nsplice, csplice])
-    splicable2 = Spliceable(body=curved_helix_pose, sites=[nsplice, csplice])
-    splicables = [splicable1]
-    segments = ([Segment(splicables, exit='C'), ] +
-                [Segment(splicables, 'N', 'C'), ] * 3 +
-                [Segment(splicables, entry='N'), ])
+    spliceable1 = Spliceable(body=curved_helix_pose, sites=[nsplice, csplice])
+    spliceable2 = Spliceable(body=curved_helix_pose, sites=[nsplice, csplice])
+    spliceables = [spliceable1]
+    segments = ([Segment(spliceables, exit='C'), ] +
+                [Segment(spliceables, 'N', 'C'), ] * 3 +
+                [Segment(spliceables, entry='N'), ])
     checkc3 = SegmentSym('C2', from_seg=0, to_seg=-1)
 
     # make sure incorrect begin/end throws error
@@ -185,8 +185,8 @@ def test_grow_errors(curved_helix_pose):
     with pytest.raises(ValueError):
         grow(segments[1:], criteria=checkc3)
     segments_polarity_mismatch = [
-        Segment(splicables, exit='C'),
-        Segment(splicables, entry='C'),
+        Segment(spliceables, exit='C'),
+        Segment(spliceables, entry='C'),
     ]
     with pytest.raises(ValueError):
         grow(segments_polarity_mismatch, criteria=checkc3)
@@ -205,7 +205,7 @@ def test_memlimit(curved_helix_pose):
 
 
 @pytest.mark.skipif('not rcl.HAVE_PYROSETTA')
-def test_pose_alignment(curved_helix_pose):
+def test_pose_alignment_0(curved_helix_pose):
     helix = Spliceable(curved_helix_pose, sites=[(1, 'N'), ('-4:', 'C')])
     segments = ([Segment([helix], exit='C'), ] +
                 [Segment([helix], 'N', 'C')] * 3 +
@@ -223,6 +223,29 @@ def test_pose_alignment(curved_helix_pose):
 
 @pytest.mark.xfail()
 @pytest.mark.skipif('not rcl.HAVE_PYROSETTA')
+def test_pose_alignment_1(curved_helix_pose):
+    helix = Spliceable(curved_helix_pose, sites=[(1, 'N'), ('-4:', 'C')])
+    segments = ([Segment([helix], exit='C'), ] +
+                [Segment([helix], 'N', 'C')] * 4 +
+                [Segment([helix], entry='N')])
+    w = grow(segments, SegmentSym('c2', from_seg=1), thresh=1)
+    assert len(w)
+    # showme(w.pose(0))
+    pose = w.pose(0, onechain=True, align=1, withend=1)
+    axis = [-0.815504, -0.57799098, 0.02965904]
+    cen = [0., 20.76257595, 12.00636205]
+    # showme(pose)
+    # import time
+    # while 1:
+    # time.sleep(1)
+    xyz0 = np.array([pose.residue(1).xyz(2)[i] for i in (0, 1, 2)] + [1])
+    # resid 43 happens to be the symmetrically related one for this solution
+    xyz1 = np.array([pose.residue(43).xyz(2)[i] for i in (0, 1, 2)] + [1])
+    xyz1 = hrot([0, 0, 1], 180) @ xyz1
+    assert np.sum((xyz1 - xyz0)**2) < 0.1
+
+
+@pytest.mark.skipif('not rcl.HAVE_PYROSETTA')
 def test_body_same_as_last(curved_helix_pose):
     helix = Spliceable(curved_helix_pose, sites=[(1, 'N'), ('-4:', 'C')])
     segments = ([Segment([helix, helix], exit='C'), ] +
@@ -234,7 +257,6 @@ def test_body_same_as_last(curved_helix_pose):
     print(w.scores[0])
     for i, s in zip(w.indices, w.scores):
         assert segments[0].bodyid[i[0]] == segments[-1].bodyid[i[-1]]
-    w.pose(0)
 
     segments = ([Segment([helix], exit='C'), ] +
                 [Segment([helix, helix], 'N', 'C'), ] +
@@ -245,9 +267,6 @@ def test_body_same_as_last(curved_helix_pose):
     print(w.scores[0])
     for i, s in zip(w.indices, w.scores):
         assert segments[1].bodyid[i[1]] == segments[-1].bodyid[i[-1]]
-    w.pose(0)
-    assert False
-
     assert tuple(w.indices[0]) == (0, 4, 2, 1, 2, 1)
 
 # def _grow_chunk(samp, segpos, connpos, segs, end, criteria, thresh, matchlast):

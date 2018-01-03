@@ -14,7 +14,7 @@ def doit(nseg, nworker):
 
     # strand = Spliceable(strand_pose, sites=[(':3', 'N'), ('-3:', 'C')])
     # loop = Spliceable(loop_pose, sites=[(':3', 'N'), ('-3:', 'C')])
-    # splicables = [helix, strand, loop]
+    # spliceables = [helix, strand, loop]
     segments = ([Segment([helix], exit='C'), ]
                 + [Segment([helix], entry='N', exit='C')] * (nseg - 2)
                 + [Segment([helix], entry='N')])
