@@ -212,7 +212,7 @@ def test_pose_alignment(curved_helix_pose):
                 [Segment([helix], entry='N')])
     w = grow(segments, SegmentSym('c2'), thresh=1)
     assert len(w)
-    assert tuple(w.indices[0]) == (2, 1, 2, 0, 0)
+    assert tuple(w.indices[0]) in ((2, 1, 2, 0, 0), (1, 2, 0, 2, 0))
     pose = w.pose(0, onechain=True, align=1, withend=1)
     xyz0 = np.array([pose.residue(1).xyz(2)[i] for i in (0, 1, 2)] + [1])
     # resid 43 happens to be the symmetrically related one for this solution

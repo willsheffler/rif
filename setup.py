@@ -266,7 +266,7 @@ setup(
     setup_requires=['wheel', 'pytest-runner', 'jinja2'],
     install_requires=['numpy', 'pandas', 'xarray', 'parsimonious', 'mock', 'pytest',
                       'pytest-xdist', 'hypothesis', 'colorama', 'pytest_cpp',
-                      'pytest-sugar'],
+                      'pytest-sugar', 'tqdm', 'dask'],
     tests_require=['pytest', 'pytest-xdist', 'hypothesis', 'colorama',
                    'pytest_cpp'],
     test_suite='pytest',
