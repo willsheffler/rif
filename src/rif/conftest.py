@@ -106,24 +106,24 @@ def trimerC_pose(pdbdir):
 
 @pytest.fixture(scope='session')
 def c2pose(pdbdir):
-    return get_pose(pdbdir, 'C2_4agh_1_full.pdb')
+    return get_pose(pdbdir, 'c2.pdb')
 
 
 @pytest.fixture(scope='session')
 def c3pose(pdbdir):
-    return get_pose(pdbdir, 'C3_1wp8_1_full.pdb')
+    return get_pose(pdbdir, 'c3.pdb')
 
 
 @pytest.fixture(scope='session')
 def c4pose(pdbdir):
-    return get_pose(pdbdir, 'C4_1gcl_1_full.pdb')
+    return get_pose(pdbdir, 'c4.pdb')
 
 
 @pytest.fixture(scope='session')
 def c5pose(pdbdir):
-    return get_pose(pdbdir, 'C5_3mxg_1_full.pdb')
+    return get_pose(pdbdir, 'c5.pdb')
 
 
 @pytest.fixture(scope='session')
 def c6pose(pdbdir):
-    return get_pose(pdbdir, 'C6_2xf5_1_full.pdb')
+    return get_pose(pdbdir, 'c6.pdb')

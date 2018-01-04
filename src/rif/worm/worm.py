@@ -70,7 +70,7 @@ class SegmentSym(WormCriteria):
     def score(self, segpos, *, debug=False, **kwarge):
         x_from = segpos[self.from_seg]
         x_to = segpos[self.to_seg]
-        xhat = inv(x_from) @ x_to
+        xhat = x_to @ inv(x_from)
         trans = xhat[..., :, 3]
         if self.origin_seg:
             raise NotImplementedError
@@ -87,12 +87,8 @@ class SegmentSym(WormCriteria):
     def canonical_alignment(self, segpos, **kwargs):
         x_from = segpos[self.from_seg]
         x_to = segpos[self.to_seg]
-        xhat = inv(x_from) @ x_to
+        xhat = x_to @ inv(x_from)
         axis, ang, cen = homog.axis_ang_cen_of(xhat)
-        print(axis)
-        print(ang)
-        print(cen)
-
         dotz = homog.hdot(axis, [0, 0, 1])[..., None]
         tgtaxis = np.where(dotz > 0, [0, 0, 1, 0], [0, 0, -1, 0])
         align = homog.hrot((axis + tgtaxis) / 2, np.pi, cen)
@@ -131,6 +127,7 @@ class SpliceSite:
                     step = int(s[2]) if len(s) > 2 else 1
                     # print(start, stop + 1, step)
                     for ir in range(start, stop + 1, step):
+                        assert 0 < ir <= len(body)
                         resids.add(ir)
                 elif sele is None:
                     resids.add(None)
@@ -143,6 +140,9 @@ class SpliceSite:
         if not resids:
             raise ValueError('empty SpliceSite')
         return resids
+
+    def __str__(self):
+        return 'SpliceSite(' + self.polarity + ', ' + self.polarity + ')'
 
 
 class Spliceable:
@@ -175,12 +175,23 @@ class Spliceable:
         assert np.all(to_subset[resid_subset] == np.arange(len(resid_subset)))
         return resid_subset, to_subset
 
+    def __str__(self):
+        return ('Spliceable: body=(' + str(len(self.body)) + ',' +
+                str(self.body).splitlines()[0].split('/')[-1] +
+                '), positions=' + str(self.spliceable_positions()[0]))
+
 
 class Segment:
 
     def __init__(self, spliceables, entry=None, exit=None):
         self.entrypol = entry
         self.exitpol = exit
+        if not spliceables:
+            raise ValueError('spliceables must not be empty, spliceables =' +
+                             str(spliceables))
+        for s in spliceables:
+            if not isinstance(s, Spliceable):
+                raise ValueError('Segment can only accept list of Spliceable')
         self.init(spliceables, entry, exit)
 
     def __len__(self):
@@ -288,15 +299,14 @@ class Worms:
         if hasattr(which, '__iter__'):
             return (self.pose(w) for w in which)
         pose = rcl.Pose()
-        positions = []
         for iseg, seg in enumerate(self.segments):
             i = self.indices[which][iseg]
             x = self.positions[which][iseg]
-            positions.append(x)
             if withend or iseg + 1 < len(self.segments):
                 pose = seg.make_pose(i, position=x, append_to=pose, **kw)
         if align:
-            align = [c.canonical_alignment(positions) for c in self.criteria]
+            align = [c.canonical_alignment(self.positions[which])
+                     for c in self.criteria]
             align = [x for x in align if x is not None]
             assert len(align) < 2  # should this be allowed?
             if len(align) == 1:
@@ -396,23 +406,16 @@ def grow(segments, criteria, *, thresh=2, expert=False, memlim=1e6,
     njob = nworker * jobmult
     njob = min(njob, nchunks)
     print('tot = {:,}, nchunk = {:,}, nchunks = {:,}, nworker = {}, njob = {}, '
-          'worm/job = {:,}, chunk/job = {}'.format(
+          'worm/job = {:,}, chunk/job = {}, sizes={}'.format(
               ntot, nchunk, nchunks, nworker, njob,
-              ntot / njob, nchunks / njob))
+              ntot / njob, nchunks / njob, sizes))
 
     # run the stuff
     tmp = [s.spliceables for s in segments]
     for s in segments: s.spliceables = None  # poses not pickleable...
     with executor(max_workers=nworker) as pool:
-        context = (
-            sizes[
-                end:],
-            njob,
-            segments,
-            end,
-            criteria,
-            thresh,
-            matchlast)
+        context = (sizes[end:], njob, segments, end, criteria, thresh,
+                   matchlast)
         args = [range(njob)] + [it.repeat(context)]
         chunks = tqdm_parallel_map(
             pool, _grow_chunks, *args,
