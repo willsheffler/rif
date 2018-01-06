@@ -264,7 +264,7 @@ def test_body_same_as_last(curved_helix_pose):
                 [Segment([helix, helix], entry='N')])
     w = grow(segments, SegmentSym('c2'), thresh=1)
     assert len(w)
-    assert tuple(w.indices[0]) == (2, 1, 2, 0, 0)
+    assert tuple(w.indices[0]) in ((2, 1, 2, 0, 0), (1, 2, 0, 2, 0))
     print(w.scores[0])
     for i, s in zip(w.indices, w.scores):
         assert segments[0].bodyid[i[0]] == segments[-1].bodyid[i[-1]]
