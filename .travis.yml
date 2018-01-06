@@ -135,9 +135,9 @@ install:
       export PIP=$(which pip3)
       export PYTHON=$(which python3)
     else # linux
-      pyenv global system 3.5
-      export PIP=$(which pip3.5)
-      export PYTHON=$(which python3.5)
+      # pyenv global system 3.5
+      export PIP=$(which pip3)
+      export PYTHON=$(which python3)
     fi
   - $PYTHON -m ensurepip
   - echo "!!!!!! travis.yml install using pip $PIP"

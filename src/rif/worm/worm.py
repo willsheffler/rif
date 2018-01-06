@@ -384,10 +384,12 @@ class Worms:
         return len(self.scores)
 
     def pose(self, which, align=True, withend=True, join=True):
+        "makes a pose for the ith worm"
+        if hasattr(which, '__iter__'):
+            return (self.pose(w) for w in which)
+        print("Will needs to fix bb O/H position!")
         rm_lower_t = ros.core.pose.remove_lower_terminus_type_from_pose_residue
         rm_upper_t = ros.core.pose.remove_upper_terminus_type_from_pose_residue
-        if hasattr(which, '__iter__'):
-            return (self.pose_WRONG(w) for w in which)
         entryexits = [seg.make_pose_chains(self.indices[which][iseg],
                                            self.positions[which][iseg])
                       for iseg, seg in enumerate(self.segments)]
@@ -400,7 +402,6 @@ class Worms:
             for chain in chains[1:]:
                 rm_upper_t(pose, len(pose))
                 rm_lower_t(chain, 1)
-                print("Will needs to fix bb O/H position!")
                 ros.core.pose.append_pose_to_pose(pose, chain, not join)
         for chain in it.chain(*rest):
             ros.core.pose.append_pose_to_pose(pose, chain, True)

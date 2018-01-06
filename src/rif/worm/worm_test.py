@@ -333,8 +333,10 @@ def test_reorder_spliced_as_N_to_C():
             == [[1], [2], [3, 4], [5], [7, 11, 6], [8], [0, 9], [1], [2]])
     assert (Q([[1, 2, 3], [4, 5, 6], [11], [12], [7, 8, 9], [0, 1, 2]], 'NCCCN')
             == [[1], [2], [3, 4], [5], [7, 12, 11, 6], [8], [9, 0], [1], [2]])
-    assert (Q([[1, 2, 5, 5, 3], [4, 5, 6], [11], [12], [7, 8, 9], [0, 1, 2]], 'NCCCN')
-            == [[1], [2], [5], [5], [3, 4], [5], [7, 12, 11, 6], [8], [9, 0], [1], [2]])
+    assert (Q([[1, 2, 5, 5, 3], [4, 5, 6], [11], [12],
+               [7, 8, 9], [0, 1, 2]], 'NCCCN')
+            == [[1], [2], [5], [5], [3, 4], [5], [7, 12, 11, 6],
+                [8], [9, 0], [1], [2]])
 
 
 # @pytest.mark.xfail
@@ -423,22 +425,11 @@ def residue_sym_err(p, ang, ir, jr, n=1):
 
 
 @pytest.mark.skipif('not rcl.HAVE_PYROSETTA')
-def test_multichain(c2pose, c3pose, curved_helix_pose):
-    helix = Spliceable(curved_helix_pose, sites=[(':4', 'N'), ('-4:', 'C')])
-    dimer = Spliceable(c2pose, sites=[('1,:2', 'N'), ('1,-2:', 'C'),
-                                      ('2,:2', 'N'), ('2,-2:', 'C')])
-    trimer = Spliceable(c3pose, sites=[('1,:2', 'N'), ('1,-2:', 'C'),
-                                       ('2,:2', 'N'), ('2,-2:', 'C'),
-                                       ('3,:2', 'N'), ('3,-2:', 'C')])
-    print(helix)
-    print(dimer)
-    print(trimer)
-    segments = [Segment([helix], exit='N'),
-                Segment([helix], entry='C'), ]
-    w = grow(segments, SegmentSym('C2'), thresh=999)
-    assert len(w)
-    p = w.pose(0)
-
+def test_multichain_reveres_pol(c2pose, curved_helix_pose):
+    helix = Spliceable(
+        curved_helix_pose, sites=[((1, 3,), 'N'), ((10, 11, 13), 'C')])
+    dimer = Spliceable(c2pose, sites=[('1,:2', 'N'), ('1,-1:', 'C'),
+                                      ('2,:2', 'N'), ('2,-1:', 'C')])
     segments = [Segment([helix], exit='C'),
                 Segment([helix], entry='N', exit='C'),
                 Segment([dimer], entry='N', exit='C'),
@@ -446,9 +437,7 @@ def test_multichain(c2pose, c3pose, curved_helix_pose):
                 Segment([helix], entry='N'), ]
     wnc = grow(segments, SegmentSym('C3'), thresh=1)
     assert len(wnc)
-    q = wnc.pose(0)
-    # showme(q)
-    assert residue_sym_err(q, 120, 2, 54, 8) < 0.5
+    assert residue_sym_err(wnc.pose(0), 120, 2, 54, 8) < 0.5
 
     segments = [Segment([helix], exit='N'),
                 Segment([helix], entry='C', exit='N'),
@@ -456,11 +445,20 @@ def test_multichain(c2pose, c3pose, curved_helix_pose):
                 Segment([helix], entry='C', exit='N'),
                 Segment([helix], entry='C'), ]
     wcn = grow(segments, SegmentSym('C3'), thresh=1)
-    p = wcn.pose(0)
-    assert residue_sym_err(p, 120, 22, 35, 8) < 0.5
+    assert residue_sym_err(wcn.pose(0), 120, 22, 35, 8) < 0.5
+
     # N-to-C and C-to-N construction should be same
     assert np.allclose(wnc.scores, wcn.scores, atol=1e-3)
 
+
+@pytest.mark.skipif('not rcl.HAVE_PYROSETTA')
+def test_multichain_mixed_pol(c2pose, c3pose, curved_helix_pose):
+    helix = Spliceable(curved_helix_pose, [(':4', 'N'), ((10, 12, 13), 'C')])
+    dimer = Spliceable(c2pose, sites=[('1,:2', 'N'), ('1,-1:', 'C'),
+                                      ('2,:2', 'N'), ('2,-1:', 'C')])
+    trimer = Spliceable(c3pose, sites=[('1,:1', 'N'), ('1,-2:', 'C'),
+                                       # ('2,:2', 'N'), ('2,-2:', 'C'),
+                                       ('3,:1', 'N'), ('3,-2:', 'C')])
     segments = [Segment([helix], exit='C'),
                 Segment([dimer], entry='N', exit='N'),
                 Segment([helix], entry='C', exit='N'),
@@ -474,3 +472,21 @@ def test_multichain(c2pose, c3pose, curved_helix_pose):
     assert residue_sym_err(w.pose(0), 72, 2, 65, 9) < 2
     w = grow(segments, SegmentSym('C6'), thresh=2)
     assert residue_sym_err(w.pose(0), 60, 2, 71, 9) < 2
+
+
+@pytest.mark.xfail
+@pytest.mark.skipif('not rcl.HAVE_PYROSETTA')
+def test_multichain_reveres_pol(c2pose, curved_helix_pose):
+    helix = Spliceable(
+        curved_helix_pose, sites=[((1, 3,), 'N'), ((10, 11, 13), 'C')])
+    dimer = Spliceable(c2pose, sites=[('1,:2', 'N'), ('1,-1:', 'C'),
+                                      ('2,:2', 'N'), ('2,-1:', 'C')])
+    segments = [Segment([helix], exit='C'),
+                Segment([helix], entry='N', exit='C'),
+                Segment([dimer], entry='N', exit='N'),
+                Segment([helix], entry='C', exit='N'),
+                Segment([helix], entry='C'), ]
+    worms = grow(segments, SegmentSym('C2'), thresh=1)
+    # showme(worms.pose(0))
+    assert len(worms)
+    # assert residue_sym_err(wnc.pose(0), 120, 2, 54, 8) < 0.5
