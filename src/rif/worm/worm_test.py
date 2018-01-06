@@ -124,15 +124,6 @@ def test_segment_geom(curved_helix_pose):
         assert_allclose(stubs[ir - 1] @ e2o, np.eye(4), atol=1e-5)
         assert_allclose(stubs[ir - 1] @ e2x, stubs[jr - 1], atol=1e-5)
 
-        # this is incorrect... translation includes
-        # cart motion due to non-zero rotation center
-        # ijdis = np.sqrt(np.sum((e2x[..., :3, 3]**2)))
-        # cadis = body.residue(ir).xyz('CA').distance(body.residue(jr).xyz('CA'))
-        # assert abs(ijdis - cadis) < 0.001
-        # odis = np.sqrt(np.sum((e2o[..., :3, 3]**2)))
-        # caodis = body.residue(ir).xyz('CA').length()
-        # assert abs(odis - caodis) < 0.001
-
 
 @pytest.mark.skipif('not rcl.HAVE_PYROSETTA')
 def test_grow_cycle(curved_helix_pose):
@@ -214,16 +205,16 @@ def test_pose_alignment_0(curved_helix_pose):
     w = grow(segments, SegmentSym('c2'), thresh=1)
     assert len(w)
     assert tuple(w.indices[0]) in ((2, 1, 2, 0, 0), (1, 2, 0, 2, 0))
-    pose = w.pose_WRONG(0, onechain=True, align=1, withend=1)
+    pose = w.pose(0, align=1, withend=1)
     xyz0 = np.array([pose.residue(1).xyz(2)[i] for i in (0, 1, 2)] + [1])
     # resid 43 happens to be the symmetrically related one for this solution
-    xyz1 = np.array([pose.residue(43).xyz(2)[i] for i in (0, 1, 2)] + [1])
+    xyz1 = np.array([pose.residue(42).xyz(2)[i] for i in (0, 1, 2)] + [1])
     xyz1 = hrot([0, 0, 1], 180) @ xyz1
     assert np.sum((xyz1 - xyz0)**2) < 0.1
 
 
 def show_with_axis(worms, idx=0):
-    pose = worms.pose_WRONG(idx, onechain=True, align=0, withend=1)
+    pose = worms.pose(idx, align=0, withend=1)
     showme(pose)
     import pymol
     pymol.finish_launching()
@@ -248,7 +239,7 @@ def test_pose_alignment_1(curved_helix_pose):
     assert len(w)
     # show_with_axis(w)
     # return
-    pose = w.pose_WRONG(0, onechain=True, align=1, withend=1)
+    pose = w.pose(0, align=1, withend=1)
     xyz0 = np.array([pose.residue(14).xyz(2)[i] for i in (0, 1, 2)] + [1])
     # resid 43 happens to be the symmetrically related one for this solution
     xyz1 = np.array([pose.residue(55).xyz(2)[i] for i in (0, 1, 2)] + [1])
@@ -355,65 +346,79 @@ def test_make_pose_chains_dimer(c2pose):
     seq = dimer.body.sequence()[:12]
 
     dimerseg = Segment([dimer], 'N', '')
-    enex, rest = dimerseg.make_pose_chains(0)
+    enex, rest = dimerseg.make_pose_chains(0, pad=(0, 1))
     assert [x.sequence() for x in enex] == [seq[1:], seq]
     assert [x.sequence() for x in rest] == []
     assert enex[-1] is dimer.chains[2]
-    enex, rest = dimerseg.make_pose_chains(1)
+    enex, rest = dimerseg.make_pose_chains(1, pad=(0, 1))
     assert [x.sequence() for x in enex] == [seq[2:], seq]
     assert [x.sequence() for x in rest] == []
     assert enex[-1] is dimer.chains[1]
 
     dimerseg = Segment([dimer], 'C', '')
-    enex, rest = dimerseg.make_pose_chains(0)
+    enex, rest = dimerseg.make_pose_chains(0, pad=(0, 1))
     assert [x.sequence() for x in enex] == [seq[:-3], seq]
     assert [x.sequence() for x in rest] == []
     assert enex[-1] is dimer.chains[2]
-    enex, rest = dimerseg.make_pose_chains(1)
+    enex, rest = dimerseg.make_pose_chains(1, pad=(0, 1))
     assert [x.sequence() for x in enex] == [seq[:-4], seq]
     assert [x.sequence() for x in rest] == []
     assert enex[-1] is dimer.chains[1]
 
     dimerseg = Segment([dimer], '', 'N')
-    enex, rest = dimerseg.make_pose_chains(0)
+    enex, rest = dimerseg.make_pose_chains(0, pad=(0, 1))
     assert [x.sequence() for x in enex] == [seq, seq[1:]]
     assert [x.sequence() for x in rest] == []
     assert enex[0] is dimer.chains[2]
-    enex, rest = dimerseg.make_pose_chains(1)
+    enex, rest = dimerseg.make_pose_chains(1, pad=(0, 1))
     assert [x.sequence() for x in enex] == [seq, seq[2:]]
     assert [x.sequence() for x in rest] == []
     assert enex[0] is dimer.chains[1]
 
     dimerseg = Segment([dimer], 'N', 'N')
-    enex, rest = dimerseg.make_pose_chains(0)
+    enex, rest = dimerseg.make_pose_chains(0, pad=(0, 1))
     assert [x.sequence() for x in enex] == [seq[1:], seq[2:]]
     assert [x.sequence() for x in rest] == []
-    enex, rest = dimerseg.make_pose_chains(1)
+    enex, rest = dimerseg.make_pose_chains(1, pad=(0, 1))
     assert [x.sequence() for x in enex] == [seq[2:], seq[1:]]
     assert [x.sequence() for x in rest] == []
     with pytest.raises(IndexError):
-        enex, rest = dimerseg.make_pose_chains(2)
+        enex, rest = dimerseg.make_pose_chains(2, pad=(0, 1))
 
     dimerseg = Segment([dimer], 'N', 'C')
-    enex, rest = dimerseg.make_pose_chains(0)
+    enex, rest = dimerseg.make_pose_chains(0, pad=(0, 1))
     assert [x.sequence() for x in enex] == [seq[1:-3]]
     assert [x.sequence() for x in rest] == [seq]
     assert rest[0] is dimer.chains[2]
-    enex, rest = dimerseg.make_pose_chains(1)
+    enex, rest = dimerseg.make_pose_chains(1, pad=(0, 1))
     assert [x.sequence() for x in enex] == [seq[1:], seq[:-4]]
     assert [x.sequence() for x in rest] == []
-    enex, rest = dimerseg.make_pose_chains(2)
+    enex, rest = dimerseg.make_pose_chains(2, pad=(0, 1))
     assert [x.sequence() for x in enex] == [seq[2:], seq[:-3]]
     assert [x.sequence() for x in rest] == []
-    enex, rest = dimerseg.make_pose_chains(3)
+    enex, rest = dimerseg.make_pose_chains(3, pad=(0, 1))
     assert [x.sequence() for x in enex] == [seq[2:-4]]
     assert [x.sequence() for x in rest] == [seq]
     assert rest[0] is dimer.chains[1]
     with pytest.raises(IndexError):
-        enex, rest = dimerseg.make_pose_chains(4)
+        enex, rest = dimerseg.make_pose_chains(4, pad=(0, 1))
 
 
-@pytest.mark.xfail
+def residue_coords(p, ir, n=3):
+    crd = (p.residue(ir).xyz(i) for i in range(1, n + 1))
+    return np.stack([c.x, c.y, c.z, 1] for c in crd)
+
+
+def residue_sym_err(p, ang, ir, jr, n=1):
+    mxdist = 0
+    for i in range(n):
+        xyz0 = residue_coords(p, ir + i)
+        xyz1 = residue_coords(p, jr + i)
+        xyz1 = hrot([0, 0, 1], ang) @ xyz1.T
+        mxdist = max(mxdist, np.max(np.sum((xyz0 - xyz1.T)**2, axis=1)))
+    return np.sqrt(mxdist)
+
+
 @pytest.mark.skipif('not rcl.HAVE_PYROSETTA')
 def test_multichain(c2pose, c3pose, curved_helix_pose):
     helix = Spliceable(curved_helix_pose, sites=[(':4', 'N'), ('-4:', 'C')])
@@ -430,8 +435,6 @@ def test_multichain(c2pose, c3pose, curved_helix_pose):
     w = grow(segments, SegmentSym('C2'), thresh=999)
     assert len(w)
     p = w.pose(0)
-    # showme(w.pose(0))
-    # assert 0
 
     segments = [Segment([helix], exit='C'),
                 Segment([helix], entry='N', exit='C'),
@@ -440,7 +443,9 @@ def test_multichain(c2pose, c3pose, curved_helix_pose):
                 Segment([helix], entry='N'), ]
     wnc = grow(segments, SegmentSym('C3'), thresh=1)
     assert len(wnc)
-    # showme(wnc.pose(0))
+    q = wnc.pose(0)
+    # showme(q)
+    assert residue_sym_err(q, -120, 2, 54, 8) < 0.5
 
     segments = [Segment([helix], exit='N'),
                 Segment([helix], entry='C', exit='N'),
@@ -449,10 +454,7 @@ def test_multichain(c2pose, c3pose, curved_helix_pose):
                 Segment([helix], entry='C'), ]
     wcn = grow(segments, SegmentSym('C3'), thresh=1)
     p = wcn.pose(0)
-    q = wnc.pose(0)
-    # showme(p, name='foo')
-    # showme(q, name='bar')
-
+    assert residue_sym_err(p, 120, 22, 35, 8) < 0.5
     # N-to-C and C-to-N construction should be same
     assert np.allclose(wnc.scores, wcn.scores, atol=1e-3)
 
@@ -460,12 +462,12 @@ def test_multichain(c2pose, c3pose, curved_helix_pose):
                 Segment([dimer], entry='N', exit='N'),
                 Segment([helix], entry='C', exit='N'),
                 Segment([trimer], entry='C', exit='C'),
-                Segment([helix], entry='N')
-                ]
+                Segment([helix], entry='N')]
+    w = grow(segments, SegmentSym('C3'), thresh=2)
+    assert residue_sym_err(w.pose(0), 120, 2, 67, 9) < 2
+    w = grow(segments, SegmentSym('C4'), thresh=2)
+    assert residue_sym_err(w.pose(0), -90, 2, 69, 9) < 2
     w = grow(segments, SegmentSym('C5'), thresh=2)
-    assert len(w)
-    # for i, s in zip(w.indices, w.scores):
-    # print(s, i)
-    # showme(w.pose(0, join=0))
-
-    # assert 0
+    assert residue_sym_err(w.pose(0), -72, 2, 65, 9) < 2
+    w = grow(segments, SegmentSym('C6'), thresh=2)
+    assert residue_sym_err(w.pose(0), 60, 2, 71, 9) < 2

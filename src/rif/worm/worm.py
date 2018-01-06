@@ -333,79 +333,39 @@ class Segment:
         bodies2 = [s.body for s in other.spliceables]
         return bodies1 == bodies2
 
-    def make_pose_singlechain(self, index, append_to=None, position=None,
-                              onechain=True, overlap=False):
-        append_to = append_to or rcl.Pose()
-        pose = self.spliceables[self.bodyid[index]].body
-        # chains = self.spliceables[self.bodyid[index]].chains
-        lb = self.entryresid[index]
-        ub = self.exitresid[index]
-
-        # print('make_pose_singlechain', lb, ub)
-        lb = lb if lb > 0 else 1
-        ub = ub if ub > 0 else len(pose)
-        if append_to and self.exitresid[index] > 0: ub = ub - 1
-
-        assert 0 < lb <= ub - 1 <= len(pose)
-        # print('append_subpose', lb, ub - 1)
-        ros.core.pose.append_subpose_to_pose(
-            append_to, pose, lb, ub, new_chain=not onechain)
-
-        if position is not None:
-            x = rcl.to_rosetta_stub(position)
-            xub = len(append_to)
-            xlb = xub - ub + lb
-            assert 0 < xlb <= xub <= len(append_to)
-            # print('xform_pose', xlb, xub)
-            ros.protocols.sic_dock.xform_pose(append_to, x, xlb, xub)
-        return append_to
-
-    def make_pose_chains(self, index, position=None, pad_entry=0, pad_exit=0):
+    def make_pose_chains(self, index, position=None, pad=(0, 0)):
         """returns (segchains, rest)
-        segchains elements are [enterexitchain] or, [enterchain, rest..., exitchain]
+        segchains elems are [enterexitchain] or, [enterchain, ..., exitchain]
         rest holds other chains IFF entre and exit in same chain
         """
         spliceable = self.spliceables[self.bodyid[index]]
         pose = spliceable.body
         chains = spliceable.chains
-        ienter = self.entryresid[index]
-        iexit = self.exitresid[index]
-        center = pose.chain(ienter) if ienter > 0 else None
-        cexit = pose.chain(iexit) if iexit > 0 else None
-        if center: ienter -= spliceable.start_of_chain[center]
-        if cexit: iexit -= spliceable.start_of_chain[cexit]
-        assert center or cexit
+        ir_en, ir_ex = self.entryresid[index], self.exitresid[index]
+        ch_en = pose.chain(ir_en) if ir_en > 0 else None
+        ch_ex = pose.chain(ir_ex) if ir_ex > 0 else None
+        pl_en, pl_ex = self.entrypol, self.exitpol
+        if ch_en: ir_en -= spliceable.start_of_chain[ch_en]
+        if ch_ex: ir_ex -= spliceable.start_of_chain[ch_ex]
+        assert ch_en or ch_ex
         rest = list(chains.values())
-        if center: rest.remove(chains[center])
-        if center == cexit:
+        if ch_en: rest.remove(chains[ch_en])
+        if ch_en == ch_ex:
             assert len(rest) + 1 == len(chains)
-            p = chains[center]
-            # print('make_pose_chains same enter', ienter, pad_entry)
-            p = trim_pose(p, ienter, self.entrypol, pad_entry)
-            iexit1 = iexit
-            if self.exitpol is 'C':
-                iexit1 -= len(chains[center]) - len(p)
-            # print('iexit', iexit, iexit1)
-            # print('center', len(chains[center]), 'p', len(p))
-            # print('make_pose_chains same exit', iexit, iexit1, pad_exit)
-            p = trim_pose(p, iexit1, self.exitpol, pad_exit)
+            p = trim_pose(chains[ch_en], ir_en, self.entrypol, pad[0])
+            iexit1 = ir_ex - (pl_ex == 'C') * (len(chains[ch_en]) - len(p))
+            p = trim_pose(p, iexit1, pl_ex, pad[1] - 1)
             enex, rest = [p], rest
         else:
-            if cexit: rest.remove(chains[cexit])
-            penter = [chains[center]] if center else []
-            pexit = [chains[cexit]] if cexit else []
-            if penter:
-                # print('make_pose_chains penter', ienter, pad_entry)
-                penter[0] = trim_pose(
-                    penter[0], ienter, self.entrypol, pad_entry)
-            if pexit:
-                # print('make_pose_chains pexit', ienter, pad_entry)
-                pexit[0] = trim_pose(pexit[0], iexit, self.exitpol, pad_exit)
-            enex, rest = penter + rest + pexit, []
+            if ch_ex: rest.remove(chains[ch_ex])
+            p_en = [chains[ch_en]] if ch_en else []
+            p_ex = [chains[ch_ex]] if ch_ex else []
+            if p_en: p_en[0] = trim_pose(p_en[0], ir_en, self.entrypol, pad[0])
+            if p_ex: p_ex[0] = trim_pose(p_ex[0], ir_ex, pl_ex, pad[1] - 1)
+            enex, rest = p_en + rest + p_ex, []
         if position is not None:
             position = rcl.to_rosetta_stub(position)
-            enex = [p.clone() for p in enex]
-            rest = [p.clone() for p in rest]
+            enex, rest = [p.clone() for p in enex], [p.clone() for p in rest]
             for p in it.chain(enex, rest):
                 ros.protocols.sic_dock.xform_pose(p, position)
         return enex, rest
@@ -423,34 +383,13 @@ class Worms:
     def __init___(self):
         return len(self.scores)
 
-    def pose_WRONG(self, which, align=True, withend=True, **kw):
-        if hasattr(which, '__iter__'):
-            return (self.pose_WRONG(w) for w in which)
-        pose = rcl.Pose()
-        for iseg, seg in enumerate(self.segments):
-            i = self.indices[which][iseg]
-            x = self.positions[which][iseg]
-            if withend or iseg + 1 < len(self.segments):
-                pose = seg.make_pose_singlechain(
-                    i, position=x, append_to=pose, **kw)
-        if align:
-            align = [c.canonical_alignment(self.positions[which])
-                     for c in self.criteria]
-            align = [x for x in align if x is not None]
-            assert len(align) < 2  # should this be allowed?
-            if len(align) == 1:
-                x = rcl.to_rosetta_stub(align[0])
-                ros.protocols.sic_dock.xform_pose(pose, x)
-        return pose
-
     def pose(self, which, align=True, withend=True, join=True):
-        rmlower = ros.core.pose.remove_lower_terminus_type_from_pose_residue
-        rmupper = ros.core.pose.remove_upper_terminus_type_from_pose_residue
+        rm_lower_t = ros.core.pose.remove_lower_terminus_type_from_pose_residue
+        rm_upper_t = ros.core.pose.remove_upper_terminus_type_from_pose_residue
         if hasattr(which, '__iter__'):
             return (self.pose_WRONG(w) for w in which)
         entryexits = [seg.make_pose_chains(self.indices[which][iseg],
-                                           self.positions[which][iseg],
-                                           pad_exit=-1)
+                                           self.positions[which][iseg])
                       for iseg, seg in enumerate(self.segments)]
         entryexits, rest = zip(*entryexits)
         chainslist = reorder_spliced_as_N_to_C(
@@ -459,13 +398,12 @@ class Worms:
         for chains in chainslist:
             ros.core.pose.append_pose_to_pose(pose, chains[0], True)
             for chain in chains[1:]:
-                rmupper(pose, len(pose))
-                rmlower(chain, 1)
+                rm_upper_t(pose, len(pose))
+                rm_lower_t(chain, 1)
                 print("Will needs to fix bb O/H position!")
                 ros.core.pose.append_pose_to_pose(pose, chain, not join)
-        for chains in rest:
-            for chain in chains:
-                ros.core.pose.append_pose_to_pose(pose, chain, True)
+        for chain in it.chain(*rest):
+            ros.core.pose.append_pose_to_pose(pose, chain, True)
         if align:
             align = [c.canonical_alignment(self.positions[which])
                      for c in self.criteria]
