@@ -414,8 +414,11 @@ def residue_sym_err(p, ang, ir, jr, n=1):
     for i in range(n):
         xyz0 = residue_coords(p, ir + i)
         xyz1 = residue_coords(p, jr + i)
-        xyz1 = hrot([0, 0, 1], ang) @ xyz1.T
-        mxdist = max(mxdist, np.max(np.sum((xyz0 - xyz1.T)**2, axis=1)))
+        xyz3 = hrot([0, 0, 1], ang) @ xyz1.T
+        xyz4 = hrot([0, 0, 1], -ang) @ xyz1.T
+        mxdist = max(mxdist, min(
+            np.max(np.sum((xyz0 - xyz3.T)**2, axis=1)),
+            np.max(np.sum((xyz0 - xyz4.T)**2, axis=1))))
     return np.sqrt(mxdist)
 
 
@@ -445,7 +448,7 @@ def test_multichain(c2pose, c3pose, curved_helix_pose):
     assert len(wnc)
     q = wnc.pose(0)
     # showme(q)
-    assert residue_sym_err(q, -120, 2, 54, 8) < 0.5
+    assert residue_sym_err(q, 120, 2, 54, 8) < 0.5
 
     segments = [Segment([helix], exit='N'),
                 Segment([helix], entry='C', exit='N'),
@@ -466,8 +469,8 @@ def test_multichain(c2pose, c3pose, curved_helix_pose):
     w = grow(segments, SegmentSym('C3'), thresh=2)
     assert residue_sym_err(w.pose(0), 120, 2, 67, 9) < 2
     w = grow(segments, SegmentSym('C4'), thresh=2)
-    assert residue_sym_err(w.pose(0), -90, 2, 69, 9) < 2
+    assert residue_sym_err(w.pose(0), 90, 2, 69, 9) < 2
     w = grow(segments, SegmentSym('C5'), thresh=2)
-    assert residue_sym_err(w.pose(0), -72, 2, 65, 9) < 2
+    assert residue_sym_err(w.pose(0), 72, 2, 65, 9) < 2
     w = grow(segments, SegmentSym('C6'), thresh=2)
     assert residue_sym_err(w.pose(0), 60, 2, 71, 9) < 2
