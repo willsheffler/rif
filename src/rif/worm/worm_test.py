@@ -277,7 +277,9 @@ def test_body_same_as_last(curved_helix_pose):
     assert len(w)
     for i, s in zip(w.indices, w.scores):
         assert segments[1].bodyid[i[1]] == segments[-1].bodyid[i[-1]]
-    assert tuple(w.indices[0]) in ((3, 2, 0, 2, 1, 0), (3, 6, 0, 2, 1, 1))
+    assert tuple(w.indices[0]) in ((2, 2, 0, 2, 1, 0),
+                                   (3, 2, 0, 2, 1, 0),
+                                   (3, 6, 0, 2, 1, 1))
 
 
 def test_reorder_spliced_as_N_to_C():
