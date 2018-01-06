@@ -13,18 +13,19 @@ from concurrent.futures import ThreadPoolExecutor, ProcessPoolExecutor
 def test_SpliceSite(pose):
     assert len(pose) == 7
     ss = SpliceSite(1, 'N')
-    assert 1 == ss.resid(1, pose)
-    assert pose.size() == ss.resid(-1, pose)
-    assert ss.resids(pose) == [1]
-    assert SpliceSite('1:7', 'N').resids(pose) == [1, 2, 3, 4, 5, 6, 7]
-    assert SpliceSite(':7', 'N').resids(pose) == [1, 2, 3, 4, 5, 6, 7]
-    assert SpliceSite('-3:-1', 'N').resids(pose) == [5, 6, 7]
-    assert SpliceSite('-3:', 'N').resids(pose) == [5, 6, 7]
-    assert SpliceSite(':2', 'N').resids(pose) == [1, 2]
-    assert SpliceSite(':-5', 'N').resids(pose) == [1, 2, 3]
-    assert SpliceSite('::2', 'N').resids(pose) == [1, 3, 5, 7]
-    with pytest.raises(ValueError): SpliceSite('-1:-3', 'N').resids(pose)
-    with pytest.raises(ValueError): SpliceSite('-1:3', 'N').resids(pose)
+    spliceable = Spliceable(pose, [])
+    assert 1 == ss.resid(1, spliceable.body)
+    assert pose.size() == ss.resid(-1, spliceable.body)
+    assert ss.resids(spliceable) == [1]
+    assert SpliceSite('1:7', 'N').resids(spliceable) == [1, 2, 3, 4, 5, 6, 7]
+    assert SpliceSite(':7', 'N').resids(spliceable) == [1, 2, 3, 4, 5, 6, 7]
+    assert SpliceSite('-3:-1', 'N').resids(spliceable) == [5, 6, 7]
+    assert SpliceSite('-3:', 'N').resids(spliceable) == [5, 6, 7]
+    assert SpliceSite(':2', 'N').resids(spliceable) == [1, 2]
+    assert SpliceSite(':-5', 'N').resids(spliceable) == [1, 2, 3]
+    assert SpliceSite('::2', 'N').resids(spliceable) == [1, 3, 5, 7]
+    with pytest.raises(ValueError): SpliceSite('-1:-3', 'N').resids(spliceable)
+    with pytest.raises(ValueError): SpliceSite('-1:3', 'N').resids(spliceable)
 
 
 def test_geom_check():
@@ -213,7 +214,7 @@ def test_pose_alignment_0(curved_helix_pose):
     w = grow(segments, SegmentSym('c2'), thresh=1)
     assert len(w)
     assert tuple(w.indices[0]) in ((2, 1, 2, 0, 0), (1, 2, 0, 2, 0))
-    pose = w.pose(0, onechain=True, align=1, withend=1)
+    pose = w.pose_WRONG(0, onechain=True, align=1, withend=1)
     xyz0 = np.array([pose.residue(1).xyz(2)[i] for i in (0, 1, 2)] + [1])
     # resid 43 happens to be the symmetrically related one for this solution
     xyz1 = np.array([pose.residue(43).xyz(2)[i] for i in (0, 1, 2)] + [1])
@@ -222,7 +223,7 @@ def test_pose_alignment_0(curved_helix_pose):
 
 
 def show_with_axis(worms, idx=0):
-    pose = worms.pose(idx, onechain=True, align=0, withend=1)
+    pose = worms.pose_WRONG(idx, onechain=True, align=0, withend=1)
     showme(pose)
     import pymol
     pymol.finish_launching()
@@ -247,7 +248,7 @@ def test_pose_alignment_1(curved_helix_pose):
     assert len(w)
     # show_with_axis(w)
     # return
-    pose = w.pose(0, onechain=True, align=1, withend=1)
+    pose = w.pose_WRONG(0, onechain=True, align=1, withend=1)
     xyz0 = np.array([pose.residue(14).xyz(2)[i] for i in (0, 1, 2)] + [1])
     # resid 43 happens to be the symmetrically related one for this solution
     xyz1 = np.array([pose.residue(55).xyz(2)[i] for i in (0, 1, 2)] + [1])
@@ -279,26 +280,190 @@ def test_body_same_as_last(curved_helix_pose):
     assert tuple(w.indices[0]) in ((3, 2, 0, 2, 1, 0), (3, 6, 0, 2, 1, 1))
 
 
-@pytest.mark.xfail()
+def test_reorder_spliced_as_N_to_C():
+    Q = reorder_spliced_as_N_to_C
+
+    with pytest.raises(ValueError): Q([[1], [1], [1]], 'NC')
+    with pytest.raises(ValueError): Q([[1], [1], [1]], 'CN')
+    with pytest.raises(ValueError): Q([[1, 1], [1], [1, 1]], 'CN')
+    with pytest.raises(ValueError): Q([], 'CN')
+    with pytest.raises(ValueError): Q([], '')
+    with pytest.raises(ValueError): Q([[]], '')
+
+    assert Q([[1]], '') == [[1]]
+    assert Q([[1, 2]], '') == [[1], [2]]
+    assert Q([[1], [2]], 'N') == [[1, 2]]
+    assert Q([[1, 2], [3]], 'N') == [[1], [2, 3]]
+    assert Q([[1, 2], [3, 4]], 'N') == [[1], [2, 3], [4]]
+    assert Q([[1, 2, 3], [4, 5]], 'N') == [[1], [2], [3, 4], [5]]
+    assert Q([[1], [2]], 'C') == [[2, 1]]
+    assert Q([[1, 2], [3]], 'C') == [[1], [3, 2]]
+    assert Q([[1, 2], [3, 4]], 'C') == [[1], [3, 2], [4]]
+    assert Q([[1, 2, 3], [4, 5]], 'C') == [[1], [2], [4, 3], [5]]
+
+    assert Q([[1], [2], [3]], 'NN') == [[1, 2, 3]]
+    assert Q([[1], [2], [3, 4]], 'NN') == [[1, 2, 3], [4]]
+    assert Q([[1], [2, 3], [4, 5]], 'NN') == [[1, 2], [3, 4], [5]]
+    assert Q([[1, 2], [3, 4], [5, 6]], 'NN') == [[1], [2, 3], [4, 5], [6]]
+    assert (Q([[1, 2, 3], [4, 5, 6], [7, 8, 9]], 'NN')
+            == [[1], [2], [3, 4], [5], [6, 7], [8], [9]])
+    assert (Q([[1, 2, 3], [4, 5, 6], [7, 8, 9]], 'CN')
+            == [[1], [2], [4, 3], [5], [6, 7], [8], [9]])
+    assert (Q([[1, 2, 3], [4, 5, 6], [7, 8, 9]], 'CC')
+            == [[1], [2], [4, 3], [5], [7, 6], [8], [9]])
+    assert (Q([[1, 2, 3], [4, 5, 6], [7, 8, 9]], 'NC')
+            == [[1], [2], [3, 4], [5], [7, 6], [8], [9]])
+
+    for n in range(10):
+        x = [[i] for i in range(n + 1)]
+        y = list(range(n + 1))
+        assert Q(x, 'N' * n) == [y]
+        assert Q(x, 'C' * n) == [y[::-1]]
+        assert Q([[13, 14]] + x, 'N' + 'N' * n) == [[13], [14] + y]
+        assert Q([[13, 14]] + x, 'C' + 'C' * n) == [[13], y[::-1] + [14]]
+        assert (Q([[10, 11, 12]] + x + [[13, 14, 15]], 'N' + 'N' * n + 'N')
+                == [[10], [11], [12] + y + [13], [14], [15]])
+        assert (Q([[10, 11, 12]] + x + [[13, 14, 15]], 'C' + 'C' * n + 'C')
+                == [[10], [11], [13] + y[::-1] + [12], [14], [15]])
+
+    assert (Q([[1, 2, 3], [4, 5, 6], [7, 8, 9], [0, 1, 2]], 'NNN')
+            == [[1], [2], [3, 4], [5], [6, 7], [8], [9, 0], [1], [2]])
+    assert (Q([[1, 2, 3], [4, 5, 6], [7, 8, 9], [0, 1, 2]], 'CNN')
+            == [[1], [2], [4, 3], [5], [6, 7], [8], [9, 0], [1], [2]])
+    assert (Q([[1, 2, 3], [4, 5, 6], [7, 8, 9], [0, 1, 2]], 'NCN')
+            == [[1], [2], [3, 4], [5], [7, 6], [8], [9, 0], [1], [2]])
+    assert (Q([[1, 2, 3], [4, 5, 6], [7, 8, 9], [0, 1, 2]], 'NNC')
+            == [[1], [2], [3, 4], [5], [6, 7], [8], [0, 9], [1], [2]])
+    assert (Q([[1, 2, 3], [4, 5, 6], [7, 8, 9], [0, 1, 2]], 'NCC')
+            == [[1], [2], [3, 4], [5], [7, 6], [8], [0, 9], [1], [2]])
+    assert (Q([[1, 2, 3], [4, 5, 6], [11], [7, 8, 9], [0, 1, 2]], 'NCCC')
+            == [[1], [2], [3, 4], [5], [7, 11, 6], [8], [0, 9], [1], [2]])
+    assert (Q([[1, 2, 3], [4, 5, 6], [11], [12], [7, 8, 9], [0, 1, 2]], 'NCCCN')
+            == [[1], [2], [3, 4], [5], [7, 12, 11, 6], [8], [9, 0], [1], [2]])
+    assert (Q([[1, 2, 5, 5, 3], [4, 5, 6], [11], [12], [7, 8, 9], [0, 1, 2]], 'NCCCN')
+            == [[1], [2], [5], [5], [3, 4], [5], [7, 12, 11, 6], [8], [9, 0], [1], [2]])
+
+
+# @pytest.mark.xfail
+@pytest.mark.skipif('not rcl.HAVE_PYROSETTA')
+def test_make_pose_chains_dimer(c2pose):
+    dimer = Spliceable(c2pose, sites=[('1,2:2', 'N'), ('2,3:3', 'N'),
+                                      ('1,-4:-4', 'C'), ('2,-5:-5', 'C')])
+    print(dimer)
+    seq = dimer.body.sequence()[:12]
+
+    dimerseg = Segment([dimer], 'N', '')
+    enex, rest = dimerseg.make_pose_chains(0)
+    assert [x.sequence() for x in enex] == [seq[1:], seq]
+    assert [x.sequence() for x in rest] == []
+    assert enex[-1] is dimer.chains[2]
+    enex, rest = dimerseg.make_pose_chains(1)
+    assert [x.sequence() for x in enex] == [seq[2:], seq]
+    assert [x.sequence() for x in rest] == []
+    assert enex[-1] is dimer.chains[1]
+
+    dimerseg = Segment([dimer], 'C', '')
+    enex, rest = dimerseg.make_pose_chains(0)
+    assert [x.sequence() for x in enex] == [seq[:-3], seq]
+    assert [x.sequence() for x in rest] == []
+    assert enex[-1] is dimer.chains[2]
+    enex, rest = dimerseg.make_pose_chains(1)
+    assert [x.sequence() for x in enex] == [seq[:-4], seq]
+    assert [x.sequence() for x in rest] == []
+    assert enex[-1] is dimer.chains[1]
+
+    dimerseg = Segment([dimer], '', 'N')
+    enex, rest = dimerseg.make_pose_chains(0)
+    assert [x.sequence() for x in enex] == [seq, seq[1:]]
+    assert [x.sequence() for x in rest] == []
+    assert enex[0] is dimer.chains[2]
+    enex, rest = dimerseg.make_pose_chains(1)
+    assert [x.sequence() for x in enex] == [seq, seq[2:]]
+    assert [x.sequence() for x in rest] == []
+    assert enex[0] is dimer.chains[1]
+
+    dimerseg = Segment([dimer], 'N', 'N')
+    enex, rest = dimerseg.make_pose_chains(0)
+    assert [x.sequence() for x in enex] == [seq[1:], seq[2:]]
+    assert [x.sequence() for x in rest] == []
+    enex, rest = dimerseg.make_pose_chains(1)
+    assert [x.sequence() for x in enex] == [seq[2:], seq[1:]]
+    assert [x.sequence() for x in rest] == []
+    with pytest.raises(IndexError):
+        enex, rest = dimerseg.make_pose_chains(2)
+
+    dimerseg = Segment([dimer], 'N', 'C')
+    enex, rest = dimerseg.make_pose_chains(0)
+    assert [x.sequence() for x in enex] == [seq[1:-3]]
+    assert [x.sequence() for x in rest] == [seq]
+    assert rest[0] is dimer.chains[2]
+    enex, rest = dimerseg.make_pose_chains(1)
+    assert [x.sequence() for x in enex] == [seq[1:], seq[:-4]]
+    assert [x.sequence() for x in rest] == []
+    enex, rest = dimerseg.make_pose_chains(2)
+    assert [x.sequence() for x in enex] == [seq[2:], seq[:-3]]
+    assert [x.sequence() for x in rest] == []
+    enex, rest = dimerseg.make_pose_chains(3)
+    assert [x.sequence() for x in enex] == [seq[2:-4]]
+    assert [x.sequence() for x in rest] == [seq]
+    assert rest[0] is dimer.chains[1]
+    with pytest.raises(IndexError):
+        enex, rest = dimerseg.make_pose_chains(4)
+
+
+@pytest.mark.xfail
 @pytest.mark.skipif('not rcl.HAVE_PYROSETTA')
 def test_multichain(c2pose, c3pose, curved_helix_pose):
     helix = Spliceable(curved_helix_pose, sites=[(':4', 'N'), ('-4:', 'C')])
-    dimer = Spliceable(c2pose, sites=[('1:2', 'N'), ('13:14', 'N')])
-    trimer = Spliceable(c3pose, sites=[('8:9', 'C'), ('17:18', 'C'),
-                                       ('26:27', 'C')])
+    dimer = Spliceable(c2pose, sites=[('1,:2', 'N'), ('1,-2:', 'C'),
+                                      ('2,:2', 'N'), ('2,-2:', 'C')])
+    trimer = Spliceable(c3pose, sites=[('1,:2', 'N'), ('1,-2:', 'C'),
+                                       ('2,:2', 'N'), ('2,-2:', 'C'),
+                                       ('3,:2', 'N'), ('3,-2:', 'C')])
     print(helix)
     print(dimer)
     print(trimer)
+    segments = [Segment([helix], exit='N'),
+                Segment([helix], entry='C'), ]
+    w = grow(segments, SegmentSym('C2'), thresh=999)
+    assert len(w)
+    p = w.pose(0)
+    # showme(w.pose(0))
+    # assert 0
+
+    segments = [Segment([helix], exit='C'),
+                Segment([helix], entry='N', exit='C'),
+                Segment([dimer], entry='N', exit='C'),
+                Segment([helix], entry='N', exit='C'),
+                Segment([helix], entry='N'), ]
+    wnc = grow(segments, SegmentSym('C3'), thresh=1)
+    assert len(wnc)
+    # showme(wnc.pose(0))
+
+    segments = [Segment([helix], exit='N'),
+                Segment([helix], entry='C', exit='N'),
+                Segment([dimer], entry='C', exit='N'),
+                Segment([helix], entry='C', exit='N'),
+                Segment([helix], entry='C'), ]
+    wcn = grow(segments, SegmentSym('C3'), thresh=1)
+    p = wcn.pose(0)
+    q = wnc.pose(0)
+    # showme(p, name='foo')
+    # showme(q, name='bar')
+
+    # N-to-C and C-to-N construction should be same
+    assert np.allclose(wnc.scores, wcn.scores, atol=1e-3)
+
     segments = [Segment([helix], exit='C'),
                 Segment([dimer], entry='N', exit='N'),
                 Segment([helix], entry='C', exit='N'),
                 Segment([trimer], entry='C', exit='C'),
                 Segment([helix], entry='N')
                 ]
-    w = grow(segments, SegmentSym('C2'), thresh=1)
+    w = grow(segments, SegmentSym('C5'), thresh=2)
     assert len(w)
-    for i, s in zip(w.indices, w.scores):
-        print(s, i)
-    # showme(w.pose(0))
+    # for i, s in zip(w.indices, w.scores):
+    # print(s, i)
+    # showme(w.pose(0, join=0))
 
-    assert 0
+    # assert 0

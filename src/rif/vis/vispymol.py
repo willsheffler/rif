@@ -29,7 +29,7 @@ def pymol_xform(name, xform):
     cmd.transform_object(name, xform.flatten())
 
 
-def pymol_load(to_show, state=None):
+def pymol_load(to_show, state=None, name=None, **kw):
     if state is None:
         state = dict(seenit=defaultdict(lambda: -1))
     if isinstance(to_show, list):
@@ -40,7 +40,7 @@ def pymol_load(to_show, state=None):
         state = pymol_load(to_show['pose'], state)
         pymol_xform(to_show['position'], state['last_obj'])
     elif is_rosetta_pose(to_show):
-        name = 'rif_thing'
+        name = name or 'rif_thing'
         state['seenit'][name] += 1
         name += '_%i' % state['seenit'][name]
         pymol_load_pose(to_show, name)
@@ -51,14 +51,14 @@ def pymol_load(to_show, state=None):
     return state
 
 
-def showme_pymol(what, headless=False, block=False):
+def showme_pymol(what, headless=False, block=False, **kw):
     import pymol
     pymol.pymol_argv = ['pymol']
     if headless:
         pymol.pymol_argv = ['pymol', '-c']
     pymol.finish_launching()
     from pymol import cmd
-    r = pymol_load(what)
+    r = pymol_load(what, **kw)
     # cmd.set('internal_gui_width', '20')
     cmd.do('full')  # todo: doesn't work!
     cmd.zoom()  # todo: doesn't work
@@ -68,9 +68,9 @@ def showme_pymol(what, headless=False, block=False):
     return r
 
 
-def showme(*args, how='pymol', **kwargs):
+def showme(*args, how='pymol', **kw):
     if how == 'pymol':
-        return showme_pymol(*args, **kwargs)
+        return showme_pymol(*args, **kw)
     else:
         raise NotImplementedError('showme how="%s" not implemented' % how)
 

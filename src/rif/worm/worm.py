@@ -31,14 +31,66 @@ def tqdm_parallel_map(pool, function, *args, **kw):
                                      total=len(futures), **kw))
 
 
+def trim_pose(pose, resid, direction, pad=0):
+    "trim end of pose from direction, leaving <=pad residues beyond resid"
+    if direction not in "NC":
+        raise ValueError("direction must be 'N' or 'C'")
+    if not 0 < resid <= len(pose):
+        raise ValueError("resid %i out of bounds %i" % (resid, len(pose)))
+    p = ros.core.pose.Pose()
+    if direction == 'N':
+        lb, ub = max(resid - pad, 1), len(pose)
+    elif direction == 'C':
+        lb, ub = 1, min(resid + pad, len(pose))
+    # print('trim_pose lbub', lb, ub, 'len', len(pose), 'resid', resid)
+    ros.core.pose.append_subpose_to_pose(p, pose, lb, ub)
+    return p
+
+
+def worst_CN_connect(p):
+    for ir in range(1, len(p)):
+        worst = 0
+        if (p.residue(ir).is_protein() and
+                p.residue(ir + 1).is_protein() and not (
+                ros.core.pose.is_upper_terminus(p, ir) or
+                ros.core.pose.is_lower_terminus(p, ir + 1))):
+            dist = p.residue(ir).xyz('C').distance(p.residue(ir + 1).xyz('N'))
+            worst = max(abs(dist - 1.32), worst)
+    return worst
+
+
+def reorder_spliced_as_N_to_C(body_chains, polarities):
+    "remap chains of each body such that concatenated chains are N->C"
+    if len(body_chains) != len(polarities) + 1:
+        raise ValueError('must be one more body_chains than polarities')
+    chains, pol = [[]], {}
+    if not all(0 < len(dg) for dg in body_chains):
+        raise ValueError('body_chains values must be [enterexit], '
+                         '[enter,exit], or [enter, ..., exit')
+    for i in range(1, len(polarities)):
+        if len(body_chains[i]) == 1:
+            if polarities[i - 1] != polarities[i]:
+                raise ValueError('polarity mismatch on single chain connect')
+    for i, dg in enumerate(body_chains):
+        chains[-1].append(dg[0])
+        if i != 0: pol[len(chains) - 1] = polarities[i - 1]
+        if len(dg) > 1: chains.extend([x] for x in dg[1:])
+    for i, chain in enumerate(chains):
+        if i in pol and pol[i] == 'C':
+            chains[i] = chains[i][::-1]
+    return chains
+
+
 class WormCriteria(abc.ABC):
 
     @abc.abstractmethod
     def score(self): pass
 
-    def canonical_alignment(self): return None
+    def canonical_alignment(self): return
 
-    def last_body_same_as(): return None
+    def last_body_same_as(self): return
+
+    def check_topolopy(self, segments): return
 
 
 class AxesIntersect(WormCriteria):
@@ -98,6 +150,13 @@ class SegmentSym(WormCriteria):
     def last_body_same_as(self):
         return self.from_seg
 
+    def check_topolopy(self, segments):
+        "for cyclic, global entry can't be same as global exit"
+        # todo: should check this...
+        # fromseg = segments[self.from_seg]
+        # toseg = segments[self.to_seg]
+        return
+
 
 class SpliceSite:
 
@@ -107,32 +166,41 @@ class SpliceSite:
         self.selections = list(sele)
         self.polarity = polarity
 
-    def resid(self, id, body):
-        resid = id if id >= 0 else len(body) + 1 + id
-        if not 0 < resid <= len(body):
+    def resid(self, id, pose):
+        resid = id if id >= 0 else len(pose) + 1 + id
+        if not 0 < resid <= len(pose):
             raise ValueError('resid ' + str(resid)
-                             + ' invalid for body of size ' + str(len(body)))
+                             + ' invalid for pose of size '
+                             + str(len(pose)))
         return resid
 
-    def resids(self, body):
+    def resids_impl(self, sele, spliceable):
+        if isinstance(sele, int):
+            return set([self.resid(sele, spliceable.body)])
+        elif isinstance(sele, str):
+            x = sele.split(',')
+            s = x[-1].split(':')
+            chain = int(x[0]) if len(x) == 2 else None
+            pose = spliceable.chains[chain] if chain else spliceable.body
+            start = self.resid(int(s[0] or 1), pose)
+            stop = self.resid(int(s[1] or -1), pose)
+            step = int(s[2]) if len(s) > 2 else 1
+            # print(start, stop + 1, step)
+            resids = set()
+            for ir in range(start, stop + 1, step):
+                assert 0 < ir <= len(pose)
+                resids.add(spliceable.start_of_chain[chain] + ir)
+            return resids
+        elif sele is None:
+            return set([None])
+        else:
+            raise ValueError('selection must be int, str, or None')
+
+    def resids(self, spliceabe):
         resids = set()
         for sele in self.selections:
             try:
-                if isinstance(sele, int):
-                    resids.add(self.resid(sele, body))
-                elif isinstance(sele, str):
-                    s = sele.split(':')
-                    start = self.resid(int(s[0] or 1), body)
-                    stop = self.resid(int(s[1] or -1), body)
-                    step = int(s[2]) if len(s) > 2 else 1
-                    # print(start, stop + 1, step)
-                    for ir in range(start, stop + 1, step):
-                        assert 0 < ir <= len(body)
-                        resids.add(ir)
-                elif sele is None:
-                    resids.add(None)
-                else:
-                    raise ValueError('selection must be int, str, or None')
+                resids |= self.resids_impl(sele, spliceabe)
             except ValueError as e:
                 raise ValueError('Error with selection '
                                  + str(sele) + ': ' + str(e))
@@ -141,30 +209,38 @@ class SpliceSite:
             raise ValueError('empty SpliceSite')
         return resids
 
-    def __str__(self):
-        return 'SpliceSite(' + self.polarity + ', ' + self.polarity + ')'
+    def __repr__(ss):
+        return 'SpliceSite(' + str(ss.selections) + ', ' + ss.polarity + ')'
 
 
 class Spliceable:
 
-    def __init__(self, body, *, sites, bodyid=None):
+    def __init__(self, body, sites, *, bodyid=None):
         self.body = body
+        chains = list(body.split_by_chain())
+        self.start_of_chain = {i + 1: sum(len(c) for c in chains[:i])
+                               for i in range(len(chains))}
+        self.start_of_chain[None] = 0
+        self.chains = {i + 1: c for i, c in enumerate(chains)}
         self.bodyid = bodyid
         if callable(sites):
             sites = sites(body)
         if isinstance(sites, SpliceSite):
             sites = [sites]
         self.sites = list(sites)
-        for i in range(len(self.sites)):
-            if not isinstance(self.sites[i], SpliceSite):
-                assert len(self.sites[i]) is 2
-                self.sites[i] = SpliceSite(*self.sites[i])
+        for i, site in enumerate(self.sites):
+            if isinstance(site, str):
+                raise ValueError('site currently must be (sele, polarity)')
+            if not isinstance(site, SpliceSite):
+                if not hasattr(site, '__iter__'):
+                    self.sites[i] = (site,)
+                self.sites[i] = SpliceSite(*site)
 
     def spliceable_positions(self):
         """selection of resids, and map 'global' index to selected index"""
         resid_subset = set()
         for site in self.sites:
-            resid_subset |= set(site.resids(self.body))
+            resid_subset |= set(site.resids(self))
         resid_subset = np.array(list(resid_subset))
         # really? must be an easier way to 'invert' a mapping in numpy?
         N = len(self.body) + 1
@@ -175,17 +251,17 @@ class Spliceable:
         assert np.all(to_subset[resid_subset] == np.arange(len(resid_subset)))
         return resid_subset, to_subset
 
-    def __str__(self):
+    def __repr__(self):
         return ('Spliceable: body=(' + str(len(self.body)) + ',' +
                 str(self.body).splitlines()[0].split('/')[-1] +
-                '), positions=' + str(self.spliceable_positions()[0]))
+                '), sites=' + str([(s.resids(self), s.polarity) for s in self.sites]))
 
 
 class Segment:
 
     def __init__(self, spliceables, entry=None, exit=None):
-        self.entrypol = entry
-        self.exitpol = exit
+        self.entrypol = entry or None
+        self.exitpol = exit or None
         if not spliceables:
             raise ValueError('spliceables must not be empty, spliceables =' +
                              str(spliceables))
@@ -201,8 +277,8 @@ class Segment:
         if not (entry or exit):
             raise ValueError('at least one of entry/exit required')
         self.spliceables = list(spliceables) or self.spliceables
-        self.entrypol = entry or self.entrypol
-        self.exitpol = exit or self.exitpol
+        self.entrypol = entry or self.entrypol or None
+        self.exitpol = exit or self.exitpol or None
         # each array has all in/out pairs
         self.x2exit, self.x2orgn, self.bodyid = [], [], []
         self.entryresid, self.exitresid = [], []
@@ -227,11 +303,11 @@ class Segment:
                 if entry_site.polarity == self.entrypol:
                     for jsite, exit_site in exit_sites:
                         if isite != jsite and exit_site.polarity == self.exitpol:
-                            for ires in entry_site.resids(spliceable.body):
+                            for ires in entry_site.resids(spliceable):
                                 istub_inv = (identity44f4 if not ires
                                              else stubs_inv[to_subset[ires]])
                                 ires = ires or -1
-                                for jres in exit_site.resids(spliceable.body):
+                                for jres in exit_site.resids(spliceable):
                                     jstub = (identity44f4 if not jres
                                              else stubs[to_subset[jres]])
                                     jres = jres or -1
@@ -252,13 +328,20 @@ class Segment:
         self.exitresid = np.array(self.exitresid)
         self.bodyid = np.array(self.bodyid)
 
-    def make_pose(self, index, append_to=None, position=None,
-                  onechain=True, overlap=False):
+    def same_bodies_as(self, other):
+        bodies1 = [s.body for s in self.spliceables]
+        bodies2 = [s.body for s in other.spliceables]
+        return bodies1 == bodies2
+
+    def make_pose_singlechain(self, index, append_to=None, position=None,
+                              onechain=True, overlap=False):
         append_to = append_to or rcl.Pose()
         pose = self.spliceables[self.bodyid[index]].body
+        # chains = self.spliceables[self.bodyid[index]].chains
         lb = self.entryresid[index]
         ub = self.exitresid[index]
-        # print('make_pose', lb, ub)
+
+        # print('make_pose_singlechain', lb, ub)
         lb = lb if lb > 0 else 1
         ub = ub if ub > 0 else len(pose)
         if append_to and self.exitresid[index] > 0: ub = ub - 1
@@ -277,10 +360,55 @@ class Segment:
             ros.protocols.sic_dock.xform_pose(append_to, x, xlb, xub)
         return append_to
 
-    def same_bodies_as(self, other):
-        bodies1 = [s.body for s in self.spliceables]
-        bodies2 = [s.body for s in other.spliceables]
-        return bodies1 == bodies2
+    def make_pose_chains(self, index, position=None, pad_entry=0, pad_exit=0):
+        """returns (segchains, rest)
+        segchains elements are [enterexitchain] or, [enterchain, rest..., exitchain]
+        rest holds other chains IFF entre and exit in same chain
+        """
+        spliceable = self.spliceables[self.bodyid[index]]
+        pose = spliceable.body
+        chains = spliceable.chains
+        ienter = self.entryresid[index]
+        iexit = self.exitresid[index]
+        center = pose.chain(ienter) if ienter > 0 else None
+        cexit = pose.chain(iexit) if iexit > 0 else None
+        if center: ienter -= spliceable.start_of_chain[center]
+        if cexit: iexit -= spliceable.start_of_chain[cexit]
+        assert center or cexit
+        rest = list(chains.values())
+        if center: rest.remove(chains[center])
+        if center == cexit:
+            assert len(rest) + 1 == len(chains)
+            p = chains[center]
+            # print('make_pose_chains same enter', ienter, pad_entry)
+            p = trim_pose(p, ienter, self.entrypol, pad_entry)
+            iexit1 = iexit
+            if self.exitpol is 'C':
+                iexit1 -= len(chains[center]) - len(p)
+            # print('iexit', iexit, iexit1)
+            # print('center', len(chains[center]), 'p', len(p))
+            # print('make_pose_chains same exit', iexit, iexit1, pad_exit)
+            p = trim_pose(p, iexit1, self.exitpol, pad_exit)
+            enex, rest = [p], rest
+        else:
+            if cexit: rest.remove(chains[cexit])
+            penter = [chains[center]] if center else []
+            pexit = [chains[cexit]] if cexit else []
+            if penter:
+                # print('make_pose_chains penter', ienter, pad_entry)
+                penter[0] = trim_pose(
+                    penter[0], ienter, self.entrypol, pad_entry)
+            if pexit:
+                # print('make_pose_chains pexit', ienter, pad_entry)
+                pexit[0] = trim_pose(pexit[0], iexit, self.exitpol, pad_exit)
+            enex, rest = penter + rest + pexit, []
+        if position is not None:
+            position = rcl.to_rosetta_stub(position)
+            enex = [p.clone() for p in enex]
+            rest = [p.clone() for p in rest]
+            for p in it.chain(enex, rest):
+                ros.protocols.sic_dock.xform_pose(p, position)
+        return enex, rest
 
 
 class Worms:
@@ -295,15 +423,16 @@ class Worms:
     def __init___(self):
         return len(self.scores)
 
-    def pose(self, which, align=True, withend=True, **kw):
+    def pose_WRONG(self, which, align=True, withend=True, **kw):
         if hasattr(which, '__iter__'):
-            return (self.pose(w) for w in which)
+            return (self.pose_WRONG(w) for w in which)
         pose = rcl.Pose()
         for iseg, seg in enumerate(self.segments):
             i = self.indices[which][iseg]
             x = self.positions[which][iseg]
             if withend or iseg + 1 < len(self.segments):
-                pose = seg.make_pose(i, position=x, append_to=pose, **kw)
+                pose = seg.make_pose_singlechain(
+                    i, position=x, append_to=pose, **kw)
         if align:
             align = [c.canonical_alignment(self.positions[which])
                      for c in self.criteria]
@@ -312,6 +441,40 @@ class Worms:
             if len(align) == 1:
                 x = rcl.to_rosetta_stub(align[0])
                 ros.protocols.sic_dock.xform_pose(pose, x)
+        return pose
+
+    def pose(self, which, align=True, withend=True, join=True):
+        rmlower = ros.core.pose.remove_lower_terminus_type_from_pose_residue
+        rmupper = ros.core.pose.remove_upper_terminus_type_from_pose_residue
+        if hasattr(which, '__iter__'):
+            return (self.pose_WRONG(w) for w in which)
+        entryexits = [seg.make_pose_chains(self.indices[which][iseg],
+                                           self.positions[which][iseg],
+                                           pad_exit=-1)
+                      for iseg, seg in enumerate(self.segments)]
+        entryexits, rest = zip(*entryexits)
+        chainslist = reorder_spliced_as_N_to_C(
+            entryexits, [s.entrypol for s in self.segments[1:]])
+        pose = ros.core.pose.Pose()
+        for chains in chainslist:
+            ros.core.pose.append_pose_to_pose(pose, chains[0], True)
+            for chain in chains[1:]:
+                rmupper(pose, len(pose))
+                rmlower(chain, 1)
+                print("Will needs to fix bb O/H position!")
+                ros.core.pose.append_pose_to_pose(pose, chain, not join)
+        for chains in rest:
+            for chain in chains:
+                ros.core.pose.append_pose_to_pose(pose, chain, True)
+        if align:
+            align = [c.canonical_alignment(self.positions[which])
+                     for c in self.criteria]
+            align = [x for x in align if x is not None]
+            assert len(align) < 2  # should this be allowed?
+            if len(align) == 1:
+                x = rcl.to_rosetta_stub(align[0])
+                ros.protocols.sic_dock.xform_pose(pose, x)
+        assert worst_CN_connect(pose) < 0.5
         return pose
 
     def __len__(self):
@@ -341,8 +504,8 @@ def _grow_chunk(samp, segpos, conpos, segs, end, criteria, thresh, matchlast):
             bidA = segs[matchlast].bodyid
             bidB = segs[-1].bodyid[samp[-1]]
             idx = (slice(None),) * matchlast + (bidA == bidB,)
-            segpos = segpos[:matchlast] + [x[idx] for x in segpos[matchlast:]]
-            conpos = conpos[:matchlast] + [x[idx] for x in conpos[matchlast:]]
+            segpos = segpos[: matchlast] + [x[idx] for x in segpos[matchlast:]]
+            conpos = conpos[: matchlast] + [x[idx] for x in conpos[matchlast:]]
             idxmap = np.where(bidA == bidB)[0]
         elif segs[matchlast].bodyid[samp[matchlast - ndimchunk]] != bidB:
             return  # last body doesn't match for this whole chunk
@@ -356,9 +519,9 @@ def _grow_chunk(samp, segpos, conpos, segs, end, criteria, thresh, matchlast):
     sampidx = tuple(np.repeat(i, len(ilow0[0])) for i in samp)
     lowpostmp = []
     for iseg in range(len(segpos)):
-        ilow = ilow0[:iseg + 1] + (0,) * (segpos[0].ndim - 2 - (iseg + 1))
+        ilow = ilow0[: iseg + 1] + (0,) * (segpos[0].ndim - 2 - (iseg + 1))
         lowpostmp.append(segpos[iseg][ilow])
-    ilow1 = (ilow0 if matchlast is None else ilow0[:matchlast] +
+    ilow1 = (ilow0 if matchlast is None else ilow0[: matchlast] +
              (idxmap[ilow0[matchlast]],) + ilow0[matchlast + 1:])
     return score[ilow0], np.array(ilow1 + sampidx).T, np.stack(lowpostmp, 1)
 
