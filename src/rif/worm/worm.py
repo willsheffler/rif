@@ -476,8 +476,14 @@ def _grow_chunks(ijob, context):
             for i in range(3)] if chunk else None
 
 
-def grow(segments, criteria, *, thresh=2, expert=False, memlim=1e6,
-         executor=None, max_workers=None, debug=False, jobmult=32):
+def grow(segments, criteria, *, thresh=2, expert=0, memlim=1e6,
+         executor=None, max_workers=None, debug=0, jobmult=32, verbose=0):
+    if verbose:
+        print('grow')
+        for i, seg in enumerate(segments):
+            print(' segment', i, 'enter:', seg.entrypol, 'exit:', seg.exitpol)
+            for sp in seg.spliceables:
+                print('   ', sp)
     criteria = [criteria] if isinstance(criteria, WormCriteria) else criteria
     # checks and setup
     if segments[0].entrypol is not None:

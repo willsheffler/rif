@@ -474,19 +474,13 @@ def test_multichain_mixed_pol(c2pose, c3pose, curved_helix_pose):
     assert residue_sym_err(w.pose(0), 60, 2, 71, 9) < 2
 
 
-@pytest.mark.xfail
 @pytest.mark.skipif('not rcl.HAVE_PYROSETTA')
-def test_multichain_reveres_pol(c2pose, curved_helix_pose):
-    helix = Spliceable(
-        curved_helix_pose, sites=[((1, 3,), 'N'), ((10, 11, 13), 'C')])
-    dimer = Spliceable(c2pose, sites=[('1,:2', 'N'), ('1,-1:', 'C'),
-                                      ('2,:2', 'N'), ('2,-1:', 'C')])
-    segments = [Segment([helix], exit='C'),
-                Segment([helix], entry='N', exit='C'),
-                Segment([dimer], entry='N', exit='N'),
-                Segment([helix], entry='C', exit='N'),
-                Segment([helix], entry='C'), ]
-    worms = grow(segments, SegmentSym('C2'), thresh=1)
-    # showme(worms.pose(0))
-    assert len(worms)
-    # assert residue_sym_err(wnc.pose(0), 120, 2, 54, 8) < 0.5
+def test_multichain_db(c2pose, c3pose, curved_helix_pose):
+    helix = Spliceable(curved_helix_pose, [(':4', 'N'), ('-4:', "C")])
+    dimer = Spliceable(c2pose, sites=[('1,-1:', 'C'), ('1,-1:', 'C')])
+    segments = [Segment([helix], exit='N'),
+                Segment([dimer], entry='C', exit='C'),
+                Segment([helix], entry='N')]
+    w = grow(segments, SegmentSym('C4'), thresh=20)
+    with pytest.raises(ValueError):
+        showme(w.pose(0))
