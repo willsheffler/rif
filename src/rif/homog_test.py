@@ -326,9 +326,6 @@ def test_align_around_axis():
     x = hrot(axis, ang)
     v = x @ u
     uprime = align_around_axis(axis, u, v) @ u
-    print(v)
-    print(uprime)
-    print(angle(v, uprime))
     assert np.allclose(angle(v, uprime), 0, atol=1e-5)
 
 

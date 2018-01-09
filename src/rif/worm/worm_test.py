@@ -24,8 +24,8 @@ def show_with_axis(worms, idx=0):
     showsphere(cen)
 
 
-def show_with_z_axes(worms, idx=0):
-    pose = worms.pose(idx, align=0, end=1, only_connected=0)
+def show_with_z_axes(worms, idx=0, only_connected=0, **kw):
+    pose = worms.pose(idx, align=0, end=1, only_connected=only_connected, **kw)
     x_from = worms.positions[idx][worms.criteria[0].from_seg]
     x_to = worms.positions[idx][worms.criteria[0].to_seg]
     cen1 = x_from[..., :, 3]
@@ -68,7 +68,7 @@ def test_geom_check():
     randaxes = np.random.randn(1, 3)
 
     assert 0 == SX('c1', relweight=0).score([I, I])
-    assert 0.001 > abs(100 - SX('c1').score([I, rotx1rad], relweight=0))
+    assert 0.001 > abs(50 - SX('c1').score([I, rotx1rad], relweight=0))
     assert 1e-5 > abs(SX('c2', relweight=0).score([I, hrot([1, 0, 0], np.pi)]))
 
     score = Cyclic('c2', relweight=0).score([I, hrot(randaxes, np.pi)])
@@ -543,7 +543,7 @@ def test_multichain_db(c2pose, c1pose):
 
 
 @pytest.mark.skipif('not rcl.HAVE_PYROSETTA')
-def test_axes_intersect_D3(c2pose, c3pose, c1pose):
+def test_D3(c2pose, c3pose, c1pose):
     helix = Spliceable(c1pose, [(':4', 'N'), ('-4:', 'C')])
     dimer = Spliceable(c2pose, sites=[('1,:2', 'N'), ('1,-1:', 'C'),
                                       ('2,:2', 'N'), ('2,-1:', 'C')])
@@ -555,7 +555,7 @@ def test_axes_intersect_D3(c2pose, c3pose, c1pose):
                 Segment([helix], entry='N', exit='C'),
                 Segment([helix], entry='N', exit='C'),
                 Segment([dimer], entry='N')]
-    w = grow(segments, Dihedral(c2=-1, cx=0), thresh=10)
+    w = grow(segments, D3(c2=-1, c3=0), thresh=10)
     print(w.scores)
     # show_with_z_axes(w, 0)
     p = w.pose(0, only_connected=0)
@@ -569,10 +569,42 @@ def test_axes_intersect_D3(c2pose, c3pose, c1pose):
                 Segment([helix], entry='N', exit='C'),
                 Segment([helix], entry='N', exit='C'),
                 Segment([trimer], entry='N')]
-    w = grow(segments, Dihedral(c2=0, cx=-1), thresh=10)
+    w = grow(segments, D3(c2=0, c3=-1), thresh=10)
     print(w.scores)
     # show_with_z_axes(w, 0)
     p = w.pose(4, only_connected=0)
     # showme(p)
     assert 1 > residue_sym_err(p, 180, 1, 13, 6, axis=[1, 0, 0])
     assert 1 > residue_sym_err(p, 120, 56, 65, 6, axis=[0, 0, 1])
+
+
+@pytest.mark.xfail
+@pytest.mark.skipif('not rcl.HAVE_PYROSETTA')
+def test_tetrahedral(c2pose, c3pose, c1pose):
+    helix = Spliceable(c1pose, [(':1', 'N'), ('-4:', 'C')])
+    dimer = Spliceable(c2pose, sites=[('1,:2', 'N'), ('1,-1:', 'C'),
+                                      ('2,:2', 'N'), ('2,-1:', 'C')])
+    trimer = Spliceable(c3pose, sites=[('1,:1', 'N'), ('1,-2:', 'C'),
+                                       ('2,:2', 'N'), ('2,-2:', 'C'),
+                                       ('3,:1', 'N'), ('3,-2:', 'C')])
+    segments = [Segment([trimer], exit='C'),
+                Segment([helix], entry='N', exit='C'),
+                Segment([helix], entry='N', exit='C'),
+                Segment([helix], entry='N', exit='C'),
+                Segment([dimer], entry='N')]
+    w = grow(segments, Tetrahedral(c2=-1, c3=0), thresh=2)
+    print(w.scores)
+    # show_with_z_axes(w, 1, only_connected=1)
+    for i in range(len(w)):
+        p = w.pose(i, only_connected=1)
+        score = w.score0_sym(p)
+        print('score', score)
+        if score < 10:
+            # showme(p)
+            break
+    else:
+        print('no results pass!')
+    # showme(p)
+    # assert 1 > residue_sym_err(p, 180, 53, 65, 6, axis=[1, 0, 0])
+    # assert 1 > residue_sym_err(p, 120, 1, 10, 6, axis=[0, 0, 1])
+    assert 0

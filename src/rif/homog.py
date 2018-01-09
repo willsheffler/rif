@@ -151,7 +151,7 @@ def hnorm2(a):
 
 def hnormalized(a):
     a = np.asanyarray(a)
-    if a.shape[-1] == 3:
+    if (not a.shape and len(a) == 3) or (a.shape and a.shape[-1] == 3):
         a, tmp = np.zeros(a.shape[:-1] + (4,)), a
         a[..., :3] = tmp
     return a / hnorm(a)[..., None]
@@ -185,6 +185,10 @@ def angle(u, v):
     d = hdot(hnormalized(u), hnormalized(v))
     # todo: handle special cases... 1,-1
     return np.arccos(np.maximum(-1, np.minimum(1, d)))
+
+
+def angle_degrees(u, v):
+    return angle(u, v) * 180 / np.pi
 
 
 def random_ray(shape=(), cen=(0, 0, 0), sdev=1):
@@ -361,8 +365,9 @@ def align_vector(a, b):
 
 def align_vectors(a1, a2, b1, b2):
     "minimizes angular error"
-    aaxis = (hnormalized(a1) + hnormalized(a2)) / 2.0
-    baxis = (hnormalized(b1) + hnormalized(b2)) / 2.0
+    a1, a2, b1, b2 = (hnormalized(v) for v in (a1, a2, b1, b2))
+    aaxis = (a1 + a2) / 2.0
+    baxis = (b1 + b2) / 2.0
     Xmiddle = align_vector(aaxis, baxis)
     Xaround = align_around_axis(baxis, Xmiddle @ a1, b1)
     X = Xaround @ Xmiddle

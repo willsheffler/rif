@@ -1,6 +1,8 @@
 from numpy.linalg import inv
 from pyrosetta import rosetta as ros
+from pyrosetta.rosetta.core.scoring import ScoreFunctionFactory
 from rif import rcl, homog, vis
+from rif.sym import *
 from tqdm import tqdm
 import functools as ft
 import itertools as it
@@ -11,6 +13,7 @@ import sys
 import abc
 import numpy as np
 import multiprocessing
+
 
 identity44f4 = np.identity(4, dtype='f4')
 identity44f8 = np.identity(4, dtype='f8')
@@ -94,63 +97,106 @@ class WormCriteria(abc.ABC):
 
     def is_cyclic(self): return False
 
+    def sym_axes(self): return []
+
 
 class AxesIntersect(WormCriteria):
 
-    def __init__(self, from_seg=0, tgtaxis1=[0, 0, 1], tgtaxis2=[1, 0, 0], *,
-                 tol=1.0, lever=100, to_seg=-1):
+    def __init__(self, tgtaxis1, tgtaxis2, from_seg, *,
+                 tol=1.0, lever=20, to_seg=-1, extraaxes=[]):
         self.from_seg = from_seg
         self.tgtaxis1 = tgtaxis1
         self.tgtaxis2 = tgtaxis2
-        self.angle = homog.angle(tgtaxis1, tgtaxis2)
+        if len(self.tgtaxis1) == 2: self.tgtaxis1 += [0, 0, 0],
+        if len(self.tgtaxis2) == 2: self.tgtaxis2 += [0, 0, 0],
+        assert 3 == len(self.tgtaxis1)
+        assert 3 == len(self.tgtaxis2)
+        self.angle = homog.angle(tgtaxis1[1], tgtaxis2[1])
         self.tol = tol
         self.lever = lever
         self.to_seg = to_seg
         self.rot_tol = tol / lever
+        self.extraaxes = extraaxes
 
     def score(self, segpos, verbose=False, **kw):
         cen1 = segpos[self.from_seg][..., :, 3]
         cen2 = segpos[self.to_seg][..., :, 3]
-        axis1 = segpos[self.from_seg][..., :, 2]
-        axis2 = segpos[self.to_seg][..., :, 2]
-        dist = homog.line_line_distance_pa(cen1, axis1, cen2, axis2)
-        ang = np.arccos(np.abs(homog.hdot(axis1, axis2)))
+        ax1 = segpos[self.from_seg][..., :, 2]
+        ax2 = segpos[self.to_seg][..., :, 2]
+        dist = homog.line_line_distance_pa(cen1, ax1, cen2, ax2)
+        ang = np.arccos(np.abs(homog.hdot(ax1, ax2)))
         roterr2 = (ang - self.angle)**2
-        if verbose:
-            print('a1', axis1)
-            print('a2', axis2)
-            print('dot', homog.hdot(axis1, axis2))
-            print('ang', ang)
-            print('ang', self.angle)
         return np.sqrt(roterr2 / self.rot_tol**2 + (dist / self.tol)**2)
 
     def canonical_alignment(self, segpos, **hw):
         cen1 = segpos[self.from_seg][..., :, 3]
         cen2 = segpos[self.to_seg][..., :, 3]
-        axis1 = segpos[self.from_seg][..., :, 2]
-        axis2 = segpos[self.to_seg][..., :, 2]
-        p, q = homog.line_line_closest_points_pa(cen1, axis1, cen2, axis2)
+        ax1 = segpos[self.from_seg][..., :, 2]
+        ax2 = segpos[self.to_seg][..., :, 2]
+        p, q = homog.line_line_closest_points_pa(cen1, ax1, cen2, ax2)
         cen = (p + q) / 2
-        if 0.001 > abs(self.angle - np.pi / 2):
-            x = homog.align_vectors(axis1, axis2, self.tgtaxis1, self.tgtaxis2)
-            x[..., :, 3] = - x @ cen
-            return x
-        else:
-            raise NotImplementedError
+        x = homog.align_vectors(ax1, ax2, self.tgtaxis1[1], self.tgtaxis2[1])
+        x[..., :, 3] = - x @ cen
+        return x
+
+    def sym_axes(self):
+        return [self.tgtaxis1, self.tgtaxis2] + self.extraaxes
 
 
-def Dihedral(cx=0, c2=-1, **kw):
-    return AxesIntersect(cx, [0, 0, 1], [1, 0, 0], to_seg=c2, **kw)
+def D2(c2=0, c2b=-1, **kw):
+    return AxesIntersect((2, [0, 0, 1]), (2, [1, 0, 0]), c2, to_seg=c2b, **kw)
 
 
-def Tetrahedral(*args, **kw):
-    return AxesIntersect(*args, tgtaxis1=[0, 0, 1], tgtaxis2=[1, 0, 0], **kw)
+def D3(c3=0, c2=-1, **kw):
+    return AxesIntersect((3, [0, 0, 1]), (2, [1, 0, 0]), c3, to_seg=c2, **kw)
+
+
+def D4(c4=0, c2=-1, **kw):
+    return AxesIntersect((4, [0, 0, 1]), (2, [1, 0, 0]), c4, to_seg=c2, **kw)
+
+
+def D5(c5=0, c2=-1, **kw):
+    return AxesIntersect((5, [0, 0, 1]), (2, [1, 0, 0]), c5, to_seg=c2, **kw)
+
+
+def D6(c6=0, c2=-1, **kw):
+    return AxesIntersect((6, [0, 0, 1]), (2, [1, 0, 0]), c6, to_seg=c2, **kw)
+
+
+def Tetrahedral(c3=0, c2=-1, **kw):
+    return AxesIntersect(from_seg=c3, to_seg=c2,
+                         tgtaxis1=(3, tetrahedral_axes[3]),
+                         tgtaxis2=(2, tetrahedral_axes[2]), **kw)
+
+
+def Octahedral(c4=None, c3=None, c2=None, **kw):
+    if 2 is not sum(c4 is None + c3 is None + c2 is None):
+        raise ValueError('must specify exactly two of c4, c3, c2')
+    if c2 is None: from_seg, to_seg, nfold1, nfold2, ex = c4, c3, 4, 3, 2
+    if c3 is None: from_seg, to_seg, nfold1, nfold2, ex = c4, c2, 4, 2, 3
+    if c4 is None: from_seg, to_seg, nfold1, nfold2, ex = c3, c2, 3, 2, 4
+    return AxesIntersect(from_seg=from_seg, to_seg=to_seg,
+                         tgtaxis1=(nfold1, octahedral_axes[nfold1]),
+                         tgtaxis2=(nfold2, octahedral_axes[nfold2]),
+                         extraaxes=[(ex, octahedral_axes[ex], [0, 0, 0])], **kw)
+
+
+def Icosahedral(c5=None, c3=None, c2=None, **kw):
+    if 2 is not sum(c5 is None + c3 is None + c2 is None):
+        raise ValueError('must specify exactly two of c5, c3, c2')
+    if c2 is None: from_seg, to_seg, nfold1, nfold2, ex = c5, c3, 5, 3, 2
+    if c3 is None: from_seg, to_seg, nfold1, nfold2, ex = c5, c2, 4, 2, 3
+    if c5 is None: from_seg, to_seg, nfold1, nfold2, ex = c3, c2, 3, 2, 5
+    return AxesIntersect(from_seg=from_seg, to_seg=to_seg,
+                         tgtaxis1=(nfold1, icosahedral_axes[nfold1]),
+                         tgtaxis2=(nfold2, icosahedral_axes[nfold2]),
+                         extraaxes=[(ex, icosahedral_axes[ex], [0, 0, 0])], **kw)
 
 
 class Cyclic(WormCriteria):
 
     def __init__(self, symmetry, from_seg=0, *, tol=1.0,
-                 origin_seg=None, lever=100.0, to_seg=-1,
+                 origin_seg=None, lever=50.0, to_seg=-1,
                  relweight=1.0):
         self.symmetry = symmetry
         self.tol = tol
@@ -454,18 +500,30 @@ class Worms:
     def __init___(self):
         return len(self.scores)
 
+    def score0_sym(self, pose):
+        sfxn = ScoreFunctionFactory.create_score_function('score0')
+        p = pose.clone()
+        ros.core.util.switch_to_residue_type_set(p, 'centroid')
+        for nfold, axis, cen in self.criteria[0].sym_axes():
+            q = p.clone()
+            position = rcl.to_rosetta_stub(hrot(axis, np.pi * 2 / nfold, cen))
+            ros.protocols.sic_dock.xform_pose(p, position)
+            ros.core.pose.append_pose_to_pose(p, q, True)
+        showme(p)
+        raise AssertionError
+        return sfxn(p)
+
     def pose(self, which, *, align=True, end=None, join=True,
              only_connected=None):
         "makes a pose for the ith worm"
         if hasattr(which, '__iter__'): return (self.pose(w) for w in which)
-        print("Will needs to fix bb O/H position!")
+        # print("Will needs to fix bb O/H position!")
         rm_lower_t = ros.core.pose.remove_lower_terminus_type_from_pose_residue
         rm_upper_t = ros.core.pose.remove_upper_terminus_type_from_pose_residue
         if end is None:
             end = not self.criteria[0].is_cyclic()
         if only_connected is None:
             only_connected = not self.criteria[0].is_cyclic()
-        print('only_connected:', only_connected)
         iend = None if end else -1
         entryexits = [seg.make_pose_chains(self.indices[which][iseg],
                                            self.positions[which][iseg])
