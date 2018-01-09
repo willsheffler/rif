@@ -105,6 +105,11 @@ def trimerC_pose(pdbdir):
 
 
 @pytest.fixture(scope='session')
+def c1pose(pdbdir):
+    return get_pose(pdbdir, 'c1.pdb')
+
+
+@pytest.fixture(scope='session')
 def c2pose(pdbdir):
     return get_pose(pdbdir, 'c2.pdb')
 

@@ -5,6 +5,15 @@ def guess_is_degrees(angle):
     return np.max(np.abs(angle)) > 2 * np.pi
 
 
+def is_broadcastable(shp1, shp2):
+    for a, b in zip(shp1[::-1], shp2[::-1]):
+        if a == 1 or b == 1 or a == b:
+            pass
+        else:
+            return False
+    return True
+
+
 def fast_axis_of(xforms):
     return np.stack((
         xforms[..., 2, 1] - xforms[..., 1, 2],
@@ -37,8 +46,10 @@ def rot(axis, angle, degrees='auto', dtype='f4', shape=(3, 3)):
     angle = np.array(angle, dtype=dtype)
     if degrees is 'auto': degrees = guess_is_degrees(angle)
     angle = angle * np.pi / 180.0 if degrees else angle
-    if axis.shape and angle.shape and (axis.shape[:-1] != angle.shape):
-        raise ValueError('axis and angle not compatible')
+    if axis.shape and angle.shape and not is_broadcastable(
+            axis.shape[:-1], angle.shape):
+        raise ValueError('axis and angle not compatible: ' +
+                         str(axis.shape) + ' ' + str(angle.shape))
     axis /= np.linalg.norm(axis, axis=-1)[..., np.newaxis]
     a = np.cos(angle / 2.0)
     tmp = axis * -np.sin(angle / 2)[..., np.newaxis]
@@ -73,14 +84,34 @@ def hrot(axis, angle, center=None, dtype='f4', **args):
     return r
 
 
+def hpoint(point):
+    point = np.asanyarray(point)
+    if point.shape[-1] == 4: return point
+    elif point.shape[-1] == 3:
+        r = np.ones(point.shape[:-1] + (4,))
+        r[..., :3] = point
+        return r
+    else: raise ValueError('point must len 3 or 4')
+
+
+def hvec(vec):
+    vec = np.asanyarray(vec)
+    if vec.shape[-1] == 4: return vec
+    elif vec.shape[-1] == 3:
+        r = np.zeros(vec.shape[:-1] + (4,))
+        r[..., :3] = vec
+        return r
+    else: raise ValueError('vec must len 3 or 4')
+
+
 def hray(origin, direction):
-    assert origin.shape[-1] in (3, 4)
-    assert direction.shape[-1] in (3, 4)
+    origin = hpoint(origin)
+    direction = hnormalized(direction)
     s = np.broadcast(origin, direction).shape
-    r = np.empty(s[:-1] + (2, 4))
-    r[..., 0, :origin.shape[-1]] = origin
-    r[..., 0, 3] = 1
-    r[..., 1, :] = hnormalized(direction)
+    r = np.empty(s[:-1] + (4, 2))
+    r[..., :origin.shape[-1], 0] = origin
+    r[..., 3, 0] = 1
+    r[..., :, 1] = direction
     return r
 
 
@@ -98,6 +129,14 @@ def hdot(a, b):
     a = np.asanyarray(a)
     b = np.asanyarray(b)
     return np.sum(a[..., :3] * b[..., :3], axis=-1)
+
+
+def hcross(a, b):
+    a = np.asanyarray(a)
+    b = np.asanyarray(b)
+    c = np.zeros(np.broadcast(a, b).shape, dtype=a.dtype)
+    c[..., :3] = np.cross(a[..., :3], b[..., :3])
+    return c
 
 
 def hnorm(a):
@@ -120,25 +159,55 @@ def hnormalized(a):
 
 def is_valid_rays(r):
     r = np.asanyarray(r)
-    if r.shape[-2:] != (2, 4): return False
-    if np.any(r[..., :, 3] != (1, 0)): return False
-    if np.any(abs(np.linalg.norm(r[..., 1, :3], axis=-1) - 1) > 0.000001):
+    if r.shape[-2:] != (4, 2): return False
+    if np.any(r[..., 3, :] != (1, 0)): return False
+    if np.any(abs(np.linalg.norm(r[..., :3, 1], axis=-1) - 1) > 0.000001):
         return False
     return True
 
 
-def random_rays(shape=(), cen=(0, 0, 0), sdev=1):
+def random_point(shape=()):
+    if isinstance(shape, int): shape = (shape,)
+    return hpoint(np.random.randn(*(shape + (3,))))
+
+
+def random_vec(shape=()):
+    if isinstance(shape, int): shape = (shape,)
+    return hvec(np.random.randn(*(shape + (3,))))
+
+
+def random_unit(shape=()):
+    if isinstance(shape, int): shape = (shape,)
+    return hnormalized(np.random.randn(*(shape + (3,))))
+
+
+def angle(u, v):
+    d = hdot(hnormalized(u), hnormalized(v))
+    # todo: handle special cases... 1,-1
+    return np.arccos(np.maximum(-1, np.minimum(1, d)))
+
+
+def random_ray(shape=(), cen=(0, 0, 0), sdev=1):
     cen = np.asanyarray(cen)
+    if cen.shape[-1] not in (3, 4):
+        raise ValueError('cen must be len 3 or 4')
+    shape = shape or cen.shape[:-1]
     cen = cen + np.random.randn(*(shape + (3,))) * sdev
     norm = np.random.randn(*(shape + (3,)))
     norm /= np.linalg.norm(norm, axis=-1)[..., np.newaxis]
-    a = np.stack([cen, norm], axis=-2)
-    b = np.tile(np.array([1, 0]).reshape(2, 1), a.shape[:-2] + (1, 1))
-    return np.concatenate([a, b], axis=-1)
+    r = np.zeros(shape + (4, 2))
+    r[..., :3, 0] = cen
+    r[..., 3, 0] = 1
+    r[..., :3, 1] = norm
+    return r
 
 
-def random_xforms(shape=()):
-    raise NotImplementedError
+def random_xform(shape=()):
+    if isinstance(shape, int): shape = (shape,)
+    axis = random_unit(shape)
+    ang = np.random.rand(*shape) * np.pi  # todo: make uniform!
+    cen = random_point(shape)
+    return hrot(axis, ang, cen)
 
 
 def proj_perp(u, v):
@@ -148,31 +217,31 @@ def proj_perp(u, v):
 
 
 def point_in_plane(plane, pt):
-    return np.abs(hdot(plane[..., 1, :3], pt - plane[..., 0, :3])) < 0.000001
+    return np.abs(hdot(plane[..., :3, 1], pt - plane[..., :3, 0])) < 0.000001
 
 
 def ray_in_plane(plane, ray):
-    return (point_in_plane(plane, ray[..., 0, :3]) *
-            point_in_plane(plane, ray[..., 0, :3] + ray[..., 1, :3]))
+    assert ray.shape[-2:] == (4, 2)
+    return (point_in_plane(plane, ray[..., :3, 0]) *
+            point_in_plane(plane, ray[..., :3, 0] + ray[..., :3, 1]))
 
 
 def intersect_planes(plane1, plane2):
     """intersect_Planes: find the 3D intersection of two planes
-       Input:  two planes represented by rays shape=(..., 2, 4)
+       Input:  two planes represented by rays shape=(..., 4, 2)
        Output: *L = the intersection line (when it exists)
-       Return: rays shape=(...,2,4), status
+       Return: rays shape=(...,4,2), status
                0 = intersection returned
                1 = disjoint (no intersection)
                2 = the two planes coincide
-
     """
     if not is_valid_rays(plane1): raise ValueError('invalid plane1')
     if not is_valid_rays(plane2): raise ValueError('invalid plane2')
     shape1, shape2 = np.array(plane1.shape), np.array(plane2.shape)
     if np.any((shape1 != shape2) * (shape1 != 1) * (shape2 != 1)):
         raise ValueError('incompatible shapes for plane1, plane2:')
-    p1, n1 = plane1[..., 0, :3], plane1[..., 1, :3]
-    p2, n2 = plane2[..., 0, :3], plane2[..., 1, :3]
+    p1, n1 = plane1[..., :3, 0], plane1[..., :3, 1]
+    p2, n2 = plane2[..., :3, 0], plane2[..., :3, 1]
     shape = tuple(np.maximum(plane1.shape, plane2.shape))
     u = np.cross(n1, n2)
     abs_u = np.abs(u)
@@ -221,4 +290,86 @@ def axis_ang_cen_of(xforms):
     plane1 = hray(c1, n1)
     plane2 = hray(c2, n2)
     isect, status = intersect_planes(plane1, plane2)
-    return axis, angle, isect[..., 0, :]
+    return axis, angle, isect[..., :, 0]
+
+
+def line_line_distance_pa(pt1, ax1, pt2, ax2):
+    # point1, point2 = hpoint(point1), hpoint(point2)
+    # axis1, axis2 = hnormalized(axis1), hnormalized(axis2)
+    n = abs(hdot(pt2 - pt1, hcross(ax1, ax2)))
+    d = hnorm(hcross(ax1, ax2))
+    r = np.zeros_like(n)
+    i = abs(d) > 0.00001
+    r[i] = n[i] / d[i]
+    pp = hnorm(proj_perp(ax1, pt2 - pt1))
+    return np.where(np.abs(hdot(ax1, ax2)) > 0.9999, pp, r)
+
+
+def line_line_distance(ray1, ray2):
+    pt1, pt2 = ray1[..., :, 0], ray2[..., :, 0]
+    ax1, ax2 = ray1[..., :, 1], ray2[..., :, 1]
+    return line_line_distance_pa(pt1, ax1, pt2, ax2)
+
+
+def line_line_closest_points_pa(pt1, ax1, pt2, ax2, verbose=0):
+    C21 = pt2 - pt1
+    M = hcross(ax1, ax2)
+    m2 = np.sum(M**2, axis=-1)[..., None]
+    R = hcross(C21, M / m2)
+    t1 = hdot(R, ax2)[..., None]
+    t2 = hdot(R, ax1)[..., None]
+    Q1 = pt1 - t1 * ax1
+    Q2 = pt2 - t2 * ax2
+    if verbose:
+        print('C21', C21)
+        print('M', M)
+        print('m2', m2)
+        print('R', R)
+        print('t1', t1)
+        print('t2', t2)
+        print('Q1', Q1)
+        print('Q2', Q2)
+    return Q1, Q2
+
+
+def line_line_closest_points(ray1, ray2, verbose=0):
+    "currently errors if ax1==ax2"
+    # pt1, pt2 = hpoint(pt1), hpoint(pt2)
+    # ax1, ax2 = hnormalized(ax1), hnormalized(ax2)
+    pt1, pt2 = ray1[..., :, 0], ray2[..., :, 0]
+    ax1, ax2 = ray1[..., :, 1], ray2[..., :, 1]
+    return line_line_closest_points_pa(pt1, ax1, pt2, ax2)
+
+
+def dihedral(p1, p2, p3, p4):
+    p1, p2, p3, p4 = hpoint(p1), hpoint(p2), hpoint(p3), hpoint(p4)
+    a = hnormalized(p2 - p1)
+    b = hnormalized(p3 - p2)
+    c = hnormalized(p4 - p3)
+    x = hdot(a, b) * hdot(b, c) - hdot(a, c)
+    y = hdot(a, hcross(b, c))
+    return np.arctan2(y, x)
+
+
+def align_around_axis(axis, u, v):
+    return hrot(axis, -dihedral(u, axis, [0, 0, 0, 0], v))
+
+
+def align_vector(a, b):
+    return hrot((hnormalized(a) + hnormalized(b)) / 2, np.pi)
+
+
+def align_vectors(a1, a2, b1, b2):
+    "minimizes angular error"
+    aaxis = (hnormalized(a1) + hnormalized(a2)) / 2.0
+    baxis = (hnormalized(b1) + hnormalized(b2)) / 2.0
+    Xmiddle = align_vector(aaxis, baxis)
+    Xaround = align_around_axis(baxis, Xmiddle @ a1, b1)
+    X = Xaround @ Xmiddle
+    assert (angle(b1, a1) + angle(b2, a2)
+            ) >= (angle(b1, X @ a1) + angle(b2, X @ a2))
+    return X
+    # not so good if angles don't match:
+    # xa = Xform().from_two_vecs(a2,a1)
+    # xb = Xform().from_two_vecs(b2,b1)
+    # return xb/xa

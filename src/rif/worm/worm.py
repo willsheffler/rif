@@ -86,23 +86,72 @@ class WormCriteria(abc.ABC):
     @abc.abstractmethod
     def score(self): pass
 
-    def canonical_alignment(self): return
+    def canonical_alignment(self, *args, **kw): return identity44f4
 
     def last_body_same_as(self): return
 
     def check_topolopy(self, segments): return
 
+    def is_cyclic(self): return False
+
 
 class AxesIntersect(WormCriteria):
 
-    def __init__(self, *args, **kw):
-        raise NotImplementedError
+    def __init__(self, from_seg=0, tgtaxis1=[0, 0, 1], tgtaxis2=[1, 0, 0], *,
+                 tol=1.0, lever=100, to_seg=-1):
+        self.from_seg = from_seg
+        self.tgtaxis1 = tgtaxis1
+        self.tgtaxis2 = tgtaxis2
+        self.angle = homog.angle(tgtaxis1, tgtaxis2)
+        self.tol = tol
+        self.lever = lever
+        self.to_seg = to_seg
+        self.rot_tol = tol / lever
+
+    def score(self, segpos, verbose=False, **kw):
+        cen1 = segpos[self.from_seg][..., :, 3]
+        cen2 = segpos[self.to_seg][..., :, 3]
+        axis1 = segpos[self.from_seg][..., :, 2]
+        axis2 = segpos[self.to_seg][..., :, 2]
+        dist = homog.line_line_distance_pa(cen1, axis1, cen2, axis2)
+        ang = np.arccos(np.abs(homog.hdot(axis1, axis2)))
+        roterr2 = (ang - self.angle)**2
+        if verbose:
+            print('a1', axis1)
+            print('a2', axis2)
+            print('dot', homog.hdot(axis1, axis2))
+            print('ang', ang)
+            print('ang', self.angle)
+        return np.sqrt(roterr2 / self.rot_tol**2 + (dist / self.tol)**2)
+
+    def canonical_alignment(self, segpos, **hw):
+        cen1 = segpos[self.from_seg][..., :, 3]
+        cen2 = segpos[self.to_seg][..., :, 3]
+        axis1 = segpos[self.from_seg][..., :, 2]
+        axis2 = segpos[self.to_seg][..., :, 2]
+        p, q = homog.line_line_closest_points_pa(cen1, axis1, cen2, axis2)
+        cen = (p + q) / 2
+        if 0.001 > abs(self.angle - np.pi / 2):
+            x = homog.align_vectors(axis1, axis2, self.tgtaxis1, self.tgtaxis2)
+            x[..., :, 3] = - x @ cen
+            return x
+        else:
+            raise NotImplementedError
 
 
-class SegmentSym(WormCriteria):
+def Dihedral(cx=0, c2=-1, **kw):
+    return AxesIntersect(cx, [0, 0, 1], [1, 0, 0], to_seg=c2, **kw)
+
+
+def Tetrahedral(*args, **kw):
+    return AxesIntersect(*args, tgtaxis1=[0, 0, 1], tgtaxis2=[1, 0, 0], **kw)
+
+
+class Cyclic(WormCriteria):
 
     def __init__(self, symmetry, from_seg=0, *, tol=1.0,
-                 origin_seg=None, lever=100.0, to_seg=-1):
+                 origin_seg=None, lever=100.0, to_seg=-1,
+                 relweight=1.0):
         self.symmetry = symmetry
         self.tol = tol
         self.from_seg = from_seg
@@ -110,6 +159,7 @@ class SegmentSym(WormCriteria):
         self.lever = lever
         self.to_seg = to_seg
         self.rot_tol = tol / lever
+        self.relweight = relweight if abs(relweight) > 0.001 else None
         if self.symmetry[0] in 'cC':
             self.nfold = int(self.symmetry[1:])
             if self.nfold <= 0:
@@ -119,7 +169,7 @@ class SegmentSym(WormCriteria):
         assert not origin_seg
         if self.tol <= 0: raise ValueError('tol should be > 0')
 
-    def score(self, segpos, *, debug=False, **kwarge):
+    def score(self, segpos, *, verbose=False, **kw):
         x_from = segpos[self.from_seg]
         x_to = segpos[self.to_seg]
         xhat = x_to @ inv(x_from)
@@ -132,15 +182,34 @@ class SegmentSym(WormCriteria):
             roterrsq = angle**2
         else:
             axis, angle = homog.axis_angle_of(xhat)
-            carterrsq = np.sum(trans * axis, axis=-1)**2
+            carterrsq = homog.hdot(trans, axis)**2
+            if self.relweight is not None:
+                distsq = np.sum(trans[..., :3]**2, axis=-1)
+                relerrsq = carterrsq / distsq
+                relerrsq[np.isnan(relerrsq)] = 9e9
+                carterrsq += self.relweight * relerrsq  # too much of a hack??
+            if verbose:
+                print('axis', axis[0])
+                print('trans', trans[0])
+                print('dot trans', homog.hdot(trans, axis)[0])
+                print('ang', angle[0] * 180 / np.pi)
             roterrsq = (angle - self.symangle)**2
-        return np.sqrt(carterrsq / self.tol**2 + roterrsq / self.rot_tol**2)
+            # if verbose:
+            # print('cart', carterrsq)
+            # print('rote', roterrsq)
+            # print('ang', angle * 180 / np.pi)
+        return np.sqrt(carterrsq / self.tol**2 +
+                       roterrsq / self.rot_tol**2)
 
     def canonical_alignment(self, segpos, **kwargs):
         x_from = segpos[self.from_seg]
         x_to = segpos[self.to_seg]
         xhat = x_to @ inv(x_from)
         axis, ang, cen = homog.axis_ang_cen_of(xhat)
+        # print('aln', axis)
+        # print('aln', ang * 180 / np.pi)
+        # print('aln', cen)
+        # print('aln', xhat[..., :, 3])
         dotz = homog.hdot(axis, [0, 0, 1])[..., None]
         tgtaxis = np.where(dotz > 0, [0, 0, 1, 0], [0, 0, -1, 0])
         align = homog.hrot((axis + tgtaxis) / 2, np.pi, cen)
@@ -156,6 +225,8 @@ class SegmentSym(WormCriteria):
         # fromseg = segments[self.from_seg]
         # toseg = segments[self.to_seg]
         return
+
+    def is_cyclic(self): return True
 
 
 class SpliceSite:
@@ -383,28 +454,36 @@ class Worms:
     def __init___(self):
         return len(self.scores)
 
-    def pose(self, which, align=True, withend=True, join=True):
+    def pose(self, which, *, align=True, end=None, join=True,
+             only_connected=None):
         "makes a pose for the ith worm"
-        if hasattr(which, '__iter__'):
-            return (self.pose(w) for w in which)
+        if hasattr(which, '__iter__'): return (self.pose(w) for w in which)
         print("Will needs to fix bb O/H position!")
         rm_lower_t = ros.core.pose.remove_lower_terminus_type_from_pose_residue
         rm_upper_t = ros.core.pose.remove_upper_terminus_type_from_pose_residue
+        if end is None:
+            end = not self.criteria[0].is_cyclic()
+        if only_connected is None:
+            only_connected = not self.criteria[0].is_cyclic()
+        print('only_connected:', only_connected)
+        iend = None if end else -1
         entryexits = [seg.make_pose_chains(self.indices[which][iseg],
                                            self.positions[which][iseg])
-                      for iseg, seg in enumerate(self.segments)]
+                      for iseg, seg in enumerate(self.segments[:iend])]
         entryexits, rest = zip(*entryexits)
         chainslist = reorder_spliced_as_N_to_C(
-            entryexits, [s.entrypol for s in self.segments[1:]])
+            entryexits, [s.entrypol for s in self.segments[1:iend]])
         pose = ros.core.pose.Pose()
         for chains in chainslist:
+            if only_connected and len(chains) is 1: continue
             ros.core.pose.append_pose_to_pose(pose, chains[0], True)
             for chain in chains[1:]:
                 rm_upper_t(pose, len(pose))
                 rm_lower_t(chain, 1)
                 ros.core.pose.append_pose_to_pose(pose, chain, not join)
-        for chain in it.chain(*rest):
-            ros.core.pose.append_pose_to_pose(pose, chain, True)
+        if not only_connected:
+            for chain in it.chain(*rest):
+                ros.core.pose.append_pose_to_pose(pose, chain, True)
         if align:
             align = [c.canonical_alignment(self.positions[which])
                      for c in self.criteria]
@@ -477,7 +556,7 @@ def _grow_chunks(ijob, context):
 
 
 def grow(segments, criteria, *, thresh=2, expert=0, memlim=1e6,
-         executor=None, max_workers=None, debug=0, jobmult=32, verbose=0):
+         executor=None, max_workers=None, verbose=0, jobmult=32):
     if verbose:
         print('grow')
         for i, seg in enumerate(segments):
@@ -538,7 +617,7 @@ def grow(segments, criteria, *, thresh=2, expert=0, memlim=1e6,
     scores = scores[order]
     lowidx = np.concatenate([c[1] for c in chunks])[order]
     lowpos = np.concatenate([c[2] for c in chunks])[order]
-    score_check = sum(c.score([lowpos[:, i]
-                               for i in range(len(segments))]) for c in criteria)
+    lowposlist = [lowpos[:, i] for i in range(len(segments))]
+    score_check = sum(c.score(lowposlist, verbose=verbose) for c in criteria)
     assert np.allclose(score_check, scores)
     return Worms(segments, scores, lowidx, lowpos, criteria)

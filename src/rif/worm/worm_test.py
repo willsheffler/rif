@@ -9,6 +9,38 @@ if rcl.HAVE_PYROSETTA:
 from concurrent.futures import ThreadPoolExecutor, ProcessPoolExecutor
 
 
+def show_with_axis(worms, idx=0):
+    pose = worms.pose(idx, align=0, end=1)
+    x_from = worms.positions[idx][worms.criteria[0].from_seg]
+    x_to = worms.positions[idx][worms.criteria[0].to_seg]
+    x = x_to @ inv(x_from)
+    axis, ang, cen = axis_ang_cen_of(x)
+    print(ang)
+    axis *= 100
+    showme(pose)
+    import pymol
+    pymol.finish_launching()
+    showline(axis, cen)
+    showsphere(cen)
+
+
+def show_with_z_axes(worms, idx=0):
+    pose = worms.pose(idx, align=0, end=1, only_connected=0)
+    x_from = worms.positions[idx][worms.criteria[0].from_seg]
+    x_to = worms.positions[idx][worms.criteria[0].to_seg]
+    cen1 = x_from[..., :, 3]
+    cen2 = x_to[..., :, 3]
+    axis1 = x_from[..., :, 2] * 100
+    axis2 = x_to[..., :, 2] * 100
+    showme(pose)
+    import pymol
+    pymol.finish_launching()
+    showline(axis1, cen1)
+    showsphere(cen1)
+    showline(axis2, cen2)
+    showsphere(cen2)
+
+
 @pytest.mark.skipif('not rcl.HAVE_PYROSETTA')
 def test_SpliceSite(pose):
     assert len(pose) == 7
@@ -29,30 +61,31 @@ def test_SpliceSite(pose):
 
 
 def test_geom_check():
-    SX = SegmentSym
+    SX = Cyclic
     I = np.identity(4, 'f4')
     rotx1rad = hrot([1, 0, 0], 1)
     transx10 = htrans([10, 0, 0])
     randaxes = np.random.randn(1, 3)
 
-    assert 0 == SX('c1').score([I, I])
-    assert 0.001 > abs(100 - SX('c1').score([I, rotx1rad]))
-    assert 1e-5 > abs(SX('c2').score([I, hrot([1, 0, 0], np.pi)]))
+    assert 0 == SX('c1', relweight=0).score([I, I])
+    assert 0.001 > abs(100 - SX('c1').score([I, rotx1rad], relweight=0))
+    assert 1e-5 > abs(SX('c2', relweight=0).score([I, hrot([1, 0, 0], np.pi)]))
 
-    score = SegmentSym('c2').score([I, hrot(randaxes, np.pi)])
+    score = Cyclic('c2', relweight=0).score([I, hrot(randaxes, np.pi)])
     assert_allclose(0, score, atol=1e-5, rtol=1)
 
-    score = SegmentSym('c3').score([I, hrot(randaxes, np.pi * 2 / 3)])
+    score = Cyclic('c3', relweight=0).score(
+        [I, hrot(randaxes, np.pi * 2 / 3)])
     assert_allclose(0, score, atol=1e-5, rtol=1)
 
-    score = SegmentSym('c4').score([I, hrot(randaxes, np.pi / 2)])
+    score = Cyclic('c4', relweight=0).score([I, hrot(randaxes, np.pi / 2)])
     assert_allclose(0, score, atol=1e-5, rtol=1)
 
 
 @pytest.mark.skipif('not rcl.HAVE_PYROSETTA')
-def test_segment_geom(curved_helix_pose):
+def test_segment_geom(c1pose):
     "currently only a basic sanity checkb... only checks translation distances"
-    body = curved_helix_pose
+    body = c1pose
     stubs = rcl.bbstubs(body)['raw']
     assert stubs.shape == (body.size(), 4, 4)
 
@@ -126,50 +159,50 @@ def test_segment_geom(curved_helix_pose):
 
 
 @pytest.mark.skipif('not rcl.HAVE_PYROSETTA')
-def test_grow_cycle(curved_helix_pose):
-    helix = Spliceable(curved_helix_pose, sites=[(1, 'N'), ('-4:', 'C')])
+def test_grow_cycle(c1pose):
+    helix = Spliceable(c1pose, sites=[(1, 'N'), ('-4:', 'C')])
     segments = ([Segment([helix], exit='C'), ] +
                 [Segment([helix], 'N', 'C')] * 3 +
                 [Segment([helix], entry='N')])
-    worms = grow(segments, SegmentSym('C2', lever=20))
+    worms = grow(segments, Cyclic('C2', lever=20), thresh=20)
     assert 0.1411 < np.min(worms.scores) < 0.1412
 
 
 @pytest.mark.skipif('not rcl.HAVE_PYROSETTA')
-def test_grow_cycle_thread_pool(curved_helix_pose):
-    helix = Spliceable(curved_helix_pose, sites=[(1, 'N'), ('-4:', 'C')])
+def test_grow_cycle_thread_pool(c1pose):
+    helix = Spliceable(c1pose, sites=[(1, 'N'), ('-4:', 'C')])
     segments = ([Segment([helix], exit='C'), ] +
                 [Segment([helix], 'N', 'C')] * 3 +
                 [Segment([helix], entry='N')])
-    worms = grow(segments, SegmentSym('C2', lever=20),
+    worms = grow(segments, Cyclic('C2', lever=20),
                  executor=ThreadPoolExecutor, max_workers=2)
     assert 0.1411 < np.min(worms.scores) < 0.1412
     assert np.sum(worms.scores < 0.1412) == 4
 
 
 @pytest.mark.skipif('not rcl.HAVE_PYROSETTA')
-def test_grow_cycle_process_pool(curved_helix_pose):
-    helix = Spliceable(curved_helix_pose, sites=[(1, 'N'), ('-4:', 'C')])
+def test_grow_cycle_process_pool(c1pose):
+    helix = Spliceable(c1pose, sites=[(1, 'N'), ('-4:', 'C')])
     segments = ([Segment([helix], exit='C'), ] +
                 [Segment([helix], 'N', 'C')] * 3 +
                 [Segment([helix], entry='N')])
-    worms = grow(segments, SegmentSym('C2', lever=20),
+    worms = grow(segments, Cyclic('C2', lever=20),
                  executor=ProcessPoolExecutor, max_workers=2)
     assert 0.1411 < np.min(worms.scores) < 0.1412
     assert np.sum(worms.scores < 0.1412) == 4
 
 
 @pytest.mark.skipif('not rcl.HAVE_PYROSETTA')
-def test_grow_errors(curved_helix_pose):
+def test_grow_errors(c1pose):
     nsplice = SpliceSite(sele=[1, 2, 3, 4, 5, 6], polarity='N')
     csplice = SpliceSite(sele=[13, ], polarity='C')
-    spliceable1 = Spliceable(body=curved_helix_pose, sites=[nsplice, csplice])
-    spliceable2 = Spliceable(body=curved_helix_pose, sites=[nsplice, csplice])
+    spliceable1 = Spliceable(body=c1pose, sites=[nsplice, csplice])
+    spliceable2 = Spliceable(body=c1pose, sites=[nsplice, csplice])
     spliceables = [spliceable1]
     segments = ([Segment(spliceables, exit='C'), ] +
                 [Segment(spliceables, 'N', 'C'), ] * 3 +
                 [Segment(spliceables, entry='N'), ])
-    checkc3 = SegmentSym('C2', from_seg=0, to_seg=-1)
+    checkc3 = Cyclic('C2', from_seg=0, to_seg=-1)
 
     # make sure incorrect begin/end throws error
     with pytest.raises(ValueError):
@@ -185,27 +218,27 @@ def test_grow_errors(curved_helix_pose):
 
 
 @pytest.mark.skipif('not rcl.HAVE_PYROSETTA')
-def test_memlimit(curved_helix_pose):
-    helix = Spliceable(curved_helix_pose, sites=[((1, 2), 'N'), ('-2:', 'C')])
+def test_memlimit(c1pose):
+    helix = Spliceable(c1pose, sites=[((1, 2), 'N'), ('-2:', 'C')])
     segments = ([Segment([helix], exit='C'), ] +
                 [Segment([helix], 'N', 'C')] * 3 +
                 [Segment([helix], entry='N')])
     for i in range(2, 7):
-        w1 = grow(segments, SegmentSym('c2'), memlim=10**i, thresh=30)
+        w1 = grow(segments, Cyclic('c2'), memlim=10**i, thresh=30)
         assert i == 2 or np.allclose(w0.scores, w1.scores)
         w0 = w1
 
 
 @pytest.mark.skipif('not rcl.HAVE_PYROSETTA')
-def test_pose_alignment_0(curved_helix_pose):
-    helix = Spliceable(curved_helix_pose, sites=[(1, 'N'), ('-4:', 'C')])
+def test_pose_alignment_0(c1pose):
+    helix = Spliceable(c1pose, sites=[(1, 'N'), ('-4:', 'C')])
     segments = ([Segment([helix], exit='C'), ] +
                 [Segment([helix], 'N', 'C')] * 3 +
                 [Segment([helix], entry='N')])
-    w = grow(segments, SegmentSym('c2'), thresh=1)
+    w = grow(segments, Cyclic('c2'), thresh=1)
     assert len(w)
     assert tuple(w.indices[0]) in ((2, 1, 2, 0, 0), (1, 2, 0, 2, 0))
-    pose = w.pose(0, align=1, withend=1)
+    pose = w.pose(0, align=1, end=1)
     xyz0 = np.array([pose.residue(1).xyz(2)[i] for i in (0, 1, 2)] + [1])
     # resid 43 happens to be the symmetrically related one for this solution
     xyz1 = np.array([pose.residue(42).xyz(2)[i] for i in (0, 1, 2)] + [1])
@@ -213,33 +246,18 @@ def test_pose_alignment_0(curved_helix_pose):
     assert np.sum((xyz1 - xyz0)**2) < 0.1
 
 
-def show_with_axis(worms, idx=0):
-    pose = worms.pose(idx, align=0, withend=1)
-    showme(pose)
-    import pymol
-    pymol.finish_launching()
-    x_from = worms.positions[idx][worms.criteria[0].from_seg]
-    x_to = worms.positions[idx][worms.criteria[0].to_seg]
-    x = x_to @ inv(x_from)
-    axis, ang, cen = axis_ang_cen_of(x)
-    print(ang)
-    axis *= 100
-    showline(axis, cen)
-    showsphere(cen)
-
-
 @pytest.mark.skipif('not rcl.HAVE_PYROSETTA')
-def test_pose_alignment_1(curved_helix_pose):
-    helix = Spliceable(curved_helix_pose, sites=[(1, 'N'), ('-4:', 'C')])
+def test_pose_alignment_1(c1pose):
+    helix = Spliceable(c1pose, sites=[(1, 'N'), ('-4:', 'C')])
     segments = ([Segment([helix], exit='C'), ] +
                 [Segment([helix], 'N', 'C')] * 4 +
                 [Segment([helix], entry='N')])
-    c = SegmentSym('c2', from_seg=1)
+    c = Cyclic('c2', from_seg=1)
     w = grow(segments, c, thresh=1)
     assert len(w)
     # show_with_axis(w)
     # return
-    pose = w.pose(0, align=1, withend=1)
+    pose = w.pose(0, align=1, end=1)
     xyz0 = np.array([pose.residue(14).xyz(2)[i] for i in (0, 1, 2)] + [1])
     # resid 43 happens to be the symmetrically related one for this solution
     xyz1 = np.array([pose.residue(55).xyz(2)[i] for i in (0, 1, 2)] + [1])
@@ -248,12 +266,12 @@ def test_pose_alignment_1(curved_helix_pose):
 
 
 @pytest.mark.skipif('not rcl.HAVE_PYROSETTA')
-def test_body_same_as_last(curved_helix_pose):
-    helix = Spliceable(curved_helix_pose, sites=[(1, 'N'), ('-4:', 'C')])
+def test_body_same_as_last(c1pose):
+    helix = Spliceable(c1pose, sites=[(1, 'N'), ('-4:', 'C')])
     segments = ([Segment([helix, helix], exit='C'), ] +
                 [Segment([helix], 'N', 'C')] * 3 +
                 [Segment([helix, helix], entry='N')])
-    w = grow(segments, SegmentSym('c2'), thresh=1)
+    w = grow(segments, Cyclic('c2'), thresh=1)
     assert len(w)
     assert tuple(w.indices[0]) in ((2, 1, 2, 0, 0), (1, 2, 0, 2, 0))
     print(w.scores[0])
@@ -264,7 +282,7 @@ def test_body_same_as_last(curved_helix_pose):
                 [Segment([helix, helix], 'N', 'C'), ] +
                 [Segment([helix], 'N', 'C')] * 3 +
                 [Segment([helix, helix], entry='N')])
-    w = grow(segments, SegmentSym('c2', 1), thresh=1)
+    w = grow(segments, Cyclic('c2', 1), thresh=1)
     assert len(w)
     for i, s in zip(w.indices, w.scores):
         assert segments[1].bodyid[i[1]] == segments[-1].bodyid[i[-1]]
@@ -339,7 +357,6 @@ def test_reorder_spliced_as_N_to_C():
                 [8], [9, 0], [1], [2]])
 
 
-# @pytest.mark.xfail
 @pytest.mark.skipif('not rcl.HAVE_PYROSETTA')
 def test_make_pose_chains_dimer(c2pose):
     dimer = Spliceable(c2pose, sites=[('1,2:2', 'N'), ('2,3:3', 'N'),
@@ -411,13 +428,13 @@ def residue_coords(p, ir, n=3):
     return np.stack([c.x, c.y, c.z, 1] for c in crd)
 
 
-def residue_sym_err(p, ang, ir, jr, n=1):
+def residue_sym_err(p, ang, ir, jr, n=1, axis=[0, 0, 1]):
     mxdist = 0
     for i in range(n):
         xyz0 = residue_coords(p, ir + i)
         xyz1 = residue_coords(p, jr + i)
-        xyz3 = hrot([0, 0, 1], ang) @ xyz1.T
-        xyz4 = hrot([0, 0, 1], -ang) @ xyz1.T
+        xyz3 = hrot(axis, ang) @ xyz1.T
+        xyz4 = hrot(axis, -ang) @ xyz1.T
         mxdist = max(mxdist, min(
             np.max(np.sum((xyz0 - xyz3.T)**2, axis=1)),
             np.max(np.sum((xyz0 - xyz4.T)**2, axis=1))))
@@ -425,62 +442,137 @@ def residue_sym_err(p, ang, ir, jr, n=1):
 
 
 @pytest.mark.skipif('not rcl.HAVE_PYROSETTA')
-def test_multichain_reveres_pol(c2pose, curved_helix_pose):
+def test_multichain_match_reveres_pol(c1pose, c2pose):
     helix = Spliceable(
-        curved_helix_pose, sites=[((1, 3,), 'N'), ((10, 11, 13), 'C')])
-    dimer = Spliceable(c2pose, sites=[('1,:2', 'N'), ('1,-1:', 'C'),
+        c1pose, sites=[((1, 2, 3,), 'N'), ((9, 10, 11, 13), 'C')])
+    dimer = Spliceable(c2pose, sites=[('1,:1', 'N'), ('1,-1:', 'C'),
                                       ('2,:2', 'N'), ('2,-1:', 'C')])
     segments = [Segment([helix], exit='C'),
                 Segment([helix], entry='N', exit='C'),
                 Segment([dimer], entry='N', exit='C'),
                 Segment([helix], entry='N', exit='C'),
                 Segment([helix], entry='N'), ]
-    wnc = grow(segments, SegmentSym('C3'), thresh=1)
+    wnc = grow(segments, Cyclic('C3', lever=20), thresh=1)
     assert len(wnc)
-    assert residue_sym_err(wnc.pose(0), 120, 2, 54, 8) < 0.5
+    assert wnc.scores[0] < 0.25
+    # print(wnc.indices[:5])
+    # print(wnc.scores)
+
+    # p = wnc.pose(0, align=1)
+    # showme(p)
+    # assert 0
+    # show_with_axis(wnc, 0)
+
+    # q = wnc.pose(4)
+    # showme(p, name='carterr')
+    # showme(q, name='angerr')
+    # assert residue_sym_err(wnc.pose(0), 120, 2, 54, b8) < 0.5
 
     segments = [Segment([helix], exit='N'),
                 Segment([helix], entry='C', exit='N'),
                 Segment([dimer], entry='C', exit='N'),
                 Segment([helix], entry='C', exit='N'),
                 Segment([helix], entry='C'), ]
-    wcn = grow(segments, SegmentSym('C3'), thresh=1)
-    assert residue_sym_err(wcn.pose(0), 120, 22, 35, 8) < 0.5
+    wcn = grow(segments, Cyclic('C3', lever=20), thresh=1)
+    # assert residue_sym_err(wcn.pose(0), 120, 22, 35, 8) < 0.5
 
     # N-to-C and C-to-N construction should be same
     assert np.allclose(wnc.scores, wcn.scores, atol=1e-3)
 
 
+@pytest.mark.xfail
 @pytest.mark.skipif('not rcl.HAVE_PYROSETTA')
-def test_multichain_mixed_pol(c2pose, c3pose, curved_helix_pose):
-    helix = Spliceable(curved_helix_pose, [(':4', 'N'), ((10, 12, 13), 'C')])
+def test_sym_bug(c1pose, c2pose):
+    helix = Spliceable(
+        c1pose, sites=[((1, 2, 3, 4,), 'N'), ((9, 10, 11, 13), 'C')])
+    dimer = Spliceable(c2pose, sites=[('1,:3', 'N'), ('1,-1:', 'C'),
+                                      ('2,:3', 'N'), ('2,-1:', 'C')])
+    segments = [Segment([helix], exit='C'),
+                Segment([helix], entry='N', exit='C'),
+                Segment([dimer], entry='N', exit='C'),
+                Segment([helix], entry='N', exit='C'),
+                Segment([helix], entry='N'), ]
+    wnc = grow(segments, Cyclic('C3', lever=200), thresh=1, verbose=1)
+    assert len(wnc)
+    print(wnc.scores)
+    p = wnc.pose(0, align=1)
+    # showme(p)
+    # show_with_axis(wnc, 0)
+
+    # q = wnc.pose(4)
+    # showme(p, name='carterr')
+    # showme(q, name='angerr')
+    assert residue_sym_err(wnc.pose(0), 120, 2, 54, b8) < 0.5
+    # assert 0
+
+
+@pytest.mark.skipif('not rcl.HAVE_PYROSETTA')
+def test_multichain_mixed_pol(c2pose, c3pose, c1pose):
+    helix = Spliceable(c1pose, [(':4', 'N'), ((10, 12, 13), 'C')])
     dimer = Spliceable(c2pose, sites=[('1,:2', 'N'), ('1,-1:', 'C'),
                                       ('2,:2', 'N'), ('2,-1:', 'C')])
     trimer = Spliceable(c3pose, sites=[('1,:1', 'N'), ('1,-2:', 'C'),
-                                       # ('2,:2', 'N'), ('2,-2:', 'C'),
+                                       ('2,:2', 'N'), ('2,-2:', 'C'),
                                        ('3,:1', 'N'), ('3,-2:', 'C')])
     segments = [Segment([helix], exit='C'),
                 Segment([dimer], entry='N', exit='N'),
                 Segment([helix], entry='C', exit='N'),
                 Segment([trimer], entry='C', exit='C'),
                 Segment([helix], entry='N')]
-    w = grow(segments, SegmentSym('C3'), thresh=2)
-    assert residue_sym_err(w.pose(0), 120, 2, 67, 9) < 2
-    w = grow(segments, SegmentSym('C4'), thresh=2)
-    assert residue_sym_err(w.pose(0), 90, 2, 69, 9) < 2
-    w = grow(segments, SegmentSym('C5'), thresh=2)
-    assert residue_sym_err(w.pose(0), 72, 2, 65, 9) < 2
-    w = grow(segments, SegmentSym('C6'), thresh=2)
-    assert residue_sym_err(w.pose(0), 60, 2, 71, 9) < 2
+    w = grow(segments, Cyclic('C3'), thresh=2)
+    (w.pose(0, end=1))
+    assert residue_sym_err(w.pose(0, end=1), 120, 3, 63, 6) < 2
+    # w = grow(segments, Cyclic('C4'), thresh=2)
+    # assert residue_sym_err(w.pose(0, end=1), 90, 2, 66, 9) < 2
+    # w = grow(segments, Cyclic('C5'), thresh=2)
+    # assert residue_sym_err(w.pose(0, end=1), 72, 2, 71, 9) < 2
+    # w = grow(segments, Cyclic('C6'), thresh=2)
+    # assert residue_sym_err(w.pose(0, end=1), 60, 2, 71, 9) < 2
 
 
 @pytest.mark.skipif('not rcl.HAVE_PYROSETTA')
-def test_multichain_db(c2pose, c3pose, curved_helix_pose):
-    helix = Spliceable(curved_helix_pose, [(':4', 'N'), ('-4:', "C")])
+def test_multichain_db(c2pose, c1pose):
+    helix = Spliceable(c1pose, [(':4', 'N'), ('-4:', "C")])
     dimer = Spliceable(c2pose, sites=[('1,-1:', 'C'), ('1,-1:', 'C')])
     segments = [Segment([helix], exit='N'),
                 Segment([dimer], entry='C', exit='C'),
                 Segment([helix], entry='N')]
-    w = grow(segments, SegmentSym('C4'), thresh=20)
+    w = grow(segments, Cyclic('C4'), thresh=20)
     with pytest.raises(ValueError):
-        showme(w.pose(0))
+        w.pose(0, end=1)
+
+
+@pytest.mark.skipif('not rcl.HAVE_PYROSETTA')
+def test_axes_intersect_D3(c2pose, c3pose, c1pose):
+    helix = Spliceable(c1pose, [(':4', 'N'), ('-4:', 'C')])
+    dimer = Spliceable(c2pose, sites=[('1,:2', 'N'), ('1,-1:', 'C'),
+                                      ('2,:2', 'N'), ('2,-1:', 'C')])
+    trimer = Spliceable(c3pose, sites=[('1,:1', 'N'), ('1,-2:', 'C'),
+                                       ('2,:2', 'N'), ('2,-2:', 'C'),
+                                       ('3,:1', 'N'), ('3,-2:', 'C')])
+    segments = [Segment([trimer], exit='C'),
+                Segment([helix], entry='N', exit='C'),
+                Segment([helix], entry='N', exit='C'),
+                Segment([helix], entry='N', exit='C'),
+                Segment([dimer], entry='N')]
+    w = grow(segments, Dihedral(c2=-1, cx=0), thresh=10)
+    print(w.scores)
+    # show_with_z_axes(w, 0)
+    p = w.pose(0, only_connected=0)
+    # print(len(p))
+    # showme(p)
+    assert 1 > residue_sym_err(p, 180, 53, 65, 6, axis=[1, 0, 0])
+    assert 1 > residue_sym_err(p, 120, 1, 10, 6, axis=[0, 0, 1])
+    # assert 0
+    segments = [Segment([dimer], exit='C'),
+                Segment([helix], entry='N', exit='C'),
+                Segment([helix], entry='N', exit='C'),
+                Segment([helix], entry='N', exit='C'),
+                Segment([trimer], entry='N')]
+    w = grow(segments, Dihedral(c2=0, cx=-1), thresh=10)
+    print(w.scores)
+    # show_with_z_axes(w, 0)
+    p = w.pose(4, only_connected=0)
+    # showme(p)
+    assert 1 > residue_sym_err(p, 180, 1, 13, 6, axis=[1, 0, 0])
+    assert 1 > residue_sym_err(p, 120, 56, 65, 6, axis=[0, 0, 1])

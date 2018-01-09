@@ -1,4 +1,5 @@
 import tempfile
+import numpy as np
 from collections import defaultdict
 try:
     from pymol import cmd
@@ -45,6 +46,8 @@ def pymol_load(to_show, state=None, name=None, **kw):
         name += '_%i' % state['seenit'][name]
         pymol_load_pose(to_show, name)
         state['last_obj'] = name
+    elif isinstance(to_show, np.ndarray):
+        showsegment(to_show, [0, 0, 0], **kw)
     else:
         raise NotImplementedError(
             "don't know how to show " + str(type(to_show)))
