@@ -16,9 +16,12 @@ import multiprocessing
 
 identity44f8 = np.identity(4, dtype='f4')
 identity44f8 = np.identity(4, dtype='f8')
-
+Ux = np.array([1, 0, 0, 0])
+Uy = np.array([0, 1, 0, 0])
+Uz = np.array([0, 0, 1, 0])
 
 # todo: the following should go elsewhere...
+
 
 def cpu_count():
     try: return int(os.environ['SLURM_CPUS_ON_NODE'])
@@ -81,6 +84,11 @@ def reorder_spliced_as_N_to_C(body_chains, polarities):
     return chains
 
 
+def symfile_path(name):
+    path, _ = os.path.split(__file__)
+    return os.path.join(path, 'rosetta_symdef', name + '.sym')
+
+
 class WormCriteria(abc.ABC):
 
     @abc.abstractmethod
@@ -98,11 +106,14 @@ class WormCriteria(abc.ABC):
 
     def sym_frames(self): return [identity44f8]
 
+    def symdef(self): return None
+
 
 class AxesIntersect(WormCriteria):
 
-    def __init__(self, tgtaxis1, tgtaxis2, from_seg, *,
+    def __init__(self, symname, tgtaxis1, tgtaxis2, from_seg, *,
                  tol=1.0, lever=50, to_seg=-1, frames=None):
+        self.symname = symname
         self.from_seg = from_seg
         if len(tgtaxis1) == 2: tgtaxis1 += [0, 0, 0, 1],
         if len(tgtaxis2) == 2: tgtaxis2 += [0, 0, 0, 1],
@@ -168,29 +179,33 @@ class AxesIntersect(WormCriteria):
 
     def sym_frames(self): return self.frames
 
+    def symdef(self): return symfile_path(self.symname)
+
+    def sym_axes(self): return [self.tgtaxis1, self.tgtaxis2]
+
 
 def D2(c2=0, c2b=-1, **kw):
-    return AxesIntersect((2, [0, 0, 1]), (2, [1, 0, 0]), c2, to_seg=c2b, **kw)
+    return AxesIntersect('D2', (2, Uz), (2, Ux), c2, to_seg=c2b, **kw)
 
 
 def D3(c3=0, c2=-1, **kw):
-    return AxesIntersect((3, [0, 0, 1]), (2, [1, 0, 0]), c3, to_seg=c2, **kw)
+    return AxesIntersect('D3', (3, Uz), (2, Ux), c3, to_seg=c2, **kw)
 
 
 def D4(c4=0, c2=-1, **kw):
-    return AxesIntersect((4, [0, 0, 1]), (2, [1, 0, 0]), c4, to_seg=c2, **kw)
+    return AxesIntersect('D4', (4, Uz), (2, Ux), c4, to_seg=c2, **kw)
 
 
 def D5(c5=0, c2=-1, **kw):
-    return AxesIntersect((5, [0, 0, 1]), (2, [1, 0, 0]), c5, to_seg=c2, **kw)
+    return AxesIntersect('D5', (5, Uz), (2, Ux), c5, to_seg=c2, **kw)
 
 
 def D6(c6=0, c2=-1, **kw):
-    return AxesIntersect((6, [0, 0, 1]), (2, [1, 0, 0]), c6, to_seg=c2, **kw)
+    return AxesIntersect('D6', (6, Uz), (2, Ux), c6, to_seg=c2, **kw)
 
 
 def Tetrahedral(c3=0, c2=-1, **kw):
-    return AxesIntersect(from_seg=c3, to_seg=c2,
+    return AxesIntersect('T', from_seg=c3, to_seg=c2,
                          tgtaxis1=(3, sym.tetrahedral_axes[3]),
                          tgtaxis2=(2, sym.tetrahedral_axes[2]),
                          frames=sym.tetrahedral_frames, **kw)
@@ -202,7 +217,7 @@ def Octahedral(c4=None, c3=None, c2=None, **kw):
     if c2 is None: from_seg, to_seg, nfold1, nfold2, ex = c4, c3, 4, 3, 2
     if c3 is None: from_seg, to_seg, nfold1, nfold2, ex = c4, c2, 4, 2, 3
     if c4 is None: from_seg, to_seg, nfold1, nfold2, ex = c3, c2, 3, 2, 4
-    return AxesIntersect(from_seg=from_seg, to_seg=to_seg,
+    return AxesIntersect('O', from_seg=from_seg, to_seg=to_seg,
                          tgtaxis1=(nfold1, sym.octahedral_axes[nfold1]),
                          tgtaxis2=(nfold2, sym.octahedral_axes[nfold2]),
                          frames=sym.octahedral_frames, **kw)
@@ -214,7 +229,7 @@ def Icosahedral(c5=None, c3=None, c2=None, **kw):
     if c2 is None: from_seg, to_seg, nfold1, nfold2, ex = c5, c3, 5, 3, 2
     if c3 is None: from_seg, to_seg, nfold1, nfold2, ex = c5, c2, 4, 2, 3
     if c5 is None: from_seg, to_seg, nfold1, nfold2, ex = c3, c2, 3, 2, 5
-    return AxesIntersect(from_seg=from_seg, to_seg=to_seg,
+    return AxesIntersect('I', from_seg=from_seg, to_seg=to_seg,
                          tgtaxis1=(nfold1, sym.icosahedral_axes[nfold1]),
                          tgtaxis2=(nfold2, sym.icosahedral_axes[nfold2]),
                          frames=sym.icosahedral_frames, **kw)
@@ -241,7 +256,7 @@ class Cyclic(WormCriteria):
         else: raise ValueError('can only do Cx symmetry for now')
         assert not origin_seg
         if self.tol <= 0: raise ValueError('tol should be > 0')
-        self.frames = [homog.hrot([0, 0, 1], self.symangle * i)
+        self.frames = [homog.hrot(Uz, self.symangle * i)
                        for i in range(self.nfold)]
 
     def score(self, segpos, *, verbose=False, **kw):
@@ -285,7 +300,7 @@ class Cyclic(WormCriteria):
         # print('aln', ang * 180 / np.pi)
         # print('aln', cen)
         # print('aln', xhat[..., :, 3])
-        dotz = homog.hdot(axis, [0, 0, 1])[..., None]
+        dotz = homog.hdot(axis, Uz)[..., None]
         tgtaxis = np.where(dotz > 0, [0, 0, 1, 0], [0, 0, -1, 0])
         align = homog.hrot((axis + tgtaxis) / 2, np.pi, cen)
         align[..., :3, 3] -= cen[..., :3]
@@ -303,6 +318,10 @@ class Cyclic(WormCriteria):
     def is_cyclic(self): return True
 
     def sym_frames(self): return self.frames
+
+    def symdef(self): return symfile_path('C' + str(self.nfold))
+
+    def sym_axes(self): return [(self.nfold, Uz, [0, 0, 0, 1])]
 
 
 class SpliceSite:
@@ -528,26 +547,15 @@ class Worms:
         self.positions = positions
         self.criteria = criteria
         self.detail = detail
-
-    def __init___(self):
-        return len(self.scores)
-
-    def score0_sym(self, pose):
-        sfxn = ScoreFunctionFactory.create_score_function('score0')
-        p = pose.clone()
-        ros.core.util.switch_to_residue_type_set(p, 'centroid')
-        p0 = p.clone()
-        test_frames = self.criteria[0].sym_frames()[1:12]
-        for x in test_frames:
-            q = p0.clone()
-            ros.protocols.sic_dock.xform_pose(q, rcl.to_rosetta_stub(x))
-            ros.core.pose.append_pose_to_pose(p, q, True)
-        return sfxn(p) / (len(test_frames) + 1)
+        self.score0 = ros.core.scoring.symmetry.symmetrize_scorefunction(
+            ros.core.scoring.ScoreFunctionFactory.create_score_function('score0'))
 
     def pose(self, which, *, align=True, end=None, join=True,
-             only_connected=None, **kw):
+             only_connected=None, cyclic_permute=False, **kw):
         "makes a pose for the ith worm"
-        if hasattr(which, '__iter__'): return (self.pose(w) for w in which)
+        if hasattr(which, '__iter__'): return (
+            self.pose(w, align=align, end=end, join=join,
+                      only_connected=only_connected, **kw) for w in which)
         # print("Will needs to fix bb O/H position!")
         rm_lower_t = ros.core.pose.remove_lower_terminus_type_from_pose_residue
         rm_upper_t = ros.core.pose.remove_upper_terminus_type_from_pose_residue
@@ -555,6 +563,10 @@ class Worms:
             end = not self.criteria[0].is_cyclic()
         if only_connected is None:
             only_connected = not self.criteria[0].is_cyclic()
+        if cyclic_permute is None:
+            cyclic_permute = self.criteria[0].is_cyclic()
+        elif cyclic_permute and not self.criteria[0].is_cyclic():
+            raise ValueError('cyclic_permute should only be used for Cyclic')
         iend = None if end else -1
         entryexits = [seg.make_pose_chains(self.indices[which][iseg],
                                            self.positions[which][iseg])
@@ -562,6 +574,31 @@ class Worms:
         entryexits, rest = zip(*entryexits)
         chainslist = reorder_spliced_as_N_to_C(
             entryexits, [s.entrypol for s in self.segments[1:iend]])
+        if align:
+            align = [c.canonical_alignment(self.positions[which], **kw)
+                     for c in self.criteria]
+            align = [x for x in align if x is not None]
+            assert len(align) < 2  # should this be allowed?
+            if len(align) == 1:
+                for p in it.chain(*chainslist, *rest):
+                    rcl.xform_pose(align[0], p)
+        if cyclic_permute and len(chainslist) > 1:
+            raise NotImplementedError('will needs to fix this')
+            axes = self.criteria[0].sym_axes()
+            assert len(axes) == 1
+            x = homog.hrot(axes[0][1], 360.0 / axes[0][0])
+            for p in chainslist[-1]: rcl.xform_pose(x, p)
+            while len(chainslist[-1][0]) > 1:
+                chainslist[-1][0].delete_residue_slow(1)
+                xyz1 = chainslist[-1][0].residue(1).xyz('N')
+                xyz2 = chainslist[0][-1].residue(
+                    len(chainslist[0][-1])).xyz('C')
+                d = xyz1.distance(xyz2)
+                print(d)
+                if d < 2.5: break
+            rm_upper_t(chainslist[0][-1], len(chainslist[0][-1]))
+            chainslist[0].extend(chainslist[-1])
+            chainslist = chainslist[:-1]
         pose = ros.core.pose.Pose()
         for chains in chainslist:
             if only_connected and len(chains) is 1: continue
@@ -573,22 +610,27 @@ class Worms:
         if not only_connected:
             for chain in it.chain(*rest):
                 ros.core.pose.append_pose_to_pose(pose, chain, True)
-        if align:
-            align = [c.canonical_alignment(self.positions[which], **kw)
-                     for c in self.criteria]
-            align = [x for x in align if x is not None]
-            assert len(align) < 2  # should this be allowed?
-            if len(align) == 1:
-                x = rcl.to_rosetta_stub(align[0])
-                ros.protocols.sic_dock.xform_pose(pose, x)
         assert worst_CN_connect(pose) < 0.5
         return pose
 
-    def __len__(self):
-        return len(self.scores)
+    def sympose(self, which, fullatom=False, score=False):
+        if hasattr(which, '__iter__'): return (self.sympose(w) for w in which)
+        p = self.pose(which)
+        if not fullatom:
+            ros.core.util.switch_to_residue_type_set(p, 'centroid')
+        ros.core.pose.symmetry.make_symmetric_pose(
+            p, self.criteria[0].symdef())
+        if not score: return p
+        return p, self.score0(p)
+
+    def __len__(self): return len(self.scores)
+
+    def __getitem__(self, i):
+        return (i, self.scores[i],) + self.sympose(i, score=True)
 
 
 def _chain_xforms(segments):
+    os.environ['OMP_NUM_THREADS'] = '1'
     x2exit = [s.x2exit for s in segments]
     x2orgn = [s.x2orgn for s in segments]
     fullaxes = (np.newaxis,) * (len(x2exit) - 1)
@@ -605,6 +647,7 @@ def _chain_xforms(segments):
 
 
 def _grow_chunk(samp, segpos, conpos, segs, end, criteria, thresh, matchlast):
+    os.environ['OMP_NUM_THREADS'] = '1'
     if matchlast is not None:
         ndimchunk = segpos[0].ndim - 2
         if matchlast < ndimchunk:
@@ -634,6 +677,7 @@ def _grow_chunk(samp, segpos, conpos, segs, end, criteria, thresh, matchlast):
 
 
 def _grow_chunks(ijob, context):
+    os.environ['OMP_NUM_THREADS'] = '1'
     sampsizes, njob, segments, end, criteria, thresh, matchlast = context
     samples = it.product(*(range(n) for n in sampsizes))
     segpos, connpos = _chain_xforms(segments[:end])  # common data
@@ -647,6 +691,7 @@ def _grow_chunks(ijob, context):
 def grow(segments, criteria, *, thresh=2, expert=0, memsize=1e6,
          executor=None, max_workers=None, verbose=0, jobmult=32,
          chunklim=None):
+
     if verbose:
         print('grow')
         for i, seg in enumerate(segments):

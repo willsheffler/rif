@@ -509,9 +509,31 @@ def test_multichain_match_reveres_pol(c1pose, c2pose):
                 Segment([helix], entry='C'), ]
     wcn = grow(segments, Cyclic('C3', lever=20), thresh=1)
     # assert residue_sym_err(wcn.pose(0), 120, 22, 35, 8) < 0.5
-
     # N-to-C and C-to-N construction should be same
     assert np.allclose(wnc.scores, wcn.scores, atol=1e-3)
+
+
+@pytest.mark.xfail
+@pytest.mark.skipif('not rcl.HAVE_PYROSETTA')
+def test_cyclic_permute(c1pose, c2pose):
+    helix = Spliceable(
+        c1pose, sites=[((1, 2, 3,), 'N'), ((9, 10, 11, 13), 'C')])
+    dimer = Spliceable(c2pose, sites=[('1,:1', 'N'), ('1,-1:', 'C'),
+                                      ('2,:2', 'N'), ('2,-1:', 'C')])
+
+    segments = [Segment([helix], exit='N'),
+                Segment([helix], entry='C', exit='N'),
+                Segment([dimer], entry='C', exit='N'),
+                Segment([helix], entry='C', exit='N'),
+                Segment([helix], entry='C'), ]
+    w = grow(segments, Cyclic('C3', lever=20), thresh=1)
+    assert 0
+
+    w.pose(0)
+    showme(w.pose(0, cyclic_permute=0))
+    showme(w.pose(0, cyclic_permute=1))
+    showme(w.sympose(0))
+    assert 0
 
 
 @pytest.mark.skipif('not rcl.HAVE_PYROSETTA')
@@ -528,14 +550,8 @@ def test_multichain_mixed_pol(c2pose, c3pose, c1pose):
                 Segment([trimer], entry='C', exit='C'),
                 Segment([helix], entry='N')]
     w = grow(segments, Cyclic('C3'), thresh=2)
-    (w.pose(0, end=1))
-    assert residue_sym_err(w.pose(0, end=1), 120, 3, 63, 6) < 2
-    # w = grow(segments, Cyclic('C4'), thresh=2)
-    # assert residue_sym_err(w.pose(0, end=1), 90, 2, 66, 9) < 2
-    # w = grow(segments, Cyclic('C5'), thresh=2)
-    # assert residue_sym_err(w.pose(0, end=1), 72, 2, 71, 9) < 2
-    # w = grow(segments, Cyclic('C6'), thresh=2)
-    # assert residue_sym_err(w.pose(0, end=1), 60, 2, 71, 9) < 2
+    p = w.pose(0, end=1, cyclic_permute=0)
+    assert 2 > residue_sym_err(p, 120, 3, 63, 6)
 
 
 @pytest.mark.skipif('not rcl.HAVE_PYROSETTA')
@@ -587,59 +603,84 @@ def test_D3(c2pose, c3pose, c1pose):
 
 
 @pytest.mark.skipif('not rcl.HAVE_PYROSETTA')
-def test_oct(c2pose, c3pose, c1pose):
+def test_tet(c2pose, c3pose, c1pose):
     helix = Spliceable(c1pose, [(':1', 'N'), ('-4:', 'C')])
     dimer = Spliceable(c2pose, sites=[('1,:2', 'N'), ('1,-1:', 'C'), ])
-    # ('2,:2', 'N'), ('2,-1:', 'C')])
     trimer = Spliceable(c3pose, sites=[('1,:1', 'N'), ('1,-2:', 'C'), ])
-    # ('2,:2', 'N'), ('2,-2:', 'C'),
-    # ('3,:1', 'N'), ('3,-2:', 'C')])
     segments = ([Segment([dimer], exit='C')] +
                 [Segment([helix], entry='N', exit='C')] * 5 +
                 [Segment([trimer], entry='N')])
-    # w = grow(segments, Tetrahedral(c3=-1, c2=0), thresh=5)
+    w = grow(segments, Tetrahedral(c3=-1, c2=0), thresh=2)
+    assert len(w)
+    p = w.pose(3, only_connected=0)
+    assert 2.5 > residue_sym_err(p, 120, 86, 95, 6, axis=[1, 1, 1])
+    assert 2.5 > residue_sym_err(p, 180, 2, 14, 6, axis=[1, 0, 0])
+
+
+@pytest.mark.skipif('not rcl.HAVE_PYROSETTA')
+def test_oct(c2pose, c3pose, c4pose, c1pose):
+    helix = Spliceable(c1pose, [(':1', 'N'), ('-4:', 'C')])
+    dimer = Spliceable(c2pose, sites=[('1,:2', 'N'), ('1,-1:', 'C'), ])
+    trimer = Spliceable(c3pose, sites=[('1,:1', 'N'), ('1,-2:', 'C'), ])
+    tetramer = Spliceable(c4pose, sites=[('1,:1', 'N'), ('1,-2:', 'C'), ])
+    segments = ([Segment([dimer], exit='C')] +
+                [Segment([helix], entry='N', exit='C')] * 5 +
+                [Segment([trimer], entry='N')])
     w = grow(segments, Octahedral(c3=-1, c2=0), thresh=1)
     assert len(w)
-    # print(w.scores)
-    # show_with_z_axes(w, 2, only_connected=0)
-
     p = w.pose(0, only_connected=0)
     assert 1 > residue_sym_err(p, 120, 85, 94, 6, axis=[1, 1, 1])
     assert 1 > residue_sym_err(p, 180, 1, 13, 6, axis=[1, 1, 0])
 
+    segments = ([Segment([tetramer], exit='C')] +
+                [Segment([helix], entry='N', exit='C')] * 5 +
+                [Segment([dimer], entry='N')])
+    w = grow(segments, Octahedral(c2=-1, c4=0), thresh=1)
+    assert len(w)
+    p = w.pose(0, only_connected=0)
     # showme(p)
-    # assert 0
+    assert 1 > residue_sym_err(p, 90, 1, 31, 6, axis=[1, 0, 0])
+    assert 1 > residue_sym_err(p, 180, 92, 104, 6, axis=[1, 1, 0])
+
+
+@pytest.mark.skipif('not rcl.HAVE_PYROSETTA')
+def test_icos(c2pose, c3pose, c4pose, c1pose):
+    helix = Spliceable(c1pose, [(':1', 'N'), ('-4:', 'C')])
+    dimer = Spliceable(c2pose, sites=[('1,:2', 'N'), ('1,-1:', 'C'), ])
+    trimer = Spliceable(c3pose, sites=[('1,:1', 'N'), ('1,-2:', 'C'), ])
+    segments = ([Segment([dimer], exit='C')] +
+                [Segment([helix], entry='N', exit='C')] * 5 +
+                [Segment([trimer], entry='N')])
+    w = grow(segments, Icosahedral(c3=-1, c2=0), thresh=2)
+    assert len(w) == 3
+    p = w.pose(2, only_connected=0)
+    # showme(p)
+    from rif.sym import icosahedral_axes as IA
+    assert 2 > residue_sym_err(p, 120, 90, 99, 6, axis=IA[3])
+    assert 2 > residue_sym_err(p, 180, 2, 14, 6, axis=IA[2])
 
 
 @pytest.mark.skipif('not rcl.HAVE_PYROSETTA')
 def test_score0_sym(c2pose, c3pose, c1pose):
     helix = Spliceable(c1pose, [(':1', 'N'), ('-4:', 'C')])
     dimer = Spliceable(c2pose, sites=[('1,:2', 'N'), ('1,-1:', 'C'), ])
-    # ('2,:2', 'N'), ('2,-1:', 'C')])
     trimer = Spliceable(c3pose, sites=[('1,:1', 'N'), ('1,-2:', 'C'), ])
-    # ('2,:2', 'N'), ('2,-2:', 'C'),
-    # ('3,:1', 'N'), ('3,-2:', 'C')])
     segments = ([Segment([dimer], exit='C')] +
                 [Segment([helix], entry='N', exit='C')] * 5 +
                 [Segment([trimer], entry='N')])
-    # w = grow(segments, Tetrahedral(c3=-1, c2=0), thresh=5)
-    w = grow(segments, Octahedral(c3=-1, c2=0), thresh=1)
-    assert len(w)
-    # print(w.scores)
-    # show_with_z_axes(w, 2, only_connected=0)
-    # showme(w.pose(2))
-    # assert 0
-    count = 0
-    for i in range(len(w)):
-        print(i, 'score', w.scores[0])
-        p = w.pose(i)
-        score = w.score0_sym(p)
-        print('score', w.scores[i], 'rscore', score, w.indices[i])
-        if score < 100:
-            print(i)
-            count += 1
-            # showme(w.pose(i, only_connected=0))
-    assert count == 1
+    w = grow(segments, Octahedral(c3=-1, c2=0), thresh=2)
+    assert len(w) == 5
+    i, err, pose, score0 = w[1]
+    # show_with_z_axes(w, 1)
+    # showme(pose)
+    assert 118.095 < score0 < 118.096
+    # count = 0
+    # for i, err, pose, score0 in w:
+    #     print(err, len(pose), score0)
+    #     if score0 < 200:
+    #         count += 1
+    #         # showme(w.sympose(i, fullatom=1))
+    # assert count == 1
 
 
 @pytest.mark.skipif('not rcl.HAVE_PYROSETTA')

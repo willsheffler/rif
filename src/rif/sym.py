@@ -7,8 +7,8 @@ octahedral_axes = {2: hnormalized([1, 1, 0]),
                    3: hnormalized([1, 1, 1]),
                    4: hnormalized([1, 0, 0])}
 icosahedral_axes = {2: hnormalized([1, 0, 0]),
-                    3: hnormalized([0, 0.356822, 0.934172]),
-                    5: hnormalized([0, 0.850651, 0.525731])}
+                    3: hnormalized([0.934172, 0.000000, 0.356822]),
+                    5: hnormalized([0.850651, 0.525731, 0.000000])}
 
 
 tetrahedral_frames = np.array([((+1.000000, +0.000000, +0.000000, +0.000000),
