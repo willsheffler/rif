@@ -1,3 +1,4 @@
+from rif import vis
 from rif.homog import *
 import numpy as np
 from numpy.testing import assert_allclose
@@ -243,10 +244,28 @@ def test_intersect_planes_rand():
     assert np.all(ray_in_plane(plane2, isect))
 
 
+@pytest.mark.xfail
+def test_axis_ang_cen_of_case1():
+    x = np.array(
+        [[-4.98183553296844550129e-01, 7.04469414791054737712e-01,
+          - 5.05505603998624652995e-01, -1.81514329108557745940e+01],
+         [-7.20356134635111944320e-01, -1.17810790725664249479e-02,
+          6.93504092978299069294e-01, -6.19665276784234198004e+00],
+         [4.82597155338028827032e-01, 7.09636632244134868408e-01,
+            5.13337986047928240829e-01, 3.12011201022210382661e+00],
+         [0.00000000000000000000e+00, 0.00000000000000000000e+00,
+            0.00000000000000000000e+00, 1.00000000000000000000e+00]])
+    axis, ang, cen = axis_ang_cen_of(x, debug=1)
+    print(cen)
+    print(x @ cen)
+    assert np.allclose(x @ cen, cen)
+    assert 0
+
+
 def test_axis_ang_cen_of_rand():
-    shape = (5, 6, 7, 8, 9,)
+    shape = (5, 6, 7, 8, 9)
     axis0 = hnormalized(np.random.randn(*shape, 3))
-    ang0 = np.random.random(shape) * np.pi / 2
+    ang0 = np.random.random(shape) * np.pi
     cen0 = np.random.randn(*shape, 3) * 100.0
 
     rot = hrot(axis0, ang0, cen0, dtype='f8')
@@ -254,6 +273,7 @@ def test_axis_ang_cen_of_rand():
 
     assert_allclose(axis0, axis, rtol=1e-5)
     assert_allclose(ang0, ang, rtol=1e-5)
+    #  check rotation doesn't move cen
     cenhat = (rot @ cen[..., None]).squeeze()
     assert_allclose(cen, cenhat, rtol=1e-5, atol=1e-5)
 
@@ -329,6 +349,7 @@ def test_align_around_axis():
     assert np.allclose(angle(v, uprime), 0, atol=1e-5)
 
 
+# @pytest.mark.xfail
 def test_align_vectors_minangle():
     # >>> for i in range(10):
     # ...     angdeg = uniform(-180,180)
@@ -354,5 +375,30 @@ def test_align_vectors_minangle():
     orig2 = [-0.723746, 0.377967, -0.577350, 0]
     # >>> print orig1.angle_degrees(orig2)
     # >>> print tgt1.angle_degrees(tgt2)
+    # print(angle(tgt1, tgt2))
+    # print(angle(orig1, orig2))
     x = align_vectors(orig1, orig2, tgt1, tgt2)
     assert np.allclose(tgt1, x @ orig1, atol=1e-5)
+
+
+def test_align_vectors_case1():
+    ax1 = np.array([0.12896027, -0.57202471, -0.81003518, 0.])
+    ax2 = np.array([0., 0., -1., 0.])
+    tax1 = np.array([0.57735027, 0.57735027, 0.57735027, 0.])
+    tax2 = np.array([0.70710678, 0.70710678, 0., 0.])
+    x = align_vectors(ax1, ax2, tax1, tax2)
+    print(tax1)
+    print(x @ ax1)
+    print(tax2)
+    print(x @ ax2)
+    assert np.allclose(x@ax1, tax1, atol=1e-2)
+    assert np.allclose(x@ax2, tax2, atol=1e-2)
+    # vis.showme(ax1, col=[1, 0, 0])
+    # vis.showme(ax2, col=[1, 0, 0])
+    # vis.showme(ax1 + ax2, col=[1, 0, 0])
+    # vis.showme(tax1, col=[0, 1, 0])
+    # vis.showme(tax2, col=[0, 1, 0])
+    # vis.showme(tax1 + tax2, col=[0, 1, 0])
+    # vis.showme(x @ ax1, col=[0, 0, 1])
+    # vis.showme(x @ ax2, col=[0, 0, 1])
+    # vis.showme(x @ ax1 + x @ ax2, col=[0, 0, 1])

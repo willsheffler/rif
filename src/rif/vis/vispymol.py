@@ -31,8 +31,6 @@ def pymol_xform(name, xform):
 
 
 def pymol_load(to_show, state=None, name=None, **kw):
-    if state is None:
-        state = dict(seenit=defaultdict(lambda: -1))
     if isinstance(to_show, list):
         for t in to_show:
             state = pymol_load(t, state)
@@ -53,18 +51,20 @@ def pymol_load(to_show, state=None, name=None, **kw):
             "don't know how to show " + str(type(to_show)))
     return state
 
+showme_state = dict(launched=0, seenit=defaultdict(lambda: -1))
+
 
 def showme_pymol(what, headless=False, block=False, **kw):
     import pymol
     pymol.pymol_argv = ['pymol']
     if headless:
         pymol.pymol_argv = ['pymol', '-c']
-    pymol.finish_launching()
+    if not showme_state['launched']:
+        pymol.finish_launching()
+        showme_state['launched'] = 1
     from pymol import cmd
-    r = pymol_load(what, **kw)
+    r = pymol_load(what, showme_state, **kw)
     # cmd.set('internal_gui_width', '20')
-    cmd.do('full')  # todo: doesn't work!
-    cmd.zoom()  # todo: doesn't work
     import time
     while block:
         time.sleep(1)

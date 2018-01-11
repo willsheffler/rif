@@ -41,7 +41,7 @@ def angle_of(xforms):
     return angl
 
 
-def rot(axis, angle, degrees='auto', dtype='f4', shape=(3, 3)):
+def rot(axis, angle, degrees='auto', dtype='f8', shape=(3, 3)):
     axis = np.array(axis, dtype=dtype)
     angle = np.array(angle, dtype=dtype)
     if degrees is 'auto': degrees = guess_is_degrees(angle)
@@ -70,7 +70,7 @@ def rot(axis, angle, degrees='auto', dtype='f4', shape=(3, 3)):
     return rot3
 
 
-def hrot(axis, angle, center=None, dtype='f4', **args):
+def hrot(axis, angle, center=None, dtype='f8', **args):
     axis = np.array(axis, dtype=dtype)
     angle = np.array(angle, dtype=dtype)
     center = (np.array([0, 0, 0], dtype=dtype) if center is None
@@ -115,7 +115,7 @@ def hray(origin, direction):
     return r
 
 
-def htrans(trans, dtype='f4'):
+def htrans(trans, dtype='f8'):
     trans = np.asanyarray(trans)
     if trans.shape[-1] != 3:
         raise ValueError('trans should be shape (..., 3)')
@@ -191,6 +191,17 @@ def angle_degrees(u, v):
     return angle(u, v) * 180 / np.pi
 
 
+def line_angle(u, v):
+    a = angle(u, v)
+    return np.minimum(a, np.pi - a)
+
+
+def line_angle_degrees(u, v):
+    a = angle(u, v)
+    a = np.minimum(a, np.pi - a)
+    return a * 180 / np.pi
+
+
 def random_ray(shape=(), cen=(0, 0, 0), sdev=1):
     cen = np.asanyarray(cen)
     if cen.shape[-1] not in (3, 4):
@@ -221,7 +232,8 @@ def proj_perp(u, v):
 
 
 def point_in_plane(plane, pt):
-    return np.abs(hdot(plane[..., :3, 1], pt - plane[..., :3, 0])) < 0.000001
+    return np.abs(
+        hdot(plane[..., :3, 1], pt[..., :3] - plane[..., :3, 0])) < 0.000001
 
 
 def ray_in_plane(plane, ray):
@@ -281,10 +293,22 @@ def intersect_planes(plane1, plane2):
     return isect, status
 
 
-def axis_ang_cen_of(xforms):
+def axis_ang_cen_of(xforms, debug=0):
     axis, angle = axis_angle_of(xforms)
+
+    # # seems to numerically unstable
+    # ev, cen = np.linalg.eig(xforms)
+    # cen = np.real(cen[..., 3])
+    # cen /= cen[..., 3][..., None]
+    # # todo: this is unstable.... fix?
+    # # cen = proj_perp(axis, cen)  # move to reasonable position
+    # return axis, angle, cen
+
+    #  sketchy magic points...
     p1 = (-32.09501046777237, 03.36227004372687, 35.34672781477340, 1)
     p2 = (21.15113978202345, 12.55664537217840, -37.48294301885574, 1)
+    # p1 = random_point()
+    # p2 = random_point()
     q1 = xforms @ p1
     q2 = xforms @ p2
     n1 = hnormalized(q1 - p1)

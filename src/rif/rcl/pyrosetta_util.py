@@ -55,6 +55,8 @@ except ImportError as e:
     # pyrosetta = mock.MagicMock()
     # rosetta = mock.MagicMock()
 
+from .conversions import to_rosetta_stub
+
 
 class Error(Exception):
     """Rosetta Compatibility Exception"""
@@ -241,3 +243,11 @@ def generate_canonical_rotamer_residues(residue_name3):
             generate_canonical_rotamer_residues_phipsi(residue_name3, phipsi))
         # print(phipsi, len(result))
     return result
+
+
+def xform_pose(xform, pose, lb=1, ub=None):
+    if xform.shape != (4, 4):
+        raise ValueError('invalid xform, must be 4x4 homogeneous matrix')
+    ub = ub or len(pose)
+    xform = to_rosetta_stub(xform)
+    rosetta.protocols.sic_dock.xform_pose(pose, xform, lb, ub)

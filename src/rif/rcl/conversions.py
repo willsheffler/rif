@@ -219,6 +219,7 @@ def to_rosetta_stub(rifstub, i=0):
         rifstub = rifstub.view('4,4f')
     if rifstub.shape == (4, 4):
         rifstub = rifstub[np.newaxis, ...]
+    rifstub = rifstub.astype('f4')
     rosstub = rcl.Stub()
     rosstub.M.xx = rifstub[i + (0, 0)]
     rosstub.M.xy = rifstub[i + (0, 1)]

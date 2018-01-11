@@ -1,8 +1,7 @@
 from numpy.linalg import inv
 from pyrosetta import rosetta as ros
 from pyrosetta.rosetta.core.scoring import ScoreFunctionFactory
-from rif import rcl, homog, vis
-from rif.sym import *
+from rif import rcl, homog, vis, sym
 from tqdm import tqdm
 import functools as ft
 import itertools as it
@@ -15,17 +14,15 @@ import numpy as np
 import multiprocessing
 
 
-identity44f4 = np.identity(4, dtype='f4')
+identity44f8 = np.identity(4, dtype='f4')
 identity44f8 = np.identity(4, dtype='f8')
 
 
 # todo: the following should go elsewhere...
 
 def cpu_count():
-    try:
-        return int(os.environ['SLURM_CPUS_ON_NODE'])
-    except:
-        return multiprocessing.cpu_count()
+    try: return int(os.environ['SLURM_CPUS_ON_NODE'])
+    except: return multiprocessing.cpu_count()
 
 
 def tqdm_parallel_map(pool, function, *args, **kw):
@@ -89,7 +86,7 @@ class WormCriteria(abc.ABC):
     @abc.abstractmethod
     def score(self): pass
 
-    def canonical_alignment(self, *args, **kw): return identity44f4
+    def canonical_alignment(self, *args, **kw): return identity44f8
 
     def last_body_same_as(self): return
 
@@ -99,16 +96,20 @@ class WormCriteria(abc.ABC):
 
     def sym_axes(self): return []
 
+    def sym_frames(self): return [identity44f8]
+
 
 class AxesIntersect(WormCriteria):
 
     def __init__(self, tgtaxis1, tgtaxis2, from_seg, *,
-                 tol=1.0, lever=20, to_seg=-1, extraaxes=[]):
+                 tol=1.0, lever=50, to_seg=-1, frames=None):
         self.from_seg = from_seg
-        self.tgtaxis1 = tgtaxis1
-        self.tgtaxis2 = tgtaxis2
-        if len(self.tgtaxis1) == 2: self.tgtaxis1 += [0, 0, 0],
-        if len(self.tgtaxis2) == 2: self.tgtaxis2 += [0, 0, 0],
+        if len(tgtaxis1) == 2: tgtaxis1 += [0, 0, 0, 1],
+        if len(tgtaxis2) == 2: tgtaxis2 += [0, 0, 0, 1],
+        self.tgtaxis1 = (tgtaxis1[0], homog.hnormalized(tgtaxis1[1]),
+                         homog.hpoint(tgtaxis1[2]))
+        self.tgtaxis2 = (tgtaxis2[0], homog.hnormalized(tgtaxis2[1]),
+                         homog.hpoint(tgtaxis2[2]))
         assert 3 == len(self.tgtaxis1)
         assert 3 == len(self.tgtaxis2)
         self.angle = homog.angle(tgtaxis1[1], tgtaxis2[1])
@@ -116,7 +117,11 @@ class AxesIntersect(WormCriteria):
         self.lever = lever
         self.to_seg = to_seg
         self.rot_tol = tol / lever
-        self.extraaxes = extraaxes
+        self.frames = frames
+        if frames is None:
+            x1 = homog.hrot(tgtaxis1[1], 360 / tgtaxis1[0], self.tgtaxis1[2])
+            x2 = homog.hrot(tgtaxis2[1], 360 / tgtaxis2[0], self.tgtaxis2[2])
+            self.frames = [identity44f8, x1, x2, x1 @ x2]
 
     def score(self, segpos, verbose=False, **kw):
         cen1 = segpos[self.from_seg][..., :, 3]
@@ -125,22 +130,43 @@ class AxesIntersect(WormCriteria):
         ax2 = segpos[self.to_seg][..., :, 2]
         dist = homog.line_line_distance_pa(cen1, ax1, cen2, ax2)
         ang = np.arccos(np.abs(homog.hdot(ax1, ax2)))
+        ang = np.minimum(ang, np.pi - ang)  # line-line isect
         roterr2 = (ang - self.angle)**2
         return np.sqrt(roterr2 / self.rot_tol**2 + (dist / self.tol)**2)
 
-    def canonical_alignment(self, segpos, **hw):
+    def canonical_alignment(self, segpos, debug=0, **kw):
         cen1 = segpos[self.from_seg][..., :, 3]
         cen2 = segpos[self.to_seg][..., :, 3]
         ax1 = segpos[self.from_seg][..., :, 2]
         ax2 = segpos[self.to_seg][..., :, 2]
+        if homog.angle(ax1, ax2) > np.pi / 2: ax2 = -ax2
         p, q = homog.line_line_closest_points_pa(cen1, ax1, cen2, ax2)
         cen = (p + q) / 2
         x = homog.align_vectors(ax1, ax2, self.tgtaxis1[1], self.tgtaxis2[1])
-        x[..., :, 3] = - x @ cen
+        x[..., :, 3] = - x @cen
+        if debug:
+            print('angs', homog.angle_degrees(ax1, ax2),
+                  homog.angle_degrees(self.tgtaxis1[1], self.tgtaxis2[1]))
+            print('ax1', ax1)
+            print('ax2', ax2)
+            print('xax1', x @ ax1)
+            print('tax1', self.tgtaxis1[1])
+            print('xax2', x @ ax2)
+            print('tax2', self.tgtaxis2[1])
+            raise AssertionError
+            # if not (np.allclose(x @ ax1, self.tgtaxis1[1], atol=1e-2) and
+            #         np.allclose(x @ ax2, self.tgtaxis2[1], atol=1e-2)):
+            #     print(homog.angle(self.tgtaxis1[1], self.tgtaxis2[1]))
+            #     print(homog.angle(ax1, ax2))
+            #     print(x @ ax1)
+            #     print(self.tgtaxis1[1])
+            #     print(x @ ax2)
+            #     print(self.tgtaxis2[1])
+            #     raise AssertionError('homog.align_vectors sucks')
+
         return x
 
-    def sym_axes(self):
-        return [self.tgtaxis1, self.tgtaxis2] + self.extraaxes
+    def sym_frames(self): return self.frames
 
 
 def D2(c2=0, c2b=-1, **kw):
@@ -165,32 +191,33 @@ def D6(c6=0, c2=-1, **kw):
 
 def Tetrahedral(c3=0, c2=-1, **kw):
     return AxesIntersect(from_seg=c3, to_seg=c2,
-                         tgtaxis1=(3, tetrahedral_axes[3]),
-                         tgtaxis2=(2, tetrahedral_axes[2]), **kw)
+                         tgtaxis1=(3, sym.tetrahedral_axes[3]),
+                         tgtaxis2=(2, sym.tetrahedral_axes[2]),
+                         frames=sym.tetrahedral_frames, **kw)
 
 
 def Octahedral(c4=None, c3=None, c2=None, **kw):
-    if 2 is not sum(c4 is None + c3 is None + c2 is None):
+    if 1 is not (c4 is None) + (c3 is None) + (c2 is None):
         raise ValueError('must specify exactly two of c4, c3, c2')
     if c2 is None: from_seg, to_seg, nfold1, nfold2, ex = c4, c3, 4, 3, 2
     if c3 is None: from_seg, to_seg, nfold1, nfold2, ex = c4, c2, 4, 2, 3
     if c4 is None: from_seg, to_seg, nfold1, nfold2, ex = c3, c2, 3, 2, 4
     return AxesIntersect(from_seg=from_seg, to_seg=to_seg,
-                         tgtaxis1=(nfold1, octahedral_axes[nfold1]),
-                         tgtaxis2=(nfold2, octahedral_axes[nfold2]),
-                         extraaxes=[(ex, octahedral_axes[ex], [0, 0, 0])], **kw)
+                         tgtaxis1=(nfold1, sym.octahedral_axes[nfold1]),
+                         tgtaxis2=(nfold2, sym.octahedral_axes[nfold2]),
+                         frames=sym.octahedral_frames, **kw)
 
 
 def Icosahedral(c5=None, c3=None, c2=None, **kw):
-    if 2 is not sum(c5 is None + c3 is None + c2 is None):
+    if 1 is not (c5 is None) + (c3 is None) + (c2 is None):
         raise ValueError('must specify exactly two of c5, c3, c2')
     if c2 is None: from_seg, to_seg, nfold1, nfold2, ex = c5, c3, 5, 3, 2
     if c3 is None: from_seg, to_seg, nfold1, nfold2, ex = c5, c2, 4, 2, 3
     if c5 is None: from_seg, to_seg, nfold1, nfold2, ex = c3, c2, 3, 2, 5
     return AxesIntersect(from_seg=from_seg, to_seg=to_seg,
-                         tgtaxis1=(nfold1, icosahedral_axes[nfold1]),
-                         tgtaxis2=(nfold2, icosahedral_axes[nfold2]),
-                         extraaxes=[(ex, icosahedral_axes[ex], [0, 0, 0])], **kw)
+                         tgtaxis1=(nfold1, sym.icosahedral_axes[nfold1]),
+                         tgtaxis2=(nfold2, sym.icosahedral_axes[nfold2]),
+                         frames=sym.icosahedral_frames, **kw)
 
 
 class Cyclic(WormCriteria):
@@ -214,6 +241,8 @@ class Cyclic(WormCriteria):
         else: raise ValueError('can only do Cx symmetry for now')
         assert not origin_seg
         if self.tol <= 0: raise ValueError('tol should be > 0')
+        self.frames = [homog.hrot([0, 0, 1], self.symangle * i)
+                       for i in range(self.nfold)]
 
     def score(self, segpos, *, verbose=False, **kw):
         x_from = segpos[self.from_seg]
@@ -262,8 +291,7 @@ class Cyclic(WormCriteria):
         align[..., :3, 3] -= cen[..., :3]
         return align
 
-    def last_body_same_as(self):
-        return self.from_seg
+    def last_body_same_as(self): return self.from_seg
 
     def check_topolopy(self, segments):
         "for cyclic, global entry can't be same as global exit"
@@ -273,6 +301,8 @@ class Cyclic(WormCriteria):
         return
 
     def is_cyclic(self): return True
+
+    def sym_frames(self): return self.frames
 
 
 class SpliceSite:
@@ -409,6 +439,7 @@ class Segment:
             # rif 'stubs' have 'extra' 'features'... the raw field is
             # just bog-standard homogeneous matrices
             stubs = rcl.bbstubs(spliceable.body, resid_subset)['raw']
+            stubs = stubs.astype('f8')
             if len(resid_subset) != stubs.shape[0]:
                 raise ValueError("no funny residues supported")
             stubs_inv = inv(stubs)
@@ -421,11 +452,11 @@ class Segment:
                     for jsite, exit_site in exit_sites:
                         if isite != jsite and exit_site.polarity == self.exitpol:
                             for ires in entry_site.resids(spliceable):
-                                istub_inv = (identity44f4 if not ires
+                                istub_inv = (identity44f8 if not ires
                                              else stubs_inv[to_subset[ires]])
                                 ires = ires or -1
                                 for jres in exit_site.resids(spliceable):
-                                    jstub = (identity44f4 if not jres
+                                    jstub = (identity44f8 if not jres
                                              else stubs[to_subset[jres]])
                                     jres = jres or -1
                                     self.x2exit.append(istub_inv @ jstub)
@@ -490,12 +521,13 @@ class Segment:
 
 class Worms:
 
-    def __init__(self, segments, scores, indices, positions, criteria):
+    def __init__(self, segments, scores, indices, positions, criteria, detail):
         self.segments = segments
         self.scores = scores
         self.indices = indices
         self.positions = positions
         self.criteria = criteria
+        self.detail = detail
 
     def __init___(self):
         return len(self.scores)
@@ -504,17 +536,16 @@ class Worms:
         sfxn = ScoreFunctionFactory.create_score_function('score0')
         p = pose.clone()
         ros.core.util.switch_to_residue_type_set(p, 'centroid')
-        for nfold, axis, cen in self.criteria[0].sym_axes():
-            q = p.clone()
-            position = rcl.to_rosetta_stub(hrot(axis, np.pi * 2 / nfold, cen))
-            ros.protocols.sic_dock.xform_pose(p, position)
+        p0 = p.clone()
+        test_frames = self.criteria[0].sym_frames()[1:12]
+        for x in test_frames:
+            q = p0.clone()
+            ros.protocols.sic_dock.xform_pose(q, rcl.to_rosetta_stub(x))
             ros.core.pose.append_pose_to_pose(p, q, True)
-        showme(p)
-        raise AssertionError
-        return sfxn(p)
+        return sfxn(p) / (len(test_frames) + 1)
 
     def pose(self, which, *, align=True, end=None, join=True,
-             only_connected=None):
+             only_connected=None, **kw):
         "makes a pose for the ith worm"
         if hasattr(which, '__iter__'): return (self.pose(w) for w in which)
         # print("Will needs to fix bb O/H position!")
@@ -543,7 +574,7 @@ class Worms:
             for chain in it.chain(*rest):
                 ros.core.pose.append_pose_to_pose(pose, chain, True)
         if align:
-            align = [c.canonical_alignment(self.positions[which])
+            align = [c.canonical_alignment(self.positions[which], **kw)
                      for c in self.criteria]
             align = [x for x in align if x is not None]
             assert len(align) < 2  # should this be allowed?
@@ -613,8 +644,9 @@ def _grow_chunks(ijob, context):
             for i in range(3)] if chunk else None
 
 
-def grow(segments, criteria, *, thresh=2, expert=0, memlim=1e6,
-         executor=None, max_workers=None, verbose=0, jobmult=32):
+def grow(segments, criteria, *, thresh=2, expert=0, memsize=1e6,
+         executor=None, max_workers=None, verbose=0, jobmult=32,
+         chunklim=None):
     if verbose:
         print('grow')
         for i, seg in enumerate(segments):
@@ -639,20 +671,21 @@ def grow(segments, criteria, *, thresh=2, expert=0, memlim=1e6,
         raise ValueError("segments[matchlast] not same as segments[-1], "
                          + "if you're sure, pass expert=True")
     if executor is None:
-        executor = ThreadPoolExecutor
+        executor = ThreadPoolExecutor  # todo: some kind of null executor?
         max_workers = 1
+    if max_workers is None: max_workers = cpu_count()
     sizes = [len(s.bodyid) for s in segments]
     end = len(segments) - 1
-    while end > 1 and (np.prod(sizes[end:]) < cpu_count() or
-                       memlim <= 64 * np.prod(sizes[:end])): end -= 1
-    ntot, nchunk, nchunks = (np.product(x)
-                             for x in (sizes, sizes[:end], sizes[end:]))
+    while end > 1 and (np.prod(sizes[end:]) < max_workers or
+                       memsize <= 64 * np.prod(sizes[:end])): end -= 1
+    ntot, chunksize, nchunks = (np.product(x)
+                                for x in (sizes, sizes[:end], sizes[end:]))
     nworker = max_workers or cpu_count()
     njob = nworker * jobmult
     njob = min(njob, nchunks)
-    print('tot = {:,}, nchunk = {:,}, nchunks = {:,}, nworker = {}, njob = {}, '
-          'worm/job = {:,}, chunk/job = {}, sizes={}'.format(
-              ntot, nchunk, nchunks, nworker, njob,
+    print('tot = {:,}, chunksize = {:,}, nchunks = {:,}, nworker = {}, '
+          'njob = {}, worm/job = {:,}, chunk/job = {}, sizes={}'.format(
+              ntot, chunksize, nchunks, nworker, njob,
               ntot / njob, nchunks / njob, sizes))
 
     # run the stuff
@@ -678,4 +711,6 @@ def grow(segments, criteria, *, thresh=2, expert=0, memlim=1e6,
     lowposlist = [lowpos[:, i] for i in range(len(segments))]
     score_check = sum(c.score(lowposlist, verbose=verbose) for c in criteria)
     assert np.allclose(score_check, scores)
-    return Worms(segments, scores, lowidx, lowpos, criteria)
+    detail = dict(ntot=ntot, chunksize=chunksize, nchunks=nchunks,
+                  nworker=nworker, njob=njob, sizes=sizes, end=end)
+    return Worms(segments, scores, lowidx, lowpos, criteria, detail)
