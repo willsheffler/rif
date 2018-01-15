@@ -2,7 +2,8 @@ from rif.homog import *
 
 
 tetrahedral_axes = {2: hnormalized([1, 0, 0]),
-                    3: hnormalized([1, 1, 1])}
+                    3: hnormalized([1, 1, 1]),
+                    7: hnormalized([1, 1, -1])}  # other c3
 octahedral_axes = {2: hnormalized([1, 1, 0]),
                    3: hnormalized([1, 1, 1]),
                    4: hnormalized([1, 0, 0])}

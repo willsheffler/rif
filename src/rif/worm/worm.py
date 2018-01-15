@@ -1,8 +1,8 @@
 from numpy.linalg import inv
 from pyrosetta import rosetta as ros
-from pyrosetta.rosetta.core.scoring import ScoreFunctionFactory
+from pyrosetta.rosetta.core import scoring
 from rif import rcl, homog, vis, sym
-from tqdm import tqdm
+from tqdm import tqdm  # progress bar utility
 import functools as ft
 import itertools as it
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -111,8 +111,8 @@ class WormCriteria(abc.ABC):
 
 class AxesIntersect(WormCriteria):
 
-    def __init__(self, symname, tgtaxis1, tgtaxis2, from_seg, *,
-                 tol=1.0, lever=50, to_seg=-1, frames=None):
+    def __init__(self, symname, tgtaxis1, tgtaxis2, from_seg, *, tol=1.0,
+                 lever=50, to_seg=-1, frames=None, distinct_axes=False):
         self.symname = symname
         self.from_seg = from_seg
         if len(tgtaxis1) == 2: tgtaxis1 += [0, 0, 0, 1],
@@ -133,15 +133,25 @@ class AxesIntersect(WormCriteria):
             x1 = homog.hrot(tgtaxis1[1], 360 / tgtaxis1[0], self.tgtaxis1[2])
             x2 = homog.hrot(tgtaxis2[1], 360 / tgtaxis2[0], self.tgtaxis2[2])
             self.frames = [identity44f8, x1, x2, x1 @ x2]
+        self.distinct_axes = distinct_axes  # -z not same as z (for T33)
 
     def score(self, segpos, verbose=False, **kw):
         cen1 = segpos[self.from_seg][..., :, 3]
         cen2 = segpos[self.to_seg][..., :, 3]
         ax1 = segpos[self.from_seg][..., :, 2]
         ax2 = segpos[self.to_seg][..., :, 2]
-        dist = homog.line_line_distance_pa(cen1, ax1, cen2, ax2)
-        ang = np.arccos(np.abs(homog.hdot(ax1, ax2)))
-        ang = np.minimum(ang, np.pi - ang)  # line-line isect
+        if self.distinct_axes:
+            p, q = homog.line_line_closest_points_pa(cen1, ax1, cen2, ax2)
+            dist = homog.hnorm(p - q)
+            cen = (p + q) / 2
+            ax1c = homog.hnormalized(cen1 - cen)
+            ax2c = homog.hnormalized(cen2 - cen)
+            ax1 = np.where(homog.hdot(ax1, ax1c)[..., None] > 0, ax1, -ax1)
+            ax2 = np.where(homog.hdot(ax2, ax2c)[..., None] > 0, ax2, -ax2)
+            ang = np.arccos(homog.hdot(ax1, ax2))
+        else:
+            dist = homog.line_line_distance_pa(cen1, ax1, cen2, ax2)
+            ang = np.arccos(np.abs(homog.hdot(ax1, ax2)))
         roterr2 = (ang - self.angle)**2
         return np.sqrt(roterr2 / self.rot_tol**2 + (dist / self.tol)**2)
 
@@ -150,9 +160,12 @@ class AxesIntersect(WormCriteria):
         cen2 = segpos[self.to_seg][..., :, 3]
         ax1 = segpos[self.from_seg][..., :, 2]
         ax2 = segpos[self.to_seg][..., :, 2]
-        if homog.angle(ax1, ax2) > np.pi / 2: ax2 = -ax2
+        if not self.distinct_axes and homog.angle(ax1, ax2) > np.pi / 2:
+            ax2 = -ax2
         p, q = homog.line_line_closest_points_pa(cen1, ax1, cen2, ax2)
         cen = (p + q) / 2
+        # ax1 = homog.hnormalized(cen1 - cen)
+        # ax2 = homog.hnormalized(cen2 - cen)
         x = homog.align_vectors(ax1, ax2, self.tgtaxis1[1], self.tgtaxis2[1])
         x[..., :, 3] = - x @cen
         if debug:
@@ -204,34 +217,40 @@ def D6(c6=0, c2=-1, **kw):
     return AxesIntersect('D6', (6, Uz), (2, Ux), c6, to_seg=c2, **kw)
 
 
-def Tetrahedral(c3=0, c2=-1, **kw):
-    return AxesIntersect('T', from_seg=c3, to_seg=c2,
-                         tgtaxis1=(3, sym.tetrahedral_axes[3]),
-                         tgtaxis2=(2, sym.tetrahedral_axes[2]),
-                         frames=sym.tetrahedral_frames, **kw)
+def Tetrahedral(c3=None, c2=None, c3b=None, **kw):
+    if 1 is not (c3b is None) + (c3 is None) + (c2 is None):
+        raise ValueError('must specify exactly two of c3, c2, c3b')
+    if c2 is None: from_seg, to_seg, nf1, nf2, ex = c3b, c3, 7, 3, 2
+    if c3 is None: from_seg, to_seg, nf1, nf2, ex = c3b, c2, 7, 2, 3
+    if c3b is None: from_seg, to_seg, nf1, nf2, ex = c3, c2, 3, 2, 7
+    return AxesIntersect('T', from_seg=from_seg, to_seg=to_seg,
+                         tgtaxis1=(max(3, nf1), sym.tetrahedral_axes[nf1]),
+                         tgtaxis2=(max(3, nf2), sym.tetrahedral_axes[nf2]),
+                         frames=sym.tetrahedral_frames,
+                         distinct_axes=(nf1 == 7), **kw)
 
 
 def Octahedral(c4=None, c3=None, c2=None, **kw):
     if 1 is not (c4 is None) + (c3 is None) + (c2 is None):
         raise ValueError('must specify exactly two of c4, c3, c2')
-    if c2 is None: from_seg, to_seg, nfold1, nfold2, ex = c4, c3, 4, 3, 2
-    if c3 is None: from_seg, to_seg, nfold1, nfold2, ex = c4, c2, 4, 2, 3
-    if c4 is None: from_seg, to_seg, nfold1, nfold2, ex = c3, c2, 3, 2, 4
+    if c2 is None: from_seg, to_seg, nf1, nf2, ex = c4, c3, 4, 3, 2
+    if c3 is None: from_seg, to_seg, nf1, nf2, ex = c4, c2, 4, 2, 3
+    if c4 is None: from_seg, to_seg, nf1, nf2, ex = c3, c2, 3, 2, 4
     return AxesIntersect('O', from_seg=from_seg, to_seg=to_seg,
-                         tgtaxis1=(nfold1, sym.octahedral_axes[nfold1]),
-                         tgtaxis2=(nfold2, sym.octahedral_axes[nfold2]),
+                         tgtaxis1=(nf1, sym.octahedral_axes[nf1]),
+                         tgtaxis2=(nf2, sym.octahedral_axes[nf2]),
                          frames=sym.octahedral_frames, **kw)
 
 
 def Icosahedral(c5=None, c3=None, c2=None, **kw):
     if 1 is not (c5 is None) + (c3 is None) + (c2 is None):
         raise ValueError('must specify exactly two of c5, c3, c2')
-    if c2 is None: from_seg, to_seg, nfold1, nfold2, ex = c5, c3, 5, 3, 2
-    if c3 is None: from_seg, to_seg, nfold1, nfold2, ex = c5, c2, 4, 2, 3
-    if c5 is None: from_seg, to_seg, nfold1, nfold2, ex = c3, c2, 3, 2, 5
+    if c2 is None: from_seg, to_seg, nf1, nf2, ex = c5, c3, 5, 3, 2
+    if c3 is None: from_seg, to_seg, nf1, nf2, ex = c5, c2, 4, 2, 3
+    if c5 is None: from_seg, to_seg, nf1, nf2, ex = c3, c2, 3, 2, 5
     return AxesIntersect('I', from_seg=from_seg, to_seg=to_seg,
-                         tgtaxis1=(nfold1, sym.icosahedral_axes[nfold1]),
-                         tgtaxis2=(nfold2, sym.icosahedral_axes[nfold2]),
+                         tgtaxis1=(nf1, sym.icosahedral_axes[nf1]),
+                         tgtaxis2=(nf2, sym.icosahedral_axes[nf2]),
                          frames=sym.icosahedral_frames, **kw)
 
 
@@ -326,11 +345,12 @@ class Cyclic(WormCriteria):
 
 class SpliceSite:
 
-    def __init__(self, sele, polarity):
+    def __init__(self, sele, polarity, chain=None):
         if isinstance(sele, str) or isinstance(sele, int):
             sele = [sele]
         self.selections = list(sele)
         self.polarity = polarity
+        self.chain = chain
 
     def resid(self, id, pose):
         resid = id if id >= 0 else len(pose) + 1 + id
@@ -342,7 +362,12 @@ class SpliceSite:
 
     def resids_impl(self, sele, spliceable):
         if isinstance(sele, int):
-            return set([self.resid(sele, spliceable.body)])
+            if self.chain is None:
+                return set([self.resid(sele, spliceable.body)])
+            else:
+                ir = self.resid(sele, spliceable.chains[self.chain])
+                ir += spliceable.start_of_chain[self.chain]
+                return set([ir])
         elif isinstance(sele, str):
             x = sele.split(',')
             s = x[-1].split(':')
@@ -375,8 +400,10 @@ class SpliceSite:
             raise ValueError('empty SpliceSite')
         return resids
 
-    def __repr__(ss):
-        return 'SpliceSite(' + str(ss.selections) + ', ' + ss.polarity + ')'
+    def __repr__(self):
+        c = '' if self.chain is None else ', chain=' + str(self.chain)
+        return 'SpliceSite(' + str(self.selections) + \
+            ', ' + self.polarity + c + ')'
 
 
 class Spliceable:
@@ -398,9 +425,12 @@ class Spliceable:
             if isinstance(site, str):
                 raise ValueError('site currently must be (sele, polarity)')
             if not isinstance(site, SpliceSite):
-                if not hasattr(site, '__iter__'):
-                    self.sites[i] = (site,)
-                self.sites[i] = SpliceSite(*site)
+                if isinstance(site, dict):
+                    self.sites[i] = SpliceSite(**site)
+                else:
+                    if not hasattr(site, '__iter__'):
+                        self.sites[i] = (site,)
+                    self.sites[i] = SpliceSite(*site)
 
     def spliceable_positions(self):
         """selection of resids, and map 'global' index to selected index"""
@@ -547,8 +577,8 @@ class Worms:
         self.positions = positions
         self.criteria = criteria
         self.detail = detail
-        self.score0 = ros.core.scoring.symmetry.symmetrize_scorefunction(
-            ros.core.scoring.ScoreFunctionFactory.create_score_function('score0'))
+        self.score0 = scoring.symmetry.symmetrize_scorefunction(
+            scoring.ScoreFunctionFactory.create_score_function('score0'))
 
     def pose(self, which, *, align=True, end=None, join=True,
              only_connected=None, cyclic_permute=False, **kw):

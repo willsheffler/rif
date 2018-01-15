@@ -74,10 +74,11 @@ def test_sym_bug(c1pose, c2pose):
 
 
 @pytest.mark.skipif('not rcl.HAVE_PYROSETTA')
-def test_SpliceSite(pose):
+def test_SpliceSite(pose, c3pose):
     assert len(pose) == 7
     ss = SpliceSite(1, 'N')
     spliceable = Spliceable(pose, [])
+    spliceablec3 = Spliceable(c3pose, [])
     assert 1 == ss.resid(1, spliceable.body)
     assert pose.size() == ss.resid(-1, spliceable.body)
     assert ss.resids(spliceable) == [1]
@@ -90,6 +91,36 @@ def test_SpliceSite(pose):
     assert SpliceSite('::2', 'N').resids(spliceable) == [1, 3, 5, 7]
     with pytest.raises(ValueError): SpliceSite('-1:-3', 'N').resids(spliceable)
     with pytest.raises(ValueError): SpliceSite('-1:3', 'N').resids(spliceable)
+    assert SpliceSite([1, 2, 3], 'N', 1).resids(spliceablec3) == [1, 2, 3]
+    assert SpliceSite([1, 2, 3], 'N', 2).resids(spliceablec3) == [10, 11, 12]
+    assert SpliceSite([1, 2, 3], 'N', 3).resids(spliceablec3) == [19, 20, 21]
+
+
+@pytest.mark.skipif('not rcl.HAVE_PYROSETTA')
+def test_spliceable(c2pose):
+    site1 = SpliceSite([1, 2, 3], 'N', 1)
+    site2 = SpliceSite([1, 2, 3], 'N', 2)
+    dimer = Spliceable(c2pose, sites=[site1, site2])
+    assert dimer.sites[0].resids(dimer) == [1, 2, 3]
+    assert dimer.sites[1].resids(dimer) == [13, 14, 15]
+
+    site1 = {'sele': [1, 2, 3], 'polarity': 'N', 'chain': 1}
+    site2 = {'sele': [1, 2, 3], 'polarity': 'N', 'chain': 2}
+    dimer = Spliceable(c2pose, sites=[site1, site2])
+    assert dimer.sites[0].resids(dimer) == [1, 2, 3]
+    assert dimer.sites[1].resids(dimer) == [13, 14, 15]
+
+    site1 = ([1, 2, 3], 'N', 1)
+    site2 = ([1, 2, 3], 'N', 2)
+    dimer = Spliceable(c2pose, sites=[site1, site2])
+    assert dimer.sites[0].resids(dimer) == [1, 2, 3]
+    assert dimer.sites[1].resids(dimer) == [13, 14, 15]
+
+    site1 = (':3', 'N')
+    site2 = ('2,:3', 'N')
+    dimer = Spliceable(c2pose, sites=[site1, site2])
+    assert dimer.sites[0].resids(dimer) == [1, 2, 3]
+    assert dimer.sites[1].resids(dimer) == [13, 14, 15]
 
 
 def test_geom_check():
@@ -520,7 +551,6 @@ def test_cyclic_permute(c1pose, c2pose):
         c1pose, sites=[((1, 2, 3,), 'N'), ((9, 10, 11, 13), 'C')])
     dimer = Spliceable(c2pose, sites=[('1,:1', 'N'), ('1,-1:', 'C'),
                                       ('2,:2', 'N'), ('2,-1:', 'C')])
-
     segments = [Segment([helix], exit='N'),
                 Segment([helix], entry='C', exit='N'),
                 Segment([dimer], entry='C', exit='N'),
@@ -529,11 +559,11 @@ def test_cyclic_permute(c1pose, c2pose):
     w = grow(segments, Cyclic('C3', lever=20), thresh=1)
     assert 0
 
-    w.pose(0)
-    showme(w.pose(0, cyclic_permute=0))
-    showme(w.pose(0, cyclic_permute=1))
-    showme(w.sympose(0))
-    assert 0
+    # w.pose(0)
+    # showme(w.pose(0, cyclic_permute=0))
+    # showme(w.pose(0, cyclic_permute=1))
+    # showme(w.sympose(0))
+    # assert 0
 
 
 @pytest.mark.skipif('not rcl.HAVE_PYROSETTA')
@@ -618,6 +648,20 @@ def test_tet(c2pose, c3pose, c1pose):
 
 
 @pytest.mark.skipif('not rcl.HAVE_PYROSETTA')
+def test_tet33(c2pose, c3pose, c1pose):
+    helix = Spliceable(c1pose, [(':1', 'N'), ('-4:', 'C')])
+    trimer = Spliceable(c3pose, sites=[('1,:1', 'N'), ('1,-2:', 'C'), ])
+    segments = ([Segment([trimer], exit='C')] +
+                [Segment([helix], entry='N', exit='C')] * 5 +
+                [Segment([trimer], entry='N')])
+    w = grow(segments, Tetrahedral(c3=-1, c3b=0), thresh=2)
+    assert len(w) == 3
+    p = w.pose(0, only_connected=0)
+    assert 2.5 > residue_sym_err(p, 120, 2, 20, 6, axis=[1, 1, -1])
+    assert 2.5 > residue_sym_err(p, 120, 87, 96, 6, axis=[1, 1, 1])
+
+
+@pytest.mark.skipif('not rcl.HAVE_PYROSETTA')
 def test_oct(c2pose, c3pose, c4pose, c1pose):
     helix = Spliceable(c1pose, [(':1', 'N'), ('-4:', 'C')])
     dimer = Spliceable(c2pose, sites=[('1,:2', 'N'), ('1,-1:', 'C'), ])
@@ -627,7 +671,7 @@ def test_oct(c2pose, c3pose, c4pose, c1pose):
                 [Segment([helix], entry='N', exit='C')] * 5 +
                 [Segment([trimer], entry='N')])
     w = grow(segments, Octahedral(c3=-1, c2=0), thresh=1)
-    assert len(w)
+    assert len(w) == 1
     p = w.pose(0, only_connected=0)
     assert 1 > residue_sym_err(p, 120, 85, 94, 6, axis=[1, 1, 1])
     assert 1 > residue_sym_err(p, 180, 1, 13, 6, axis=[1, 1, 0])
@@ -636,9 +680,8 @@ def test_oct(c2pose, c3pose, c4pose, c1pose):
                 [Segment([helix], entry='N', exit='C')] * 5 +
                 [Segment([dimer], entry='N')])
     w = grow(segments, Octahedral(c2=-1, c4=0), thresh=1)
-    assert len(w)
+    assert len(w) == 5
     p = w.pose(0, only_connected=0)
-    # showme(p)
     assert 1 > residue_sym_err(p, 90, 1, 31, 6, axis=[1, 0, 0])
     assert 1 > residue_sym_err(p, 180, 92, 104, 6, axis=[1, 1, 0])
 
@@ -674,6 +717,16 @@ def test_score0_sym(c2pose, c3pose, c1pose):
     # show_with_z_axes(w, 1)
     # showme(pose)
     assert 118.095 < score0 < 118.096
+
+    # iw = 3
+    # bodyids = [s.bodyid[i] for s, i in zip(w.segments, w.indices[iw])]
+    # poses = [s.spliceables[i].body for s, i in zip(w.segments, bodyids)]
+    # enres = [s.entryresid[i] for s, i in zip(w.segments, w.indices[iw])]
+    # exres = [s.exitresid[i] for s, i in zip(w.segments, w.indices[iw])]
+    # junctions = list(zip(poses[1:], enres[1:], poses[:1], exres[:1]))
+    # print(junctions)
+
+    # assert 0
     # count = 0
     # for i, err, pose, score0 in w:
     #     print(err, len(pose), score0)
