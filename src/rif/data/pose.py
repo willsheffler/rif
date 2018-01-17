@@ -11,7 +11,7 @@ class PoseLib:
     def get(self, name):
         if name.startswith('__'):
             return
-        rcl.init_check('-mute all')
+        rcl.init_check('-mute all', strict=False)
         this_dir, this_filename = os.path.split(__file__)
         pdb_dir = os.path.join(this_dir, 'pdb')
         return pyrosetta.pose_from_file(os.path.join(pdb_dir, name + '.pdb'))

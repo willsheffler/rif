@@ -1,7 +1,7 @@
 import pytest
 from types import ModuleType
-from mock import MagicMock
-from rif import rcl
+from rif import rcl, vis
+from .pyrosetta_util import *
 
 
 def test_import_pyrosetta():
@@ -54,3 +54,13 @@ def test_atomic_charge_deviation():
 #     # p.dump_pdb('asn%i.pdb' % i)
 #     # print(len(rots))
 #     # print(rcl.rosetta.options)
+
+@pytest.mark.skipif('not rcl.HAVE_PYROSETTA')
+def test_concatenate_pose(c1pose):
+    lorig = len(c1pose)
+    assert worst_CN_connect(c1pose) < 0.1
+    p = c1pose
+    p2 = concatenate_pose(p, p)
+    assert len(p2) == 2 * len(p) - 1
+    assert worst_CN_connect(p2) < 0.1
+    assert len(c1pose) == lorig

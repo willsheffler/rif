@@ -50,18 +50,6 @@ def trim_pose(pose, resid, direction, pad=0):
     return p
 
 
-def worst_CN_connect(p):
-    for ir in range(1, len(p)):
-        worst = 0
-        if (p.residue(ir).is_protein() and
-                p.residue(ir + 1).is_protein() and not (
-                ros.core.pose.is_upper_terminus(p, ir) or
-                ros.core.pose.is_lower_terminus(p, ir + 1))):
-            dist = p.residue(ir).xyz('C').distance(p.residue(ir + 1).xyz('N'))
-            worst = max(abs(dist - 1.32), worst)
-    return worst
-
-
 def reorder_spliced_as_N_to_C(body_chains, polarities):
     "remap chains of each body such that concatenated chains are N->C"
     if len(body_chains) != len(polarities) + 1:
@@ -459,11 +447,11 @@ class Segment:
         self.entrypol = entry or None
         self.exitpol = exit or None
         if not spliceables:
-            raise ValueError('spliceables must not be empty, spliceables =' +
-                             str(spliceables))
+            raise ValueError('spliceables must not be empty, spliceables ='
+                             + str(spliceables))
         for s in spliceables:
             if not isinstance(s, Spliceable):
-                raise ValueError('Segment can only accept list of Spliceable')
+                raise ValueError('Segment only accepts list of Spliceable')
         self.init(spliceables, entry, exit)
 
     def __len__(self):
@@ -530,10 +518,10 @@ class Segment:
         bodies2 = [s.body for s in other.spliceables]
         return bodies1 == bodies2
 
-    def make_pose_chains(self, index, position=None, pad=(0, 0)):
+    def make_pose_chains(self, index, position=None, pad=(0, 0), ):
         """returns (segchains, rest)
         segchains elems are [enterexitchain] or, [enterchain, ..., exitchain]
-        rest holds other chains IFF entre and exit in same chain
+        rest holds other chains IFF enter and exit in same chain
         """
         spliceable = self.spliceables[self.bodyid[index]]
         pose = spliceable.body
@@ -568,6 +556,37 @@ class Segment:
         return enex, rest
 
 
+def _subpose(pose, lb, ub):
+    assert lb > 0 and ub <= len(pose)
+    p = ros.core.pose.Pose()
+    ros.core.pose.append_subpose_to_pose(p, pose, lb, ub)
+    return p
+
+
+def _cyclic_permute_chains(chainslist, polarity, spliceres):
+    rm_lower_t = ros.core.pose.remove_lower_terminus_type_from_pose_residue
+    rm_upper_t = ros.core.pose.remove_upper_terminus_type_from_pose_residue
+    beg, end = chainslist[0], chainslist[-1]
+    n2c = polarity == 'N'
+    if n2c:
+        stub1 = rcl.bbstubs(beg[0], [spliceres])
+        stub2 = rcl.bbstubs(end[-1], [len(end[-1])])
+        beg[0] = _subpose(beg[0], spliceres + 1, len(beg[0]))
+        rm_lower_t(beg[0], 1)
+        rm_upper_t(end[-1], len(end[-1]))
+    else:
+        stub1 = rcl.bbstubs(beg[-1], [spliceres])
+        stub2 = rcl.bbstubs(end[0], [1])
+        beg[-1] = _subpose(beg[-1], 1, spliceres - 1)
+        rm_lower_t(beg[-1], len(beg[-1]))
+        rm_upper_t(end[0], 1)
+    xalign = stub1['raw'][0] @ np.linalg.inv(stub2['raw'][0])
+    for p in end: rcl.xform_pose(xalign, p)
+    if n2c: chainslist[0] = end + beg
+    else: chainslist[0] = beg + end
+    chainslist = chainslist[:-1]
+
+
 class Worms:
 
     def __init__(self, segments, scores, indices, positions, criteria, detail):
@@ -579,6 +598,7 @@ class Worms:
         self.detail = detail
         self.score0 = scoring.symmetry.symmetrize_scorefunction(
             scoring.ScoreFunctionFactory.create_score_function('score0'))
+        self.splicepoint_cache = {}
 
     def pose(self, which, *, align=True, end=None, join=True,
              only_connected=None, cyclic_permute=False, **kw):
@@ -613,39 +633,39 @@ class Worms:
                 for p in it.chain(*chainslist, *rest):
                     rcl.xform_pose(align[0], p)
         if cyclic_permute and len(chainslist) > 1:
-            raise NotImplementedError('will needs to fix this')
-            axes = self.criteria[0].sym_axes()
-            assert len(axes) == 1
-            x = homog.hrot(axes[0][1], 360.0 / axes[0][0])
-            for p in chainslist[-1]: rcl.xform_pose(x, p)
-            while len(chainslist[-1][0]) > 1:
-                chainslist[-1][0].delete_residue_slow(1)
-                xyz1 = chainslist[-1][0].residue(1).xyz('N')
-                xyz2 = chainslist[0][-1].residue(
-                    len(chainslist[0][-1])).xyz('C')
-                d = xyz1.distance(xyz2)
-                print(d)
-                if d < 2.5: break
-            rm_upper_t(chainslist[0][-1], len(chainslist[0][-1]))
-            chainslist[0].extend(chainslist[-1])
-            chainslist = chainslist[:-1]
+            # todo: this is only correct if 1st seg is one chain
+            spliceres = self.segments[-1].entryresid[self.indices[which, -1]]
+            bodyid = self.segments[0].bodyid[self.indices[which, 0]]
+            origlen = len(self.segments[0].spliceables[bodyid].body)
+            i = -1 if self.segments[-1].entrypol == 'C' else 0
+            spliceres -= origlen - len(chainslist[0][i])
+            _cyclic_permute_chains(chainslist, self.segments[-1].entrypol,
+                                   spliceres + 1)
         pose = ros.core.pose.Pose()
+        splicepoints = []
         for chains in chainslist:
             if only_connected and len(chains) is 1: continue
             ros.core.pose.append_pose_to_pose(pose, chains[0], True)
             for chain in chains[1:]:
                 rm_upper_t(pose, len(pose))
                 rm_lower_t(chain, 1)
+                splicepoints.append(len(pose))
                 ros.core.pose.append_pose_to_pose(pose, chain, not join)
+        self.splicepoint_cache[which] = splicepoints
         if not only_connected:
             for chain in it.chain(*rest):
                 ros.core.pose.append_pose_to_pose(pose, chain, True)
-        assert worst_CN_connect(pose) < 0.5
+        assert rcl.worst_CN_connect(pose) < 0.5
         return pose
+
+    def splicepoints(self, which):
+        if not which in self.splicepoint_cache:
+            self.pose(which)
+        return self.splicepoint_cache[which]
 
     def sympose(self, which, fullatom=False, score=False):
         if hasattr(which, '__iter__'): return (self.sympose(w) for w in which)
-        p = self.pose(which)
+        p = self.pose(which, splicepoints=True)
         if not fullatom:
             ros.core.util.switch_to_residue_type_set(p, 'centroid')
         ros.core.pose.symmetry.make_symmetric_pose(

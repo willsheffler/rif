@@ -55,7 +55,8 @@ except ImportError as e:
     # pyrosetta = mock.MagicMock()
     # rosetta = mock.MagicMock()
 
-from .conversions import to_rosetta_stub
+from .conversions import to_rosetta_stub, bbstubs
+import numpy as np
 
 
 class Error(Exception):
@@ -245,9 +246,54 @@ def generate_canonical_rotamer_residues(residue_name3):
     return result
 
 
-def xform_pose(xform, pose, lb=1, ub=None):
+def worst_CN_connect(p):
+    for ir in range(1, len(p)):
+        worst = 0
+        if (p.residue(ir).is_protein() and
+                p.residue(ir + 1).is_protein() and not (
+                rosetta.core.pose.is_upper_terminus(p, ir) or
+                rosetta.core.pose.is_lower_terminus(p, ir + 1))):
+            dist = p.residue(ir).xyz('C').distance(p.residue(ir + 1).xyz('N'))
+            worst = max(abs(dist - 1.32), worst)
+    return worst
+
+
+def pose_bounds(pose, lb, ub):
+    if ub < 0: ub = len(pose) + 1 + ub
+    if lb < 1 or ub > len(pose):
+        raise ValueError('lb/ub ' + str(lb) + '/' + str(ub) +
+                         ' out of bounds for pose with len '
+                         + str(len(pose)))
+    return lb, ub
+
+
+def xform_pose(xform, pose, lb=1, ub=-1):
+    lb, ub = pose_bounds(pose, lb, ub)
     if xform.shape != (4, 4):
-        raise ValueError('invalid xform, must be 4x4 homogeneous matrix')
-    ub = ub or len(pose)
+        raise ValueError(
+            'invalid xform, must be 4x4 homogeneous matrix, shape is: '
+            + str(xform.shape))
     xform = to_rosetta_stub(xform)
     rosetta.protocols.sic_dock.xform_pose(pose, xform, lb, ub)
+
+
+def concatenate_pose(p, to_append, lb=1, ub=-1, out=None):
+    "put poses together aligning on end of p"
+    lb, ub = pose_bounds(to_append, lb, ub)
+    if not p.residue(len(p)).is_protein():
+        raise ValueError('last res of p is not protein')
+    if not to_append.residue(lb).is_protein():
+        raise ValueError('lb res of to_append is not protein')
+    if out is not p:
+        out = p.clone()
+    stub1 = bbstubs(p, [len(p)])['raw'][0]
+    stub2 = bbstubs(to_append, [lb])['raw'][0]
+    xalign = stub1 @ np.linalg.inv(stub2)
+    rosetta.core.pose.remove_upper_terminus_type_from_pose_residue(
+        out, len(out))
+    outlen = len(out)
+    rosetta.core.pose.append_subpose_to_pose(
+        out, to_append, lb + 1, ub, new_chain=0)
+    xform_pose(xalign, out, outlen + 1)
+    # todo: fix NH/CO
+    return out

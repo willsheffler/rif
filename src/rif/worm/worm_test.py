@@ -520,6 +520,8 @@ def test_multichain_match_reveres_pol(c1pose, c2pose):
     wnc = grow(segments, Cyclic('C3', lever=20), thresh=1)
     assert len(wnc)
     assert wnc.scores[0] < 0.25
+    assert wnc.splicepoints(0) == [10, 20, 42]
+
     # print(wnc.indices[:5])
     # print(wnc.scores)
 
@@ -556,13 +558,13 @@ def test_cyclic_permute(c1pose, c2pose):
                 Segment([dimer], entry='C', exit='N'),
                 Segment([helix], entry='C', exit='N'),
                 Segment([helix], entry='C'), ]
-    w = grow(segments, Cyclic('C3', lever=20), thresh=1)
+    w = grow(segments, Cyclic('C3', lever=50), thresh=1)
+    print(w.scores)
     assert 0
 
-    # w.pose(0)
-    # showme(w.pose(0, cyclic_permute=0))
-    # showme(w.pose(0, cyclic_permute=1))
-    # showme(w.sympose(0))
+    showme(w.pose(0, cyclic_permute=1))
+    showme(w.pose(0, cyclic_permute=0, end=1))
+
     # assert 0
 
 
@@ -740,10 +742,7 @@ def test_score0_sym(c2pose, c3pose, c1pose):
 def test_chunk_speed(c2pose, c3pose, c1pose):
     helix = Spliceable(c1pose, [(':1', 'N'), ('-2:', 'C')])
     dimer = Spliceable(c2pose, sites=[('1,:2', 'N'), ('1,-1:', 'C'), ])
-    # ('2,:2', 'N'), ('2,-1:', 'C')])
     trimer = Spliceable(c3pose, sites=[('1,:1', 'N'), ('1,-2:', 'C'), ])
-    # ('2,:2', 'N'), ('2,-2:', 'C'),
-    # ('3,:1', 'N'), ('3,-2:', 'C')])
     nseg = 11
     segments = ([Segment([dimer], exit='C')] +
                 [Segment([helix], entry='N', exit='C')] * (nseg - 2) +

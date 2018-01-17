@@ -26,8 +26,8 @@ def axis_angle_of(xforms):
     axis = fast_axis_of(xforms)
     four_sin2 = np.sum(axis**2, axis=-1)
     axis = axis / np.linalg.norm(axis, axis=-1)[..., np.newaxis]
-    sin_angl = np.sqrt(four_sin2 / 4)
-    cos_angl = np.trace(xforms, axis1=-1, axis2=-2) / 2 - 1
+    sin_angl = np.clip(np.sqrt(four_sin2 / 4), -1, 1)
+    cos_angl = np.clip(np.trace(xforms, axis1=-1, axis2=-2) / 2 - 1, -1, 1)
     angl = np.arctan2(sin_angl, cos_angl)
     return axis, angl
 
@@ -35,8 +35,8 @@ def axis_angle_of(xforms):
 def angle_of(xforms):
     axis = fast_axis_of(xforms)
     four_sin2 = np.sum(axis**2, axis=-1)
-    sin_angl = np.sqrt(four_sin2 / 4)
-    cos_angl = np.trace(xforms, axis1=-1, axis2=-2) / 2 - 1
+    sin_angl = np.clip(np.sqrt(four_sin2 / 4), -1, 1)
+    cos_angl = np.clip(np.trace(xforms, axis1=-1, axis2=-2) / 2 - 1, -1, 1)
     angl = np.arctan2(sin_angl, cos_angl)
     return angl
 
@@ -184,7 +184,7 @@ def random_unit(shape=()):
 def angle(u, v):
     d = hdot(hnormalized(u), hnormalized(v))
     # todo: handle special cases... 1,-1
-    return np.arccos(np.maximum(-1, np.minimum(1, d)))
+    return np.arccos(np.clip(d, -1, 1))
 
 
 def angle_degrees(u, v):
@@ -374,8 +374,8 @@ def dihedral(p1, p2, p3, p4):
     a = hnormalized(p2 - p1)
     b = hnormalized(p3 - p2)
     c = hnormalized(p4 - p3)
-    x = hdot(a, b) * hdot(b, c) - hdot(a, c)
-    y = hdot(a, hcross(b, c))
+    x = np.clip(hdot(a, b) * hdot(b, c) - hdot(a, c), -1, 1)
+    y = np.clip(hdot(a, hcross(b, c)), -1, 1)
     return np.arctan2(y, x)
 
 

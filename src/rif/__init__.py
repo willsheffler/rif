@@ -7,7 +7,10 @@ from _rif import *
 from rif.eigen_types import *
 from rif.actor import *
 from rif.index import *
-from rif.rcl import *
+import rif.data
+import rif.vis
+import rif.homog
+import rif.rcl
 
 # from . import actor
 # from . import apps
