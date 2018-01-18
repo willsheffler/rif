@@ -316,7 +316,7 @@ def test_line_line_closest_points():
     assert p.shape[:-1] == shape and q.shape[:-1] == shape
     lldist0 = hnorm(p - q)
     lldist1 = lld(r1, r2)
-    assert np.allclose(lldist0, lldist1, atol=1e-5)
+    assert np.allclose(lldist0, lldist1, atol=1e-4, rtol=1e-4)
 
 
 def test_dihedral():

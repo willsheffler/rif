@@ -72,9 +72,16 @@ def reorder_spliced_as_N_to_C(body_chains, polarities):
     return chains
 
 
-def symfile_path(name):
+def _symfile_path(name):
     path, _ = os.path.split(__file__)
     return os.path.join(path, 'rosetta_symdef', name + '.sym')
+
+
+@ft.lru_cache()
+def _get_symdata(name):
+    d = ros.core.conformation.symmetry.SymmData()
+    d.read_symmetry_data_from_file(_symfile_path(name))
+    return d
 
 
 class WormCriteria(abc.ABC):
@@ -94,7 +101,7 @@ class WormCriteria(abc.ABC):
 
     def sym_frames(self): return [identity44f8]
 
-    def symdef(self): return None
+    def symdata(self): return None
 
 
 class AxesIntersect(WormCriteria):
@@ -180,7 +187,7 @@ class AxesIntersect(WormCriteria):
 
     def sym_frames(self): return self.frames
 
-    def symdef(self): return symfile_path(self.symname)
+    def symdata(self): return _get_symdata(self.symname)
 
     def sym_axes(self): return [self.tgtaxis1, self.tgtaxis2]
 
@@ -326,7 +333,7 @@ class Cyclic(WormCriteria):
 
     def sym_frames(self): return self.frames
 
-    def symdef(self): return symfile_path('C' + str(self.nfold))
+    def symdata(self): return _get_symdata('C' + str(self.nfold))
 
     def sym_axes(self): return [(self.nfold, Uz, [0, 0, 0, 1])]
 
@@ -589,8 +596,9 @@ class Worms:
         self.positions = positions
         self.criteria = criteria
         self.detail = detail
-        self.score0 = scoring.symmetry.symmetrize_scorefunction(
-            scoring.ScoreFunctionFactory.create_score_function('score0'))
+        self.score0 = scoring.ScoreFunctionFactory.create_score_function(
+            'score0')
+        self.score0sym = scoring.symmetry.symmetrize_scorefunction(self.score0)
         self.splicepoint_cache = {}
 
     def pose(self, which, *, align=True, end=None, join=True,
@@ -656,7 +664,8 @@ class Worms:
             self.pose(which)
         return self.splicepoint_cache[which]
 
-    def sympose(self, which, score=False, fullatom=False, parallel=False):
+    def sympose(self, which, score=False, fullatom=False,
+                parallel=False, asym_score_thresh=50):
         if hasattr(which, '__iter__'):
             which = list(which)
             if not all(0 <= i < len(self) for i in which):
@@ -668,13 +677,18 @@ class Worms:
             else: return list(map(self.sympose, which, it.repeat(score)))
         if not 0 <= which < len(self):
             raise IndexError('invalid worm index')
-        p = self.pose(which, splicepoints=True)
+        p = self.pose(which)
+        # todo: why is asym scoring broken?!?
+        # try: score0asym = self.score0(p)
+        # except: score0asym = 9e9
+        # if score0asym > asym_score_thresh:
+        # return None, None if score else None
         if not fullatom:
             ros.core.util.switch_to_residue_type_set(p, 'centroid')
         ros.core.pose.symmetry.make_symmetric_pose(
-            p, self.criteria[0].symdef())
-        if not score: return p
-        return p, self.score0(p)
+            p, self.criteria[0].symdata())
+        if score: return p, self.score0sym(p)
+        return p
 
     def splices(self, which):
         if hasattr(which, '__iter__'): return (self.splices(w) for w in which)
