@@ -277,6 +277,13 @@ def xform_pose(xform, pose, lb=1, ub=-1):
     rosetta.protocols.sic_dock.xform_pose(pose, xform, lb, ub)
 
 
+def subpose(pose, lb, ub=-1):
+    lb, ub = pose_bounds(pose, lb, ub)
+    p = rosetta.core.pose.Pose()
+    rosetta.core.pose.append_subpose_to_pose(p, pose, lb, ub)
+    return p
+
+
 def concatenate_pose(p, to_append, lb=1, ub=-1, out=None):
     "put poses together aligning on end of p"
     lb, ub = pose_bounds(to_append, lb, ub)

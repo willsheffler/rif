@@ -556,13 +556,6 @@ class Segment:
         return enex, rest
 
 
-def _subpose(pose, lb, ub):
-    assert lb > 0 and ub <= len(pose)
-    p = ros.core.pose.Pose()
-    ros.core.pose.append_subpose_to_pose(p, pose, lb, ub)
-    return p
-
-
 def _cyclic_permute_chains(chainslist, polarity, spliceres):
     rm_lower_t = ros.core.pose.remove_lower_terminus_type_from_pose_residue
     rm_upper_t = ros.core.pose.remove_upper_terminus_type_from_pose_residue
@@ -571,13 +564,13 @@ def _cyclic_permute_chains(chainslist, polarity, spliceres):
     if n2c:
         stub1 = rcl.bbstubs(beg[0], [spliceres])
         stub2 = rcl.bbstubs(end[-1], [len(end[-1])])
-        beg[0] = _subpose(beg[0], spliceres + 1, len(beg[0]))
+        beg[0] = rcl.subpose(beg[0], spliceres + 1, len(beg[0]))
         rm_lower_t(beg[0], 1)
         rm_upper_t(end[-1], len(end[-1]))
     else:
         stub1 = rcl.bbstubs(beg[-1], [spliceres])
         stub2 = rcl.bbstubs(end[0], [1])
-        beg[-1] = _subpose(beg[-1], 1, spliceres - 1)
+        beg[-1] = rcl.subpose(beg[-1], 1, spliceres - 1)
         rm_lower_t(beg[-1], len(beg[-1]))
         rm_upper_t(end[0], 1)
     xalign = stub1['raw'][0] @ np.linalg.inv(stub2['raw'][0])
@@ -663,8 +656,18 @@ class Worms:
             self.pose(which)
         return self.splicepoint_cache[which]
 
-    def sympose(self, which, fullatom=False, score=False):
-        if hasattr(which, '__iter__'): return (self.sympose(w) for w in which)
+    def sympose(self, which, score=False, fullatom=False, parallel=False):
+        if hasattr(which, '__iter__'):
+            which = list(which)
+            if not all(0 <= i < len(self) for i in which):
+                raise IndexError('invalid worm index')
+            if parallel:
+                with ThreadPoolExecutor() as pool:
+                    result = pool.map(self.sympose, which, it.repeat(score))
+                    return list(result)
+            else: return list(map(self.sympose, which, it.repeat(score)))
+        if not 0 <= which < len(self):
+            raise IndexError('invalid worm index')
         p = self.pose(which, splicepoints=True)
         if not fullatom:
             ros.core.util.switch_to_residue_type_set(p, 'centroid')
@@ -672,6 +675,29 @@ class Worms:
             p, self.criteria[0].symdef())
         if not score: return p
         return p, self.score0(p)
+
+    def splices(self, which):
+        if hasattr(which, '__iter__'): return (self.splices(w) for w in which)
+        splices = []
+        for i in range(len(self.segments) - 1):
+            seg1 = self.segments[i]
+            isegchoice1 = self.indices[which, i]
+            ibody1 = seg1.bodyid[isegchoice1]
+            spliceable1 = seg1.spliceables[ibody1]
+            resid1 = seg1.exitresid[isegchoice1]
+            ichain1 = spliceable1.body.chain(resid1)
+            chainresid1 = resid1 - spliceable1.start_of_chain[ichain1]
+            seg2 = self.segments[i + 1]
+            isegchoice2 = self.indices[which, i + 1]
+            ibody2 = seg2.bodyid[isegchoice2]
+            spliceable2 = seg2.spliceables[ibody2]
+            resid2 = seg2.entryresid[isegchoice2]
+            ichain2 = spliceable2.body.chain(resid2)
+            chainresid2 = resid2 - spliceable2.start_of_chain[ichain2]
+            drn = self.segments[i].exitpol + self.segments[i + 1].entrypol
+            splices.append((ibody1, ichain1, chainresid1,
+                            ibody2, ichain2, chainresid2, drn))
+        return splices
 
     def __len__(self): return len(self.scores)
 
