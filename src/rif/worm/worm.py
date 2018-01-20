@@ -10,6 +10,7 @@ import multiprocessing
 import os
 import sys
 import abc
+from collections.abc import Iterable
 import numpy as np
 import multiprocessing
 
@@ -87,27 +88,40 @@ def _get_symdata(name):
 class WormCriteria(abc.ABC):
 
     @abc.abstractmethod
-    def score(self): pass
+    def score(self, **kw): pass
 
-    def canonical_alignment(self, *args, **kw): return identity44f8
+    allowed_attributes = ('last_body_same_as',
+                          'symdata',
+                          'is_cyclic',
+                          'alignment',
+                          'from_seg',
+                          'to_seg',
+                          )
 
-    def last_body_same_as(self): return
 
-    def check_topolopy(self, segments): return
+class CriteriaList(WormCriteria):
 
-    def is_cyclic(self): return False
+    def __init__(self, children):
+        if isinstance(children, WormCriteria):
+            children = [children]
+        self.children = children
 
-    def sym_axes(self): return []
+    def score(self, **kw):
+        return sum(c.score(**kw) for c in self.children)
 
-    def sym_frames(self): return [identity44f8]
-
-    def symdata(self): return None
+    def __getattr__(self, name):
+        if name not in WormCriteria.allowed_attributes:
+            raise AttributeError('CriteriaList has no attribute: ' + name)
+        r = [getattr(c, name) for c in self.children if hasattr(c, name)]
+        r = [x for x in r if x is not None]
+        assert len(r) < 2
+        return r[0] if len(r) else None
 
 
 class AxesIntersect(WormCriteria):
 
     def __init__(self, symname, tgtaxis1, tgtaxis2, from_seg, *, tol=1.0,
-                 lever=50, to_seg=-1, frames=None, distinct_axes=False):
+                 lever=50, to_seg=-1, distinct_axes=False):
         self.symname = symname
         self.from_seg = from_seg
         if len(tgtaxis1) == 2: tgtaxis1 += [0, 0, 0, 1],
@@ -123,12 +137,9 @@ class AxesIntersect(WormCriteria):
         self.lever = lever
         self.to_seg = to_seg
         self.rot_tol = tol / lever
-        self.frames = frames
-        if frames is None:
-            x1 = homog.hrot(tgtaxis1[1], 360 / tgtaxis1[0], self.tgtaxis1[2])
-            x2 = homog.hrot(tgtaxis2[1], 360 / tgtaxis2[0], self.tgtaxis2[2])
-            self.frames = [identity44f8, x1, x2, x1 @ x2]
         self.distinct_axes = distinct_axes  # -z not same as z (for T33)
+        self.symdata = _get_symdata(self.symname)
+        self.sym_axes = [self.tgtaxis1, self.tgtaxis2]
 
     def score(self, segpos, verbose=False, **kw):
         cen1 = segpos[self.from_seg][..., :, 3]
@@ -150,7 +161,7 @@ class AxesIntersect(WormCriteria):
         roterr2 = (ang - self.angle)**2
         return np.sqrt(roterr2 / self.rot_tol**2 + (dist / self.tol)**2)
 
-    def canonical_alignment(self, segpos, debug=0, **kw):
+    def alignment(self, segpos, debug=0, **kw):
         cen1 = segpos[self.from_seg][..., :, 3]
         cen2 = segpos[self.to_seg][..., :, 3]
         ax1 = segpos[self.from_seg][..., :, 2]
@@ -185,12 +196,6 @@ class AxesIntersect(WormCriteria):
 
         return x
 
-    def sym_frames(self): return self.frames
-
-    def symdata(self): return _get_symdata(self.symname)
-
-    def sym_axes(self): return [self.tgtaxis1, self.tgtaxis2]
-
 
 def D2(c2=0, c2b=-1, **kw):
     return AxesIntersect('D2', (2, Uz), (2, Ux), c2, to_seg=c2b, **kw)
@@ -221,7 +226,6 @@ def Tetrahedral(c3=None, c2=None, c3b=None, **kw):
     return AxesIntersect('T', from_seg=from_seg, to_seg=to_seg,
                          tgtaxis1=(max(3, nf1), sym.tetrahedral_axes[nf1]),
                          tgtaxis2=(max(3, nf2), sym.tetrahedral_axes[nf2]),
-                         frames=sym.tetrahedral_frames,
                          distinct_axes=(nf1 == 7), **kw)
 
 
@@ -233,8 +237,7 @@ def Octahedral(c4=None, c3=None, c2=None, **kw):
     if c4 is None: from_seg, to_seg, nf1, nf2, ex = c3, c2, 3, 2, 4
     return AxesIntersect('O', from_seg=from_seg, to_seg=to_seg,
                          tgtaxis1=(nf1, sym.octahedral_axes[nf1]),
-                         tgtaxis2=(nf2, sym.octahedral_axes[nf2]),
-                         frames=sym.octahedral_frames, **kw)
+                         tgtaxis2=(nf2, sym.octahedral_axes[nf2]), **kw)
 
 
 def Icosahedral(c5=None, c3=None, c2=None, **kw):
@@ -245,15 +248,14 @@ def Icosahedral(c5=None, c3=None, c2=None, **kw):
     if c5 is None: from_seg, to_seg, nf1, nf2, ex = c3, c2, 3, 2, 5
     return AxesIntersect('I', from_seg=from_seg, to_seg=to_seg,
                          tgtaxis1=(nf1, sym.icosahedral_axes[nf1]),
-                         tgtaxis2=(nf2, sym.icosahedral_axes[nf2]),
-                         frames=sym.icosahedral_frames, **kw)
+                         tgtaxis2=(nf2, sym.icosahedral_axes[nf2]), **kw)
 
 
 class Cyclic(WormCriteria):
 
-    def __init__(self, symmetry, from_seg=0, *, tol=1.0,
-                 origin_seg=None, lever=50.0, to_seg=-1,
-                 relweight=1.0):
+    def __init__(self, symmetry=1, from_seg=0, *, tol=1.0, origin_seg=None,
+                 lever=50.0, to_seg=-1, relweight=1.0):
+        if isinstance(symmetry, int): symmetry = 'C' + str(symmetry)
         self.symmetry = symmetry
         self.tol = tol
         self.from_seg = from_seg
@@ -270,8 +272,12 @@ class Cyclic(WormCriteria):
         else: raise ValueError('can only do Cx symmetry for now')
         assert not origin_seg
         if self.tol <= 0: raise ValueError('tol should be > 0')
-        self.frames = [homog.hrot(Uz, self.symangle * i)
-                       for i in range(self.nfold)]
+        self.last_body_same_as = self.from_seg
+        self.is_cyclic = True
+        self.symdata = None
+        if self.nfold > 1:
+            self.symdata = _get_symdata('C' + str(self.nfold))
+        self.sym_axes = [(self.nfold, Uz, [0, 0, 0, 1])]
 
     def score(self, segpos, *, verbose=False, **kw):
         x_from = segpos[self.from_seg]
@@ -305,7 +311,7 @@ class Cyclic(WormCriteria):
         return np.sqrt(carterrsq / self.tol**2 +
                        roterrsq / self.rot_tol**2)
 
-    def canonical_alignment(self, segpos, **kwargs):
+    def alignment(self, segpos, **kwargs):
         x_from = segpos[self.from_seg]
         x_to = segpos[self.to_seg]
         xhat = x_to @ inv(x_from)
@@ -320,22 +326,12 @@ class Cyclic(WormCriteria):
         align[..., :3, 3] -= cen[..., :3]
         return align
 
-    def last_body_same_as(self): return self.from_seg
-
     def check_topolopy(self, segments):
         "for cyclic, global entry can't be same as global exit"
         # todo: should check this...
         # fromseg = segments[self.from_seg]
         # toseg = segments[self.to_seg]
         return
-
-    def is_cyclic(self): return True
-
-    def sym_frames(self): return self.frames
-
-    def symdata(self): return _get_symdata('C' + str(self.nfold))
-
-    def sym_axes(self): return [(self.nfold, Uz, [0, 0, 0, 1])]
 
 
 class SpliceSite:
@@ -344,6 +340,7 @@ class SpliceSite:
         if isinstance(sele, str) or isinstance(sele, int):
             sele = [sele]
         self.selections = list(sele)
+        assert polarity in ('N', 'C', None)
         self.polarity = polarity
         self.chain = chain
 
@@ -403,7 +400,7 @@ class SpliceSite:
 
 class Spliceable:
 
-    def __init__(self, body, sites, *, bodyid=None):
+    def __init__(self, body, sites, *, bodyid=None, min_seg_len=1):
         self.body = body
         chains = list(body.split_by_chain())
         self.start_of_chain = {i + 1: sum(len(c) for c in chains[:i])
@@ -423,9 +420,12 @@ class Spliceable:
                 if isinstance(site, dict):
                     self.sites[i] = SpliceSite(**site)
                 else:
-                    if not hasattr(site, '__iter__'):
+                    if not isinstance(site, Iterable):
                         self.sites[i] = (site,)
                     self.sites[i] = SpliceSite(*site)
+        self.nsite = dict(N=0, C=0)
+        for s in self.sites: self.nsite[s.polarity] += 1
+        self.min_seg_len = min_seg_len
 
     def spliceable_positions(self):
         """selection of resids, and map 'global' index to selected index"""
@@ -442,6 +442,20 @@ class Spliceable:
         assert np.all(to_subset[resid_subset] == np.arange(len(resid_subset)))
         return resid_subset, to_subset
 
+    def is_compatible(self, isite, ires, jsite, jres):
+        if ires < 0 or jres < 0: return True
+        assert 0 < ires <= len(self.body) and 0 < jres <= len(self.body)
+        ichain, jchain = self.body.chain(ires), self.body.chain(jres)
+        if ichain == jchain:
+            ipol = self.sites[isite].polarity
+            jpol = self.sites[jsite].polarity
+            if ipol == jpol: return False
+            print(ipol, ires, jpol, jres)
+            if ipol == 'N': seglen = jres - ires + 1
+            else: seglen = ires - jres + 1
+            if seglen < self.min_seg_len: return False
+        return True
+
     def __repr__(self):
         return ('Spliceable: body=(' + str(len(self.body)) + ',' +
                 str(self.body).splitlines()[0].split('/')[-1] +
@@ -450,21 +464,33 @@ class Spliceable:
 
 class Segment:
 
-    def __init__(self, spliceables, entry=None, exit=None):
+    def __init__(self, spliceables, entry=None, exit=None, expert=False):
+        if entry and len(entry) is 2:
+            entry, exit = entry
+            if entry == '_': entry = None
+            if exit == '_': exit = None
         self.entrypol = entry or None
         self.exitpol = exit or None
+        self.min_sites = dict(C=9e9, N=9e9)
+        self.max_sites = dict(C=0, N=0)
         if not spliceables:
             raise ValueError('spliceables must not be empty, spliceables ='
                              + str(spliceables))
         for s in spliceables:
             if not isinstance(s, Spliceable):
                 raise ValueError('Segment only accepts list of Spliceable')
-        self.init(spliceables, entry, exit)
+        self.init_segment(spliceables, entry, exit)
+        self.nchains = len(spliceables[0].chains)
+        for s in spliceables:
+            if not expert and len(s.chains) is not self.nchains:
+                raise ValueError('different number of chains for spliceables',
+                                 ' in segment (pass expert=True to ignore)')
+            self.nchains = max(self.nchains, len(s.chains))
 
     def __len__(self):
         return len(self.bodyid)
 
-    def init(self, spliceables=None, entry=None, exit=None):
+    def init_segment(self, spliceables=None, entry=None, exit=None):
         if not (entry or exit):
             raise ValueError('at least one of entry/exit required')
         self.spliceables = list(spliceables) or self.spliceables
@@ -477,6 +503,9 @@ class Segment:
         # this whole loop is pretty inefficient, but that probably
         # doesn't matter much given the cost subsequent operations (?)
         for ibody, spliceable in enumerate(self.spliceables):
+            for p in 'NC':
+                self.min_sites[p] = min(self.min_sites[p], spliceable.nsite[p])
+                self.max_sites[p] = max(self.max_sites[p], spliceable.nsite[p])
             resid_subset, to_subset = spliceable.spliceable_positions()
             bodyid = ibody if spliceable.bodyid is None else spliceable.bodyid
             # extract 'stubs' from body at selected positions
@@ -503,6 +532,9 @@ class Segment:
                                     jstub = (identity44f8 if not jres
                                              else stubs[to_subset[jres]])
                                     jres = jres or -1
+                                    if not spliceable.is_compatible(
+                                            isite, ires, jsite, jres):
+                                        continue
                                     self.x2exit.append(istub_inv @ jstub)
                                     self.x2orgn.append(istub_inv)
                                     self.entrysiteid.append(isite)
@@ -604,19 +636,20 @@ class Worms:
     def pose(self, which, *, align=True, end=None, join=True,
              only_connected=None, cyclic_permute=False, **kw):
         "makes a pose for the ith worm"
-        if hasattr(which, '__iter__'): return (
+        if isinstance(which, Iterable): return (
             self.pose(w, align=align, end=end, join=join,
-                      only_connected=only_connected, **kw) for w in which)
+                      only_connected=only_connected, **kw)
+            for w in which)
         # print("Will needs to fix bb O/H position!")
         rm_lower_t = ros.core.pose.remove_lower_terminus_type_from_pose_residue
         rm_upper_t = ros.core.pose.remove_upper_terminus_type_from_pose_residue
         if end is None:
-            end = not self.criteria[0].is_cyclic()
+            end = not self.criteria.is_cyclic
         if only_connected is None:
-            only_connected = not self.criteria[0].is_cyclic()
+            only_connected = not self.criteria.is_cyclic
         if cyclic_permute is None:
-            cyclic_permute = self.criteria[0].is_cyclic()
-        elif cyclic_permute and not self.criteria[0].is_cyclic():
+            cyclic_permute = self.criteria.is_cyclic
+        elif cyclic_permute and not self.criteria.is_cyclic:
             raise ValueError('cyclic_permute should only be used for Cyclic')
         iend = None if end else -1
         entryexits = [seg.make_pose_chains(self.indices[which][iseg],
@@ -626,13 +659,8 @@ class Worms:
         chainslist = reorder_spliced_as_N_to_C(
             entryexits, [s.entrypol for s in self.segments[1:iend]])
         if align:
-            align = [c.canonical_alignment(self.positions[which], **kw)
-                     for c in self.criteria]
-            align = [x for x in align if x is not None]
-            assert len(align) < 2  # should this be allowed?
-            if len(align) == 1:
-                for p in it.chain(*chainslist, *rest):
-                    rcl.xform_pose(align[0], p)
+            x = self.criteria.alignment(segpos=self.positions[which], **kw)
+            for p in it.chain(*chainslist, *rest): rcl.xform_pose(x, p)
         if cyclic_permute and len(chainslist) > 1:
             # todo: this is only correct if 1st seg is one chain
             spliceres = self.segments[-1].entryresid[self.indices[which, -1]]
@@ -666,7 +694,7 @@ class Worms:
 
     def sympose(self, which, score=False, fullatom=False,
                 parallel=False, asym_score_thresh=50):
-        if hasattr(which, '__iter__'):
+        if isinstance(which, Iterable):
             which = list(which)
             if not all(0 <= i < len(self) for i in which):
                 raise IndexError('invalid worm index')
@@ -685,13 +713,15 @@ class Worms:
         # return None, None if score else None
         if not fullatom:
             ros.core.util.switch_to_residue_type_set(p, 'centroid')
-        ros.core.pose.symmetry.make_symmetric_pose(
-            p, self.criteria[0].symdata())
-        if score: return p, self.score0sym(p)
+        symdata = self.criteria.symdata
+        sfxn = self.score0sym
+        if symdata is None: sfxn = self.score0
+        else: ros.core.pose.symmetry.make_symmetric_pose(p, symdata)
+        if score: return p, sfxn(p)
         return p
 
     def splices(self, which):
-        if hasattr(which, '__iter__'): return (self.splices(w) for w in which)
+        if isinstance(which, Iterable): return (self.splices(w) for w in which)
         splices = []
         for i in range(len(self.segments) - 1):
             seg1 = self.segments[i]
@@ -754,7 +784,7 @@ def _grow_chunk(samp, segpos, conpos, segs, end, criteria, thresh, matchlast):
         segpos.append(conpos[-1] @ seg.x2orgn[samp[iseg]])
         if seg is not segs[-1]:
             conpos.append(conpos[-1] @ seg.x2exit[samp[iseg]])
-    score = sum(c.score(segpos=segpos) for c in criteria)
+    score = criteria.score(segpos=segpos)
     ilow0 = np.where(score < thresh)
     sampidx = tuple(np.repeat(i, len(ilow0[0])) for i in samp)
     lowpostmp = []
@@ -778,18 +808,7 @@ def _grow_chunks(ijob, context):
             for i in range(3)] if chunk else None
 
 
-def grow(segments, criteria, *, thresh=2, expert=0, memsize=1e6,
-         executor=None, max_workers=None, verbose=0, jobmult=32,
-         chunklim=None):
-
-    if verbose:
-        print('grow')
-        for i, seg in enumerate(segments):
-            print(' segment', i, 'enter:', seg.entrypol, 'exit:', seg.exitpol)
-            for sp in seg.spliceables:
-                print('   ', sp)
-    criteria = [criteria] if isinstance(criteria, WormCriteria) else criteria
-    # checks and setup
+def _check_topology(segments, criteria, expert=False):
     if segments[0].entrypol is not None:
         raise ValueError('beginning of worm cant have entry')
     if segments[-1].exitpol is not None:
@@ -800,11 +819,48 @@ def grow(segments, criteria, *, thresh=2, expert=0, memsize=1e6,
                              + str(a.exitpol) + '->'
                              + str(b.entrypol) + ' on segment pair: '
                              + str((segments.index(a), segments.index(b))))
-    matchlast = ([c.last_body_same_as() for c in criteria] or [None])[0]
+    matchlast = criteria.last_body_same_as
     if matchlast is not None and not expert and (
             not segments[matchlast].same_bodies_as(segments[-1])):
         raise ValueError("segments[matchlast] not same as segments[-1], "
                          + "if you're sure, pass expert=True")
+    if criteria.is_cyclic and not criteria.to_seg in (-1, len(segments) - 1):
+        raise ValueError('Cyclic and to_seg is not last segment,'
+                         'if you\'re sure, pass expert=True')
+    if criteria.is_cyclic:
+        beg, end = segments[criteria.from_seg], segments[criteria.to_seg]
+        sites_required = {'N': 0, 'C': 0, None: 0}
+        sites_required[beg.entrypol] += 1
+        sites_required[beg.exitpol] += 1
+        sites_required[end.entrypol] += 1
+        # print('pols', beg.entrypol, beg.exitpol, end.entrypol)
+        for pol in 'NC':
+            # print(pol, beg.max_sites[pol], sites_required[pol])
+            if beg.max_sites[pol] < sites_required[pol]:
+                msg = 'Not enough %s sites in any of segment %i Spliceables' % (
+                    pol, criteria.from_seg)
+                raise ValueError(msg)
+            if beg.min_sites[pol] < sites_required[pol]:
+                msg = ('Not enough %s sites in all of segment %i Spliceables ' +
+                       ' (pass expert=True to ignore)') % (pol, criteria.from_seg)
+                if not expert: raise ValueError(msg)
+                print("WARNING:", msg)
+    return matchlast
+
+
+def grow(segments, criteria, *, thresh=2, expert=0, memsize=1e6,
+         executor=None, max_workers=None, verbose=0, jobmult=32,
+         chunklim=None):
+    print('grow, ', 'criteria from', criteria.from_seg, 'to', criteria.to_seg)
+    for i, seg in enumerate(segments):
+        print(' segment', i, 'enter:', seg.entrypol, 'exit:', seg.exitpol)
+        for sp in seg.spliceables:
+            print('   ', sp)
+
+    if not isinstance(criteria, CriteriaList):
+        criteria = CriteriaList(criteria)
+    # checks and setup
+    matchlast = _check_topology(segments, criteria, expert)
     if executor is None:
         executor = ThreadPoolExecutor  # todo: some kind of null executor?
         max_workers = 1
@@ -844,7 +900,7 @@ def grow(segments, criteria, *, thresh=2, expert=0, memsize=1e6,
     lowidx = np.concatenate([c[1] for c in chunks])[order]
     lowpos = np.concatenate([c[2] for c in chunks])[order]
     lowposlist = [lowpos[:, i] for i in range(len(segments))]
-    score_check = sum(c.score(lowposlist, verbose=verbose) for c in criteria)
+    score_check = criteria.score(segpos=lowposlist, verbose=verbose)
     assert np.allclose(score_check, scores)
     detail = dict(ntot=ntot, chunksize=chunksize, nchunks=nchunks,
                   nworker=nworker, njob=njob, sizes=sizes, end=end)
