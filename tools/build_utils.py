@@ -374,6 +374,7 @@ def build_and_test():
         sys.argv[1:] = args
         print('handoff to pytest.main()')
         sys.stdout.flush()
+        os.environ['OMP_NUM_THREADS'] = '1'
         assert not pytest.main()
 
 

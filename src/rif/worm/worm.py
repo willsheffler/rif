@@ -80,6 +80,7 @@ def _symfile_path(name):
 
 @ft.lru_cache()
 def _get_symdata(name):
+    if name is None: return None
     d = ros.core.conformation.symmetry.SymmData()
     d.read_symmetry_data_from_file(_symfile_path(name))
     return d
@@ -91,7 +92,7 @@ class WormCriteria(abc.ABC):
     def score(self, **kw): pass
 
     allowed_attributes = ('last_body_same_as',
-                          'symdata',
+                          'symname',
                           'is_cyclic',
                           'alignment',
                           'from_seg',
@@ -138,7 +139,7 @@ class AxesIntersect(WormCriteria):
         self.to_seg = to_seg
         self.rot_tol = tol / lever
         self.distinct_axes = distinct_axes  # -z not same as z (for T33)
-        self.symdata = _get_symdata(self.symname)
+        self.symname = self.symname
         self.sym_axes = [self.tgtaxis1, self.tgtaxis2]
 
     def score(self, segpos, verbose=False, **kw):
@@ -254,7 +255,7 @@ def Icosahedral(c5=None, c3=None, c2=None, **kw):
 class Cyclic(WormCriteria):
 
     def __init__(self, symmetry=1, from_seg=0, *, tol=1.0, origin_seg=None,
-                 lever=50.0, to_seg=-1, relweight=1.0):
+                 lever=50.0, to_seg=-1):
         if isinstance(symmetry, int): symmetry = 'C' + str(symmetry)
         self.symmetry = symmetry
         self.tol = tol
@@ -263,20 +264,19 @@ class Cyclic(WormCriteria):
         self.lever = lever
         self.to_seg = to_seg
         self.rot_tol = tol / lever
-        self.relweight = relweight if abs(relweight) > 0.001 else None
+        # self.relweight = relweight if abs(relweight) > 0.001 else None
         if self.symmetry[0] in 'cC':
             self.nfold = int(self.symmetry[1:])
             if self.nfold <= 0:
                 raise ValueError('invalid symmetry: ' + symmetry)
             self.symangle = np.pi * 2.0 / self.nfold
         else: raise ValueError('can only do Cx symmetry for now')
-        assert not origin_seg
         if self.tol <= 0: raise ValueError('tol should be > 0')
         self.last_body_same_as = self.from_seg
         self.is_cyclic = True
-        self.symdata = None
+        self.symname = None
         if self.nfold > 1:
-            self.symdata = _get_symdata('C' + str(self.nfold))
+            self.symname = 'C' + str(self.nfold)
         self.sym_axes = [(self.nfold, Uz, [0, 0, 0, 1])]
 
     def score(self, segpos, *, verbose=False, **kw):
@@ -284,30 +284,35 @@ class Cyclic(WormCriteria):
         x_to = segpos[self.to_seg]
         xhat = x_to @ inv(x_from)
         trans = xhat[..., :, 3]
-        if self.origin_seg:
-            raise NotImplementedError
-        elif self.nfold is 1:
+        if self.nfold is 1:
             angle = homog.angle_of(xhat)
             carterrsq = np.sum(trans[..., :3]**2, axis=-1)
             roterrsq = angle**2
         else:
-            axis, angle = homog.axis_angle_of(xhat)
-            carterrsq = homog.hdot(trans, axis)**2
-            if self.relweight is not None:
-                distsq = np.sum(trans[..., :3]**2, axis=-1)
-                relerrsq = carterrsq / distsq
-                relerrsq[np.isnan(relerrsq)] = 9e9
-                carterrsq += self.relweight * relerrsq  # too much of a hack??
+
+            if self.origin_seg is not None:
+                tgtaxis = segpos[self.origin_seg] @ [0, 0, 1, 0]
+                tgtcen = segpos[self.origin_seg] @ [0, 0, 0, 1]
+                axis, ang, cen = homog.axis_ang_cen_of(xhat)
+                carterrsq = homog.hnorm2(cen - tgtcen)
+            else:  # much cheaper if cen not needed
+                axis, ang = homog.axis_angle_of(xhat)
+                carterrsq = 0
+            carterrsq = carterrsq + homog.hdot(trans, axis)**2
+            roterrsq = (ang - self.symangle)**2
+            # if self.relweight is not None:
+            #     # penalize 'relative' error
+            #     distsq = np.sum(trans[..., :3]**2, axis=-1)
+            #     relerrsq = carterrsq / distsq
+            #     relerrsq[np.isnan(relerrsq)] = 9e9
+            #     # too much of a hack??
+            #     carterrsq += self.relweight * relerrsq
             if verbose:
                 print('axis', axis[0])
                 print('trans', trans[0])
                 print('dot trans', homog.hdot(trans, axis)[0])
                 print('ang', angle[0] * 180 / np.pi)
-            roterrsq = (angle - self.symangle)**2
-            # if verbose:
-            # print('cart', carterrsq)
-            # print('rote', roterrsq)
-            # print('ang', angle * 180 / np.pi)
+
         return np.sqrt(carterrsq / self.tol**2 +
                        roterrsq / self.rot_tol**2)
 
@@ -450,7 +455,6 @@ class Spliceable:
             ipol = self.sites[isite].polarity
             jpol = self.sites[jsite].polarity
             if ipol == jpol: return False
-            print(ipol, ires, jpol, jres)
             if ipol == 'N': seglen = jres - ires + 1
             else: seglen = ires - jres + 1
             if seglen < self.min_seg_len: return False
@@ -713,7 +717,7 @@ class Worms:
         # return None, None if score else None
         if not fullatom:
             ros.core.util.switch_to_residue_type_set(p, 'centroid')
-        symdata = self.criteria.symdata
+        symdata = _get_symdata(self.criteria.symname)
         sfxn = self.score0sym
         if symdata is None: sfxn = self.score0
         else: ros.core.pose.symmetry.make_symmetric_pose(p, symdata)
@@ -751,6 +755,7 @@ class Worms:
 
 def _chain_xforms(segments):
     os.environ['OMP_NUM_THREADS'] = '1'
+    os.environ['NUM_THREADS'] = '1'
     x2exit = [s.x2exit for s in segments]
     x2orgn = [s.x2orgn for s in segments]
     fullaxes = (np.newaxis,) * (len(x2exit) - 1)
@@ -767,18 +772,29 @@ def _chain_xforms(segments):
 
 
 def _grow_chunk(samp, segpos, conpos, segs, end, criteria, thresh, matchlast):
+    ML = matchlast
     os.environ['OMP_NUM_THREADS'] = '1'
-    if matchlast is not None:
+    os.environ['NUM_THREADS'] = '1'
+    # body must match, and splice sites must be distinct
+    if ML is not None:
         ndimchunk = segpos[0].ndim - 2
-        if matchlast < ndimchunk:
-            bidA = segs[matchlast].bodyid
-            bidB = segs[-1].bodyid[samp[-1]]
-            idx = (slice(None),) * matchlast + (bidA == bidB,)
-            segpos = segpos[: matchlast] + [x[idx] for x in segpos[matchlast:]]
-            conpos = conpos[: matchlast] + [x[idx] for x in conpos[matchlast:]]
-            idxmap = np.where(bidA == bidB)[0]
-        elif segs[matchlast].bodyid[samp[matchlast - ndimchunk]] != bidB:
-            return  # last body doesn't match for this whole chunk
+        bidB = segs[-1].bodyid[samp[-1]]
+        site3 = segs[-1].entrysiteid[samp[-1]]
+        if ML < ndimchunk:
+            bidA = segs[ML].bodyid
+            site1 = segs[ML].entrysiteid
+            site2 = segs[ML].exitsiteid
+            allowed = (bidA == bidB) * (site1 != site3) * (site2 != site3)
+            idx = (slice(None),) * ML + (allowed,)
+            segpos = segpos[: ML] + [x[idx] for x in segpos[ML:]]
+            conpos = conpos[: ML] + [x[idx] for x in conpos[ML:]]
+            idxmap = np.where(allowed)[0]
+        else:
+            bidA = segs[ML].bodyid[samp[ML - ndimchunk]]
+            site1 = segs[ML].entrysiteid[samp[ML - ndimchunk]]
+            site2 = segs[ML].exitsiteid[samp[ML - ndimchunk]]
+            if bidA != bidB or site3 == site2 or site3 == site1:
+                return
     segpos, conpos = segpos[:end], conpos[:end]
     for iseg, seg in enumerate(segs[end:]):
         segpos.append(conpos[-1] @ seg.x2orgn[samp[iseg]])
@@ -791,21 +807,23 @@ def _grow_chunk(samp, segpos, conpos, segs, end, criteria, thresh, matchlast):
     for iseg in range(len(segpos)):
         ilow = ilow0[: iseg + 1] + (0,) * (segpos[0].ndim - 2 - (iseg + 1))
         lowpostmp.append(segpos[iseg][ilow])
-    ilow1 = (ilow0 if matchlast is None else ilow0[: matchlast] +
-             (idxmap[ilow0[matchlast]],) + ilow0[matchlast + 1:])
+    ilow1 = (ilow0 if (ML is None or ML >= ndimchunk) else
+             ilow0[:ML] + (idxmap[ilow0[ML]],) + ilow0[ML + 1:])
     return score[ilow0], np.array(ilow1 + sampidx).T, np.stack(lowpostmp, 1)
 
 
 def _grow_chunks(ijob, context):
     os.environ['OMP_NUM_THREADS'] = '1'
+    os.environ['NUM_THREADS'] = '1'
     sampsizes, njob, segments, end, criteria, thresh, matchlast = context
     samples = it.product(*(range(n) for n in sampsizes))
     segpos, connpos = _chain_xforms(segments[:end])  # common data
     args = [list(samples)[ijob::njob]] + [it.repeat(x) for x in (
         segpos, connpos, segments, end, criteria, thresh, matchlast)]
-    chunk = list(map(_grow_chunk, *args))
-    return [np.concatenate([c[i] for c in chunk])
-            for i in range(3)] if chunk else None
+    chunks = list(map(_grow_chunk, *args))
+    chunks = [c for c in chunks if c is not None]
+    return [np.concatenate([c[i] for c in chunks])
+            for i in range(3)] if chunks else None
 
 
 def _check_topology(segments, criteria, expert=False):
@@ -837,19 +855,21 @@ def _check_topology(segments, criteria, expert=False):
         for pol in 'NC':
             # print(pol, beg.max_sites[pol], sites_required[pol])
             if beg.max_sites[pol] < sites_required[pol]:
-                msg = 'Not enough %s sites in any of segment %i Spliceables' % (
-                    pol, criteria.from_seg)
+                msg = 'Not enough %s sites in any of segment %i Spliceables, %i required, at most %i available' % (
+                    pol, criteria.from_seg, sites_required[pol],
+                    beg.max_sites[pol])
                 raise ValueError(msg)
             if beg.min_sites[pol] < sites_required[pol]:
-                msg = ('Not enough %s sites in all of segment %i Spliceables ' +
-                       ' (pass expert=True to ignore)') % (pol, criteria.from_seg)
+                msg = 'Not enough %s sites in all of segment %i Spliceables, %i required, some have only %i available (pass expert=True if you really want to run anyway)' % (
+                    pol, criteria.from_seg, sites_required[pol],
+                    beg.max_sites[pol])
                 if not expert: raise ValueError(msg)
                 print("WARNING:", msg)
     return matchlast
 
 
 def grow(segments, criteria, *, thresh=2, expert=0, memsize=1e6,
-         executor=None, max_workers=None, verbose=0, jobmult=32,
+         executor=None, max_workers=None, verbose=0, jobmult=128,
          chunklim=None):
     print('grow, ', 'criteria from', criteria.from_seg, 'to', criteria.to_seg)
     for i, seg in enumerate(segments):
