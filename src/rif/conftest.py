@@ -120,6 +120,11 @@ def c3pose(pdbdir):
 
 
 @pytest.fixture(scope='session')
+def c3_splay_pose(pdbdir):
+    return get_pose(pdbdir, 'c3_splay.pdb')
+
+
+@pytest.fixture(scope='session')
 def c4pose(pdbdir):
     return get_pose(pdbdir, 'c4.pdb')
 

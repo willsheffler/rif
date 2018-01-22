@@ -289,17 +289,17 @@ class Cyclic(WormCriteria):
             carterrsq = np.sum(trans[..., :3]**2, axis=-1)
             roterrsq = angle**2
         else:
-
             if self.origin_seg is not None:
                 tgtaxis = segpos[self.origin_seg] @ [0, 0, 1, 0]
                 tgtcen = segpos[self.origin_seg] @ [0, 0, 0, 1]
                 axis, ang, cen = homog.axis_ang_cen_of(xhat)
                 carterrsq = homog.hnorm2(cen - tgtcen)
+                roterrsq = (1 - np.abs(homog.hdot(axis, tgtaxis))) * np.pi
             else:  # much cheaper if cen not needed
                 axis, ang = homog.axis_angle_of(xhat)
-                carterrsq = 0
+                carterrsq = roterrsq = 0
             carterrsq = carterrsq + homog.hdot(trans, axis)**2
-            roterrsq = (ang - self.symangle)**2
+            roterrsq = roterrsq + (ang - self.symangle)**2
             # if self.relweight is not None:
             #     # penalize 'relative' error
             #     distsq = np.sum(trans[..., :3]**2, axis=-1)
@@ -317,6 +317,8 @@ class Cyclic(WormCriteria):
                        roterrsq / self.rot_tol**2)
 
     def alignment(self, segpos, **kwargs):
+        if self.origin_seg is not None:
+            return inv(segpos[self.origin_seg])
         x_from = segpos[self.from_seg]
         x_to = segpos[self.to_seg]
         xhat = x_to @ inv(x_from)
