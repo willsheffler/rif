@@ -401,59 +401,59 @@ def test_make_pose_chains_dimer(c2pose):
 
     dimerseg = Segment([dimer], 'N', '')
     enex, rest = dimerseg.make_pose_chains(0, pad=(0, 1))
-    assert [x.sequence() for x in enex] == [seq[1:], seq]
-    assert [x.sequence() for x in rest] == []
-    assert enex[-1] is dimer.chains[2]
+    assert [x[0].sequence() for x in enex] == [seq[1:], seq]
+    assert [x[0].sequence() for x in rest] == []
+    assert enex[-1][0] is dimer.chains[2]
     enex, rest = dimerseg.make_pose_chains(1, pad=(0, 1))
-    assert [x.sequence() for x in enex] == [seq[2:], seq]
-    assert [x.sequence() for x in rest] == []
-    assert enex[-1] is dimer.chains[1]
+    assert [x[0].sequence() for x in enex] == [seq[2:], seq]
+    assert [x[0].sequence() for x in rest] == []
+    assert enex[-1][0] is dimer.chains[1]
 
     dimerseg = Segment([dimer], 'C', '')
     enex, rest = dimerseg.make_pose_chains(0, pad=(0, 1))
-    assert [x.sequence() for x in enex] == [seq[:-3], seq]
-    assert [x.sequence() for x in rest] == []
-    assert enex[-1] is dimer.chains[2]
+    assert [x[0].sequence() for x in enex] == [seq[:-3], seq]
+    assert [x[0].sequence() for x in rest] == []
+    assert enex[-1][0] is dimer.chains[2]
     enex, rest = dimerseg.make_pose_chains(1, pad=(0, 1))
-    assert [x.sequence() for x in enex] == [seq[:-4], seq]
-    assert [x.sequence() for x in rest] == []
-    assert enex[-1] is dimer.chains[1]
+    assert [x[0].sequence() for x in enex] == [seq[:-4], seq]
+    assert [x[0].sequence() for x in rest] == []
+    assert enex[-1][0] is dimer.chains[1]
 
     dimerseg = Segment([dimer], '', 'N')
     enex, rest = dimerseg.make_pose_chains(0, pad=(0, 1))
-    assert [x.sequence() for x in enex] == [seq, seq[1:]]
-    assert [x.sequence() for x in rest] == []
-    assert enex[0] is dimer.chains[2]
+    assert [x[0].sequence() for x in enex] == [seq, seq[1:]]
+    assert [x[0].sequence() for x in rest] == []
+    assert enex[0][0] is dimer.chains[2]
     enex, rest = dimerseg.make_pose_chains(1, pad=(0, 1))
-    assert [x.sequence() for x in enex] == [seq, seq[2:]]
-    assert [x.sequence() for x in rest] == []
-    assert enex[0] is dimer.chains[1]
+    assert [x[0].sequence() for x in enex] == [seq, seq[2:]]
+    assert [x[0].sequence() for x in rest] == []
+    assert enex[0][0] is dimer.chains[1]
 
     dimerseg = Segment([dimer], 'N', 'N')
     enex, rest = dimerseg.make_pose_chains(0, pad=(0, 1))
-    assert [x.sequence() for x in enex] == [seq[1:], seq[2:]]
-    assert [x.sequence() for x in rest] == []
+    assert [x[0].sequence() for x in enex] == [seq[1:], seq[2:]]
+    assert [x[0].sequence() for x in rest] == []
     enex, rest = dimerseg.make_pose_chains(1, pad=(0, 1))
-    assert [x.sequence() for x in enex] == [seq[2:], seq[1:]]
-    assert [x.sequence() for x in rest] == []
+    assert [x[0].sequence() for x in enex] == [seq[2:], seq[1:]]
+    assert [x[0].sequence() for x in rest] == []
     with pytest.raises(IndexError):
         enex, rest = dimerseg.make_pose_chains(2, pad=(0, 1))
 
     dimerseg = Segment([dimer], 'N', 'C')
     enex, rest = dimerseg.make_pose_chains(0, pad=(0, 1))
-    assert [x.sequence() for x in enex] == [seq[1:-3]]
-    assert [x.sequence() for x in rest] == [seq]
-    assert rest[0] is dimer.chains[2]
+    assert [x[0].sequence() for x in enex] == [seq[1:-3]]
+    assert [x[0].sequence() for x in rest] == [seq]
+    assert rest[0][0] is dimer.chains[2]
     enex, rest = dimerseg.make_pose_chains(1, pad=(0, 1))
-    assert [x.sequence() for x in enex] == [seq[1:], seq[:-4]]
-    assert [x.sequence() for x in rest] == []
+    assert [x[0].sequence() for x in enex] == [seq[1:], seq[:-4]]
+    assert [x[0].sequence() for x in rest] == []
     enex, rest = dimerseg.make_pose_chains(2, pad=(0, 1))
-    assert [x.sequence() for x in enex] == [seq[2:], seq[:-3]]
-    assert [x.sequence() for x in rest] == []
+    assert [x[0].sequence() for x in enex] == [seq[2:], seq[:-3]]
+    assert [x[0].sequence() for x in rest] == []
     enex, rest = dimerseg.make_pose_chains(3, pad=(0, 1))
-    assert [x.sequence() for x in enex] == [seq[2:-4]]
-    assert [x.sequence() for x in rest] == [seq]
-    assert rest[0] is dimer.chains[1]
+    assert [x[0].sequence() for x in enex] == [seq[2:-4]]
+    assert [x[0].sequence() for x in rest] == [seq]
+    assert rest[0][0] is dimer.chains[1]
     with pytest.raises(IndexError):
         enex, rest = dimerseg.make_pose_chains(4, pad=(0, 1))
 
@@ -855,3 +855,24 @@ def test_origin_seg(c1pose, c2pose, c3pose):
     print(w.scores[:10])
     # showme(w.sympose(0))
     assert 0
+
+
+@pytest.mark.skipif('not rcl.HAVE_PYROSETTA')
+def test_provenance(c1pose):
+    helix = Spliceable(c1pose, [(':1', 'N'), ('-4:', 'C')])
+    segments = ([Segment([helix], '_C')] +
+                [Segment([helix], 'NC')] * 6 +
+                [Segment([helix], 'N_')])
+    w = grow(segments, Cyclic(6), thresh=2)
+    for i in range(len(w)):
+        # pose, score, srcpose, srcres = w.sympose(
+            # i, score=True, provenance=True)
+        pose, srcpose, srcres = w.pose(i, provenance=True)
+        assert len(srcpose) == len(pose)
+        assert len(srcres) == len(pose)
+        assert isinstance(srcpose, list)
+        assert isinstance(srcres, np.ndarray)
+        for j in range(len(pose)):
+            aa = pose.residue(j + 1).aa()
+            srcaa = srcpose[j].residue(srcres[j]).aa()
+            assert aa == srcaa

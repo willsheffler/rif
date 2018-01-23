@@ -33,10 +33,9 @@ def main():
                 Segment([trimer], 'N_'), ]  # to_seg
     w = grow(segments, Cyclic(3, from_seg=4, origin_seg=0), thresh=10,
              executor=ProcessPoolExecutor, max_workers=8, memsize=1e6)
-    for i, err, pose, score0 in w:
-        print(i, err, len(pose), score0)
-        if score0 < 300:
-        pose.dump_pdb('test_%i_%i.pdb' % (i, int(score0)))
+    showme(w.pose(0))
+    # for i, err, pose, score0 in w:
+    # print(i, err, len(pose), score0)
 
 if __name__ == '__main__':
     main()
