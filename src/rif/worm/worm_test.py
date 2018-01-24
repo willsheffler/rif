@@ -4,8 +4,7 @@ from rif.vis.vispymol import showme, showline, showsphere
 from numpy.testing import assert_allclose
 import pytest
 import numpy as np
-if rcl.HAVE_PYROSETTA:
-    from rif.worm import *
+from rif.worm import *
 from concurrent.futures import ThreadPoolExecutor, ProcessPoolExecutor
 
 
@@ -859,20 +858,26 @@ def test_origin_seg(c1pose, c2pose, c3pose):
 
 @pytest.mark.skipif('not rcl.HAVE_PYROSETTA')
 def test_provenance(c1pose):
-    helix = Spliceable(c1pose, [(':1', 'N'), ('-4:', 'C')])
-    segments = ([Segment([helix], '_C')] +
-                [Segment([helix], 'NC')] * 6 +
-                [Segment([helix], 'N_')])
-    w = grow(segments, Cyclic(6), thresh=2)
+    sites = [(':1', 'N'), ('-4:', 'C')]
+    segments = [Segment([Spliceable(c1pose.clone(), sites)], '_C'),
+                Segment([Spliceable(c1pose.clone(), sites)], 'NC'),
+                Segment([Spliceable(c1pose.clone(), sites)], 'NC'),
+                Segment([Spliceable(c1pose.clone(), sites)], 'NC'),
+                Segment([Spliceable(c1pose.clone(), sites)], 'NC'),
+                Segment([Spliceable(c1pose.clone(), sites)], 'NC'),
+                Segment([Spliceable(c1pose.clone(), sites)], 'NC'),
+                Segment([Spliceable(c1pose.clone(), sites)], 'N_')]
+    w = grow(segments, Cyclic(6), thresh=2, expert=True)
+    assert len(w)
     for i in range(len(w)):
         # pose, score, srcpose, srcres = w.sympose(
             # i, score=True, provenance=True)
-        pose, srcpose, srcres = w.pose(i, provenance=True)
-        assert len(srcpose) == len(pose)
-        assert len(srcres) == len(pose)
-        assert isinstance(srcpose, list)
-        assert isinstance(srcres, np.ndarray)
-        for j in range(len(pose)):
-            aa = pose.residue(j + 1).aa()
-            srcaa = srcpose[j].residue(srcres[j]).aa()
-            assert aa == srcaa
+        pose, prov = w.pose(i, provenance=True)
+        assert len(prov) == len(segments) - 1  # b/c end removed
+        for i, prv in enumerate(prov):
+            lb, ub, src_pose, src_lb, src_ub = prv
+            assert src_pose is segments[i].spliceables[0].body
+            assert src_pose is not c1pose
+            srcseq = src_pose.sequence()[src_lb - 1:src_ub]
+            seq = pose.sequence()[lb - 1:ub]
+            assert srcseq == seq

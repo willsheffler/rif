@@ -1,4 +1,5 @@
-from pyrosetta import *
+try: from pyrosetta import *
+except: pass
 from concurrent.futures import *
 import rif
 import time
@@ -46,4 +47,8 @@ def main():
     print(scores[:4])
 
 if __name__ == '__main__':
-    main()
+    try:
+        import pyrosetta
+        main()
+    except ImportError:
+        print('no pyrosetta')

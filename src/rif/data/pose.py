@@ -19,4 +19,5 @@ class PoseLib:
     def __getattr__(self, name):
         return self.get(name)
 
-poselib = PoseLib()
+
+poselib = PoseLib() if rcl.HAVE_PYROSETTA else None

@@ -714,41 +714,38 @@ class Worms:
         sourcelist = [[x[1] for x in c] for c in chainslist]
         chainslist = [[x[0] for x in c] for c in chainslist]
         pose = ros.core.pose.Pose()
-        prov = []
+        prov0 = []
         splicepoints = []
         for chains, sources in zip(chainslist, sourcelist):
             if only_connected and len(chains) is 1: continue
             ros.core.pose.append_pose_to_pose(pose, chains[0], True)
-            prov.append(sources[0])
+            prov0.append(sources[0])
             for chain, source in zip(chains[1:], sources[1:]):
                 assert isinstance(chain, ros.core.pose.Pose)
                 rm_upper_t(pose, len(pose))
                 rm_lower_t(chain, 1)
                 splicepoints.append(len(pose))
                 ros.core.pose.append_pose_to_pose(pose, chain, not join)
-                prov.append(source)
+                prov0.append(source)
         self.splicepoint_cache[which] = splicepoints
         if not only_connected:
             for chain, source in it.chain(*rest):
                 assert isinstance(chain, ros.core.pose.Pose)
                 ros.core.pose.append_pose_to_pose(pose, chain, True)
-                prov.append(source)
+                prov0.append(source)
         assert rcl.worst_CN_connect(pose) < 0.5
         if not provenance: return pose
-        sourcepose, sourceres = [], []
-        for i, pr in enumerate(prov):
+        prov = []
+        for i, pr in enumerate(prov0):
             psrc, lb0, ub0 = pr
-            lb1 = sum(ub - lb + 1 for _, lb, ub in prov[:i]) + 1
+            lb1 = sum(ub - lb + 1 for _, lb, ub in prov0[:i]) + 1
             ub1 = lb1 + ub0 - lb0
             assert ub0 - lb0 == ub1 - lb1
             assert 0 < lb0 <= len(psrc) and 0 < ub0 <= len(psrc)
             assert 0 < lb1 <= len(pose) and 0 < ub1 <= len(pose)
             assert psrc.sequence()[lb0 - 1:ub0] == pose.sequence()[lb1 - 1:ub1]
-            for ir in range(lb0, ub0 + 1):
-                sourcepose.append(psrc)
-                sourceres.append(ir)
-        sourceres = np.array(sourceres, dtype='i')  # save a little memory
-        return pose, sourcepose, sourceres
+            prov.append((lb1, ub1, psrc, lb0, ub0))
+        return pose, prov
 
     def splicepoints(self, which):
         if not which in self.splicepoint_cache:
@@ -773,7 +770,7 @@ class Worms:
             else: return list(map(self.sympose, which, it.repeat(score), it.repeat(provenance)))
         if not 0 <= which < len(self):
             raise IndexError('invalid worm index')
-        p, srcpose, srcres = self.pose(which, provenance=True)
+        p, prov = self.pose(which, provenance=True)
         # todo: why is asym scoring broken?!?
         # try: score0asym = self.score0(p)
         # except: score0asym = 9e9
@@ -785,9 +782,9 @@ class Worms:
         sfxn = self.score0sym
         if symdata is None: sfxn = self.score0
         else: ros.core.pose.symmetry.make_symmetric_pose(p, symdata)
-        if score and provenance: return p, sfxn(p), srcpose, srcres
+        if score and provenance: return p, sfxn(p), prov
         if score: return p, sfxn(p)
-        if provenance: return p, srcpose, srcres
+        if provenance: return p, prov
         return p
 
     def splices(self, which):
