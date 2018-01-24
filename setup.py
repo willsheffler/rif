@@ -16,6 +16,14 @@ from setuptools.command.build_ext import build_ext
 from distutils.version import LooseVersion
 
 
+setup_requires = ['wheel', 'pytest-runner', 'jinja2'],
+install_requires = ['numpy', 'pandas', 'xarray', 'parsimonious', 'mock', 'pytest',
+                    'pytest-xdist', 'hypothesis', 'colorama', 'pytest_cpp',
+                    'pytest-sugar', 'tqdm', 'dask', 'homog', 'jinga2'],
+tests_require = ['pytest', 'pytest-xdist', 'hypothesis', 'colorama',
+                 'pytest_cpp', 'homog', 'jinga2'],
+
+
 ###############################################################################
 # horrible duplicates with setup.py and tools/build_utils.py
 # setup.py must stand alone for detox to work(?)
@@ -263,12 +271,9 @@ setup(
     ext_modules=[CMakeExtension('_rif')],
     cmdclass=dict(build_ext=CMakeBuild),
     zip_safe=False,
-    setup_requires=['wheel', 'pytest-runner', 'jinja2'],
-    install_requires=['numpy', 'pandas', 'xarray', 'parsimonious', 'mock', 'pytest',
-                      'pytest-xdist', 'hypothesis', 'colorama', 'pytest_cpp',
-                      'pytest-sugar', 'tqdm', 'dask', 'homog'],
-    tests_require=['pytest', 'pytest-xdist', 'hypothesis', 'colorama',
-                   'pytest_cpp', 'homog'],
+    setup_requires=setup_requires,
+    install_requires=install_requires,
+    tests_require=tests_require,
     test_suite='pytest',
     # packages=['rif'],
     # package_dir={'rif': 'src/rif'},
