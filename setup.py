@@ -262,7 +262,7 @@ class CMakeBuild(build_ext):
 
 setup(
     name='rif',
-    version='0.0.1',
+    version='0.0.2',
     author='Will Sheffler',
     author_email='willsheffler@gmail.com',
     description='Rotamer Interaction Field protein design library',
@@ -274,8 +274,5 @@ setup(
     setup_requires=setup_requires,
     install_requires=install_requires,
     tests_require=tests_require,
-    test_suite='pytest',
-    # packages=['rif'],
-    # package_dir={'rif': 'src/rif'},
-    # package_data={'rif': marshal_package_data()}
+    test_suite='pytest'
 )
