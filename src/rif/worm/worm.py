@@ -1,7 +1,7 @@
 from numpy.linalg import inv
 from pyrosetta import rosetta as ros
 from pyrosetta.rosetta.core import scoring
-from rif import rcl, homog, vis, sym
+from rif import rcl, vis, sym
 from tqdm import tqdm  # progress bar utility
 import functools as ft
 import itertools as it
@@ -10,6 +10,7 @@ import multiprocessing
 import os
 import sys
 import abc
+import homog
 from collections.abc import Iterable
 import numpy as np
 import multiprocessing
@@ -817,7 +818,7 @@ class Worms:
 
 def _chain_xforms(segments):
     os.environ['OMP_NUM_THREADS'] = '1'
-    os.environ['NUM_THREADS'] = '1'
+    os.environ['MKL_NUM_THREADS'] = '1'
     x2exit = [s.x2exit for s in segments]
     x2orgn = [s.x2orgn for s in segments]
     fullaxes = (np.newaxis,) * (len(x2exit) - 1)
@@ -836,7 +837,7 @@ def _chain_xforms(segments):
 def _grow_chunk(samp, segpos, conpos, segs, end, criteria, thresh, matchlast):
     ML = matchlast
     os.environ['OMP_NUM_THREADS'] = '1'
-    os.environ['NUM_THREADS'] = '1'
+    os.environ['MKL_NUM_THREADS'] = '1'
     # body must match, and splice sites must be distinct
     if ML is not None:
         ndimchunk = segpos[0].ndim - 2
@@ -876,7 +877,7 @@ def _grow_chunk(samp, segpos, conpos, segs, end, criteria, thresh, matchlast):
 
 def _grow_chunks(ijob, context):
     os.environ['OMP_NUM_THREADS'] = '1'
-    os.environ['NUM_THREADS'] = '1'
+    os.environ['MKL_NUM_THREADS'] = '1'
     sampsizes, njob, segments, end, criteria, thresh, matchlast = context
     samples = it.product(*(range(n) for n in sampsizes))
     segpos, connpos = _chain_xforms(segments[:end])  # common data

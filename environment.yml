@@ -14,7 +14,6 @@ dependencies:
  - mock
  - seaborn
  - dask
- - pip
  - pip:
    - external/hacked_packages/pytest-cpp-0.4
    - breathe
@@ -23,3 +22,4 @@ dependencies:
    - pytest-xdist
    - parsimonious
    - tqdm
+   - homog

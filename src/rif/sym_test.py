@@ -1,5 +1,5 @@
 from .sym import *
-from rif.homog import angle_degrees
+from homog import angle_degrees
 
 
 def test_symm():

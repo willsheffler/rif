@@ -1,4 +1,4 @@
-from rif.homog import *
+from homog import *
 
 
 tetrahedral_axes = {2: hnormalized([1, 0, 0]),

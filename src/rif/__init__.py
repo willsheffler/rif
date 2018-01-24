@@ -9,7 +9,6 @@ from rif.actor import *
 from rif.index import *
 import rif.data
 import rif.vis
-import rif.homog
 import rif.rcl
 
 # from . import actor

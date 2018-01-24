@@ -1,5 +1,5 @@
 from rif import rcl
-from rif.homog import hrot, htrans, axis_angle_of, axis_ang_cen_of
+from homog import hrot, htrans, axis_angle_of, axis_ang_cen_of
 from rif.vis.vispymol import showme, showline, showsphere
 from numpy.testing import assert_allclose
 import pytest
