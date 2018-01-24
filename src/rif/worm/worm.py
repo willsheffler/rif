@@ -1,6 +1,4 @@
 from numpy.linalg import inv
-from pyrosetta import rosetta as ros
-from pyrosetta.rosetta.core import scoring
 from rif import rcl, vis, sym
 from tqdm import tqdm  # progress bar utility
 import functools as ft
@@ -14,6 +12,11 @@ import homog
 from collections.abc import Iterable
 import numpy as np
 import multiprocessing
+try:
+    from pyrosetta import rosetta as ros
+    from pyrosetta.rosetta.core import scoring
+except ImportError:
+    print('pyrosetta not available, worms won\'t work')
 
 
 identity44f8 = np.identity(4, dtype='f4')
