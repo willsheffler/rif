@@ -16,12 +16,12 @@ from setuptools.command.build_ext import build_ext
 from distutils.version import LooseVersion
 
 
-setup_requires = ['wheel', 'pytest-runner', 'jinja2'],
+setup_requires = ['wheel', 'pytest-runner', 'jinja2']
 install_requires = ['numpy', 'pandas', 'xarray', 'parsimonious', 'mock', 'pytest',
                     'pytest-xdist', 'hypothesis', 'colorama', 'pytest_cpp',
-                    'pytest-sugar', 'tqdm', 'dask', 'homog', 'jinja2'],
+                    'pytest-sugar', 'tqdm', 'dask', 'homog', 'jinja2']
 tests_require = ['pytest', 'pytest-xdist', 'hypothesis', 'colorama',
-                 'pytest_cpp', 'homog', 'jinja2'],
+                 'pytest_cpp', 'homog', 'jinja2']
 
 
 ###############################################################################
@@ -274,7 +274,7 @@ setup(
     setup_requires=setup_requires,
     install_requires=install_requires,
     tests_require=tests_require,
-    test_suite='pytest'
+    test_suite='pytest',
     # packages=['rif'],
     # package_dir={'rif': 'src/rif'},
     # package_data={'rif': marshal_package_data()}
