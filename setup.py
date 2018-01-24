@@ -19,9 +19,9 @@ from distutils.version import LooseVersion
 setup_requires = ['wheel', 'pytest-runner', 'jinja2'],
 install_requires = ['numpy', 'pandas', 'xarray', 'parsimonious', 'mock', 'pytest',
                     'pytest-xdist', 'hypothesis', 'colorama', 'pytest_cpp',
-                    'pytest-sugar', 'tqdm', 'dask', 'homog', 'jinga2'],
+                    'pytest-sugar', 'tqdm', 'dask', 'homog', 'jinja2'],
 tests_require = ['pytest', 'pytest-xdist', 'hypothesis', 'colorama',
-                 'pytest_cpp', 'homog', 'jinga2'],
+                 'pytest_cpp', 'homog', 'jinja2'],
 
 
 ###############################################################################
