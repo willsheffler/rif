@@ -1,17 +1,19 @@
-from rif import rcl
-from homog import hrot, htrans, axis_angle_of, axis_ang_cen_of
-from rif.vis.vispymol import showme, showline, showsphere
-from numpy.testing import assert_allclose
 import pytest
 import numpy as np
-from rif.worm import *
+from homog import hrot, htrans, axis_angle_of, axis_ang_cen_of
 from concurrent.futures import ThreadPoolExecutor, ProcessPoolExecutor
+from rif.worm import *
+from rif.rcl import HAVE_PYROSETTA
+try:
+    from rif.vis.vispymol import showme, showline, showsphere
+except ImportError:
+    print()
 
 
 def show_with_axis(worms, idx=0):
     pose = worms.pose(idx, align=0, end=1)
-    x_from = worms.positions[idx][worms.criteria[0].from_seg]
-    x_to = worms.positions[idx][worms.criteria[0].to_seg]
+    x_from = worms.positions[idx][worms.criteria.from_seg]
+    x_to = worms.positions[idx][worms.criteria.to_seg]
     x = x_to @ inv(x_from)
     axis, ang, cen = axis_ang_cen_of(x)
     np.set_printoptions(precision=20)
@@ -21,18 +23,19 @@ def show_with_axis(worms, idx=0):
     print(cen)
     axis *= 100
     showme(pose, name='unit')
-    rcl.xform_pose(x, pose)
+    xform_pose(x, pose)
     showme(pose, name='sym1')
-    rcl.xform_pose(x, pose)
+    xform_pose(x, pose)
     showme(pose, name='sym2')
     showline(axis, cen)
     showsphere(cen)
 
 
 def show_with_z_axes(worms, idx=0, only_connected=0, **kw):
+    from rif.vis.vispymol import showme, showline, showsphere
     pose = worms.pose(idx, align=0, end=1, only_connected=only_connected, **kw)
-    x_from = worms.positions[idx][worms.criteria[0].from_seg]
-    x_to = worms.positions[idx][worms.criteria[0].to_seg]
+    x_from = worms.positions[idx][worms.criteria.from_seg]
+    x_to = worms.positions[idx][worms.criteria.to_seg]
     cen1 = x_from[..., :, 3]
     cen2 = x_to[..., :, 3]
     axis1 = x_from[..., :, 2] * 100
@@ -47,7 +50,7 @@ def show_with_z_axes(worms, idx=0, only_connected=0, **kw):
 
 
 @pytest.mark.xfail
-@pytest.mark.skipif('not rcl.HAVE_PYROSETTA')
+@pytest.mark.skipif('not HAVE_PYROSETTA')
 def test_sym_bug(c1pose, c2pose):
     helix = Spliceable(
         c1pose, sites=[((1, 2, 3, 4,), 'N'), ((9, 10, 11, 13), 'C')])
@@ -72,7 +75,7 @@ def test_sym_bug(c1pose, c2pose):
     # assert 0
 
 
-@pytest.mark.skipif('not rcl.HAVE_PYROSETTA')
+@pytest.mark.skipif('not HAVE_PYROSETTA')
 def test_SpliceSite(pose, c3pose):
     assert len(pose) == 7
     ss = SpliceSite(1, 'N')
@@ -95,7 +98,7 @@ def test_SpliceSite(pose, c3pose):
     assert SpliceSite([1, 2, 3], 'N', 3).resids(spliceablec3) == [19, 20, 21]
 
 
-@pytest.mark.skipif('not rcl.HAVE_PYROSETTA')
+@pytest.mark.skipif('not HAVE_PYROSETTA')
 def test_spliceable(c2pose):
     site1 = SpliceSite([1, 2, 3], 'N', 1)
     site2 = SpliceSite([1, 2, 3], 'N', 2)
@@ -134,21 +137,21 @@ def test_geom_check():
     assert 1e-5 > abs(SX('c2').score([I, hrot([1, 0, 0], np.pi)]))
 
     score = Cyclic('c2').score([I, hrot(randaxes, np.pi)])
-    assert_allclose(0, score, atol=1e-5, rtol=1)
+    assert np.allclose(0, score, atol=1e-5, rtol=1)
 
     score = Cyclic('c3').score(
         [I, hrot(randaxes, np.pi * 2 / 3)])
-    assert_allclose(0, score, atol=1e-5, rtol=1)
+    assert np.allclose(0, score, atol=1e-5, rtol=1)
 
     score = Cyclic('c4').score([I, hrot(randaxes, np.pi / 2)])
-    assert_allclose(0, score, atol=1e-5, rtol=1)
+    assert np.allclose(0, score, atol=1e-5, rtol=1)
 
 
-@pytest.mark.skipif('not rcl.HAVE_PYROSETTA')
+@pytest.mark.skipif('not HAVE_PYROSETTA')
 def test_segment_geom(c1pose):
     "currently only a basic sanity checkb... only checks translation distances"
     body = c1pose
-    stubs = rcl.bbstubs(body)['raw']
+    stubs = get_bb_stubs(body)
     assert stubs.shape == (body.size(), 4, 4)
 
     nsplice = SpliceSite(polarity='N', sele=[1, 2, ])
@@ -175,8 +178,8 @@ def test_segment_geom(c1pose):
     for e2x, e2o, ir, jr in zip(seg.x2exit, seg.x2orgn,
                                 seg.entryresid, seg.exitresid):
         assert ir == -1
-        assert_allclose(e2o, np.eye(4))
-        assert_allclose(e2x, stubs[jr - 1])
+        assert np.allclose(e2o, np.eye(4))
+        assert np.allclose(e2x, stubs[jr - 1])
 
     # test middle segment with entry and exit
     seg = Segment([spliceable], 'N', 'C')
@@ -186,8 +189,8 @@ def test_segment_geom(c1pose):
     assert np.all(seg.x2exit[..., 3, 3] == 1)
     for e2x, e2o, ir, jr in zip(seg.x2exit, seg.x2orgn,
                                 seg.entryresid, seg.exitresid):
-        assert_allclose(stubs[ir - 1] @ e2o, np.eye(4), atol=1e-5)
-        assert_allclose(stubs[ir - 1] @ e2x, stubs[jr - 1], atol=1e-5)
+        assert np.allclose(stubs[ir - 1] @ e2o, np.eye(4), atol=1e-5)
+        assert np.allclose(stubs[ir - 1] @ e2x, stubs[jr - 1], atol=1e-5)
 
     # test ending segment.. only has entry
     seg = Segment([spliceable], entry='N')
@@ -198,8 +201,8 @@ def test_segment_geom(c1pose):
     for e2x, e2o, ir, jr in zip(seg.x2exit, seg.x2orgn,
                                 seg.entryresid, seg.exitresid):
         assert jr == -1
-        assert_allclose(e2o, e2x)
-        assert_allclose(e2o @ stubs[ir - 1], np.eye(4), atol=1e-5)
+        assert np.allclose(e2o, e2x)
+        assert np.allclose(e2o @ stubs[ir - 1], np.eye(4), atol=1e-5)
 
     # test now with multiple spliceables input to segment
     Nexbody = 3
@@ -216,11 +219,11 @@ def test_segment_geom(c1pose):
     assert np.all(seg.x2exit[..., 3, 3] == 1)
     for e2x, e2o, ir, jr in zip(seg.x2exit, seg.x2orgn,
                                 seg.entryresid, seg.exitresid):
-        assert_allclose(stubs[ir - 1] @ e2o, np.eye(4), atol=1e-5)
-        assert_allclose(stubs[ir - 1] @ e2x, stubs[jr - 1], atol=1e-5)
+        assert np.allclose(stubs[ir - 1] @ e2o, np.eye(4), atol=1e-5)
+        assert np.allclose(stubs[ir - 1] @ e2x, stubs[jr - 1], atol=1e-5)
 
 
-@pytest.mark.skipif('not rcl.HAVE_PYROSETTA')
+@pytest.mark.skipif('not HAVE_PYROSETTA')
 def test_grow_cycle(c1pose):
     helix = Spliceable(c1pose, sites=[(1, 'N'), ('-4:', 'C')])
     segments = ([Segment([helix], exit='C'), ] +
@@ -230,7 +233,7 @@ def test_grow_cycle(c1pose):
     assert 0.1411 < np.min(worms.scores) < 0.1412
 
 
-@pytest.mark.skipif('not rcl.HAVE_PYROSETTA')
+@pytest.mark.skipif('not HAVE_PYROSETTA')
 def test_grow_cycle_thread_pool(c1pose):
     helix = Spliceable(c1pose, sites=[(1, 'N'), ('-4:', 'C')])
     segments = ([Segment([helix], exit='C'), ] +
@@ -242,7 +245,7 @@ def test_grow_cycle_thread_pool(c1pose):
     assert np.sum(worms.scores < 0.1412) == 4
 
 
-@pytest.mark.skip  # if('not rcl.HAVE_PYROSETTA')
+@pytest.mark.skipif('not HAVE_PYROSETTA')
 def test_grow_cycle_process_pool(c1pose):
     helix = Spliceable(c1pose, sites=[(1, 'N'), ('-4:', 'C')])
     segments = ([Segment([helix], exit='C'), ] +
@@ -254,7 +257,7 @@ def test_grow_cycle_process_pool(c1pose):
     assert np.sum(worms.scores < 0.1412) == 4
 
 
-@pytest.mark.skipif('not rcl.HAVE_PYROSETTA')
+@pytest.mark.skipif('not HAVE_PYROSETTA')
 def test_grow_errors(c1pose):
     nsplice = SpliceSite(sele=[1, 2, 3, 4, 5, 6], polarity='N')
     csplice = SpliceSite(sele=[13, ], polarity='C')
@@ -279,7 +282,7 @@ def test_grow_errors(c1pose):
         grow(segments_polarity_mismatch, criteria=checkc3)
 
 
-@pytest.mark.skipif('not rcl.HAVE_PYROSETTA')
+@pytest.mark.skipif('not HAVE_PYROSETTA')
 def test_memsize(c1pose):
     helix = Spliceable(c1pose, sites=[((1, 2), 'N'), ('-2:', 'C')])
     segments = ([Segment([helix], exit='C'), ] +
@@ -291,7 +294,7 @@ def test_memsize(c1pose):
         w0 = w1
 
 
-@pytest.mark.skipif('not rcl.HAVE_PYROSETTA')
+@pytest.mark.skipif('not HAVE_PYROSETTA')
 def test_pose_alignment_0(c1pose):
     helix = Spliceable(c1pose, sites=[(1, 'N'), ('-4:', 'C')])
     segments = ([Segment([helix], exit='C'), ] +
@@ -299,7 +302,10 @@ def test_pose_alignment_0(c1pose):
                 [Segment([helix], entry='N')])
     w = grow(segments, Cyclic('c2'), thresh=1)
     assert len(w)
-    assert tuple(w.indices[0]) in ((2, 1, 2, 0, 0), (1, 2, 0, 2, 0))
+    print(w.indices)
+    for i in range(4):
+        assert tuple(w.indices[i]) in ((0, 2, 1, 2, 0), (2, 1, 2, 0, 0),
+                                       (1, 2, 0, 2, 0), (2, 0, 2, 1, 0))
     pose = w.pose(0, align=1, end=1)
     # showme(pose)
     xyz0 = np.array([pose.residue(1).xyz(2)[i] for i in (0, 1, 2)] + [1])
@@ -309,7 +315,7 @@ def test_pose_alignment_0(c1pose):
     assert np.sum((xyz1 - xyz0)**2) < 0.1
 
 
-@pytest.mark.skipif('not rcl.HAVE_PYROSETTA')
+@pytest.mark.skipif('not HAVE_PYROSETTA')
 def test_last_body_same_as(c1pose):
     helix = Spliceable(c1pose, sites=[(1, 'N'), ('-4:', 'C')])
     segments = ([Segment([helix, helix], exit='C'), ] +
@@ -391,7 +397,7 @@ def test_reorder_spliced_as_N_to_C():
                 [8], [9, 0], [1], [2]])
 
 
-@pytest.mark.skipif('not rcl.HAVE_PYROSETTA')
+@pytest.mark.skipif('not HAVE_PYROSETTA')
 def test_make_pose_chains_dimer(c2pose):
     dimer = Spliceable(c2pose, sites=[('1,2:2', 'N'), ('2,3:3', 'N'),
                                       ('1,-4:-4', 'C'), ('2,-5:-5', 'C')])
@@ -475,7 +481,7 @@ def residue_sym_err(p, ang, ir, jr, n=1, axis=[0, 0, 1]):
     return np.sqrt(mxdist)
 
 
-@pytest.mark.skipif('not rcl.HAVE_PYROSETTA')
+@pytest.mark.skipif('not HAVE_PYROSETTA')
 def test_multichain_match_reveres_pol(c1pose, c2pose):
     helix = Spliceable(
         c1pose, sites=[((1, 2, 3,), 'N'), ((9, 10, 11, 13), 'C')])
@@ -501,7 +507,7 @@ def test_multichain_match_reveres_pol(c1pose, c2pose):
     assert np.allclose(wnc.scores, wcn.scores, atol=1e-3)
 
 
-@pytest.mark.skipif('not rcl.HAVE_PYROSETTA')
+@pytest.mark.skipif('not HAVE_PYROSETTA')
 def test_splicepoints(c1pose, c2pose, c3pose):
     helix = Spliceable(
         c1pose, sites=[((1, 2, 3,), 'N'), ((9, 10, 11, 13), 'C')])
@@ -537,8 +543,8 @@ def test_splicepoints(c1pose, c2pose, c3pose):
         ib1, ic1, ir1, ib2, ic2, ir2, dr = splice
         pose1 = w.segments[i].spliceables[ib1].chains[ic1]
         pose2 = w.segments[i + 1].spliceables[ib2].chains[ic2]
-        seq1 = str(rcl.subpose(pose1, 1, ir1 - 1).sequence())
-        seq2 = str(rcl.subpose(pose2, ir2).sequence())
+        seq1 = str(subpose(pose1, 1, ir1 - 1).sequence())
+        seq2 = str(subpose(pose2, ir2).sequence())
         # print(i, '1', seq1, str(actual_chains[i].sequence()))
         # print(i, '2', seq2, str(actual_chains[i + 1].sequence()))
         assert seq1.endswith(str(actual_chains[i].sequence()))
@@ -546,7 +552,7 @@ def test_splicepoints(c1pose, c2pose, c3pose):
 
 
 @pytest.mark.xfail
-@pytest.mark.skipif('not rcl.HAVE_PYROSETTA')
+@pytest.mark.skipif('not HAVE_PYROSETTA')
 def test_cyclic_permute(c1pose, c2pose):
     helix = Spliceable(
         c1pose, sites=[((1, 2, 3,), 'N'), ((9, 10, 11, 13), 'C')])
@@ -565,7 +571,8 @@ def test_cyclic_permute(c1pose, c2pose):
     showme(w.pose(0, cyclic_permute=0, end=1))
 
 
-@pytest.mark.skipif('not rcl.HAVE_PYROSETTA')
+@pytest.mark.xfail
+@pytest.mark.skipif('not HAVE_PYROSETTA')
 def test_multichain_mixed_pol(c2pose, c3pose, c1pose):
     helix = Spliceable(c1pose, [(':4', 'N'), ((10, 12, 13), 'C')])
     dimer = Spliceable(c2pose, sites=[('1,:2', 'N'), ('1,-1:', 'C'),
@@ -578,12 +585,16 @@ def test_multichain_mixed_pol(c2pose, c3pose, c1pose):
                 Segment([helix], entry='C', exit='N'),
                 Segment([trimer], entry='C', exit='C'),
                 Segment([helix], entry='N')]
-    w = grow(segments, Cyclic('C3'), thresh=2)
-    p = w.pose(0, end=1, cyclic_permute=0)
-    assert 2 > residue_sym_err(p, 120, 3, 63, 6)
+    w = grow(segments, Cyclic('C3'), thresh=1)
+    assert len(w) == 24
+    p = w.pose(0, end=True, cyclic_permute=0)
+    # show_with_axis(w, 0)
+    # showme(p)
+
+    assert 2 > residue_sym_err(p, 120, 2, 62, 7)
 
 
-@pytest.mark.skipif('not rcl.HAVE_PYROSETTA')
+@pytest.mark.skipif('not HAVE_PYROSETTA')
 def test_multichain_db(c2pose, c1pose):
     helix = Spliceable(c1pose, [(':4', 'N'), ('-4:', "C")])
     dimer = Spliceable(c2pose, sites=[('1,-1:', 'C'), ('2,-1:', 'C')])
@@ -594,7 +605,7 @@ def test_multichain_db(c2pose, c1pose):
         w = grow(segments, Cyclic('C4'), thresh=20)
 
 
-@pytest.mark.skipif('not rcl.HAVE_PYROSETTA')
+@pytest.mark.skipif('not HAVE_PYROSETTA')
 def test_D3(c2pose, c3pose, c1pose):
     helix = Spliceable(c1pose, [(':4', 'N'), ('-4:', 'C')])
     dimer = Spliceable(c2pose, sites=[('1,:2', 'N'), ('1,-1:', 'C'),
@@ -630,7 +641,7 @@ def test_D3(c2pose, c3pose, c1pose):
     assert 1 > residue_sym_err(p, 120, 56, 65, 6, axis=[0, 0, 1])
 
 
-@pytest.mark.skipif('not rcl.HAVE_PYROSETTA')
+@pytest.mark.skipif('not HAVE_PYROSETTA')
 def test_tet(c2pose, c3pose, c1pose):
     helix = Spliceable(c1pose, [(':1', 'N'), ('-4:', 'C')])
     dimer = Spliceable(c2pose, sites=[('1,:2', 'N'), ('1,-1:', 'C'), ])
@@ -645,7 +656,7 @@ def test_tet(c2pose, c3pose, c1pose):
     assert 2.5 > residue_sym_err(p, 180, 2, 14, 6, axis=[1, 0, 0])
 
 
-@pytest.mark.skipif('not rcl.HAVE_PYROSETTA')
+@pytest.mark.skipif('not HAVE_PYROSETTA')
 def test_tet33(c2pose, c3pose, c1pose):
     helix = Spliceable(c1pose, [(':1', 'N'), ('-4:', 'C')])
     trimer = Spliceable(c3pose, sites=[('1,:1', 'N'), ('1,-2:', 'C'), ])
@@ -659,7 +670,7 @@ def test_tet33(c2pose, c3pose, c1pose):
     assert 2.5 > residue_sym_err(p, 120, 87, 96, 6, axis=[1, 1, 1])
 
 
-@pytest.mark.skipif('not rcl.HAVE_PYROSETTA')
+@pytest.mark.skipif('not HAVE_PYROSETTA')
 def test_oct(c2pose, c3pose, c4pose, c1pose):
     helix = Spliceable(c1pose, [(':1', 'N'), ('-4:', 'C')])
     dimer = Spliceable(c2pose, sites=[('1,:2', 'N'), ('1,-1:', 'C'), ])
@@ -684,7 +695,7 @@ def test_oct(c2pose, c3pose, c4pose, c1pose):
     assert 1 > residue_sym_err(p, 180, 92, 104, 6, axis=[1, 1, 0])
 
 
-@pytest.mark.skipif('not rcl.HAVE_PYROSETTA')
+@pytest.mark.skipif('not HAVE_PYROSETTA')
 def test_icos(c2pose, c3pose, c4pose, c1pose):
     helix = Spliceable(c1pose, [(':1', 'N'), ('-4:', 'C')])
     dimer = Spliceable(c2pose, sites=[('1,:2', 'N'), ('1,-1:', 'C'), ])
@@ -701,7 +712,7 @@ def test_icos(c2pose, c3pose, c4pose, c1pose):
     assert 2 > residue_sym_err(p, 180, 2, 14, 6, axis=IA[2])
 
 
-@pytest.mark.skipif('not rcl.HAVE_PYROSETTA')
+@pytest.mark.skipif('not HAVE_PYROSETTA')
 def test_score0_sym(c2pose, c3pose, c1pose):
     helix = Spliceable(c1pose, [(':1', 'N'), ('-4:', 'C')])
     dimer = Spliceable(c2pose, sites=[('1,:2', 'N'), ('1,-1:', 'C'), ])
@@ -730,7 +741,7 @@ def test_score0_sym(c2pose, c3pose, c1pose):
         assert np.allclose([x[1] for x in ps1], [x[1] for x in ps2])
 
 
-@pytest.mark.skipif('not rcl.HAVE_PYROSETTA')
+@pytest.mark.skipif('not HAVE_PYROSETTA')
 def test_chunk_speed(c2pose, c3pose, c1pose):
     helix = Spliceable(c1pose, [(':1', 'N'), ('-2:', 'C')])
     dimer = Spliceable(c2pose, sites=[('1,:2', 'N'), ('1,-1:', 'C'), ])
@@ -755,7 +766,7 @@ def test_chunk_speed(c2pose, c3pose, c1pose):
     assert t1 / t2 > 10.0  # conservative, but still sketchy...
 
 
-@pytest.mark.skipif('not rcl.HAVE_PYROSETTA')
+@pytest.mark.skipif('not HAVE_PYROSETTA')
 def test_splice_compatibility_check(c1pose, c2pose):
     helix = Spliceable(c1pose, [(':1', 'N'), ('-2:', 'C')])
     dimer = Spliceable(c2pose, sites=[('1,:2', 'N'), ('2,:2', 'N'), ])
@@ -766,7 +777,7 @@ def test_splice_compatibility_check(c1pose, c2pose):
         w = grow(segments, Cyclic(), thresh=1)
 
 
-@pytest.mark.skipif('not rcl.HAVE_PYROSETTA')
+@pytest.mark.skipif('not HAVE_PYROSETTA')
 def test_invalid_splices_seg_too_small(c1pose):
     helix = Spliceable(c1pose, [('8:8', 'N'), ('7:7', 'C')])
     with pytest.raises(ValueError):
@@ -789,7 +800,7 @@ def test_invalid_splices_seg_too_small(c1pose):
     assert len(w) == 4
 
 
-@pytest.mark.skipif('not rcl.HAVE_PYROSETTA')
+@pytest.mark.skipif('not HAVE_PYROSETTA')
 def test_invalid_splices_site_overlap_2(c1pose, c2pose):
     helix = Spliceable(c1pose, [(':1', 'N'), ('-1:', 'C')])
     dimer = Spliceable(c2pose, sites=[('1,:1', 'N'), ('2,:1', 'N'),
@@ -808,7 +819,7 @@ def test_invalid_splices_site_overlap_2(c1pose, c2pose):
                 w.segments[3].exitsiteid[w.indices[i, 3]])
 
 
-@pytest.mark.skipif('not rcl.HAVE_PYROSETTA')
+@pytest.mark.skipif('not HAVE_PYROSETTA')
 def test_invalid_splices_site_overlap_3(c1pose, c3pose):
     helix = Spliceable(c1pose, [(':1', 'N'), ('-1:', 'C')])
     trimer = Spliceable(c3pose, sites=[('1,:1', 'N'), ('1,-1:', 'C'),
@@ -832,7 +843,7 @@ def test_invalid_splices_site_overlap_3(c1pose, c3pose):
 
 
 @pytest.mark.xfail
-@pytest.mark.skipif('not rcl.HAVE_PYROSETTA')
+@pytest.mark.skipif('not HAVE_PYROSETTA')
 def test_origin_seg(c1pose, c2pose, c3pose):
     assert 0
     helix = Spliceable(c1pose, [(':1', 'N'), ('-8:', 'C')])
@@ -856,7 +867,7 @@ def test_origin_seg(c1pose, c2pose, c3pose):
     assert 0
 
 
-@pytest.mark.skipif('not rcl.HAVE_PYROSETTA')
+@pytest.mark.skipif('not HAVE_PYROSETTA')
 def test_provenance(c1pose):
     sites = [(':1', 'N'), ('-4:', 'C')]
     segments = [Segment([Spliceable(c1pose.clone(), sites)], '_C'),

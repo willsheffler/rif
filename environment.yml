@@ -1,7 +1,7 @@
 name: rif
 dependencies:
- - python=3
- - numpy=1.13
+ - python>=3.5
+ - numpy=1.13.3
  - PyYAML
  - colorama
  - future

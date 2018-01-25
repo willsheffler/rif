@@ -1,5 +1,4 @@
 from numpy.linalg import inv
-from rif import rcl, vis, sym
 from tqdm import tqdm  # progress bar utility
 import functools as ft
 import itertools as it
@@ -9,6 +8,7 @@ import os
 import sys
 import abc
 import homog
+from homog import sym
 from collections.abc import Iterable
 import numpy as np
 import multiprocessing
@@ -37,6 +37,86 @@ def tqdm_parallel_map(pool, function, *args, **kw):
     futures = [pool.submit(function, *a) for a in zip(*args)]
     return (f.result() for f in tqdm(as_completed(futures),
                                      total=len(futures), **kw))
+
+
+def numpy_stub_from_rosetta_stub(rosstub):
+    npstub = np.zeros((4, 4))
+    for i in range(3):
+        npstub[..., i, 3] = rosstub.v[i]
+        for j in range(3):
+            npstub[..., i, j] = rosstub.M(i + 1, j + 1)
+    npstub[..., 3, 3] = 1.0
+    return npstub
+
+
+def rosetta_stub_from_numpy_stub(npstub):
+    rosstub = ros.core.kinematics.Stub()
+    rosstub.M.xx = npstub[0, 0]
+    rosstub.M.xy = npstub[0, 1]
+    rosstub.M.xz = npstub[0, 2]
+    rosstub.M.yx = npstub[1, 0]
+    rosstub.M.yy = npstub[1, 1]
+    rosstub.M.yz = npstub[1, 2]
+    rosstub.M.zx = npstub[2, 0]
+    rosstub.M.zy = npstub[2, 1]
+    rosstub.M.zz = npstub[2, 2]
+    rosstub.v.x = npstub[0, 3]
+    rosstub.v.y = npstub[1, 3]
+    rosstub.v.z = npstub[2, 3]
+    return rosstub
+
+
+def get_bb_stubs(pose, which_resi=None):
+    'extract rif style stubs from rosetta pose'
+    if which_resi is None:
+        which_resi = list(range(1, pose.size() + 1))
+    npstubs = []
+    for ir in which_resi:
+        r = pose.residue(ir)
+        if not r.is_protein():
+            continue
+        ros_stub = ros.core.kinematics.Stub(
+            r.xyz('CA'), r.xyz('N'), r.xyz('CA'), r.xyz('C'))
+        npstubs.append(numpy_stub_from_rosetta_stub(ros_stub))
+    return np.stack(npstubs)
+
+
+def pose_bounds(pose, lb, ub):
+    if ub < 0: ub = len(pose) + 1 + ub
+    if lb < 1 or ub > len(pose):
+        raise ValueError('lb/ub ' + str(lb) + '/' + str(ub) +
+                         ' out of bounds for pose with len '
+                         + str(len(pose)))
+    return lb, ub
+
+
+def subpose(pose, lb, ub=-1):
+    lb, ub = pose_bounds(pose, lb, ub)
+    p = ros.core.pose.Pose()
+    ros.core.pose.append_subpose_to_pose(p, pose, lb, ub)
+    return p
+
+
+def xform_pose(xform, pose, lb=1, ub=-1):
+    lb, ub = pose_bounds(pose, lb, ub)
+    if xform.shape != (4, 4):
+        raise ValueError(
+            'invalid xform, must be 4x4 homogeneous matrix, shape is: '
+            + str(xform.shape))
+    xform = rosetta_stub_from_numpy_stub(xform)
+    ros.protocols.sic_dock.xform_pose(pose, xform, lb, ub)
+
+
+def worst_CN_connect(p):
+    for ir in range(1, len(p)):
+        worst = 0
+        if (p.residue(ir).is_protein() and
+                p.residue(ir + 1).is_protein() and not (
+                ros.core.pose.is_upper_terminus(p, ir) or
+                ros.core.pose.is_lower_terminus(p, ir + 1))):
+            dist = p.residue(ir).xyz('C').distance(p.residue(ir + 1).xyz('N'))
+            worst = max(abs(dist - 1.32), worst)
+    return worst
 
 
 def _trim_pose(pose, resid, direction, pad=0):
@@ -523,8 +603,9 @@ class Segment:
             # extract 'stubs' from body at selected positions
             # rif 'stubs' have 'extra' 'features'... the raw field is
             # just bog-standard homogeneous matrices
-            stubs = rcl.bbstubs(spliceable.body, resid_subset)['raw']
-            stubs = stubs.astype('f8')
+            # stubs = rcl.bbstubs(spliceable.body, resid_subset)['raw']
+            # stubs = stubs.astype('f8')
+            stubs = get_bb_stubs(spliceable.body, resid_subset)
             if len(resid_subset) != stubs.shape[0]:
                 raise ValueError("no funny residues supported")
             stubs_inv = inv(stubs)
@@ -623,7 +704,7 @@ class Segment:
             enex = p_en + [[a, b] for a, b in rest.items()] + p_ex
             rest = []
         if position is not None:
-            position = rcl.to_rosetta_stub(position)
+            position = rosetta_stub_from_numpy_stub(position)
             for x in enex: x[0] = x[0].clone()
             for x in rest: x[0] = x[0].clone()
             for p, _ in it.chain(enex, rest):
@@ -641,19 +722,19 @@ def _cyclic_permute_chains(chainslist, polarity, spliceres):
     beg, end = chainslist[0], chainslist[-1]
     n2c = polarity == 'N'
     if n2c:
-        stub1 = rcl.bbstubs(beg[0], [spliceres])
-        stub2 = rcl.bbstubs(end[-1], [len(end[-1])])
-        beg[0] = rcl.subpose(beg[0], spliceres + 1, len(beg[0]))
+        stub1 = get_bb_stubs(beg[0], [spliceres])
+        stub2 = get_bb_stubs(end[-1], [len(end[-1])])
+        beg[0] = pyrosetta.subpose(beg[0], spliceres + 1, len(beg[0]))
         rm_lower_t(beg[0], 1)
         rm_upper_t(end[-1], len(end[-1]))
     else:
-        stub1 = rcl.bbstubs(beg[-1], [spliceres])
-        stub2 = rcl.bbstubs(end[0], [1])
-        beg[-1] = rcl.subpose(beg[-1], 1, spliceres - 1)
+        stub1 = get_bb_stubs(beg[-1], [spliceres])
+        stub2 = get_bb_stubs(end[0], [1])
+        beg[-1] = pyrosetta.subpose(beg[-1], 1, spliceres - 1)
         rm_lower_t(beg[-1], len(beg[-1]))
         rm_upper_t(end[0], 1)
     xalign = stub1['raw'][0] @ np.linalg.inv(stub2['raw'][0])
-    for p in end: rcl.xform_pose(xalign, p)
+    for p in end: xform_pose(xalign, p)
     if n2c: chainslist[0] = end + beg
     else: chainslist[0] = beg + end
     chainslist = chainslist[:-1]
@@ -701,7 +782,7 @@ class Worms:
             entryexits, [s.entrypol for s in self.segments[1:iend]])
         if align:
             x = self.criteria.alignment(segpos=self.positions[which], **kw)
-            for p in it.chain(*chainslist, *rest): rcl.xform_pose(x, p[0])
+            for p in it.chain(*chainslist, *rest): xform_pose(x, p[0])
         if cyclic_permute and len(chainslist) > 1:
             # todo: this is only correct if 1st seg is one chain
             spliceres = self.segments[-1].entryresid[self.indices[which, -1]]
@@ -733,7 +814,7 @@ class Worms:
                 assert isinstance(chain, ros.core.pose.Pose)
                 ros.core.pose.append_pose_to_pose(pose, chain, True)
                 prov0.append(source)
-        assert rcl.worst_CN_connect(pose) < 0.5
+        assert worst_CN_connect(pose) < 0.5
         if not provenance: return pose
         prov = []
         for i, pr in enumerate(prov0):
