@@ -95,7 +95,7 @@ class type_caster<rif::util::SimpleArray<DIM, E, init0>> {
   Type value;
 
  public:
-  static PYBIND11_DESCR name() { return type_descr(_<Type>()); }
+  static constexpr auto name() { return type_descr(_<Type>()); }
 
   // Normal returned non-reference, non-const value:
   static handle cast(Type &&src, return_value_policy /* policy */,
@@ -142,7 +142,7 @@ class type_caster<rif::util::SimpleArray<DIM, E, init0>> {
 template <int DIM, class Scalar, bool init0>
 struct npy_format_descriptor<rif::util::SimpleArray<DIM, Scalar, init0>> {
   using T = rif::util::SimpleArray<DIM, Scalar, init0>;
-  static PYBIND11_DESCR name() { return make_caster<T>::name(); }
+  static constexpr auto name() { return make_caster<T>::name(); }
 
   static pybind11::dtype dtype() {
     return reinterpret_borrow<pybind11::dtype>(dtype_ptr());

@@ -3,6 +3,7 @@
 #include <Eigen/Geometry>
 #include <iostream>
 #include <util/str.hpp>
+#include "pybind11/detail/descr.h"
 #include "pybind11/numpy.h"
 #include "pybind11/pybind11.h"
 
@@ -15,7 +16,7 @@ using rif::util::cpp_repr;
 template <class Scalar, int NROW, int NCOL, int OPTS>
 struct npy_format_descriptor<Eigen::Matrix<Scalar, NROW, NCOL, OPTS>> {
   using T = Eigen::Matrix<Scalar, NROW, NCOL, OPTS>;
-  static PYBIND11_DESCR name() { return make_caster<T>::name(); }
+  static constexpr auto name() { return make_caster<T>::name(); }
 
   static pybind11::dtype dtype() {
     return reinterpret_borrow<pybind11::dtype>(dtype_ptr());
@@ -95,7 +96,7 @@ struct npy_format_descriptor<Eigen::Matrix<Scalar, NROW, NCOL, OPTS>> {
 template <class Scalar, int DIM, int MODE, int OPTS>
 struct npy_format_descriptor<Eigen::Transform<Scalar, DIM, MODE, OPTS>> {
   using T = Eigen::Transform<Scalar, DIM, MODE, OPTS>;
-  static PYBIND11_DESCR name() { return make_caster<T>::name(); }
+  static constexpr auto name() { return make_caster<T>::name(); }
 
   static pybind11::dtype dtype() {
     return reinterpret_borrow<pybind11::dtype>(dtype_ptr());

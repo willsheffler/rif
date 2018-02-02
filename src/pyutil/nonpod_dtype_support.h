@@ -8,7 +8,7 @@ namespace detail {
 
 template <typename T>
 struct unsafe_nonpod_npy_format_descriptor {
-  static PYBIND11_DESCR name() { return make_caster<T>::name(); }
+  static constexpr auto name() { return make_caster<T>::name(); }
 
   static pybind11::dtype dtype() {
     return reinterpret_borrow<pybind11::dtype>(dtype_ptr());

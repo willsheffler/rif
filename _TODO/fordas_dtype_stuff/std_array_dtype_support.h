@@ -1,5 +1,5 @@
-#include "pybind11/pybind11.h"
 #include "pybind11/numpy.h"
+#include "pybind11/pybind11.h"
 
 #pragma once
 
@@ -10,7 +10,7 @@ template <typename Scalar, std::size_t N>
 struct npy_format_descriptor<std::array<Scalar, N>> {
   using T = std::array<Scalar, N>;
 
-  static PYBIND11_DESCR name() { return make_caster<T>::name(); }
+  static constexpr auto name() { return make_caster<T>::name(); }
 
   static pybind11::dtype dtype() {
     return reinterpret_borrow<pybind11::dtype>(dtype_ptr());
@@ -73,5 +73,4 @@ struct format_descriptor<std::array<Scalar, N>> {
         typename std::remove_cv<T>::type>::format();
   }
 };
-
 }
